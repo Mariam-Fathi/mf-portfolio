@@ -102,17 +102,16 @@ export const HeroParallax = ({
 export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0">
-      <h1 className="text-4xl md:text-6xl font-bold dark:text-white">
-        From Data
+      <h1 className="text-4xl md:text-6xl font-bold dark:text-white ">
+        Mariam Fathi
         <br />
-        to Intelligent Systems
+        From Data to Insight
       </h1>
       <p className="max-w-2xl text-base sm:text-xl mt-8 dark:text-neutral-200">
         I combine data engineering and frontend development to explore how
-        patterns emerge from complexity. My goal is to advance from building
-        systems that display data to designing systems that learn from it —
-        developing adaptive, intelligent solutions that bridge technology and
-        human insight.
+        patterns emerge from complexity. My goal is to move beyond displaying
+        data to designing systems that learn from it — creating adaptive,
+        intelligent solutions that bridge technology and human insight.
       </p>
     </div>
   );
