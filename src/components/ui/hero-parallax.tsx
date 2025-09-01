@@ -102,15 +102,13 @@ export const HeroParallax = ({
 export const Header = () => {
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 font-sans">
-      <h1 className="mt-3 text-4xl tracking-tighter font-bold md:text-7xl text-white">
-        Turn your visitors into profitable
-        <span className="relative inline-flex sm:inline">
-          <span className="absolute inset-0 bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] blur-lg opacity-30"></span>
-          <span className="relative"> customers</span>
-        </span>
+      <h1 className="text-4xl md:text-7xl font-bold text-white">
+        From Data
+        <br />
+        to Intelligent Systems
       </h1>
 
-      <p className="max-w-2xl text-base sm:text-xl mt-8 dark:text-neutral-200">
+      <p className="max-w-2xl text-base sm:text-xl mt-8 text-neutral-200">
         I combine data engineering and frontend development to explore how
         patterns emerge from complexity. My goal is to move beyond displaying
         data to designing systems that learn from it — creating adaptive,
@@ -142,7 +140,7 @@ export const ProjectCard = ({
       key={project.title}
       className="group/project h-96 w-[30rem] relative shrink-0"
     >
-      <a href={project.link} className="block group-hover/project:shadow-2xl ">
+      <div className="block group-hover/project:shadow-2xl ">
         <img
           src={project.thumbnail}
           height="600"
@@ -150,7 +148,7 @@ export const ProjectCard = ({
           className="object-cover object-left-top absolute h-full w-full inset-0"
           alt={project.title}
         />
-      </a>
+      </div>
       <div className="absolute inset-0 h-full w-full opacity-0 group-hover/project:opacity-80 bg-black pointer-events-none"></div>
       <h2 className="absolute bottom-4 left-4 opacity-0 group-hover/project:opacity-100 text-white">
         {project.title}
