@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { TracingBeam } from "./tracing-beam";
 
 export const StickyScroll = ({
   content,
@@ -40,7 +41,6 @@ export const StickyScroll = ({
     setActiveCard(closestBreakpointIndex);
   });
 
-  const backgroundColors = ["#0f172a", "#000000", "#171717"];
   const linearGradients = [
     "linear-gradient(to bottom right, #06b6d4, #10b981)",
     "linear-gradient(to bottom right, #ec4899, #6366f1)",
@@ -56,17 +56,14 @@ export const StickyScroll = ({
   }, [activeCard]);
 
   return (
-    <motion.div
-      animate={{
-        backgroundColor: backgroundColors[activeCard % backgroundColors.length],
-      }}
-      className="relative flex min-h-[200vh] justify-center space-x-10 rounded-md p-10"
+    <div
+      className="relative flex min-h-[200vh] justify-between space-x-10 rounded-md px-20"
       ref={ref}
     >
-      <div className="relative flex items-start px-4">
+      <div className="relative flex items-start">
         <div className="max-w-2xl">
           {content.map((item, index) => (
-            <div key={item.title + index} className="my-20">
+            <div key={item.title + index} className="mb-20">
               <motion.h2
                 animate={{ opacity: activeCard === index ? 1 : 0.3 }}
                 className="text-2xl font-bold text-slate-100"
@@ -75,7 +72,7 @@ export const StickyScroll = ({
               </motion.h2>
               <motion.p
                 animate={{ opacity: activeCard === index ? 1 : 0.3 }}
-                className="text-kg mt-10 max-w-sm text-slate-300"
+                className="mt-6 max-w-sm text-slate-300"
               >
                 {item.description}
               </motion.p>
@@ -84,15 +81,15 @@ export const StickyScroll = ({
           <div className="h-40" />
         </div>
       </div>
+
       <div
-        style={{ background: backgroundGradient }}
         className={cn(
-          "sticky top-10 hidden h-60 w-80 overflow-hidden rounded-md bg-white lg:block",
+          "sticky top-10 hidden w-1/2 h-1/3 overflow-hidden rounded-xl bg-opacity-80 backdrop-blur-md lg:block shadow-lg",
           contentClassName
         )}
       >
         {content[activeCard].content ?? null}
       </div>
-    </motion.div>
+    </div>
   );
 };

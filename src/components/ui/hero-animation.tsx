@@ -1,6 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
+import { ContainerScroll } from "./container-scroll-animation";
+import { StickyScroll } from "./sticky-scroll-reveal";
+import { TracingBeam } from "./tracing-beam";
 
 export function HeroAnimation() {
   return (
@@ -66,7 +69,7 @@ export function HeroAnimation() {
             duration: 0.3,
             delay: 1.2,
           }}
-          className="relative z-10 mt-10 rounded-3xl border  p-4 shadow-md border-neutral-800 bg-neutral-900"
+          className="relative z-10 mt-6 rounded-3xl border  p-4 shadow-md border-neutral-800 bg-neutral-900"
         >
           <div className="w-full overflow-hidden rounded-xl border border-gray-700">
             <img
@@ -78,6 +81,26 @@ export function HeroAnimation() {
             />
           </div>
         </motion.div>
+        <TracingBeam className="w-full mt-20">
+          <h1 className="text-4xl font-bold text-slate-100 ml-20 mb-20">
+            {"Selected Work".split(" ").map((word, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
+                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                transition={{
+                  duration: 0.3,
+                  delay: index * 0.1,
+                  ease: "easeInOut",
+                }}
+                className="mr-2 inline-block"
+              >
+                {word}
+              </motion.span>
+            ))}
+          </h1>
+          <StickyScroll content={content} />
+        </TracingBeam>
       </div>
     </div>
   );
@@ -95,3 +118,70 @@ const Navbar = () => {
     </nav>
   );
 };
+
+const content = [
+  {
+    title: "Data Engineering",
+    description:
+      "Building scalable pipelines that transform raw data into reliable, structured insights. From ingestion to storage, I design systems that make data ready for analysis and decision-making.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src="/MF1.png"
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+          alt="Data dashboard preview"
+        />
+      </div>
+    ),
+  },
+  {
+    title: "Frontend Development",
+    description:
+      "Translating complex data into intuitive interfaces. I focus on creating clear, interactive dashboards and applications that turn information into actionable insight.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src="/MF2.png"
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+          alt="Data dashboard preview"
+        />
+      </div>
+    ),
+  },
+  {
+    title: "Machine Learning Exploration",
+    description:
+      "Experimenting with algorithms that uncover patterns and learn from data. I’m passionate about building adaptive systems that go beyond static outputs to provide predictive and intelligent behavior.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src="/MF3.png"
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+          alt="Data dashboard preview"
+        />
+      </div>
+    ),
+  },
+  {
+    title: "Bridging Tech and Human Insight",
+    description:
+      "I believe technology should serve people. My work aims to connect the dots between complex systems and human needs, making insights more accessible, meaningful, and actionable.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src="/MF4.png"
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+          alt="Data dashboard preview"
+        />
+      </div>
+    ),
+  },
+];
