@@ -101,12 +101,15 @@ export const HeroParallax = ({
 
 export const Header = () => {
   return (
-    <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0">
-      <h1 className="text-4xl md:text-6xl font-bold dark:text-white ">
-        Mariam Fathi
-        <br />
-        From Data to Insight
+    <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full left-0 top-0 font-sans">
+      <h1 className="mt-3 text-4xl tracking-tighter font-bold md:text-7xl text-white">
+        Turn your visitors into profitable
+        <span className="relative inline-flex sm:inline">
+          <span className="absolute inset-0 bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] blur-lg opacity-30"></span>
+          <span className="relative"> customers</span>
+        </span>
       </h1>
+
       <p className="max-w-2xl text-base sm:text-xl mt-8 dark:text-neutral-200">
         I combine data engineering and frontend development to explore how
         patterns emerge from complexity. My goal is to move beyond displaying
