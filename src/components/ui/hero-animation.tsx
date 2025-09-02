@@ -121,25 +121,9 @@ const Navbar = () => {
 
 const content = [
   {
-    title: "Data Engineering",
+    title: "Project 1",
     description:
-      "Building scalable pipelines that transform raw data into reliable, structured insights. From ingestion to storage, I design systems that make data ready for analysis and decision-making.",
-    content: (
-      <div className="flex h-full w-full items-center justify-center">
-        <img
-          src="/MF1.png"
-          width={300}
-          height={300}
-          className="h-full w-full object-cover"
-          alt="Data dashboard preview"
-        />
-      </div>
-    ),
-  },
-  {
-    title: "Frontend Development",
-    description:
-      "Translating complex data into intuitive interfaces. I focus on creating clear, interactive dashboards and applications that turn information into actionable insight.",
+      "A robust ETL pipeline for data cleaning and transformation, designed to process millions of rows efficiently and provide ready-to-use datasets for analytics.",
     content: (
       <div className="flex h-full w-full items-center justify-center">
         <img
@@ -147,15 +131,31 @@ const content = [
           width={300}
           height={300}
           className="h-full w-full object-cover"
-          alt="Data dashboard preview"
+          alt="ETL Pipeline Preview"
         />
       </div>
     ),
   },
   {
-    title: "Machine Learning Exploration",
+    title: "Project 2",
     description:
-      "Experimenting with algorithms that uncover patterns and learn from data. I’m passionate about building adaptive systems that go beyond static outputs to provide predictive and intelligent behavior.",
+      "An interactive data visualization dashboard with live filters, built to help teams explore insights in real time.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center">
+        <img
+          src="/MF1.png"
+          width={300}
+          height={300}
+          className="h-full w-full object-cover"
+          alt="Dashboard Preview"
+        />
+      </div>
+    ),
+  },
+  {
+    title: "Project 3",
+    description:
+      "Machine learning model exploration: testing supervised and unsupervised algorithms to uncover hidden data patterns and improve decision-making.",
     content: (
       <div className="flex h-full w-full items-center justify-center">
         <img
@@ -163,15 +163,15 @@ const content = [
           width={300}
           height={300}
           className="h-full w-full object-cover"
-          alt="Data dashboard preview"
+          alt="ML Model Preview"
         />
       </div>
     ),
   },
   {
-    title: "Bridging Tech and Human Insight",
+    title: "Project 4",
     description:
-      "I believe technology should serve people. My work aims to connect the dots between complex systems and human needs, making insights more accessible, meaningful, and actionable.",
+      "Human-centered design system for translating complex datasets into accessible, meaningful interfaces for non-technical users.",
     content: (
       <div className="flex h-full w-full items-center justify-center">
         <img
@@ -179,7 +179,7 @@ const content = [
           width={300}
           height={300}
           className="h-full w-full object-cover"
-          alt="Data dashboard preview"
+          alt="Design System Preview"
         />
       </div>
     ),
