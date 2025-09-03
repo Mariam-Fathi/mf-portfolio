@@ -83,7 +83,7 @@ export default function Home() {
     <HeroAnimation>
       <div
         ref={sectionRef}
-        className="h-[600vh] w-full rounded-md relative pt-40"
+        className="h-[600vh] w-full rounded-md relative pt-40 overflow-clip"
       >
         <GoogleGeminiEffect
           pathLengths={[
@@ -99,7 +99,7 @@ export default function Home() {
       </div>
 
       <div
-        className={`w-full h-full pt-96  transition-opacity duration-700 ${
+        className={`w-full h-full py-20 transition-opacity duration-700 ${
           isFirstSectionEnded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
