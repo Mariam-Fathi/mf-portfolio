@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ContainerScroll } from "./container-scroll-animation";
 import { StickyScroll } from "./sticky-scroll-reveal";
 import { TracingBeam } from "./tracing-beam";
+import MobileMockup from "./mobile-mockup";
 
 export function HeroAnimation() {
   return (
@@ -73,7 +74,7 @@ export function HeroAnimation() {
         >
           <div className="w-full overflow-hidden rounded-xl border border-gray-700">
             <img
-              src="/MF1.png"
+              src="/Data.png"
               alt="Landing page preview"
               className="aspect-[16/9] h-auto w-full object-cover"
               height={1000}
@@ -81,26 +82,10 @@ export function HeroAnimation() {
             />
           </div>
         </motion.div>
-        <TracingBeam className="w-full mt-20">
-          <h1 className="text-4xl font-bold text-slate-100 ml-20 mb-20">
-            {"Selected Work".split(" ").map((word, index) => (
-              <motion.span
-                key={index}
-                initial={{ opacity: 0, filter: "blur(4px)", y: 10 }}
-                animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  delay: index * 0.1,
-                  ease: "easeInOut",
-                }}
-                className="mr-2 inline-block"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </h1>
+
+        <div className="w-full mt-20">
           <StickyScroll content={content} />
-        </TracingBeam>
+        </div>
       </div>
     </div>
   );
@@ -121,66 +106,48 @@ const Navbar = () => {
 
 const content = [
   {
-    title: "Project 1",
+    title: "Collaborative Editing",
     description:
-      "A robust ETL pipeline for data cleaning and transformation, designed to process millions of rows efficiently and provide ready-to-use datasets for analytics.",
+      "Work together in real time with your team, clients, and stakeholders. Collaborate on documents, share ideas, and make decisions quickly. With our platform, you can streamline your workflow and increase productivity.",
     content: (
-      <div className="flex h-full w-full items-center justify-center">
+      <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(to_bottom_right,var(--cyan-500),var(--emerald-500))] text-white">
+        Collaborative Editing
+      </div>
+    ),
+  },
+  {
+    title: "Real time changes",
+    description:
+      "See changes as they happen. With our platform, you can track every modification in real time. No more confusion about the latest version of your project. Say goodbye to the chaos of version control and embrace the simplicity of real-time updates.",
+    content: (
+      <div className="flex h-full w-full items-center justify-center text-white">
         <img
-          src="/MF2.png"
+          src="/linear.webp"
           width={300}
           height={300}
           className="h-full w-full object-cover"
-          alt="ETL Pipeline Preview"
+          alt="linear board demo"
         />
       </div>
     ),
   },
   {
-    title: "Project 2",
+    title: "Version control",
     description:
-      "An interactive data visualization dashboard with live filters, built to help teams explore insights in real time.",
+      "Experience real-time updates and never stress about version control again. Our platform ensures that you're always working on the most recent version of your project, eliminating the need for constant manual updates. Stay in the loop, keep your team aligned, and maintain the flow of your work without any interruptions.",
     content: (
-      <div className="flex h-full w-full items-center justify-center">
-        <img
-          src="/MF1.png"
-          width={300}
-          height={300}
-          className="h-full w-full object-cover"
-          alt="Dashboard Preview"
-        />
+      <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(to_bottom_right,var(--orange-500),var(--yellow-500))] text-white">
+        Version control
       </div>
     ),
   },
   {
-    title: "Project 3",
+    title: "Running out of content",
     description:
-      "Machine learning model exploration: testing supervised and unsupervised algorithms to uncover hidden data patterns and improve decision-making.",
+      "Experience real-time updates and never stress about version control again. Our platform ensures that you're always working on the most recent version of your project, eliminating the need for constant manual updates. Stay in the loop, keep your team aligned, and maintain the flow of your work without any interruptions.",
     content: (
-      <div className="flex h-full w-full items-center justify-center">
-        <img
-          src="/MF3.png"
-          width={300}
-          height={300}
-          className="h-full w-full object-cover"
-          alt="ML Model Preview"
-        />
-      </div>
-    ),
-  },
-  {
-    title: "Project 4",
-    description:
-      "Human-centered design system for translating complex datasets into accessible, meaningful interfaces for non-technical users.",
-    content: (
-      <div className="flex h-full w-full items-center justify-center">
-        <img
-          src="/MF4.png"
-          width={300}
-          height={300}
-          className="h-full w-full object-cover"
-          alt="Design System Preview"
-        />
+      <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(to_bottom_right,var(--cyan-500),var(--emerald-500))] text-white">
+        Running out of content
       </div>
     ),
   },
