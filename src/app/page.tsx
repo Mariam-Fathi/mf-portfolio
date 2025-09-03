@@ -103,7 +103,7 @@ export default function Home() {
           isFirstSectionEnded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <h2 className="max-w-7xl pl-4 mx-auto text-4xl md:text-5xl font-bold text-neutral-200 font-sans">
+        <h2 className="max-w-7xl mx-auto text-4xl md:text-5xl font-bold text-neutral-200 font-sans">
           Selected Work.
         </h2>
         <Carousel items={cards} />
