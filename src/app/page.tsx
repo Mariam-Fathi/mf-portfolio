@@ -12,14 +12,11 @@ export default function Home() {
 
   const [currentStep, setCurrentStep] = React.useState(0);
 
-  // ⚡ Faster transitions → every ~10% scroll
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest < 0.1) setCurrentStep(0); // 0-10%
-    else if (latest < 0.2) setCurrentStep(1); // 10-20%
-    else if (latest < 0.3) setCurrentStep(2); // 20-30%
-    else if (latest < 0.4) setCurrentStep(3); // 30-40%
-    else if (latest < 0.5) setCurrentStep(4); // 40-50%
-    else setCurrentStep(5); // 50%+
+    if (latest < 0.1) setCurrentStep(0);
+    else if (latest < 0.2) setCurrentStep(1);
+    else if (latest < 0.3) setCurrentStep(2);
+    else setCurrentStep(3);
   });
 
   const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
@@ -30,34 +27,24 @@ export default function Home() {
 
   const contentSteps = [
     {
-      title: "From Data to Intelligent Systems",
+      title: "From Software to Intelligent Systems",
       description:
-        "My goal is to advance from building systems that display data to designing systems that learn from it — developing adaptive, intelligent solutions that bridge technology and human insight.",
+        "I began my career as a software engineer, focused on building reliable systems and scalable solutions. More recently, I’ve shifted toward data engineering — designing the pipelines that power decision-making — and I’m now eager to move from managing data to creating systems that learn from it.",
     },
     {
-      title: "Transforming Insights into Action",
+      title: "Driven by Curiosity",
       description:
-        "Every dataset tells a story — my focus is to decode that story and turn it into meaningful, automated outcomes that create real value.",
+        "Since childhood, I’ve been fascinated by understanding how things work — first through psychology and the human mind, and later through technology. Over time, I realized that my real passion lies in uncovering patterns, whether in human behavior or in the data that shapes our world.",
     },
     {
-      title: "Adaptive & Human-Centered",
+      title: "From Data to Insight",
       description:
-        "I strive to make technology feel less mechanical, crafting systems that adjust, learn, and grow with the people they serve.",
+        "My engineering background taught me to value precision and structure, but I’ve learned to look beyond the technical. To me, data is not just a resource — it is a narrative, full of hidden relationships and opportunities for innovation. My natural tendency to think deeply drives me to explore not just 'what' happens, but 'why.'",
     },
     {
-      title: "Building Smarter Systems",
+      title: "Shaping the Future of AI",
       description:
-        "The future lies in systems that understand context and continuously evolve — bridging data, intelligence, and human experience.",
-    },
-    {
-      title: "Collaborative Intelligence",
-      description:
-        "Humans and machines work best together — I aim to design systems that amplify human decision-making rather than replace it.",
-    },
-    {
-      title: "Shaping the Future",
-      description:
-        "Innovation is a journey — every insight, every experiment, every iteration moves us closer to building technology that feels truly alive.",
+        "Alongside my current work, I am actively studying deep learning through DeepLearning.AI courses. My goal is to bridge software engineering, data engineering, and AI research — creating systems that are not only technically robust but also trustworthy, transparent, and impactful for society.",
     },
   ];
 

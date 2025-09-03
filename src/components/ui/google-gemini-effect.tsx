@@ -22,7 +22,7 @@ export const GoogleGeminiEffect = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("sticky top-80 max-sm:top-50", className)}>
+    <div className={cn("sticky top-80", className)}>
       <p className="text-4xl md:text-7xl font-normal pb-4 text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-300">
         {title || `From Data to Intelligent Systems`}
       </p>
