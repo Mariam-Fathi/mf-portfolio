@@ -1,23 +1,54 @@
 "use client";
-import { useScroll, useTransform, useMotionValueEvent } from "motion/react";
-import React, { useRef } from "react";
+import {
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+  useSpring,
+} from "motion/react";
+import React, { useEffect, useRef, useState } from "react";
 import { GoogleGeminiEffect } from "@/components/ui/google-gemini-effect";
+import { HeroAnimation } from "@/components/ui/hero-animation";
+import { Carousel, Card } from "@/components/ui/apple-cards-carousel";
 
 export default function Home() {
+  const cards = data.map((card, index) => (
+    <Card key={card.src} card={card} index={index} />
+  ));
+
   const ref = useRef<HTMLDivElement>(null);
+
+  const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  const [currentStep, setCurrentStep] = React.useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isFirstSectionEnded, setIsFirstSectionEnded] = useState(false);
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest < 0.2) setCurrentStep(0);
-    else if (latest < 0.4) setCurrentStep(1);
-    else if (latest < 0.6) setCurrentStep(2);
-    else setCurrentStep(3);
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 200,
+    damping: 30,
   });
+
+  useMotionValueEvent(smoothProgress, "change", (latest) => {
+    const totalSteps = contentSteps.length;
+    const step = Math.floor(latest * totalSteps);
+    const safeStep = Math.min(Math.max(step, 0), totalSteps - 1);
+    setCurrentStep(safeStep);
+  });
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFirstSectionEnded(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const pathLengthFirst = useTransform(scrollYProgress, [0, 0.8], [0.2, 1.2]);
   const pathLengthSecond = useTransform(scrollYProgress, [0, 0.8], [0.15, 1.2]);
@@ -49,21 +80,87 @@ export default function Home() {
   ];
 
   return (
-    <div
-      className="h-[600vh] bg-black w-full dark:border dark:border-white/[0.1] rounded-md relative pt-40 overflow-clip"
-      ref={ref}
-    >
-      <GoogleGeminiEffect
-        pathLengths={[
-          pathLengthFirst,
-          pathLengthSecond,
-          pathLengthThird,
-          pathLengthFourth,
-          pathLengthFifth,
-        ]}
-        title={contentSteps[currentStep].title}
-        description={contentSteps[currentStep].description}
-      />
-    </div>
+    <HeroAnimation>
+      <div
+        ref={sectionRef}
+        className="h-[600vh] w-full rounded-md relative pt-40"
+      >
+        <GoogleGeminiEffect
+          pathLengths={[
+            pathLengthFirst,
+            pathLengthSecond,
+            pathLengthThird,
+            pathLengthFourth,
+            pathLengthFifth,
+          ]}
+          title={contentSteps[currentStep].title}
+          description={contentSteps[currentStep].description}
+        />
+      </div>
+
+      <div
+        className={`w-full h-full pt-96  transition-opacity duration-700 ${
+          isFirstSectionEnded ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <h2 className="max-w-7xl pl-4 mx-auto text-xl md:text-5xl font-bold text-neutral-200 font-sans">
+          Selected Work.
+        </h2>
+        <Carousel items={cards} />
+      </div>
+    </HeroAnimation>
   );
 }
+
+const DummyContent = () => {
+  return (
+    <div className="bg-neutral-800 p-8 md:p-14 rounded-3xl mb-4">
+      <p className="text-neutral-400 text-base md:text-2xl font-sans max-w-3xl mx-auto">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis
+        adipisci sit tempora consectetur molestias cupiditate distinctio vitae
+        cumque ut nobis quis exercitationem deleniti ducimus soluta facere sint,
+        magni, odio sequi!
+      </p>
+    </div>
+  );
+};
+
+const data = [
+  {
+    category: "Project 1",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+  {
+    category: "Project 2",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+  {
+    category: "Project 3",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+
+  {
+    category: "Project 4",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+  {
+    category: "Project 4",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+  {
+    category: "Project 5",
+    title: "You can do more with AI.",
+    src: "/Data.png",
+    content: <DummyContent />,
+  },
+];
