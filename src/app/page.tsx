@@ -128,38 +128,38 @@ const DummyContent = () => {
 const data = [
   {
     category: "Project 1",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
   {
     category: "Project 2",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
   {
     category: "Project 3",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
 
   {
     category: "Project 4",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
   {
     category: "Project 4",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
   {
     category: "Project 5",
-    title: "You can do more with AI.",
+    title: "Project Title",
     src: "/Data.png",
     content: <DummyContent />,
   },
