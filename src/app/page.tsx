@@ -99,7 +99,7 @@ export default function Home() {
       </div>
 
       <div
-        className={`w-full h-full py-20 transition-opacity duration-700 ${
+        className={`w-full h-full py-20 max-sm:py-32 transition-opacity duration-700 ${
           isFirstSectionEnded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
