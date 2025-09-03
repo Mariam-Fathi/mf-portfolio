@@ -97,7 +97,7 @@ const Navbar = () => {
       <div className="flex items-center gap-2">
         <div className="size-7 rounded-full bg-gradient-to-br from-green-950 to-green-500" />
         <h1 className="text-base font-bold md:text-2xl">
-          Mariam Fathi Portfolio
+          Mariam Fathi
         </h1>
       </div>
     </nav>
