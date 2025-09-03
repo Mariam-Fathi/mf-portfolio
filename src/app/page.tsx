@@ -27,7 +27,7 @@ export default function Home() {
 
   const contentSteps = [
     {
-      title: "From Software to Intelligent Systems",
+      title: "From Data to Intelligent Systems",
       description:
         "I began my career as a software engineer, focused on building reliable systems and scalable solutions. More recently, I’ve shifted toward data engineering — designing the pipelines that power decision-making — and I’m now eager to move from managing data to creating systems that learn from it.",
     },
