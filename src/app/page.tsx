@@ -13,9 +13,9 @@ export default function Home() {
   const [currentStep, setCurrentStep] = React.useState(0);
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest < 0.1) setCurrentStep(0);
-    else if (latest < 0.2) setCurrentStep(1);
-    else if (latest < 0.3) setCurrentStep(2);
+    if (latest < 0.2) setCurrentStep(0);
+    else if (latest < 0.4) setCurrentStep(1);
+    else if (latest < 0.6) setCurrentStep(2);
     else setCurrentStep(3);
   });
 
