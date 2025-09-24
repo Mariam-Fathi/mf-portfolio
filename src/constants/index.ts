@@ -98,4 +98,22 @@ export const navLinks = [
     },
 ];
 
+export const counterItems = [
+    { value: 2, suffix: "+", label: "Years of Experience" },
+    { value: 200, suffix: "+", label: "Satisfied Clients" },
+    { value: 108, suffix: "+", label: "Completed Projects" },
+    { value: 90, suffix: "%", label: "Client Retention Rate" },
+];
+
+export const words = [
+    { text: "Ideas", imgPath: "/icons/ideas.svg" },
+    { text: "Concepts", imgPath: "/icons/concepts.svg" },
+    { text: "Designs", imgPath: "/icons/designs.svg" },
+    { text: "Code", imgPath: "/icons/code.svg" },
+    { text: "Ideas", imgPath: "/icons/ideas.svg" },
+    { text: "Concepts", imgPath: "/icons/concepts.svg" },
+    { text: "Designs", imgPath: "/icons/designs.svg" },
+    { text: "Code", imgPath: "/icons/code.svg" },
+];
+
 
