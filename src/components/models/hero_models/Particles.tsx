@@ -2,68 +2,51 @@
 
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Points, BufferGeometry, Float32BufferAttribute } from "three";
+import { Points } from "three";
+import { Points as PointsElement, PointMaterial } from "@react-three/drei";
 
 const Particles = ({ count = 200 }) => {
-    const mesh = useRef<Points>(null!);
+    const pointsRef = useRef<Points>(null!);
 
-    const particles = useMemo(() => {
-        const temp = [];
+    const { positions, speeds } = useMemo(() => {
+        const positions = new Float32Array(count * 3);
+        const speeds = new Float32Array(count);
+
         for (let i = 0; i < count; i++) {
-            temp.push({
-                position: [
-                    (Math.random() - 0.5) * 10,
-                    Math.random() * 10 + 5, // higher starting point
-                    (Math.random() - 0.5) * 10,
-                ],
-                speed: 0.005 + Math.random() * 0.001,
-            });
+            positions[i * 3] = (Math.random() - 0.5) * 10;
+            positions[i * 3 + 1] = Math.random() * 10 + 5;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 10;
+            speeds[i] = 0.005 + Math.random() * 0.001;
         }
-        return temp;
+
+        return { positions, speeds };
     }, [count]);
 
     useFrame(() => {
-        if (!mesh.current) return;
+        if (!pointsRef.current) return;
 
-        const positions = mesh.current.geometry.attributes.position.array;
+        const positionsArray = pointsRef.current.geometry.attributes.position.array as Float32Array;
+
         for (let i = 0; i < count; i++) {
-            let y = positions[i * 3 + 1];
-            y -= particles[i].speed;
+            let y = positionsArray[i * 3 + 1];
+            y -= speeds[i];
             if (y < -2) y = Math.random() * 10 + 5;
-            positions[i * 3 + 1] = y;
+            positionsArray[i * 3 + 1] = y;
         }
-        mesh.current.geometry.attributes.position.needsUpdate = true;
+
+        pointsRef.current.geometry.attributes.position.needsUpdate = true;
     });
 
-    const positions = useMemo(() => {
-        const positionsArray = new Float32Array(count * 3);
-        particles.forEach((p, i) => {
-            positionsArray[i * 3] = p.position[0];
-            positionsArray[i * 3 + 1] = p.position[1];
-            positionsArray[i * 3 + 2] = p.position[2];
-        });
-        return positionsArray;
-    }, [particles, count]);
-
     return (
-        <points ref={mesh}>
-            <bufferGeometry>
-                <bufferAttribute
-                    attach="attributes-position"
-                    count={count}
-                    array={positions}
-                    itemSize={3}
-                    usage={35048}
-                />
-            </bufferGeometry>
-            <pointsMaterial
+        <PointsElement ref={pointsRef} positions={positions}>
+            <PointMaterial
+                transparent
                 color="#ffffff"
                 size={0.05}
-                transparent
-                opacity={0.9}
+                sizeAttenuation={true}
                 depthWrite={false}
             />
-        </points>
+        </PointsElement>
     );
 };
 

@@ -10,12 +10,13 @@ import { counterItems } from "@/constants";
 gsap.registerPlugin(ScrollTrigger);
 
 const AnimatedCounter = () => {
-    const counterRef = useRef(null);
-    const countersRef = useRef([]);
+    const counterRef = useRef<HTMLDivElement>(null);
+    const numberElementsRef = useRef<(HTMLDivElement | null)[]>([]);
 
     useGSAP(() => {
-        countersRef.current.forEach((counter, index) => {
-            const numberElement = counter.querySelector(".counter-number");
+        numberElementsRef.current.forEach((numberElement, index) => {
+            if (!numberElement) return;
+
             const item = counterItems[index];
 
             // Set initial value to 0
@@ -26,17 +27,16 @@ const AnimatedCounter = () => {
                 innerText: item.value,
                 duration: 2.5,
                 ease: "power2.out",
-                snap: { innerText: 1 }, // Ensures whole numbers
+                snap: { innerText: 1 },
                 scrollTrigger: {
-                    trigger: "#counter",
+                    trigger: counterRef.current,
                     start: "top center",
                 },
-                // Add the suffix after counting is complete
                 onComplete: () => {
                     numberElement.textContent = `${item.value}${item.suffix}`;
                 },
             });
-        }, counterRef);
+        });
     }, []);
 
     return (
@@ -45,10 +45,14 @@ const AnimatedCounter = () => {
                 {counterItems.map((item, index) => (
                     <div
                         key={index}
-                        ref={(el) => el && (countersRef.current[index] = el)}
                         className="bg-zinc-900 rounded-lg p-10 flex flex-col justify-center"
                     >
-                        <div className="counter-number text-white-50 text-5xl font-bold mb-2">
+                        <div
+                            ref={(el) => {
+                                numberElementsRef.current[index] = el;
+                            }}
+                            className="counter-number text-white-50 text-5xl font-bold mb-2"
+                        >
                             0 {item.suffix}
                         </div>
                         <div className="text-white-50 text-lg">{item.label}</div>

@@ -3,9 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useMediaQuery } from 'react-responsive';
 import { Suspense } from 'react';
-import HeroLights from "@/components/models/hero_models/HeroLights";
 import Particles from "@/components/models/hero_models/Particles";
-import {Room} from "@/components/models/hero_models/Room";
 
 // Dynamically import Three.js components with SSR disabled
 const Canvas = dynamic(
