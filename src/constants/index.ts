@@ -115,5 +115,45 @@ export const words = [
 
 ];
 
-
+export const expCards = [
+    {
+        review:
+            "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact.",
+        imgPath: "/images/exp1.png",
+        logoPath: "/images/logo1.png",
+        title: "Software & Mobile Engineer @ Tarqia",
+        date: "July 2023 – Present",
+        responsibilities: [
+            "Led development of two React Native apps deployed in live hospitality environments.",
+            "Engineered mobile systems integrating IoT, AI, and behavioral modeling for smart access.",
+            "Shaped product strategy and UX to align technical delivery with operational goals.",
+        ],
+    },
+    {
+        review:
+            "Mariam’s freelance work at Dracode showcased her ability to merge frontend precision with practical ML thinking. Her tools didn’t just work—they solved real business bottlenecks.",
+        imgPath: "/images/exp2.png",
+        logoPath: "/images/logo2.png",
+        title: "Freelance Software Engineer @ Dracode",
+        date: "March 2023 – July 2023",
+        responsibilities: [
+            "Built a CRM system with embedded ML-based estimation logic tailored to client workflows.",
+            "Delivered clean, scalable frontend architecture using React and TypeScript.",
+            "Translated ambiguous business needs into intuitive, data-driven product features.",
+        ],
+    },
+    {
+        review:
+            "During her internship at SBS, Mariam demonstrated rapid learning and architectural thinking. Her contributions to mobile deployment pipelines reflected a strong foundation in cross-platform engineering.",
+        imgPath: "/images/exp3.png",
+        logoPath: "/images/logo3.png",
+        title: "React Native Developer Intern @ SBS",
+        date: "August 2022 – October 2022",
+        responsibilities: [
+            "Contributed to mobile architecture and deployment strategies for cross-platform apps.",
+            "Refactored and debugged React Native components for performance and maintainability.",
+            "Collaborated with senior engineers to align technical decisions with product goals.",
+        ],
+    },
+];
 

@@ -35,14 +35,14 @@ const Contact = () => {
       // Reset form and stop loading
       setForm({ name: "", email: "", message: "" });
     } catch (error) {
-      console.error("EmailJS Error:", error); // Optional: show toast
+      console.error("EmailJS Error:", error);
     } finally {
-      setLoading(false); // Always stop loading, even on error
+      setLoading(false);
     }
   };
 
   return (
-    <section id="contact" className="flex-center section-padding">
+    <section id="contact" className="flex-center section-padding mb-20">
       <div className="w-full h-full md:px-10 px-5">
         <TitleHeader
           title="Get in Touch – Let’s Connect"
