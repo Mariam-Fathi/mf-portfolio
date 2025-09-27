@@ -99,21 +99,21 @@ export const navLinks = [
 ];
 
 export const counterItems = [
-    { value: 2, suffix: "+", label: "Years of Experience" },
-    { value: 200, suffix: "+", label: "Satisfied Clients" },
-    { value: 108, suffix: "+", label: "Completed Projects" },
-    { value: 90, suffix: "%", label: "Client Retention Rate" },
+    { value: 2, suffix: "", label: "Years of Experience" },
+    { value: 10, suffix: "+", label: "Completed Projects" },
 ];
 
 export const words = [
-    { text: "Ideas", imgPath: "/icons/ideas.svg" },
-    { text: "Concepts", imgPath: "/icons/concepts.svg" },
-    { text: "Designs", imgPath: "/icons/designs.svg" },
+    { text: "ideas", imgPath: "/icons/ideas.svg" },
+    { text: "insight", imgPath: "/icons/concepts.svg" },
     { text: "Code", imgPath: "/icons/code.svg" },
-    { text: "Ideas", imgPath: "/icons/ideas.svg" },
-    { text: "Concepts", imgPath: "/icons/concepts.svg" },
-    { text: "Designs", imgPath: "/icons/designs.svg" },
+    { text: "ideas", imgPath: "/icons/ideas.svg" },
+    { text: "insight", imgPath: "/icons/concepts.svg" },
     { text: "Code", imgPath: "/icons/code.svg" },
+    { text: "ideas", imgPath: "/icons/ideas.svg" },
+    { text: "insight", imgPath: "/icons/concepts.svg" },
+
 ];
+
 
 

@@ -19,10 +19,8 @@ const AnimatedCounter = () => {
 
             const item = counterItems[index];
 
-            // Set initial value to 0
             gsap.set(numberElement, { innerText: "0" });
 
-            // Create the counting animation
             gsap.to(numberElement, {
                 innerText: item.value,
                 duration: 2.5,
@@ -41,7 +39,7 @@ const AnimatedCounter = () => {
 
     return (
         <div id="counter" ref={counterRef} className="padding-x-lg xl:mt-0 mt-32">
-            <div className="mx-auto grid-4-cols">
+            <div className="mx-auto grid-2-cols">
                 {counterItems.map((item, index) => (
                     <div
                         key={index}
