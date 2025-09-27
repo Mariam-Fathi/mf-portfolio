@@ -49,7 +49,7 @@ const Certificates = () => {
     return (
         <div id="certificates" ref={sectionRef} className="app-showcase mt-32">
             <TitleHeader
-                title="Professional Work Experience"
+                title="Certifications & Volunteering"
                 sub="🎓 Certificates"
             />
             <div className="w-full mt-32">
