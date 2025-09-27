@@ -1,9 +1,8 @@
 import React from 'react'
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import ShowCaseSection from "@/components/ShowCaseSection";
-import ShowStudyCase from "@/components/ShowStudyCase";
 import {Projects} from "@/components/Projects";
+import Contact from "@/components/Contact";
 
 export default function Home() {
     return (
@@ -11,6 +10,7 @@ export default function Home() {
             <Navbar/>
             <Hero/>
             <Projects/>
+            <Contact />
         </>
     )
 }
