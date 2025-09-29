@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 
 const TechIconCardExperience = ({ model }) => {
-  const scene = useGLTF(model.modelPath);
+  const scene = useGLTF('/models/react_logo-transformed.glb');
 
   useEffect(() => {
     if (model.name === "Interactive Developer") {
