@@ -99,18 +99,45 @@ export const ProjectsCarousel = ({
             const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
             setCanScrollLeft(scrollLeft > 0);
             setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
+
+            // Update current index based on scroll position
+            updateCurrentIndex();
+        }
+    };
+
+    const updateCurrentIndex = () => {
+        if (carouselRef.current) {
+            const cardWidth = isMobile() ? 230 : 384;
+            const gap = isMobile() ? 4 : 8;
+            const scrollLeft = carouselRef.current.scrollLeft;
+            const newIndex = Math.round(scrollLeft / (cardWidth + gap));
+            setCurrentIndex(Math.min(newIndex, projects.length - 1));
         }
     };
 
     const scrollLeft = () => {
         if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+            const cardWidth = isMobile() ? 230 : 384;
+            const gap = isMobile() ? 4 : 8;
+            const newScrollLeft = carouselRef.current.scrollLeft - (cardWidth + gap);
+            carouselRef.current.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+
+            // Update index immediately for better UX
+            const newIndex = Math.max(0, currentIndex - 1);
+            setCurrentIndex(newIndex);
         }
     };
 
     const scrollRight = () => {
         if (carouselRef.current) {
-            carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+            const cardWidth = isMobile() ? 230 : 384;
+            const gap = isMobile() ? 4 : 8;
+            const newScrollLeft = carouselRef.current.scrollLeft + (cardWidth + gap);
+            carouselRef.current.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+
+            // Update index immediately for better UX
+            const newIndex = Math.min(projects.length - 1, currentIndex + 1);
+            setCurrentIndex(newIndex);
         }
     };
 
@@ -237,7 +264,7 @@ export const ProjectsCarousel = ({
     );
 };
 
-// Project Card Component
+// Project Card Component - Keep the rest of your existing ProjectCard component the same
 export const ProjectCard = ({
                                 project,
                                 index,
@@ -441,7 +468,7 @@ export const ProjectCard = ({
     );
 };
 
-// Enhanced Image Component
+// Enhanced Image Component - Keep the same
 export const BlurImage = ({
                               height,
                               width,

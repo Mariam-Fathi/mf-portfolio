@@ -12,11 +12,10 @@ interface ButtonProps {
 const Button = ({ text, className, id }: ButtonProps) => {
     return (
         <a
-            href={`#${id}`}
             onClick={(e) => {
                 e.preventDefault(); // Stop the link from jumping instantly
 
-                const target = document.getElementById("counter"); // Find the section with ID "counter"
+                const target = document.getElementById("experience"); // Find the section with ID "counter"
 
                 // Only scroll if we found the section and an ID is passed in
                 // that prevents the contact button from scrolling to the top
