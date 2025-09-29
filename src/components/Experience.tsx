@@ -94,7 +94,7 @@ const Experience = () => {
   return (
     <section
       id="experience"
-      className="flex-center md:mt-20 mt-20 section-padding xl:px-0"
+      className="flex-center section-padding xl:px-0 mt-42"
     >
       <div className="w-full h-full md:px-20 px-5">
         <TitleHeader

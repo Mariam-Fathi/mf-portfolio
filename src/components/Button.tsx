@@ -12,7 +12,7 @@ interface ButtonProps {
 const Button = ({ text, className, id }: ButtonProps) => {
     return (
         <a
-            href="#"
+            href={`#${id}`}
             onClick={(e) => {
                 e.preventDefault(); // Stop the link from jumping instantly
 

@@ -6,14 +6,15 @@ import Contact from "@/components/Contact";
 import Experience from "@/components/Experience";
 import ShowCaseSection from "@/components/Certificates";
 import Certificates from "@/components/Certificates";
+import LogoShowcase from "@/components/LogoShowcase";
 
 export default function Home() {
     return (
         <>
             <Navbar/>
             <Hero/>
-            <Projects/>
             <Experience/>
+            <Projects/>
             <Certificates />
             <Contact />
         </>

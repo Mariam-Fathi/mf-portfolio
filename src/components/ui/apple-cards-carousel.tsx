@@ -4,292 +4,471 @@ import React, {
     useRef,
     useState,
     createContext,
-    useContext, JSX,
+    useContext,
+    JSX,
 } from "react";
 import {
-  IconArrowNarrowLeft,
-  IconArrowNarrowRight,
-  IconX,
+    IconArrowNarrowLeft,
+    IconArrowNarrowRight,
+    IconX,
+    IconBrandGithub,
+    IconExternalLink,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 import Image, { ImageProps } from "next/image";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 
-interface CarouselProps {
-  items: JSX.Element[];
-  initialScroll?: number;
+// Types
+export interface ProjectCard {
+    id: string;
+    src: string;
+    title: string;
+    category: string;
+    description: string;
+    content: React.ReactNode;
+    githubUrl?: string;
+    demoUrl?: string;
+    technologies?: string[];
+    featured?: boolean;
 }
 
-type Card = {
-  src: string;
-  title: string;
-  category: string;
-  content: React.ReactNode;
-};
+interface CarouselProps {
+    projects: ProjectCard[];
+    initialScroll?: number;
+    autoPlay?: boolean;
+    autoPlayInterval?: number;
+    showControls?: boolean;
+    showIndicators?: boolean;
+    className?: string;
+}
 
+interface CardProps {
+    project: ProjectCard;
+    index: number;
+    layout?: boolean;
+    variant?: "default" | "minimal" | "featured";
+}
+
+// Context
 export const CarouselContext = createContext<{
-  onCardClose: (index: number) => void;
-  currentIndex: number;
+    onProjectClose: (index: number) => void;
+    currentIndex: number;
+    activeProject: ProjectCard | null;
 }>({
-  onCardClose: () => {},
-  currentIndex: 0,
+    onProjectClose: () => {},
+    currentIndex: 0,
+    activeProject: null,
 });
 
-export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
-  const carouselRef = React.useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
-  const [canScrollRight, setCanScrollRight] = React.useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+// Main Carousel Component
+export const ProjectsCarousel = ({
+                                     projects,
+                                     initialScroll = 0,
+                                     autoPlay = false,
+                                     autoPlayInterval = 5000,
+                                     showControls = true,
+                                     showIndicators = true,
+                                     className,
+                                 }: CarouselProps) => {
+    const carouselRef = React.useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+    const [canScrollRight, setCanScrollRight] = React.useState(true);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [activeProject, setActiveProject] = useState<ProjectCard | null>(null);
 
-  useEffect(() => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollLeft = initialScroll;
-      checkScrollability();
-    }
-  }, [initialScroll]);
+    useEffect(() => {
+        if (carouselRef.current) {
+            carouselRef.current.scrollLeft = initialScroll;
+            checkScrollability();
+        }
+    }, [initialScroll]);
 
-  const checkScrollability = () => {
-    if (carouselRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
-    }
-  };
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (autoPlay && canScrollRight) {
+            interval = setInterval(() => {
+                scrollRight();
+            }, autoPlayInterval);
+        }
+        return () => clearInterval(interval);
+    }, [autoPlay, autoPlayInterval, canScrollRight]);
 
-  const scrollLeft = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
-    }
-  };
+    const checkScrollability = () => {
+        if (carouselRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+            setCanScrollLeft(scrollLeft > 0);
+            setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
+        }
+    };
 
-  const scrollRight = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
-    }
-  };
+    const scrollLeft = () => {
+        if (carouselRef.current) {
+            carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
+        }
+    };
 
-  const handleCardClose = (index: number) => {
-    if (carouselRef.current) {
-      const cardWidth = isMobile() ? 230 : 384; // (md:w-96)
-      const gap = isMobile() ? 4 : 8;
-      const scrollPosition = (cardWidth + gap) * (index + 1);
-      carouselRef.current.scrollTo({
-        left: scrollPosition,
-        behavior: "smooth",
-      });
-      setCurrentIndex(index);
-    }
-  };
+    const scrollRight = () => {
+        if (carouselRef.current) {
+            carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
+        }
+    };
 
-  const isMobile = () => {
-    return window && window.innerWidth < 768;
-  };
+    const scrollToIndex = (index: number) => {
+        if (carouselRef.current) {
+            const cardWidth = isMobile() ? 230 : 384;
+            const gap = isMobile() ? 4 : 8;
+            const scrollPosition = (cardWidth + gap) * index;
+            carouselRef.current.scrollTo({
+                left: scrollPosition,
+                behavior: "smooth",
+            });
+            setCurrentIndex(index);
+        }
+    };
 
-  return (
-    <CarouselContext.Provider
-      value={{ onCardClose: handleCardClose, currentIndex }}
-    >
-      <div className="relative w-full">
-        <div
-          className="flex w-full overflow-x-scroll overscroll-x-auto scroll-smooth py-10 [scrollbar-width:none] md:py-20"
-          ref={carouselRef}
-          onScroll={checkScrollability}
+    const handleProjectClose = (index: number) => {
+        if (carouselRef.current) {
+            const cardWidth = isMobile() ? 230 : 384;
+            const gap = isMobile() ? 4 : 8;
+            const scrollPosition = (cardWidth + gap) * (index + 1);
+            carouselRef.current.scrollTo({
+                left: scrollPosition,
+                behavior: "smooth",
+            });
+            setCurrentIndex(index);
+            setActiveProject(null);
+        }
+    };
+
+    const isMobile = () => {
+        return typeof window !== "undefined" && window.innerWidth < 768;
+    };
+
+    return (
+        <CarouselContext.Provider
+            value={{
+                onProjectClose: handleProjectClose,
+                currentIndex,
+                activeProject,
+            }}
         >
-          <div
-            className={cn(
-              "absolute right-0 z-[1000] h-auto w-[5%] overflow-hidden bg-gradient-to-l",
-            )}
-          ></div>
+            <div className={cn("relative w-full", className)}>
+                {/* Carousel Container */}
+                <div
+                    className="flex w-full overflow-x-scroll overscroll-x-auto scroll-smooth py-10 [scrollbar-width:none] md:py-20"
+                    ref={carouselRef}
+                    onScroll={checkScrollability}
+                >
+                    <div className="absolute right-0 z-40 h-full w-20 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+                    <div className="absolute left-0 z-40 h-full w-20 bg-gradient-to-r from-background to-transparent pointer-events-none" />
 
-          <div
-            className={cn(
-              "flex flex-row justify-start gap-4",
-            )}
-          >
-            {items.map((item, index) => (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 20,
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  transition: {
-                    duration: 0.5,
-                    delay: 0.2 * index,
-                    ease: "easeOut",
-                  },
-                }}
-                key={"card" + index}
-                className="rounded-3xl last:pr-[5%] md:last:pr-[33%]"
-              >
-                {item}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-        <div className="mr-10 flex justify-end gap-2">
-          <button
-            className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 disabled:opacity-50"
-            onClick={scrollLeft}
-            disabled={!canScrollLeft}
-          >
-            <IconArrowNarrowLeft className="h-6 w-6 text-gray-500" />
-          </button>
-          <button
-            className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 disabled:opacity-50"
-            onClick={scrollRight}
-            disabled={!canScrollRight}
-          >
-            <IconArrowNarrowRight className="h-6 w-6 text-gray-500" />
-          </button>
-        </div>
-      </div>
-    </CarouselContext.Provider>
-  );
+                    <div className="flex flex-row justify-start gap-4 pl-4">
+                        {projects.map((project, index) => (
+                            <motion.div
+                                initial={{
+                                    opacity: 0,
+                                    y: 20,
+                                }}
+                                animate={{
+                                    opacity: 1,
+                                    y: 0,
+                                    transition: {
+                                        duration: 0.5,
+                                        delay: 0.1 * index,
+                                        ease: "easeOut",
+                                    },
+                                }}
+                                key={`project-${project.id}`}
+                                className="rounded-3xl last:pr-8"
+                            >
+                                <ProjectCard
+                                    project={project}
+                                    index={index}
+                                    layout={true}
+                                    variant={project.featured ? "featured" : "default"}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Controls */}
+                {showControls && (
+                    <div className="flex items-center justify-between px-4">
+                        <div className="flex gap-2">
+                            <button
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                onClick={scrollLeft}
+                                disabled={!canScrollLeft}
+                            >
+                                <IconArrowNarrowLeft className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
+                            </button>
+                            <button
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                onClick={scrollRight}
+                                disabled={!canScrollRight}
+                            >
+                                <IconArrowNarrowRight className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
+                            </button>
+                        </div>
+
+                        {/* Indicators */}
+                        {showIndicators && projects.length > 1 && (
+                            <div className="flex gap-2">
+                                {projects.map((_, index) => (
+                                    <button
+                                        key={`indicator-${index}`}
+                                        onClick={() => scrollToIndex(index)}
+                                        className={cn(
+                                            "h-2 rounded-full transition-all duration-300",
+                                            currentIndex === index
+                                                ? "w-8 bg-white"
+                                                : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500"
+                                        )}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </CarouselContext.Provider>
+    );
 };
 
-export const Card = ({
-  card,
-  index,
-  layout = false,
-}: {
-  card: Card;
-  index: number;
-  layout?: boolean;
-}) => {
-  const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const { onCardClose, currentIndex } = useContext(CarouselContext);
+// Project Card Component
+export const ProjectCard = ({
+                                project,
+                                index,
+                                layout = false,
+                                variant = "default",
+                            }: CardProps) => {
+    const [open, setOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const { onProjectClose } = useContext(CarouselContext);
 
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        handleClose();
-      }
-    }
+    useEffect(() => {
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") {
+                handleClose();
+            }
+        }
 
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
+        if (open) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "auto";
+        }
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [open]);
 
-  useOutsideClick(containerRef, () => handleClose());
+    useOutsideClick(containerRef, () => handleClose());
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
+    const handleOpen = () => {
+        setOpen(true);
+    };
 
-  const handleClose = () => {
-    setOpen(false);
-    onCardClose(index);
-  };
+    const handleClose = () => {
+        setOpen(false);
+        onProjectClose(index);
+    };
 
-  return (
-    <>
-      <AnimatePresence>
-        {open && (
-          <div className="fixed inset-0 z-50 h-screen overflow-auto">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 h-full w-full bg-black/80 backdrop-blur-lg"
-            />
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              ref={containerRef}
-              layoutId={layout ? `card-${card.title}` : undefined}
-              className="relative z-[60] mx-auto my-10 h-fit max-w-5xl rounded-3xl bg-white p-4 font-sans md:p-10 dark:bg-neutral-900"
+    const cardClasses = cn(
+        "relative z-10 flex flex-col items-start justify-end overflow-hidden rounded-3xl bg-gradient-to-br from-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group",
+        {
+            "h-80 w-56 md:h-96 md:w-80": variant === "default",
+            "h-64 w-48 md:h-80 md:w-64": variant === "minimal",
+            "h-80 w-56 md:h-[40rem] md:w-96": variant === "featured",
+            "ring-2 ring-primary/50": variant === "featured",
+        }
+    );
+
+    return (
+        <>
+            {/* Modal */}
+            <AnimatePresence>
+                {open && (
+                    <div className="fixed inset-0 z-50 h-screen overflow-auto top-32">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 h-full w-full bg-black/80 backdrop-blur-lg"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            ref={containerRef}
+                            layoutId={layout ? `card-${project.id}` : undefined}
+                            className="relative z-[60] mx-auto my-10 h-fit max-w-4xl rounded-3xl bg-card p-4 font-sans shadow-2xl md:p-8 bg-white/20"
+                        >
+                            <button
+                                className="sticky top-4 right-0 ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                                onClick={handleClose}
+                            >
+                                <IconX className="h-4 w-4" />
+                            </button>
+
+                            <motion.p
+                                layoutId={layout ? `category-${project.id}` : undefined}
+                                className="text-sm font-medium text-muted-foreground uppercase tracking-wide"
+                            >
+                                {project.category}
+                            </motion.p>
+
+                            <motion.h3
+                                layoutId={layout ? `title-${project.id}` : undefined}
+                                className="mt-2 text-2xl font-bold text-foreground md:text-4xl"
+                            >
+                                {project.title}
+                            </motion.h3>
+
+                            {/* Project Links */}
+                            <div className="mt-4 flex gap-4">
+                                {project.githubUrl && (
+                                    <a
+                                        href={project.githubUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        <IconBrandGithub className="h-4 w-4" />
+                                        Code
+                                    </a>
+                                )}
+                                {project.demoUrl && (
+                                    <a
+                                        href={project.demoUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        <IconExternalLink className="h-4 w-4" />
+                                        Live Demo
+                                    </a>
+                                )}
+                            </div>
+
+                            {/* Technologies */}
+                            {project.technologies && (
+                                <div className="mt-6 flex flex-wrap gap-2">
+                                    {project.technologies.map((tech) => (
+                                        <span
+                                            key={tech}
+                                            className="rounded-full bg-black px-3 py-1 text-xs text-primary"
+                                        >
+                      {tech}
+                    </span>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="py-6 text-foreground">{project.content}</div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Card */}
+            <motion.button
+                layoutId={layout ? `card-${project.id}` : undefined}
+                onClick={handleOpen}
+                className={cardClasses}
             >
-              <button
-                className="sticky top-4 right-0 ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-black dark:bg-white"
-                onClick={handleClose}
-              >
-                <IconX className="h-6 w-6 text-neutral-100 dark:text-neutral-900" />
-              </button>
-              <motion.p
-                layoutId={layout ? `category-${card.title}` : undefined}
-                className="text-base font-medium text-black dark:text-white"
-              >
-                {card.category}
-              </motion.p>
-              <motion.p
-                layoutId={layout ? `title-${card.title}` : undefined}
-                className="mt-4 text-2xl font-semibold text-neutral-700 md:text-5xl dark:text-white"
-              >
-                {card.title}
-              </motion.p>
-              <div className="py-10">{card.content}</div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      <motion.button
-        layoutId={layout ? `card-${card.title}` : undefined}
-        onClick={handleOpen}
-        className="relative z-10 flex h-80 w-56 flex-col items-start justify-start overflow-hidden rounded-3xl bg-gray-100 md:h-[40rem] md:w-96 dark:bg-neutral-900"
-      >
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-30 h-full bg-gradient-to-b from-black/50 via-transparent to-transparent" />
-        <div className="relative z-40 p-8">
-          <motion.p
-            layoutId={layout ? `category-${card.category}` : undefined}
-            className="text-left font-sans text-sm font-medium text-white md:text-base"
-          >
-            {card.category}
-          </motion.p>
-          <motion.p
-            layoutId={layout ? `title-${card.title}` : undefined}
-            className="mt-2 max-w-xs text-left font-sans text-xl font-semibold [text-wrap:balance] text-white md:text-3xl"
-          >
-            {card.title}
-          </motion.p>
-        </div>
-        <BlurImage
-          src={card.src}
-          alt={card.title}
-          fill
-          className="absolute inset-0 z-10 object-cover"
-        />
-      </motion.button>
-    </>
-  );
+                {/* Background Image */}
+                <div className="absolute inset-0 z-0">
+                    <BlurImage
+                        src={project.src}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                </div>
+
+                {/* Content */}
+                <div className="relative z-20 w-full p-6 bg-black-100">
+                    <motion.p
+                        layoutId={layout ? `category-${project.id}` : undefined}
+                        className="text-left text-sm font-medium text-primary/90 md:text-base"
+                    >
+                        {project.category}
+                    </motion.p>
+                    <motion.h3
+                        layoutId={layout ? `title-${project.id}` : undefined}
+                        className="mt-2 text-left text-xl font-bold [text-wrap:balance] text-white md:text-2xl"
+                    >
+                        {project.title}
+                    </motion.h3>
+                    <motion.p className="mt-2 text-left text-sm text-white/80 line-clamp-2">
+                        {project.description}
+                    </motion.p>
+
+                    {/* Action Links */}
+                    <div className="mt-4 flex gap-4 transition-opacity duration-300 opacity-100">
+                        {project.githubUrl && (
+                            <a
+                                href={project.githubUrl}
+                                onClick={(e) => e.stopPropagation()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm hover:bg-white/20 transition-colors"
+                            >
+                                <IconBrandGithub className="h-3 w-3" />
+                                Code
+                            </a>
+                        )}
+                        {project.demoUrl && (
+                            <a
+                                href={project.demoUrl}
+                                onClick={(e) => e.stopPropagation()}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs text-white backdrop-blur-sm hover:bg-white/20 transition-colors"
+                            >
+                                <IconExternalLink className="h-3 w-3" />
+                                Demo
+                            </a>
+                        )}
+                    </div>
+                </div>
+            </motion.button>
+        </>
+    );
 };
 
+// Enhanced Image Component
 export const BlurImage = ({
-  height,
-  width,
-  src,
-  className,
-  alt,
-  ...rest
-}: ImageProps) => {
-  const [isLoading, setLoading] = useState(true);
-  return (
-    <Image
-      className={cn(
-        "h-full w-full transition duration-300",
-        isLoading ? "blur-sm" : "blur-0",
-        className,
-      )}
-      onLoad={() => setLoading(false)}
-      src={src as string}
-      width={width}
-      height={height}
-      loading="lazy"
-      decoding="async"
-      blurDataURL={typeof src === "string" ? src : undefined}
-      alt={alt ? alt : "Background of a beautiful view"}
-      {...rest}
-    />
-  );
+                              height,
+                              width,
+                              src,
+                              className,
+                              alt,
+                              ...rest
+                          }: ImageProps) => {
+    const [isLoading, setLoading] = useState(true);
+
+    return (
+        <Image
+            className={cn(
+                "h-full w-full transition duration-500",
+                isLoading ? "scale-110 blur-lg" : "scale-100 blur-0",
+                className
+            )}
+            onLoad={() => setLoading(false)}
+            src={src}
+            width={width}
+            height={height}
+            loading="lazy"
+            decoding="async"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+            alt={alt || "Project screenshot"}
+            {...rest}
+        />
+    );
 };

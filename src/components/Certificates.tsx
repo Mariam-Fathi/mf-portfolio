@@ -90,7 +90,7 @@ const CertificatesOption2 = () => {
 
 
     return (
-        <section id="certificates" ref={sectionRef} className="app-showcase mt-32" >
+        <section id="certificates" ref={sectionRef} className="app-showcase" >
             <TitleHeader
                 title="Professional Certifications & Contributions"
                 sub="🎓 Certificates"
