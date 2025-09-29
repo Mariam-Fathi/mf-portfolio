@@ -118,7 +118,7 @@ export const words = [
 export const expCards = [
     {
         review:
-            "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact.",
+            "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
         imgPath: "/images/exp1.png",
         logoPath: "/images/logo1.png",
         title: "Software & Mobile Engineer @ Tarqia",
@@ -131,7 +131,7 @@ export const expCards = [
     },
     {
         review:
-            "Mariam’s freelance work at Dracode showcased her ability to merge frontend precision with practical ML thinking. Her tools didn’t just work—they solved real business bottlenecks.",
+            "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
         imgPath: "/images/exp2.png",
         logoPath: "/images/logo2.png",
         title: "Freelance Software Engineer @ Dracode",
@@ -144,7 +144,7 @@ export const expCards = [
     },
     {
         review:
-            "During her internship at SBS, Mariam demonstrated rapid learning and architectural thinking. Her contributions to mobile deployment pipelines reflected a strong foundation in cross-platform engineering.",
+            "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
         imgPath: "/images/exp3.png",
         logoPath: "/images/logo3.png",
         title: "React Native Developer Intern @ SBS",
@@ -190,5 +190,75 @@ export const logoIconsList = [
     },
     {
         imgPath: "/images/logos/company-logo-11.png",
+    },
+];
+
+export const techStackIcons = [
+    {
+        name: "React Developer",
+        modelPath: "/models/react_logo-transformed.glb",
+        scale: 1,
+        rotation: [0, 0, 0],
+    },
+    {
+        name: "Python Developer",
+        modelPath: "/models/python-transformed.glb",
+        scale: 0.8,
+        rotation: [0, 0, 0],
+    },
+    {
+        name: "Backend Developer",
+        modelPath: "/models/node-transformed.glb",
+        scale: 5,
+        rotation: [0, -Math.PI / 2, 0],
+    },
+    {
+        name: "Interactive Developer",
+        modelPath: "/models/three.js-transformed.glb",
+        scale: 0.05,
+        rotation: [0, 0, 0],
+    },
+    {
+        name: "Project Manager",
+        modelPath: "/models/git-svg-transformed.glb",
+        scale: 0.05,
+        rotation: [0, -Math.PI / 4, 0],
+    },
+];
+
+export const abilities = [
+    {
+        imgPath: "/images/seo.png",
+        title: "Quality Focus",
+        desc: "Delivering high-quality results while maintaining attention to every detail.",
+    },
+    {
+        imgPath: "/images/chat.png",
+        title: "Reliable Communication",
+        desc: "Keeping you updated at every step to ensure transparency and clarity.",
+    },
+    {
+        imgPath: "/images/time.png",
+        title: "On-Time Delivery",
+        desc: "Making sure projects are completed on schedule, with quality & attention to detail.",
+    },
+];
+
+export const socialImgs = [
+    {
+        name: "insta",
+        imgPath: "/images/insta.png",
+    },
+    {
+        name: "fb",
+        imgPath: "/images/fb.png",
+    },
+    {
+        name: "x",
+        imgPath: "/images/x.png",
+    },
+    {
+        name: "linkedin",
+        imgPath: "/images/linkedin.png",
     },
 ];

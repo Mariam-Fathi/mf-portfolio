@@ -198,14 +198,14 @@ export const ProjectsCarousel = ({
                     <div className="flex items-center justify-between px-4">
                         <div className="flex gap-2">
                             <button
-                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full  border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 onClick={scrollLeft}
                                 disabled={!canScrollLeft}
                             >
                                 <IconArrowNarrowLeft className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
                             </button>
                             <button
-                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full  border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 onClick={scrollRight}
                                 disabled={!canScrollRight}
                             >
@@ -277,12 +277,12 @@ export const ProjectCard = ({
     };
 
     const cardClasses = cn(
-        "relative z-10 flex flex-col items-start justify-end overflow-hidden rounded-3xl bg-gradient-to-br from-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group",
+        "relative z-10 flex flex-col items-start justify-end  overflow-hidden rounded-3xl bg-gradient-to-br from-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group",
         {
-            "h-80 w-56 md:h-96 md:w-80": variant === "default",
-            "h-64 w-48 md:h-80 md:w-64": variant === "minimal",
-            "h-80 w-56 md:h-[40rem] md:w-96": variant === "featured",
-            "ring-2 ring-primary/50": variant === "featured",
+            "h-80 w-56 md:h-96 md:w-80 card-border": variant === "default",
+            "h-64 w-48 md:h-80 md:w-64 card-border": variant === "minimal",
+            "h-80 w-56 md:h-[40rem] md:w-96 card-border": variant === "featured",
+            " card-border": variant === "featured",
         }
     );
 
@@ -296,7 +296,7 @@ export const ProjectCard = ({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 h-full w-full bg-black/80 backdrop-blur-lg"
+                            className="fixed inset-0 h-full w-full card-border backdrop-blur-lg"
                         />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -359,7 +359,7 @@ export const ProjectCard = ({
                                     {project.technologies.map((tech) => (
                                         <span
                                             key={tech}
-                                            className="rounded-full bg-black px-3 py-1 text-xs text-primary"
+                                            className="rounded-full card-border px-3 py-1 text-xs text-primary"
                                         >
                       {tech}
                     </span>
@@ -391,7 +391,7 @@ export const ProjectCard = ({
                 </div>
 
                 {/* Content */}
-                <div className="relative z-20 w-full p-6 bg-black-100">
+                <div className="relative z-20 w-full p-6 card-border">
                     <motion.p
                         layoutId={layout ? `category-${project.id}` : undefined}
                         className="text-left text-sm font-medium text-primary/90 md:text-base"

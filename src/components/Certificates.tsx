@@ -95,13 +95,13 @@ const CertificatesOption2 = () => {
                 title="Professional Certifications & Contributions"
                 sub="🎓 Certificates"
             />
-            <div className="mt-12 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {
                     certificates.map((items, key) => (
-                        <article className="max-w-md mx-auto mt-4 shadow-lg border rounded-md duration-300 hover:shadow-sm" key={key}>
+                        <article className="max-w-md mx-auto mt-4 shadow-lg border rounded-md duration-300 hover:shadow-sm card-border" key={key}>
                             <a href={items.href}>
-                                <img src={items.img} loading="lazy" alt={items.title}  className="bg-white w-full h-48 rounded-t-md object-contain"/>
-                                <div className="flex items-center mt-2 pt-3 ml-4 mr-2">
+                                <img src={items.img} loading="lazy" alt={items.title}  className="bg-black-200 w-full h-48 rounded-t-md object-contain"/>
+                                <div className="flex items-center mt-2 pt-3 ml-4 mr-2 ">
                                     <div className="flex-none w-10 h-10 rounded-full">
                                         <img src={items.authorLogo} className="w-full h-full rounded-full" alt={items.authorName} />
                                     </div>

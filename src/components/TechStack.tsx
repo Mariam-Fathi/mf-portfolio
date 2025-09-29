@@ -1,8 +1,10 @@
+'use client'
+
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 import TitleHeader from "../components/TitleHeader";
-import TechIconCardExperience from "../components/models/tech_logos/TechIconCardExperience";
+import TechIconCardExperience from "./models/tech_logos/TechIconCardExperience";
 import { techStackIcons } from "../constants";
 // import { techStackImgs } from "../constants";
 
