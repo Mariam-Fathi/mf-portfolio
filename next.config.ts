@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
         return config;
     },
     // Optional: Enable SWC minification for better performance
-    swcMinify: true,
+    // swcMinify: true,
 };
 
 export default nextConfig;
