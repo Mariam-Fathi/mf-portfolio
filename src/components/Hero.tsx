@@ -20,7 +20,7 @@ const Hero = () => {
     });
 
     return (
-        <section id="hero" className="relative overflow-hidden xl:mt-20 mt-32 flex-col justify-center items-center">
+        <section id="hero" className="relative overflow-hidden pt-20 xl:mt-20 mt-32 flex-col justify-center items-center">
             <div className="absolute top-0 left-0 z-10">
                 <img src="/images/bg.png" alt="" />
             </div>
