@@ -240,23 +240,23 @@ export const ProjectsCarousel = ({
                             </button>
                         </div>
 
-                        {/* Indicators */}
-                        {showIndicators && projects.length > 1 && (
-                            <div className="flex gap-2">
-                                {projects.map((_, index) => (
-                                    <button
-                                        key={`indicator-${index}`}
-                                        onClick={() => scrollToIndex(index)}
-                                        className={cn(
-                                            "h-2 rounded-full transition-all duration-300",
-                                            currentIndex === index
-                                                ? "w-8 bg-white"
-                                                : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500"
-                                        )}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        {/*/!* Indicators *!/*/}
+                        {/*{showIndicators && projects.length > 1 && (*/}
+                        {/*    <div className="flex gap-2">*/}
+                        {/*        {projects.map((_, index) => (*/}
+                        {/*            <button*/}
+                        {/*                key={`indicator-${index}`}*/}
+                        {/*                onClick={() => scrollToIndex(index)}*/}
+                        {/*                className={cn(*/}
+                        {/*                    "h-2 rounded-full transition-all duration-300",*/}
+                        {/*                    currentIndex === index*/}
+                        {/*                        ? "w-8 bg-white"*/}
+                        {/*                        : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500"*/}
+                        {/*                )}*/}
+                        {/*            />*/}
+                        {/*        ))}*/}
+                        {/*    </div>*/}
+                        {/*)}*/}
                     </div>
                 )}
             </div>
