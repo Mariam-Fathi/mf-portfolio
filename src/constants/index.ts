@@ -159,31 +159,31 @@ export const expCards = [
 
 export const logoIconsList = [
     {
-        imgPath: "/images/logos/company-logo-1.svg",
+        imgPath: "/images/logos/tech-stack-1.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-2.svg",
+        imgPath: "/images/logos/tech-stack-2.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-3.png",
+        imgPath: "/images/logos/tech-stack-3.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-4.png",
+        imgPath: "/images/logos/tech-stack-4.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-5.svg",
+        imgPath: "/images/logos/tech-stack-5.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-6.svg",
+        imgPath: "/images/logos/tech-stack-6.png",
     },
     {
-        imgPath: "/images/logos/company-logo-7.svg",
+        imgPath: "/images/logos/tech-stack-7.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-8.png",
+        imgPath: "/images/logos/tech-stack-8.svg",
     },
     {
-        imgPath: "/images/logos/company-logo-9.png",
+        imgPath: "/images/logos/tech-stack-9.svg",
     },
 ];
 
