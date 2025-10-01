@@ -58,7 +58,7 @@ const data = [
         id: "multimodal-personality1",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -86,7 +86,7 @@ const data = [
         id: "multimodal-personality2",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -114,7 +114,7 @@ const data = [
         id: "multimodal-personality3",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -142,7 +142,7 @@ const data = [
         id: "multimodal-personality",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -170,7 +170,7 @@ const data = [
         id: "multimodal-personality4",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -198,7 +198,7 @@ const data = [
         id: "multimodal-personality5",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">
@@ -226,7 +226,7 @@ const data = [
         id: "multimodal-personality7",
         category: "Graduation Project",
         title: "Multimodal Personality Trait Prediction",
-        src: "/images/project7.png",
+        src: "/images/Cover.png",
         description: "Predicting personality traits from self-presentation videos using multimodal deep learning",
         content: (
             <div className="space-y-4">

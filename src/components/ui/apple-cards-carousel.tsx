@@ -61,7 +61,6 @@ export const CarouselContext = createContext<{
     activeProject: null,
 });
 
-// Main Carousel Component
 export const ProjectsCarousel = ({
                                      projects,
                                      initialScroll = 0,
@@ -76,6 +75,12 @@ export const ProjectsCarousel = ({
     const [canScrollRight, setCanScrollRight] = React.useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [activeProject, setActiveProject] = useState<ProjectCard | null>(null);
+
+    // Calculate how many projects to show based on screen size
+    const getProjectsPerView = () => {
+        if (typeof window === "undefined") return 2;
+        return window.innerWidth < 768 ? 1 : 2;
+    };
 
     useEffect(() => {
         if (carouselRef.current) {
@@ -99,30 +104,30 @@ export const ProjectsCarousel = ({
             const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
             setCanScrollLeft(scrollLeft > 0);
             setCanScrollRight(scrollLeft < scrollWidth - clientWidth);
-
-            // Update current index based on scroll position
             updateCurrentIndex();
         }
     };
 
     const updateCurrentIndex = () => {
         if (carouselRef.current) {
-            const cardWidth = isMobile() ? 230 : 384;
+            const projectsPerView = getProjectsPerView();
+            const cardWidth = isMobile() ? 288 : 500; // Wider cards for 2-column layout
             const gap = isMobile() ? 4 : 8;
             const scrollLeft = carouselRef.current.scrollLeft;
-            const newIndex = Math.round(scrollLeft / (cardWidth + gap));
-            setCurrentIndex(Math.min(newIndex, projects.length - 1));
+            const newIndex = Math.round(scrollLeft / ((cardWidth + gap) * projectsPerView));
+            setCurrentIndex(Math.min(newIndex, Math.ceil(projects.length / projectsPerView) - 1));
         }
     };
 
     const scrollLeft = () => {
         if (carouselRef.current) {
-            const cardWidth = isMobile() ? 230 : 384;
+            const projectsPerView = getProjectsPerView();
+            const cardWidth = isMobile() ? 288 : 500;
             const gap = isMobile() ? 4 : 8;
-            const newScrollLeft = carouselRef.current.scrollLeft - (cardWidth + gap);
+            const scrollAmount = (cardWidth + gap) * projectsPerView;
+            const newScrollLeft = carouselRef.current.scrollLeft - scrollAmount;
             carouselRef.current.scrollTo({ left: newScrollLeft, behavior: "smooth" });
 
-            // Update index immediately for better UX
             const newIndex = Math.max(0, currentIndex - 1);
             setCurrentIndex(newIndex);
         }
@@ -130,22 +135,27 @@ export const ProjectsCarousel = ({
 
     const scrollRight = () => {
         if (carouselRef.current) {
-            const cardWidth = isMobile() ? 230 : 384;
+            const projectsPerView = getProjectsPerView();
+            const cardWidth = isMobile() ? 288 : 500;
             const gap = isMobile() ? 4 : 8;
-            const newScrollLeft = carouselRef.current.scrollLeft + (cardWidth + gap);
+            const scrollAmount = (cardWidth + gap) * projectsPerView;
+            const newScrollLeft = carouselRef.current.scrollLeft + scrollAmount;
             carouselRef.current.scrollTo({ left: newScrollLeft, behavior: "smooth" });
 
-            // Update index immediately for better UX
-            const newIndex = Math.min(projects.length - 1, currentIndex + 1);
+            const newIndex = Math.min(
+                Math.ceil(projects.length / projectsPerView) - 1,
+                currentIndex + 1
+            );
             setCurrentIndex(newIndex);
         }
     };
 
     const scrollToIndex = (index: number) => {
         if (carouselRef.current) {
-            const cardWidth = isMobile() ? 230 : 384;
+            const projectsPerView = getProjectsPerView();
+            const cardWidth = isMobile() ? 288 : 500;
             const gap = isMobile() ? 4 : 8;
-            const scrollPosition = (cardWidth + gap) * index;
+            const scrollPosition = ((cardWidth + gap) * projectsPerView) * index;
             carouselRef.current.scrollTo({
                 left: scrollPosition,
                 behavior: "smooth",
@@ -156,9 +166,10 @@ export const ProjectsCarousel = ({
 
     const handleProjectClose = (index: number) => {
         if (carouselRef.current) {
-            const cardWidth = isMobile() ? 230 : 384;
+            const projectsPerView = getProjectsPerView();
+            const cardWidth = isMobile() ? 288 : 500;
             const gap = isMobile() ? 4 : 8;
-            const scrollPosition = (cardWidth + gap) * (index + 1);
+            const scrollPosition = ((cardWidth + gap) * projectsPerView) * (index + 1);
             carouselRef.current.scrollTo({
                 left: scrollPosition,
                 behavior: "smooth",
@@ -190,7 +201,8 @@ export const ProjectsCarousel = ({
                     <div className="absolute right-0 z-40 h-full w-20 bg-gradient-to-l from-background to-transparent pointer-events-none" />
                     <div className="absolute left-0 z-40 h-full w-20 bg-gradient-to-r from-background to-transparent pointer-events-none" />
 
-                    <div className="flex flex-row justify-start gap-4 pl-4">
+                    {/* Updated container to show 2 projects on desktop */}
+                    <div className="flex flex-row justify-start gap-6 pl-6">
                         {projects.map((project, index) => (
                             <motion.div
                                 initial={{
@@ -207,7 +219,7 @@ export const ProjectsCarousel = ({
                                     },
                                 }}
                                 key={`project-${project.id}`}
-                                className="rounded-3xl last:pr-8"
+                                className="rounded-3xl"
                             >
                                 <ProjectCard
                                     project={project}
@@ -225,38 +237,20 @@ export const ProjectsCarousel = ({
                     <div className="flex items-center justify-between px-4">
                         <div className="flex gap-2">
                             <button
-                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full  border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 onClick={scrollLeft}
                                 disabled={!canScrollLeft}
                             >
                                 <IconArrowNarrowLeft className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
                             </button>
                             <button
-                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full  border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
+                                className="relative z-40 flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700"
                                 onClick={scrollRight}
                                 disabled={!canScrollRight}
                             >
                                 <IconArrowNarrowRight className="h-6 w-6 text-neutral-700 dark:text-neutral-300" />
                             </button>
                         </div>
-
-                        {/*/!* Indicators *!/*/}
-                        {/*{showIndicators && projects.length > 1 && (*/}
-                        {/*    <div className="flex gap-2">*/}
-                        {/*        {projects.map((_, index) => (*/}
-                        {/*            <button*/}
-                        {/*                key={`indicator-${index}`}*/}
-                        {/*                onClick={() => scrollToIndex(index)}*/}
-                        {/*                className={cn(*/}
-                        {/*                    "h-2 rounded-full transition-all duration-300",*/}
-                        {/*                    currentIndex === index*/}
-                        {/*                        ? "w-8 bg-white"*/}
-                        {/*                        : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600 dark:hover:bg-neutral-500"*/}
-                        {/*                )}*/}
-                        {/*            />*/}
-                        {/*        ))}*/}
-                        {/*    </div>*/}
-                        {/*)}*/}
                     </div>
                 )}
             </div>
@@ -304,12 +298,12 @@ export const ProjectCard = ({
     };
 
     const cardClasses = cn(
-        "relative z-10 flex flex-col items-start justify-end  overflow-hidden rounded-3xl bg-gradient-to-br from-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group",
+        "relative z-10 flex flex-col items-start justify-end overflow-hidden rounded-3xl bg-gradient-to-br from-card to-card/80 shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group",
         {
-            "h-80 w-56 md:h-96 md:w-80 card-border": variant === "default",
-            "h-64 w-48 md:h-80 md:w-64 card-border": variant === "minimal",
-            "h-80 w-56 md:h-[40rem] md:w-96 card-border": variant === "featured",
-            " card-border": variant === "featured",
+            "h-80 w-72 md:h-96 md:w-[500px] card-border": variant === "default", // Wider for 2-column layout
+            "h-64 w-64 md:h-80 md:w-[500px] card-border": variant === "minimal",
+            "h-80 w-72 md:h-[40rem] md:w-[500px] card-border": variant === "featured",
+            "card-border": variant === "featured",
         }
     );
 
