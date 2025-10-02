@@ -1,6 +1,8 @@
 'use client'
 
-import { useRef } from "react";
+import React, { useRef } from "react";
+import {ArrowRight, ArrowUpRight, Star, Users} from "lucide-react";
+import Button from "@/components/Button";
 
 const GlowCard = ({ card, index, children }) => {
     const cardRefs = useRef([]);
@@ -23,74 +25,100 @@ const GlowCard = ({ card, index, children }) => {
         <div
             ref={(el) => (cardRefs.current[index] = el)}
             onMouseMove={handleMouseMove(index)}
-            className="card card-border timeline-card rounded-xl p-6 md:p-8 mb-5 break-inside-avoid-column backdrop-blur-sm flex flex-col h-full"
+            className="card card-border timeline-card rounded-xl p-6 md:p-8 mb-5 break-inside-avoid-column backdrop-blur-sm flex flex-col h-full min-h-[450px]"
         >
             <div className="glow"></div>
 
-            {/* Certificate Image */}
             {card.certificateImage && (
-                <div className="mb-6 rounded-lg overflow-hidden border border-gray-600/30 shadow-lg">
+                <div className="mb-4 rounded-lg overflow-hidden border border-gray-600/30 shadow-lg h-60 flex-shrink-0">
                     <img
                         src={card.certificateImage}
                         alt={card.title || "Certificate"}
-                        className="w-full h-48 md:h-56 object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
                 </div>
             )}
-
-            {/* Platform Logo and Title */}
-            <div className="flex items-start gap-4 mb-4">
-                {card.platformLogo && (
-                    <div className="flex-shrink-0">
-                        <img
-                            src={card.platformLogo}
-                            alt={card.platform || "Platform"}
-                            className="size-12 md:size-14 rounded-lg bg-white p-2 object-contain border border-gray-600/30"
-                        />
-                    </div>
-                )}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-bold text-lg md:text-xl leading-tight line-clamp-2">
-                        {card.title}
-                    </h3>
+            <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2">
                     {card.platform && (
-                        <p className="text-blue-400 text-sm md:text-base font-medium mt-1">
-                            {card.platform}
-                        </p>
+
+                        <div className="flex items-center gap-2">
+                            {card.platform.map((log, index) => (
+                                <>
+                                    <img
+                                        key={index}
+                                        src={log.logo}
+                                        alt={log.educator || "Platform"}
+                                        className="size-8 rounded-lg bg-white p-1 object-contain border border-gray-600/30"
+                                    />
+                                    <span className="text-gray-400 text-sm">
+        {log.educator}
+    </span>
+                                </>
+                            ))}
+                        </div>
                     )}
                 </div>
+
+            </div>
+            <div className="mb-2 flex-shrink-0">
+                <h3 className="text-white font-bold text-xl md:text-2xl leading-tight mb-2">
+                    {card.title}
+                </h3>
+
+                {card.level && (
+                    <div className="inline-flex items-center gap-2 text-sm  bg-green-500/20 text-green-300 rounded-sm px-2 border border-green-500/30">
+                        <span className="capitalize">{card.level}</span>
+                    </div>
+
+                )}
+                {card.type && (
+                    <div className="inline-flex items-center ml-1 text-sm  bg-green-500/20 text-green-300 rounded-sm px-2 border border-green-500/30">
+                        <span className="capitalize">{card.type}</span>
+                    </div>
+
+                )}
             </div>
 
-            {/* Description */}
-            {card.description && (
-                <div className="mb-4 flex-grow">
-                    <p className="text-white-50 text-base leading-relaxed line-clamp-3">
-                        {card.description}
-                    </p>
-                </div>
-            )}
 
-            {/* Skills Tags */}
             {card.skills && card.skills.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                    {card.skills.map((skill, idx) => (
-                        <span
-                            key={idx}
-                            className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-medium border border-green-500/30"
-                        >
-                            {skill}
-                        </span>
-                    ))}
+                <div className="flex-shrink-0 mt-4">
+                    <p className="text-gray-300 text-sm font-medium mb-2">
+                        Skills Acquired:
+                    </p>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                        {card.skills.slice(0, 6).map((skill, idx) => (
+                            <span
+                                key={idx}
+                                className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded text-xs font-medium border border-blue-500/30"
+                            >
+                                {skill}
+                            </span>
+                        ))}
+                        {card.skills.length > 4 && (
+                            <span className="px-2 py-1 bg-gray-500/20 text-gray-300 rounded text-xs font-medium border border-gray-500/30">
+                                +{card.skills.length - 4} more...
+                            </span>
+                        )}
+                    </div>
                 </div>
             )}
 
-            {/* Children content (buttons, links, etc.) - Always at the bottom */}
-            <div className="mt-auto pt-4">
-                {children || (
-                    <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300">
-                        View Certificate
-                    </button>
-                )}
+            <div  className="mt-auto flex-shrink-0 ">
+                <a
+                    href={card.link}
+                    className={`w-full cta-wrapper`}
+                >
+                    <div className="cta-button group">
+                        <div className="bg-circle" />
+                        <p className="text">View Certificate</p>
+                        <div className="arrow-wrapper">
+                            <div>
+                                <ArrowUpRight color={'black'}/>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     );

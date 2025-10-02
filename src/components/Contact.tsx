@@ -1,118 +1,165 @@
 'use client'
 
-import { useRef, useState } from "react";
-import emailjs from "@emailjs/browser";
-
+import { useRef } from "react";
 import TitleHeader from "./TitleHeader";
-import ContactExperience from "../components/models/contact/ContactExperience";
+import { Linkedin, Github, MessageCircle, Mail, Phone } from "lucide-react";
 
 const Contact = () => {
-  const formRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+    const cardRef = useRef(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
+    const contactInfo = {
+        email: "mariam.fathi.siam@outlook.com",
+        phone: "+201020103227",
+        linkedin: "https://linkedin.com/in/mariam-fathi-siam",
+        github: "https://github.com/Mariam-Fathi",
+        whatsapp: "https://wa.me/201020103227"
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); // Show loading state
+    const handleMouseMove = (e) => {
+        const card = cardRef.current;
+        if (!card) return;
 
-    try {
-      await emailjs.sendForm(
-        import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-        formRef.current,
-        import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
-      );
+        const rect = card.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left - rect.width / 2;
+        const mouseY = e.clientY - rect.top - rect.height / 2;
 
-      // Reset form and stop loading
-      setForm({ name: "", email: "", message: "" });
-    } catch (error) {
-      console.error("EmailJS Error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        let angle = Math.atan2(mouseY, mouseX) * (180 / Math.PI);
+        angle = (angle + 360) % 360;
 
-  return (
-    <section id="contact" className="flex-center section-padding">
-      <div className="w-full h-full md:px-10 px-5">
-        <TitleHeader
-          title="Get in Touch – Let’s Connect"
-          sub="💬 Have questions or ideas? Let’s talk! 🚀"
-        />
-        <div className="max-w-4xl mx-auto mt-16">
-          <div className="">
-            <div className="flex-center card-border rounded-xl p-10">
-              <form
-                ref={formRef}
-                onSubmit={handleSubmit}
-                className="w-full flex flex-col gap-7"
-              >
-                <div>
-                  <label htmlFor="name">Your name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    placeholder="What’s your good name?"
-                    required
-                  />
-                </div>
+        card.style.setProperty("--start", angle + 60);
+    };
 
-                <div>
-                  <label htmlFor="email">Your Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="What’s your email address?"
-                    required
-                  />
-                </div>
+    const handleWhatsAppRedirect = () => {
+        const message = "Hello! I'd like to connect with you regarding opportunities.";
+        const whatsappUrl = `https://wa.me/${contactInfo.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    };
 
-                <div>
-                  <label htmlFor="message">Your Message</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    placeholder="How can I help you?"
-                    rows="5"
-                    required
-                  />
-                </div>
+    const socialLinks = [
+        {
+            name: "LinkedIn",
+            icon: Linkedin,
+            url: contactInfo.linkedin,
+            bgColor: "bg-blue-500/20",
+            borderColor: "border-blue-500/50",
+            iconColor: "text-blue-400",
+            hoverColor: "hover:bg-blue-500/30"
+        },
+        {
+            name: "GitHub",
+            icon: Github,
+            url: contactInfo.github,
+            bgColor: "bg-gray-500/20",
+            borderColor: "border-gray-500/50",
+            iconColor: "text-gray-400",
+            hoverColor: "hover:bg-gray-500/30"
+        },
+        {
+            name: "WhatsApp",
+            icon: MessageCircle,
+            url: contactInfo.whatsapp,
+            bgColor: "bg-green-500/20",
+            borderColor: "border-green-500/50",
+            iconColor: "text-green-400",
+            hoverColor: "hover:bg-green-500/30",
+            onClick: handleWhatsAppRedirect
+        }
+    ];
 
-                <button type="submit">
-                  <div className="cta-button group">
-                    <div className="bg-circle" />
-                    <p className="text">
-                      {loading ? "Sending..." : "Send Message"}
-                    </p>
-                    <div className="arrow-wrapper">
-                      <img src="/images/arrow-down.svg" alt="arrow" />
+    return (
+        <section id="contact" className="flex-center section-padding">
+            <div className="w-full h-full md:px-10 px-5">
+                <TitleHeader
+                    title="Get in Touch"
+                    sub="💬 Let's connect and discuss opportunities"
+                />
+                <div className="max-w-4xl mx-auto mt-16">
+                    <div
+                        ref={cardRef}
+                        onMouseMove={handleMouseMove}
+                        className="card card-border timeline-card rounded-xl p-10 backdrop-blur-sm relative overflow-hidden"
+                    >
+                        {/* Glow Effect */}
+                        <div className="glow"></div>
+
+                        <div className="w-full text-center relative z-10">
+                            {/* Contact Info Grid */}
+                            <div className="grid md:grid-cols-2 gap-8 mb-12">
+                                {/* Email */}
+                                <div className="flex flex-col items-center p-6 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                    <div className="p-3 rounded-full bg-blue-500/20 border border-blue-500/30 mb-4">
+                                        <Mail className="w-6 h-6 text-blue-400" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Email</h3>
+                                    <a
+                                        href={`mailto:${contactInfo.email}`}
+                                        className="text-blue-400 hover:text-blue-300 transition-colors font-medium break-all"
+                                    >
+                                        {contactInfo.email}
+                                    </a>
+                                </div>
+
+                                {/* Phone */}
+                                <div className="flex flex-col items-center p-6 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                                    <div className="p-3 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4">
+                                        <Phone className="w-6 h-6 text-purple-400" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold mb-2 text-white">Phone</h3>
+                                    <a
+                                        href={`tel:${contactInfo.phone}`}
+                                        className="text-purple-400 hover:text-purple-300 transition-colors font-medium"
+                                    >
+                                        {contactInfo.phone}
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Social Links */}
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold mb-6 text-white">Connect With Me</h3>
+                                <div className="flex justify-center gap-6 flex-wrap">
+                                    {socialLinks.map((social, index) => (
+                                        <a
+                                            key={social.name}
+                                            href={social.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={social.onClick}
+                                            className={`flex flex-col items-center p-4 rounded-2xl ${social.bgColor} ${social.borderColor} border-2 transition-all duration-300 ${social.hoverColor} hover:scale-105 hover:border-opacity-70 group cursor-pointer min-w-[100px]`}
+                                        >
+                                            <div className={`p-3 rounded-xl ${social.bgColor} border ${social.borderColor} mb-3 group-hover:scale-110 transition-transform`}>
+                                                <social.icon className={`w-6 h-6 ${social.iconColor}`} />
+                                            </div>
+                                            <span className="text-white font-medium text-sm">{social.name}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Call to Action */}
+                            <div className="mt-10">
+                                <p className="text-gray-300 mb-6 text-lg">
+                                    Feel free to reach out - I'm always open to discussing new projects and opportunities.
+                                </p>
+                                <a
+                                    href={`mailto:${contactInfo.email}`}
+                                    className="cta-button group inline-block max-w-md mx-auto w-full"
+                                >
+                                    <div className="bg-circle" />
+                                    <p className="text">Send me an email</p>
+                                    <div className="arrow-wrapper">
+                                        <div className={'items-center justify-center flex'}>
+                                            <Mail color={'black'}/>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </button>
-              </form>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    );
 };
 
 export default Contact;

@@ -1,7 +1,10 @@
+import {ArrowRight, ArrowUpRight} from "lucide-react";
+
 interface ButtonProps {
     text: string;
     className?: string;
     id?: string;
+    link?: string;
 }
 
 /**
@@ -9,13 +12,13 @@ interface ButtonProps {
  * When clicked, it scrolls smoothly to the section with ID "counter",
  * with a small offset from the top for better visual placement.
  */
-const Button = ({ text, className, id }: ButtonProps) => {
+const Button = ({ text, className, id, link }: ButtonProps) => {
     return (
         <a
             onClick={(e) => {
                 e.preventDefault(); // Stop the link from jumping instantly
 
-                const target = document.getElementById("experience"); // Find the section with ID "counter"
+                const target = document.getElementById(`${id}`);
 
                 // Only scroll if we found the section and an ID is passed in
                 // that prevents the contact button from scrolling to the top
@@ -36,7 +39,11 @@ const Button = ({ text, className, id }: ButtonProps) => {
                 <div className="bg-circle" />
                 <p className="text">{text}</p>
                 <div className="arrow-wrapper">
-                    <img src="/images/arrow-down.svg" alt="arrow" />
+                    {text === 'See My Work'?<img src="/images/arrow-down.svg" alt="arrow" />:
+                        (
+                            <div>
+                                <ArrowUpRight color={'black'}/>
+                            </div> )}
                 </div>
             </div>
         </a>
