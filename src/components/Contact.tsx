@@ -73,7 +73,7 @@ const Contact = () => {
                     title="Get in Touch"
                     sub="💬 Let's connect and discuss opportunities"
                 />
-                <div className="max-w-4xl mx-auto mt-16">
+                <div className="mx-auto w-3/4 mt-16">
                     <div
                         ref={cardRef}
                         onMouseMove={handleMouseMove}
