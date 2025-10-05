@@ -80,12 +80,13 @@ section {
         @apply grid grid-cols-1 xl:grid-cols-12 gap-10;
     }
 
+
     .hero-layout {
         @apply relative z-10 flex xl:items-center items-start justify-center;
     }
 
     .hero-text {
-        @apply flex flex-col justify-center md:text-[60px] text-[30px] font-semibold relative z-10 pointer-events-none;
+        @apply flex flex-col justify-center md:text-[60px] text-[48px] font-semibold relative z-10 pointer-events-none;
         img {
             @apply size-8 md:size-10 object-contain;
         }
@@ -328,9 +329,12 @@ section {
 
 /* Hero text slider starts */
 .slide {
-    display: inline-block;
+    display: inline-flex;
     flex-direction: column;
-    transition: all cubic-bezier(0.71, 0.03, 0.34, 1);
+    position: relative;
+    overflow: hidden;
+    height: 1.2em; /* Match your text line height */
+    vertical-align: top;
 }
 
 .wrapper {
