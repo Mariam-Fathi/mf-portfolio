@@ -234,6 +234,33 @@ section {
         }
     }
 
+    .cta-button-reverse{
+        @apply px-4 py-4 rounded-lg bg-white-50 flex justify-center items-center relative cursor-pointer overflow-hidden;
+
+        .bg-circle {
+            @apply absolute -right-10 origin-center top-1/2 -translate-y-1/2
+            w-[120%] h-[120%] group-hover:size-10 group-hover:right-10
+            rounded-full  bg-black-200 transition-all duration-500;
+        }
+
+        .text {
+            @apply uppercase md:text-lg text-white-50 transition-all duration-500
+            group-hover:text-black group-hover:-translate-x-5 xl:translate-x-0 -translate-x-5;
+        }
+
+        .arrow-wrapper {
+            @apply group-hover:bg-black-200 size-10 rounded-full absolute right-10 top-1/2
+            -translate-y-1/2 flex justify-center items-center overflow-hidden;
+
+            img {
+                @apply size-5 xl:-translate-y-32 translate-y-0 animate-bounce group-hover:translate-y-0 transition-all duration-500;
+            }
+            div {
+                @apply size-5 xl:-translate-y-32 translate-y-0 animate-bounce group-hover:translate-y-0 transition-all duration-500;
+            }
+        }
+    }
+
 
     .card-border {
         @apply border border-black-50 bg-black-100;

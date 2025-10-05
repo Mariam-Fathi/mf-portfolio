@@ -1,4 +1,4 @@
-import {ArrowRight, ArrowUpRight} from "lucide-react";
+import {ArrowDown, ArrowRight, ArrowUpRight} from "lucide-react";
 
 interface ButtonProps {
     text: string;
@@ -35,11 +35,15 @@ const Button = ({ text, className, id, link }: ButtonProps) => {
             }}
             className={`${className ?? ""} cta-wrapper`} // Add base + extra class names
         >
-            <div className="cta-button group">
+            <div className={`${text ==='Contact Me'?'cta-button-reverse':'cta-button'} group`}>
                 <div className="bg-circle" />
                 <p className="text">{text}</p>
                 <div className="arrow-wrapper">
-                    {text === 'See My Work' || text==='Contact Me'?<img src="/images/arrow-down.svg" alt="arrow" />:
+                    {text === 'See My Work' ?(<div>
+                            <ArrowDown color={'black'}/>
+                        </div>) : text==='Contact Me'? (<div>
+                        <ArrowDown color={'#d9ecff'}/>
+                    </div>) :
                         (
                             <div>
                                 <ArrowUpRight color={'black'}/>
