@@ -39,7 +39,7 @@ const Button = ({ text, className, id, link }: ButtonProps) => {
                 <div className="bg-circle" />
                 <p className="text">{text}</p>
                 <div className="arrow-wrapper">
-                    {text === 'See My Work'?<img src="/images/arrow-down.svg" alt="arrow" />:
+                    {text === 'See My Work' || text==='Contact Me'?<img src="/images/arrow-down.svg" alt="arrow" />:
                         (
                             <div>
                                 <ArrowUpRight color={'black'}/>

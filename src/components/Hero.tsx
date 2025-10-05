@@ -46,21 +46,26 @@ const Hero = () => {
         </span>
     </span>{" "}
                             </h1>
-                            into Real Projects
+                            into Real Projects that Deliver Results
 
                         </div>
 
                         <p className="text-white-50 md:text-xl relative z-10 pointer-events-none">
-                            Software & Mobile Engineer with a passion for behavioral modeling, <br/>data engineering, and intuitive product design.
+                            Software & Mobile Engineer with a passion for behavioral modeling, data engineering, and intuitive product design.
 
 
                         </p>
 
-                        <div className={'w-full justify-center items-center'}>
+                        <div className={'w-full justify-center items-center flex gap-4 mb-6'}>
                             <Button
                                 text="See My Work"
-                                className="md:w-80 md:h-16 w-60 h-12"
+                                className="md:w-1/2 md:h-16 w-60 h-12"
                                 id="work"
+                            />
+                            <Button
+                                text="Contact Me"
+                                className="md:w-1/2 md:h-16 w-60 h-12"
+                                id="contact"
                             />
                         </div>
 
