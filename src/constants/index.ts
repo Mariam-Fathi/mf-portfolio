@@ -223,18 +223,18 @@ export const techStackIcons = [
 export const abilities = [
     {
         imgPath: "/images/seo.png",
-        title: "Quality Focus",
-        desc: "Delivering high-quality results while maintaining attention to every detail.",
+        title: "Bridge Builder",
+        desc: "I specialize in connecting intelligent algorithms with real-world impact. My passion lies in taking AI prototypes and building the robust data pipelines and applications that make them truly useful and reliable.",
     },
     {
         imgPath: "/images/chat.png",
-        title: "Reliable Communication",
-        desc: "Keeping you updated at every step to ensure transparency and clarity.",
+        title: "Full-Stack Thinker",
+        desc: "From mobile apps to data models, I thrive at the intersection of engineering and product. I don't just build features; I solve business problems by understanding the entire system, from the user interface to the data that powers it.",
     },
     {
         imgPath: "/images/time.png",
-        title: "On-Time Delivery",
-        desc: "Making sure projects are completed on schedule, with quality & attention to detail.",
+        title: "Data-First Engineer",
+        desc: "My core belief is that great software starts with great data. I have a proven track record of diagnosing data quality issues and architecting the foundational pipelines that turn messy, real-world information into a trustworthy asset.",
     },
 ];
 
