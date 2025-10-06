@@ -38,47 +38,38 @@ const GlowCard = ({ card, index, children }) => {
                     />
                 </div>
             )}
-            <div className="flex items-center gap-2 mb-3">
-                <div className="flex items-center gap-2">
-                    {card.platform && (
 
-                        <div className="flex items-center gap-2">
-                            {card.platform.map((log, index) => (
-                                <>
-                                    <img
-                                        key={index}
-                                        src={log.logo}
-                                        alt={log.educator || "Platform"}
-                                        className="size-8 rounded-lg bg-white p-1 object-contain border border-gray-600/30"
-                                    />
-                                    <span className="text-gray-400 text-sm">
-        {log.educator}
-    </span>
-                                </>
-                            ))}
-                        </div>
-                    )}
-                </div>
 
-            </div>
             <div className="mb-2 flex-shrink-0">
                 <h3 className="text-white font-bold text-xl md:text-2xl leading-tight mb-2">
                     {card.title}
                 </h3>
 
-                {card.level && (
-                    <div className="inline-flex items-center gap-2 text-sm  bg-green-500/20 text-green-300 rounded-sm px-2 border border-green-500/30">
-                        <span className="capitalize">{card.level}</span>
-                    </div>
+                <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                        {card.platform && (
 
-                )}
-                {card.type && (
-                    <div className="inline-flex items-center ml-1 text-sm  bg-green-500/20 text-green-300 rounded-sm px-2 border border-green-500/30">
-                        <span className="capitalize">{card.type}</span>
+                            <div className="flex items-center gap-2">
+                                {card.platform.map((log, index) => (
+                                    <>
+                                        <img
+                                            key={index}
+                                            src={log.logo}
+                                            alt={log.educator || "Platform"}
+                                            className="size-8 rounded-lg bg-white p-1 object-contain border border-gray-600/30"
+                                        />
+                                        <span className="text-gray-400 text-sm">
+        {log.educator}
+    </span>
+                                    </>
+                                ))}
+                            </div>
+                        )}
                     </div>
+                </div>
 
-                )}
             </div>
+
 
 
             {card.skills && card.skills.length > 0 && (
@@ -104,22 +95,22 @@ const GlowCard = ({ card, index, children }) => {
                 </div>
             )}
 
-            <div  className="mt-auto flex-shrink-0 ">
-                <a
-                    href={card.link}
-                    className={`w-full cta-wrapper`}
-                >
-                    <div className="cta-button group">
-                        <div className="bg-circle" />
-                        <p className="text">View Certificate</p>
-                        <div className="arrow-wrapper">
-                            <div>
-                                <ArrowUpRight color={'black'}/>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            {/*<div  className="mt-auto flex-shrink-0 ">*/}
+            {/*    <a*/}
+            {/*        href={card.link}*/}
+            {/*        className={`w-full cta-wrapper`}*/}
+            {/*    >*/}
+            {/*        <div className="cta-button group">*/}
+            {/*            <div className="bg-circle" />*/}
+            {/*            <p className="text">View Certificate</p>*/}
+            {/*            <div className="arrow-wrapper">*/}
+            {/*                <div>*/}
+            {/*                    <ArrowUpRight color={'black'}/>*/}
+            {/*                </div>*/}
+            {/*            </div>*/}
+            {/*        </div>*/}
+            {/*    </a>*/}
+            {/*</div>*/}
         </div>
     );
 };

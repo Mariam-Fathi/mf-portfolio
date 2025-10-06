@@ -82,7 +82,7 @@ const CertificatesOption2 = () => {
                 title="Certifications & Contributions"
                 sub="🎓 Certificates"
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            <div className="mt-32 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {certificates.map((cert, index) => (
                     <CertificateCard key={index} card={cert} index={index}>
 

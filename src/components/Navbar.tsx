@@ -42,7 +42,11 @@ const NavBar = () => {
                             </li>
                         ))}
                     </ul>
-
+                    <a href="#contact" className="contact-btn group ml-8">
+                        <div className="inner">
+                            <span>Contact me</span>
+                        </div>
+                    </a>
                 </nav>
 
                 <a href="#contact" className="contact-btn group md:hidden">

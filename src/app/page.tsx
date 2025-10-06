@@ -14,9 +14,9 @@ export default function Home() {
         <>
             <Navbar/>
             <Hero/>
-            <div className={'mt-20'}>
-                <FeatureCards />
-            </div>
+            {/*<div className={'mt-20'}>*/}
+            {/*    <FeatureCards />*/}
+            {/*</div>*/}
             <div className={'mt-20'}>
                 <Experience/>
             </div>

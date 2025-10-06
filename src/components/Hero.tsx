@@ -7,6 +7,8 @@ import Button from "@/components/Button";
 import { words } from "@/constants";
 import HeroExperience from "@/components/models/hero_models/HeroExperience";
 import React from "react";
+import {WavyBackground} from "@/components/ui/wavy-background";
+import FeatureCards from "@/components/FeatureCard";
 
 const Hero = () => {
     useGSAP(() => {
@@ -18,12 +20,11 @@ const Hero = () => {
     });
 
     return (
-        <section id="hero" className="relative overflow-hidden pt-20 mt-20 flex-col justify-center items-center">
-            <div className="absolute top-0 left-0 z-10">
-                <img src="/images/bg.png" alt="" />
-            </div>
+        <WavyBackground className="">
 
-                <header className="flex flex-col items-center text-center justify-center md:w-full w-screen md:px-20 px-5">
+        <section id="hero" className="relative overflow-hidden mt-20 pt-20 flex-col justify-center items-center">
+
+                <header className="flex flex-col items-center text-center justify-center md:w-full w-screen md:px-20 px-5 mb-20">
                     <div className="flex flex-col gap-7 items-center">
                         <div className="hero-text">
                             <h1>
@@ -56,29 +57,13 @@ const Hero = () => {
 
                         </p>
 
-                        <div className={'w-full justify-center items-center flex gap-4 mb-6'}>
-                            <Button
-                                text="See My Work"
-                                className="md:w-1/2 md:h-16 w-60 h-12"
-                                id="work"
-                            />
-                            <Button
-                                text="Contact Me"
-                                className="md:w-1/2 md:h-16 w-60 h-12"
-                                id="contact"
-                            />
-                        </div>
 
                     </div>
                 </header>
+                <FeatureCards />
 
-                {/* RIGHT: 3D Model or Visual */}
-                <figure>
-                    <div className="hero-3d-layout">
-                        <HeroExperience />
-                    </div>
-                </figure>
         </section>
+            </WavyBackground>
     );
 };
 
