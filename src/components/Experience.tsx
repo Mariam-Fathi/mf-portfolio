@@ -156,7 +156,7 @@ export const expCards = [
     title: "AI Research & Mobile Developer",
     company: "Self-Directed Learning & Projects",
     date: "2022 - 2023",
-    logoPath: "/images/logo3.png",
+    logoPath: "/images/logo.svg",
     responsibilities: [
       "Mastered React Native through intensive self-learning to pivot into software engineering",
       "Developed full-stack applications integrating OAuth, payments, push notifications, and Appwrite database",
@@ -165,11 +165,24 @@ export const expCards = [
     ]
   },
   {
+    keyInsight: "Mobile development provides the perfect bridge between theoretical AI concepts and real-user impact, where software meets human behavior.",
+    title: "Mobile Development Intern",
+    company: "Tarqia for Technology",
+    date: "2022 (4 Months)",
+    logoPath: "/images/logo1.png",
+    responsibilities: [
+      "Completed intensive training in React Native and mobile development fundamentals",
+      "Contributed to early-stage UI components and feature development for prototype applications",
+      "Gained foundational understanding of mobile architecture patterns and state management",
+      "Transitioned to full-time role based on demonstrated technical aptitude and performance"
+    ]
+  },
+  {
     keyInsight: "The most sophisticated model is constrained by the integrity of its data; the real challenge lies in the unglamorous work of building trustworthy pipelines.",
     title: "AI Research Lead - Graduation Project",
     company: "Benha University - Computer Systems Engineering",
     date: "2022",
-    logoPath: "/logos/benha-logo.png",
+    logoPath: "/images/logo3.png",
     responsibilities: [
       "Led the video processing module for a multimodal AI system predicting personality traits",
       "Implemented advanced techniques including VGG-Face, LSTNet, and ensemble methods",
@@ -177,17 +190,5 @@ export const expCards = [
       "Gained pivotal insight into the gap between AI prototypes and production-ready systems"
     ]
   },
-  {
-    keyInsight: "Mobile development provides the perfect bridge between theoretical AI concepts and real-user impact, where software meets human behavior.",
-    title: "Mobile Development Intern",
-    company: "Tarqia for Technology",
-    date: "2022 (4 Months)",
-    logoPath: "/logos/tarqia-logo.png",
-    responsibilities: [
-      "Completed intensive training in React Native and mobile development fundamentals",
-      "Contributed to early-stage UI components and feature development for prototype applications",
-      "Gained foundational understanding of mobile architecture patterns and state management",
-      "Transitioned to full-time role based on demonstrated technical aptitude and performance"
-    ]
-  }
+
 ];
