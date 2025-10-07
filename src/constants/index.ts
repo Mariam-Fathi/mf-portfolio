@@ -115,48 +115,48 @@ export const words = [
 
 ];
 
+// In your constants file, update the expCards to reflect your authentic story
 export const expCards = [
-    {
-        review:
+    {review:
             "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
-        imgPath: "/images/exp1.png",
-        logoPath: "/images/logo1.png",
-        title: "Software & Mobile Engineer @ Tarqia",
-        date: "July 2023 – Present",
+        title: "Lead Mobile Engineer",
+        company: "Tarqia for Technology",
+        date: "2023 - Present",
+        logoPath: "/logos/tarqia-logo.png", // You'll need to add this image
         responsibilities: [
-            "Led development of two React Native apps deployed in live hospitality environments.",
-            "Engineered mobile systems integrating IoT, AI, and behavioral modeling for smart access.",
-            "Shaped product strategy and UX to align technical delivery with operational goals.",
-        ],
+            "Single-handedly architected and built the flagship 'Smart Key' mobile applications from scratch after a colleague's departure",
+            "Led the full product lifecycle through a critical pilot deployment, navigating complex hardware integrations and stakeholder management",
+            "Contributed directly to securing enterprise contracts with major hotels in Hurghada by demonstrating product viability",
+            "Thrived in a high-pressure startup environment, often wearing multiple hats from engineering to product strategy"
+        ]
     },
-    {
-        review:
+    {review:
             "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
-        imgPath: "/images/exp2.png",
-        logoPath: "/images/logo2.png",
-        title: "Freelance Software Engineer @ Dracode",
-        date: "March 2023 – July 2023",
+        title: "AI Research & Mobile Developer",
+        company: "Self-Directed Learning & Projects",
+        date: "2022 - 2023",
+        logoPath: "/logos/personal-logo.png", // Custom logo for your personal brand
         responsibilities: [
-            "Built a CRM system with embedded ML-based estimation logic tailored to client workflows.",
-            "Delivered clean, scalable frontend architecture using React and TypeScript.",
-            "Translated ambiguous business needs into intuitive, data-driven product features.",
-        ],
+            "Mastered React Native through intensive self-learning to pivot into software engineering",
+            "Developed full-stack applications integrating OAuth, payments, push notifications, and Appwrite database",
+            "Conducted deep data analysis on the USA Real Estate Dataset, uncovering 38.19% data quality issues",
+            "Built AI tools using Hugging Face models and designed scalable data pipelines for continuous learning"
+        ]
     },
-    {
-        review:
+    {review:
             "Mariam architected and delivered Tarqia’s Smart Key Solution from the ground up, blending mobile engineering with behavioral logic. Her work transformed pilot deployments into scalable products with real business impact. Her work transformed pilot deployments into scalable products with real business impact.",
-        imgPath: "/images/exp3.png",
-        logoPath: "/images/logo3.png",
-        title: "React Native Developer Intern @ SBS",
-        date: "August 2022 – October 2022",
+        title: "AI Research Lead - Graduation Project",
+        company: "Benha University - Computer Systems Engineering",
+        date: "2022",
+        logoPath: "/logos/benha-logo.png",
         responsibilities: [
-            "Contributed to mobile architecture and deployment strategies for cross-platform apps.",
-            "Refactored and debugged React Native components for performance and maintainability.",
-            "Collaborated with senior engineers to align technical decisions with product goals.",
-        ],
-    },
+            "Led the video processing module for a multimodal AI system predicting personality traits",
+            "Implemented advanced techniques including VGG-Face, LSTNet, and ensemble methods",
+            "Identified and solved critical class imbalance issues that were biasing model results",
+            "Gained pivotal insight into the gap between AI prototypes and production-ready systems"
+        ]
+    }
 ];
-
 export const logoIconsList = [
     {
         imgPath: "/images/logos/tech-stack-1.svg",

@@ -225,7 +225,7 @@ export const ProjectsCarousel = ({
                                     project={project}
                                     index={index}
                                     layout={true}
-                                    variant={project.featured ? "featured" : "default"}
+                                    variant={"featured" }
                                 />
                             </motion.div>
                         ))}

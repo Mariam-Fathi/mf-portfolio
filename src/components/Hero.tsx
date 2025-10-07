@@ -74,7 +74,7 @@ const Hero = () => {
 
     return (
         <WavyBackground className="min-h-screen">
-            <section id="hero" className="relative min-h-screen overflow-hidden pt-32 md:pt-52 flex-col justify-center items-center">
+            <section id="hero" className="relative min-h-screen overflow-hidden pt-32 md:pt-48 flex-col justify-center items-center">
                 <header className="flex flex-col items-center text-center justify-center w-full px-5 md:px-20 mb-16 md:mb-20">
                     <div className="flex flex-col gap-6 md:gap-8 items-center max-w-6xl">
                         <div className="hero-text">

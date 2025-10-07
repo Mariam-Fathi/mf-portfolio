@@ -13,20 +13,22 @@ export default function Home() {
     return (
         <>
             <Navbar/>
-            <Hero/>
-            <div className={'mt-20'}>
+            <div className="pt-16 md:pt-0"> {/* Add padding top for mobile */}
+                <Hero/>
+            </div>
+            <div className="mt-10 md:mt-20"> {/* Reduced margin on mobile */}
                 <Experience/>
             </div>
-            <div className={'mt-20'}>
+            <div className="mt-10 md:mt-20">
                 <LogoShowcase />
             </div>
-            <div className={'mt-20'}>
+            <div className="mt-10 md:mt-20">
                 <Projects/>
             </div>
-            <div className={'mt-20'}>
+            <div className="mt-10 md:mt-20">
                 <Certificates />
             </div>
-            <div className={'mt-20'}>
+            <div className="mt-10 md:mt-20">
                 <Contact />
             </div>
             <Footer />
