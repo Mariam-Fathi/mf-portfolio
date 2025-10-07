@@ -96,11 +96,8 @@ const Experience = () => {
                             <p className="my-5 text-white-50 flex items-center">
                               🗓️&nbsp;{card.date}
                             </p>
-                            <p className="text-[#839CB5] italic font-medium border-l-4 border-blue-500 pl-3 my-4">
-                              <span className="font-semibold text-white">Key Insight:</span> {card.keyInsight}
-                            </p>
                             <p className="text-[#839CB5] italic font-medium">
-                              Key Contributions & Learnings
+                              Key Contributions & Learnings:
                             </p>
                             <ul className="list-disc ms-5 mt-5 flex flex-col gap-4 text-white-50">
                               {card.responsibilities.map((responsibility, index) => (
@@ -126,7 +123,7 @@ export default Experience;
 
 export const expCards = [
   {
-    keyInsight: "Real-world impact is achieved not by perfect code, but by resilient systems that solve tangible business problems under pressure.",
+    review: "Real-world impact is achieved not by perfect code, but by resilient systems that solve tangible business problems under pressure.",
     title: "Lead Mobile Engineer",
     company: "Tarqia for Technology",
     date: "2023 - Present",
@@ -139,7 +136,7 @@ export const expCards = [
     ]
   },
   {
-    keyInsight: "The most immediate AI value often comes from solving specific pain points; even simple models can deliver massive ROI when integrated into real workflows.",
+    review: "The most immediate AI value often comes from solving specific pain points; even simple models can deliver massive ROI when integrated into real workflows.",
     title: "Freelance AI Engineer & Mobile Developer",
     company: "Dracode Startup",
     date: "2023",
@@ -152,7 +149,7 @@ export const expCards = [
     ]
   },
   {
-    keyInsight: "True mastery lies in self-directed learning; the ability to deconstruct a field and build competence from the ground up is the ultimate leverage.",
+    review: "True mastery lies in self-directed learning; the ability to deconstruct a field and build competence from the ground up is the ultimate leverage.",
     title: "AI Research & Mobile Developer",
     company: "Self-Directed Learning & Projects",
     date: "2022 - 2023",
@@ -165,7 +162,7 @@ export const expCards = [
     ]
   },
   {
-    keyInsight: "Mobile development provides the perfect bridge between theoretical AI concepts and real-user impact, where software meets human behavior.",
+    review: "Mobile development provides the perfect bridge between theoretical AI concepts and real-user impact, where software meets human behavior.",
     title: "Mobile Development Intern",
     company: "Tarqia for Technology",
     date: "2022 (4 Months)",
@@ -178,7 +175,7 @@ export const expCards = [
     ]
   },
   {
-    keyInsight: "The most sophisticated model is constrained by the integrity of its data; the real challenge lies in the unglamorous work of building trustworthy pipelines.",
+    review: "The most sophisticated model is constrained by the integrity of its data; the real challenge lies in the unglamorous work of building trustworthy pipelines.",
     title: "AI Research Lead - Graduation Project",
     company: "Benha University - Computer Systems Engineering",
     date: "2022",
