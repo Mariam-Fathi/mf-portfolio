@@ -4,7 +4,6 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import { expCards } from "../constants";
 import TitleHeader from "../components/TitleHeader";
 import GlowCard from "../components/GlowCard";
 
@@ -12,7 +11,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Experience = () => {
   useGSAP(() => {
-    // Your existing animation code remains excellent
     gsap.utils.toArray(".timeline-card").forEach((card) => {
       gsap.from(card, {
         xPercent: -100,
@@ -72,7 +70,6 @@ const Experience = () => {
                   <div key={card.title} className="exp-card-wrapper">
                     <div className="xl:w-2/6">
                       <GlowCard card={card}>
-                        {/* Optional: You could add achievement badges here */}
                       </GlowCard>
                     </div>
                     <div className="xl:w-4/6">
@@ -99,6 +96,9 @@ const Experience = () => {
                             <p className="my-5 text-white-50 flex items-center">
                               🗓️&nbsp;{card.date}
                             </p>
+                            <p className="text-[#839CB5] italic font-medium border-l-4 border-blue-500 pl-3 my-4">
+                              <span className="font-semibold text-white">Key Insight:</span> {card.keyInsight}
+                            </p>
                             <p className="text-[#839CB5] italic font-medium">
                               Key Contributions & Learnings
                             </p>
@@ -123,3 +123,71 @@ const Experience = () => {
 };
 
 export default Experience;
+
+export const expCards = [
+  {
+    keyInsight: "Real-world impact is achieved not by perfect code, but by resilient systems that solve tangible business problems under pressure.",
+    title: "Lead Mobile Engineer",
+    company: "Tarqia for Technology",
+    date: "2023 - Present",
+    logoPath: "/images/logo1.png",
+    responsibilities: [
+      "Single-handedly architected and built the flagship 'Smart Key' mobile applications from scratch after a colleague's departure",
+      "Led the full product lifecycle through a critical pilot deployment, navigating complex hardware integrations and stakeholder management",
+      "Contributed directly to securing enterprise contracts with major hotels in Hurghada by demonstrating product viability",
+      "Thrived in a high-pressure startup environment, often wearing multiple hats from engineering to product strategy"
+    ]
+  },
+  {
+    keyInsight: "The most immediate AI value often comes from solving specific pain points; even simple models can deliver massive ROI when integrated into real workflows.",
+    title: "Freelance AI Engineer & Mobile Developer",
+    company: "Dracode Startup",
+    date: "2023",
+    logoPath: "/images/logo2.png",
+    responsibilities: [
+      "Identified a critical sales bottleneck: team struggling with technical project estimations costing deals",
+      "Architected and built an internal AI tool using Hugging Face models to generate cost estimates from project descriptions",
+      "Designed a scalable feedback loop to collect final deal prices for continuous model retraining",
+      "Proposed a product roadmap to evolve the prototype into a company-specific competitive advantage"
+    ]
+  },
+  {
+    keyInsight: "True mastery lies in self-directed learning; the ability to deconstruct a field and build competence from the ground up is the ultimate leverage.",
+    title: "AI Research & Mobile Developer",
+    company: "Self-Directed Learning & Projects",
+    date: "2022 - 2023",
+    logoPath: "/images/logo3.png",
+    responsibilities: [
+      "Mastered React Native through intensive self-learning to pivot into software engineering",
+      "Developed full-stack applications integrating OAuth, payments, push notifications, and Appwrite database",
+      "Conducted deep data analysis on the USA Real Estate Dataset, uncovering 38.19% data quality issues",
+      "Built AI tools using Hugging Face models and designed scalable data pipelines for continuous learning"
+    ]
+  },
+  {
+    keyInsight: "The most sophisticated model is constrained by the integrity of its data; the real challenge lies in the unglamorous work of building trustworthy pipelines.",
+    title: "AI Research Lead - Graduation Project",
+    company: "Benha University - Computer Systems Engineering",
+    date: "2022",
+    logoPath: "/logos/benha-logo.png",
+    responsibilities: [
+      "Led the video processing module for a multimodal AI system predicting personality traits",
+      "Implemented advanced techniques including VGG-Face, LSTNet, and ensemble methods",
+      "Identified and solved critical class imbalance issues that were biasing model results",
+      "Gained pivotal insight into the gap between AI prototypes and production-ready systems"
+    ]
+  },
+  {
+    keyInsight: "Mobile development provides the perfect bridge between theoretical AI concepts and real-user impact, where software meets human behavior.",
+    title: "Mobile Development Intern",
+    company: "Tarqia for Technology",
+    date: "2022 (4 Months)",
+    logoPath: "/logos/tarqia-logo.png",
+    responsibilities: [
+      "Completed intensive training in React Native and mobile development fundamentals",
+      "Contributed to early-stage UI components and feature development for prototype applications",
+      "Gained foundational understanding of mobile architecture patterns and state management",
+      "Transitioned to full-time role based on demonstrated technical aptitude and performance"
+    ]
+  }
+];
