@@ -24,7 +24,7 @@ const abilities = [
 ];
 
 const FeatureCards = () => (
-    <div className="w-full px-5 md:px-20 lg:px-40 mt-16 md:mt-20">
+    <div className="w-full px-5 md:px-20 lg:px-40 mt-16 md:mt-20 pb-20">
         <div className="mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl">
             {abilities.map(({ imgPath, title, desc }) => (
                 <div
@@ -73,9 +73,8 @@ const Hero = () => {
     ];
 
     return (
-        <WavyBackground className="min-h-screen">
-            <section id="hero" className="relative min-h-screen overflow-hidden pt-32 md:pt-48 flex-col justify-center items-center">
-                <header className="flex flex-col items-center text-center justify-center w-full px-5 md:px-20 mb-16 md:mb-20">
+        <WavyBackground className="min-h-[90vh] md:min-h-screen">
+            <section id="hero" className="relative overflow-hidden pt-32 md:pt-48 pb-10 flex-col justify-center items-center">                <header className="flex flex-col items-center text-center justify-center w-full px-5 md:px-20 mb-16 md:mb-20">
                     <div className="flex flex-col gap-6 md:gap-8 items-center max-w-6xl">
                         <div className="hero-text">
                             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
