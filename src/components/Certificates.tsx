@@ -26,7 +26,7 @@ const CertificatesOption2 = () => {
             ],
             level: "Professional",
             type: "Professional Certificate",
-            certificateImage: "/images/data-engineering-certificate.jpg",
+            certificateImage: "/images/project2.jpeg",
             link: 'https://coursera.org/share/your-certificate-link',
             description: 'Mastered the complete data engineering lifecycle from ingestion to consumption. Learned to design scalable data pipelines, implement ETL processes, and build robust data architectures that power intelligent systems.'
         },
@@ -45,15 +45,15 @@ const CertificatesOption2 = () => {
                 "Anomaly Detection"
             ],
             level: "Intermediate",
-            certificateImage: "/images/time-series-certificate.jpg",
+            certificateImage: "/images/project1.png",
             link: 'https://www.kaggle.com/learn/certification/your-certificate',
             description: 'Applied time series analysis techniques to real-world datasets, focusing on temporal pattern recognition and forecasting. This knowledge was crucial for my work on behavioral modeling and recommendation systems.'
         },
         {
             platform: [
-                {logo:"/images/deeplearning.ai.svg", educator:"DeepLearning.AI"}
+                {logo:"/images/kaggle.svg", educator:"Kaggle"}
             ],
-            title: "Machine Learning Specialization",
+            title: "Computer Vision",
             skills: [
                 "Neural Networks",
                 "Model Evaluation",
@@ -64,7 +64,7 @@ const CertificatesOption2 = () => {
                 "Bias-Variance Tradeoff"
             ],
             level: "Intermediate",
-            certificateImage: "/images/ml-specialization-certificate.jpg",
+            certificateImage: "/images/project1.png",
             link: 'https://coursera.org/share/your-ml-certificate',
             description: 'Built a strong foundation in machine learning principles and practices. Learned to implement and optimize various algorithms, which directly informed my graduation project on multimodal personality analysis.'
         },
