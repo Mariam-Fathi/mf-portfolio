@@ -3,10 +3,8 @@ import {GoogleGeminiEffectDemo} from "@/components/Curiosity";
 
 const Hero = () => {
     return (
-        <section >
-            <GoogleGeminiEffectDemo />
 
-        </section>
+            <GoogleGeminiEffectDemo />
     );
 };
 

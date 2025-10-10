@@ -20,7 +20,7 @@ export const GoogleGeminiEffect = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("sticky top-80", className)}>
+    <div className={cn("sticky top-70", className)}>
       <p className="text-lg md:text-7xl font-normal pb-4 text-center bg-clip-text text-white-50 bg-gradient-to-b from-neutral-100 to-neutral-300">
         {title || `EVERYTHING IS CONNECTED`}
       </p>
