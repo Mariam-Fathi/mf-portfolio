@@ -13,9 +13,7 @@ export default function Home() {
     return (
         <>
             <Navbar/>
-            <div className="pt-16 md:pt-0"> {/* Add padding top for mobile */}
-                <Hero/>
-            </div>
+            <Hero/>
             <div className="mt-10 md:mt-20"> {/* Reduced margin on mobile */}
                 <Experience/>
             </div>
