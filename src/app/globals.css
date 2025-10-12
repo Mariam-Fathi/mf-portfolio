@@ -48,7 +48,7 @@ section {
     }
 
     .section-padding {
-        @apply px-5 md:px-10 ;
+        @apply px-4 md:px-10 ;
     }
 
     .mt-responsive {
@@ -279,7 +279,7 @@ section {
     }
 
     .timeline-logo {
-        @apply md:size-20 size-10 flex-none rounded-full flex justify-center items-center md:-translate-y-7 border border-black-50 bg-black-100;
+        @apply md:size-20 size-10 flex-none rounded-full flex justify-center items-center md:-translate-y-7 border border-black-50 bg-black-100 object-cover;
     }
 
     .exp-card-wrapper {
