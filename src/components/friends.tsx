@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { TextPlugin } from "gsap/TextPlugin";
 import TitleHeader from "./TitleHeader";
 import { IconArrowLeft, IconArrowRight, IconBrandGithub } from "@tabler/icons-react";
 import FriendsCinematicSection from "./friends-cinematic";
 
-gsap.registerPlugin(ScrollTrigger, TextPlugin);
+gsap.registerPlugin(ScrollTrigger);
 
 export function Projects() {
     const sectionRef = useRef(null);
@@ -17,41 +16,52 @@ export function Projects() {
     useGSAP(() => {
         gsap.fromTo(
             sectionRef.current,
-            { opacity: 0 },
-            { opacity: 1, duration: 1.5 }
-        );
-    }, []);
-
-    return (
-        <div id="projects" ref={sectionRef} className="section-padding bg-gradient-to-b from-gray-900/0 to-gray-900/10">
-            <TitleHeader
-                title="My Projects"
-                sub="🎬 From Concept to Production - Real Applications, Real Impact"
-            />
-            
-            <ProjectsCarousel projects={projectsData} />
-            
-            <FriendsCinematicSection />
-        </div>
-    );
-}
-
-
-const ProjectsCarousel = ({ projects }) => {
-    const carouselRef = useRef(null);
-    const [currentIndex, setCurrentIndex] = React.useState(0);
-
-    useGSAP(() => {
-        gsap.fromTo(".project-card",
             { opacity: 0, y: 50 },
             { 
                 opacity: 1, 
                 y: 0, 
-                duration: 1, 
-                stagger: 0.2,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            }
+        );
+    }, []);
+
+    return (
+        <section id="work" ref={sectionRef} className="py-20 bg-black">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <TitleHeader
+                    title="My Projects"
+                    sub="From Concept to Production - Real Applications, Real Impact"
+                />
+                
+                <ProjectsCarousel projects={projectsData} />
+            </div>
+            
+            <FriendsCinematicSection />
+        </section>
+    );
+}
+
+const ProjectsCarousel = ({ projects }) => {
+    const carouselRef = useRef(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useGSAP(() => {
+        gsap.fromTo(".project-card",
+            { opacity: 0, y: 30 },
+            { 
+                opacity: 1, 
+                y: 0, 
+                duration: 0.8,
+                stagger: 0.15,
                 scrollTrigger: {
                     trigger: carouselRef.current,
-                    start: "top 80%"
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
                 }
             }
         );
@@ -70,62 +80,82 @@ const ProjectsCarousel = ({ projects }) => {
             <div className="relative">
                 <button
                     onClick={prevSlide}
-                    className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 z-10 p-4 rounded-full bg-gray-800/50 border border-gray-600/30 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-300 backdrop-blur-sm project-card"
+                    className="absolute -left-4 md:-left-12 top-1/2 -translate-y-1/2 z-10 p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600/70 transition-all duration-300 backdrop-blur-sm"
                 >
-                    <IconArrowLeft className="w-6 h-6" />
+                    <IconArrowLeft className="w-5 h-5" />
                 </button>
                 
                 <button
                     onClick={nextSlide}
-                    className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 z-10 p-4 rounded-full bg-gray-800/50 border border-gray-600/30 text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-300 backdrop-blur-sm project-card"
+                    className="absolute -right-4 md:-right-12 top-1/2 -translate-y-1/2 z-10 p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600/70 transition-all duration-300 backdrop-blur-sm"
                 >
-                    <IconArrowRight className="w-6 h-6" />
+                    <IconArrowRight className="w-5 h-5" />
                 </button>
 
+                {/* Project Card */}
                 <div className="px-8 md:px-0">
-                    <div className="project-card bg-gray-800/30 backdrop-blur-sm rounded-3xl border border-gray-700/50 p-8 transform transition-all duration-500 hover:border-blue-500/50 hover:scale-[1.02]">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div className="project-card bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 transition-all duration-300 hover:border-gray-600/70">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+                            {/* Image Section */}
                             <div className="relative group">
-                                <div className="rounded-2xl overflow-hidden border border-gray-600/30 bg-gray-900/20">
+                                <div className="rounded-lg overflow-hidden border border-gray-600/30 bg-gray-900/20">
                                     <img
                                         src={projects[currentIndex].demoGif}
                                         alt={`${projects[currentIndex].title} Demo`}
-                                        className="w-full h-64 object-cover rounded-2xl transform transition-transform duration-700 group-hover:scale-110"
+                                        className="w-full h-48 lg:h-64 object-cover transform transition-transform duration-500 group-hover:scale-105"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-6">
+                            {/* Content Section */}
+                            <div className="space-y-4">
                                 <div>
-                                    <span className="inline-block px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium border border-blue-500/30 mb-4">
+                                    <span className="inline-block px-3 py-1 bg-blue-500/20 text-blue-400 rounded-full text-xs font-medium border border-blue-500/30 mb-3">
                                         {projects[currentIndex].category}
                                     </span>
-                                    <h3 className="text-3xl font-bold text-white mb-3">
+                                    <h3 className="text-xl lg:text-2xl font-semibold text-white mb-2">
                                         {projects[currentIndex].title}
                                     </h3>
-                                    <p className="text-gray-300 text-lg leading-relaxed">
+                                    <p className="text-gray-400 text-sm leading-relaxed font-light">
                                         {projects[currentIndex].description}
                                     </p>
                                 </div>
 
+                                {/* Technologies */}
                                 <div className="flex flex-wrap gap-2">
                                     {projects[currentIndex].technologies.map((tech, idx) => (
                                         <span
                                             key={idx}
-                                            className="px-3 py-2 bg-gray-700/50 text-gray-300 rounded-lg text-sm font-medium border border-gray-600/50 backdrop-blur-sm"
+                                            className="px-2 py-1 bg-gray-700/30 text-gray-300 rounded text-xs font-light border border-gray-600/30"
                                         >
                                             {tech}
                                         </span>
                                     ))}
                                 </div>
 
-                                <div className="flex gap-4 pt-4">
+                                {/* Key Features */}
+                                <div className="pt-2">
+                                    <p className="text-gray-500 text-xs font-medium mb-2 uppercase tracking-wide">Key Features</p>
+                                    <ul className="space-y-1">
+                                        {projects[currentIndex].keyFeatures.slice(0, 3).map((feature, idx) => (
+                                            <li key={idx} className="text-gray-400 text-xs flex items-start gap-2">
+                                                <span className="text-blue-400 mt-0.5">•</span>
+                                                <span>{feature}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3 pt-4">
                                     {projects[currentIndex].githubUrl && (
                                         <a
                                             href={projects[currentIndex].githubUrl}
-                                            className="flex items-center gap-2 px-6 py-3 bg-gray-700/50 text-gray-300 rounded-xl border border-gray-600/50 hover:bg-gray-600/50 hover:text-white transition-all duration-300 backdrop-blur-sm"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 px-4 py-2 bg-gray-700/50 text-gray-300 rounded-lg border border-gray-600/50 hover:bg-gray-600/50 hover:text-white transition-all duration-300 text-sm"
                                         >
-                                            <IconBrandGithub className="w-5 h-5" />
+                                            <IconBrandGithub className="w-4 h-4" />
                                             View Code
                                         </a>
                                     )}
@@ -135,14 +165,14 @@ const ProjectsCarousel = ({ projects }) => {
                     </div>
                 </div>
 
-                <div className="flex justify-center gap-3 mt-8">
+                <div className="flex justify-center gap-2 mt-6 py-1">
                     {projects.map((_, index) => (
                         <button
                             key={index}
                             onClick={() => setCurrentIndex(index)}
-                            className={`w-3 h-3 rounded-full transition-all duration-300 project-card ${
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
                                 index === currentIndex 
-                                    ? "bg-blue-500 scale-125 shadow-lg shadow-blue-500/50" 
+                                    ? "bg-white scale-125" 
                                     : "bg-gray-600 hover:bg-gray-500"
                             }`}
                         />
