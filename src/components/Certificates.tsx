@@ -1,10 +1,13 @@
 'use client'
 
-import {useRef} from "react";
-import {useGSAP} from "@gsap/react";
-import {gsap} from "gsap";
+import { useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import TitleHeader from "@/components/TitleHeader";
 import CertificateCard from "@/components/CertificateCard";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const CertificatesOption2 = () => {
     const certificates = [
@@ -68,52 +71,68 @@ const CertificatesOption2 = () => {
             link: 'https://coursera.org/share/your-ml-certificate',
             description: 'Built a strong foundation in machine learning principles and practices. Learned to implement and optimize various algorithms, which directly informed my graduation project on multimodal personality analysis.'
         },
-
     ];
 
     const sectionRef = useRef(null);
+    const cardsRef = useRef([]);
 
     useGSAP(() => {
-        // Animation for the main section
-        gsap.fromTo(
-            sectionRef.current,
-            { opacity: 0, y: 30 },
-            { opacity: 1, y: 0, duration: 1.5, ease: "power2.out" }
+        gsap.fromTo(sectionRef.current,
+            { opacity: 0, y: 50 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                }
+            }
         );
 
-        // Stagger animation for certificate cards
-        gsap.fromTo(
-            ".certificate-card",
-            {
-                y: 50,
-                opacity: 0,
-            },
+        gsap.fromTo(cardsRef.current,
+            { y: 30, opacity: 0 },
             {
                 y: 0,
                 opacity: 1,
                 duration: 0.8,
                 stagger: 0.15,
-                ease: "back.out(1.7)",
                 scrollTrigger: {
-                    trigger: ".certificates-grid",
-                    start: "top 80%",
-                },
+                    trigger: cardsRef.current[0],
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                }
             }
         );
-    }, []);
+
+    }, { scope: sectionRef });
+
+    const addToCardsRef = (el, index) => {
+        if (el && !cardsRef.current.includes(el)) {
+            cardsRef.current[index] = el;
+        }
+    };
 
     return (
-        <section id="certificates" ref={sectionRef} className="app-showcase">
-            <TitleHeader
-                title="Learning Journey & Certifications"
-                sub="📚 Continuous Growth"
-            />
-            <div className="certificates-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-6 mt-10">
-                {certificates.map((cert, index) => (
-                    <div key={index} className="certificate-card">
-                        <CertificateCard card={cert} index={index} />
-                    </div>
-                ))}
+        <section id="certificates" ref={sectionRef} className="py-16 bg-black">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <TitleHeader
+                    title="Learning Journey & Certifications"
+                    sub="Continuous Growth Through Structured Learning"
+                />
+                
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {certificates.map((cert, index) => (
+                        <div 
+                            key={index} 
+                            ref={el => addToCardsRef(el, index)}
+                            className="certificate-card"
+                        >
+                            <CertificateCard card={cert} index={index} />
+                        </div>
+                    ))}
+                </div>
             </div>
         </section>
     )
