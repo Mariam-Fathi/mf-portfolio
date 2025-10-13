@@ -3,21 +3,17 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
-import { TextPlugin } from "gsap/TextPlugin";
-
-gsap.registerPlugin(TextPlugin);
 
 const MinimalCinematicHero = () => {
     const containerRef = useRef(null);
     const titleRef = useRef(null);
     const subtitleRef = useRef(null);
-    const pathsRef = useRef([]);
+    const imageRef = useRef(null);
 
     useGSAP(() => {
         const tl = gsap.timeline();
 
-        tl
-        .fromTo(titleRef.current,
+        tl.fromTo(titleRef.current,
             { 
                 opacity: 0, 
                 y: 30,
@@ -33,32 +29,23 @@ const MinimalCinematicHero = () => {
         )
 
         .fromTo(subtitleRef.current,
-            { opacity: 0 },
-            { opacity: 1, duration: 0.5 }
-        )
-        .to(subtitleRef.current, {
-            duration: 2.5,
-            text: {
-                value: "We're sometimes trained—whether intuitively or in school—to isolate knowledge into pockets, where what exists in one pocket has nothing to do with what's in the other. When in reality, it's a web. And the one ingredient that fuels that web... CURIOSITY.",
-                delimiter: ""
-            },
-            ease: "none"
-        }, "-=0.3")
-
-        .fromTo(pathsRef.current,
             { 
-                opacity: 0,
-                strokeDasharray: 1000,
-                strokeDashoffset: 1000
+                opacity: 0, 
+                y: 20,
+                filter: "blur(8px)",
+                height: 0, 
+                marginBottom: 0
             },
             { 
-                opacity: 1,
-                strokeDashoffset: 0,
-                duration: 2,
-                stagger: 0.2,
-                ease: "power2.inOut"
+                opacity: 1, 
+                y: 0,
+                filter: "blur(0px)",
+                height: "auto",
+                marginBottom: "4rem",
+                duration: 1.2,
+                ease: "power2.out"
             },
-            "-=1.5"
+            "+=0.3"
         );
 
     }, { scope: containerRef });
@@ -77,16 +64,17 @@ const MinimalCinematicHero = () => {
 
                 <p 
                     ref={subtitleRef}
-                    className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto mb-16 font-light tracking-wide opacity-0"
+                    className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto font-light tracking-wide opacity-0 h-0 overflow-hidden"
                 >
+                    We're sometimes trained—whether intuitively or in school—to isolate knowledge into pockets, where what exists in one pocket has nothing to do with what's in the other. When in reality, it's a web. And the one ingredient that fuels that web... CURIOSITY.
                 </p>
 
                 <div className="relative">
-                       <img 
-                                src="/images/gifs/brain-neuron.gif" 
-                                alt="Monica cleaning and organizing"
-                                className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
-                            />
+                    <img 
+                        src="/images/gifs/brain-neuron.gif" 
+                        alt="Brain neurons connecting"
+                        className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
+                    />
                 </div>
             </div>
 
@@ -115,20 +103,6 @@ const MinimalCinematicHero = () => {
                         transform: translateY(-20px) translateX(10px);
                         opacity: 0.3;
                     }
-                }
-                
-                /* Custom scrollbar for elegance */
-                ::-webkit-scrollbar {
-                    width: 6px;
-                }
-                
-                ::-webkit-scrollbar-track {
-                    background: #000;
-                }
-                
-                ::-webkit-scrollbar-thumb {
-                    background: #333;
-                    border-radius: 3px;
                 }
             `}</style>
         </div>
