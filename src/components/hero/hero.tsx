@@ -1,8 +1,8 @@
 "use client";
-import { GoogleGeminiEffectComponent } from "@/components/hero/google-gemini-effect-component";
+import BloomingHero from "./blooming-hero";
 
 const Hero = () => {
-  return <GoogleGeminiEffectComponent />;
+  return <BloomingHero />;
 };
 
 export default Hero;
