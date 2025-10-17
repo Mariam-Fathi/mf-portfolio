@@ -19,6 +19,17 @@ section {
     width: 100dvw;
 }
 
+.no-visible-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.no-visible-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
 @theme {
     --font-sans: "Mona Sans", sans-serif;
     --color-white-50: #d9ecff;

@@ -13,7 +13,6 @@ const FriendsCinematicSection = () => {
 
   useGSAP(
     () => {
-      // Reset all scenes to hidden initially
       gsap.set(scenesRef.current, { opacity: 0, y: 100 });
 
       scenesRef.current.forEach((scene, index) => {
@@ -29,7 +28,6 @@ const FriendsCinematicSection = () => {
           },
         });
 
-        // Scene entrance animation
         tl.to(scene, {
           opacity: 1,
           y: 0,
@@ -37,7 +35,6 @@ const FriendsCinematicSection = () => {
           ease: "power2.out",
         });
 
-        // GIF animation
         tl.fromTo(
           scene.querySelector(".scene-gif"),
           {
@@ -55,7 +52,6 @@ const FriendsCinematicSection = () => {
           "-=1"
         );
 
-        // Text animation
         tl.fromTo(
           scene.querySelector(".scene-text"),
           {
@@ -109,15 +105,15 @@ const FriendsCinematicSection = () => {
               </p>
               <div className="space-y-4 text-lg">
                 <p className="flex items-center text-gray-400">
-                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Methodical data investigation</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Statistical hypothesis testing</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-blue-400 mr-3 bg-blue-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Evidence-based conclusions</span>
                 </p>
               </div>
@@ -189,15 +185,15 @@ const FriendsCinematicSection = () => {
               </p>
               <div className="space-y-4 text-lg">
                 <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>87% memory usage reduction</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>3.2x faster processing</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full"></span>
+                  <span className="text-green-400 mr-3 bg-green-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Efficient data structures</span>
                 </p>
               </div>
@@ -222,15 +218,15 @@ const FriendsCinematicSection = () => {
               </p>
               <div className="space-y-4 text-lg mb-8">
                 <p className="flex items-center text-gray-400">
-                  <span className="text-purple-400 mr-3">✅</span>
+                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Production-ready pipeline</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-purple-400 mr-3">🔄</span>
+                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Automated validation system</span>
                 </p>
                 <p className="flex items-center text-gray-400">
-                  <span className="text-purple-400 mr-3">📈</span>
+                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
                   <span>Real-time monitoring dashboard</span>
                 </p>
               </div>

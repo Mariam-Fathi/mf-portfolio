@@ -6,14 +6,14 @@ import Experience from "@/components/journey/Experience";
 import Certificates from "@/components/Certificates";
 import Technologies from "@/components/technologies";
 import Footer from "@/components/Footer";
-import { Projects } from "@/components/friends";
+import { ProjectSection } from "@/components/friends";
 
 export default function Home() {
   return (
     <>
       <Navbar />
       <Hero />
-      <Projects />
+      <ProjectSection />
       <Experience />
       <Technologies />
       <Certificates />
