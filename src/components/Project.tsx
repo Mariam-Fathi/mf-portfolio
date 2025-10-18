@@ -137,7 +137,8 @@ const projectsData = [
       "Node.js",
       "MongoDB",
     ],
-    githubUrl: "https://github.com/Mariam-Fathi/multimodal-personality-analysis",
+    githubUrl:
+      "https://github.com/Mariam-Fathi/multimodal-personality-analysis",
     demoUrl: null,
     researchLinks: [
       {
@@ -206,7 +207,7 @@ const projectsData = [
     image: "/images/homi.png",
     deliverables: ["Mobile App", "Backend API"],
     accentColor: "from-indigo-500 to-blue-500",
-        playStoreUrls: [
+    playStoreUrls: [
       {
         name: "Homi App",
         url: "https://expo.dev/accounts/mariamfathi/projects/homi/builds/4c066908-834c-46f5-a581-bb60afcf80f2",
@@ -232,7 +233,7 @@ const projectsData = [
     demoUrl: null,
     status: "Learning Project",
     deployment: "Personal Development",
-        webDemo: [
+    webDemo: [
       {
         name: "Honmi Dashboard ",
         url: "https://homi-analytics.vercel.app/",
@@ -340,7 +341,7 @@ const ProjectCard = ({
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30 overflow-hidden transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
+      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30  transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
       style={{
@@ -351,7 +352,7 @@ const ProjectCard = ({
         className={`absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-1000`}
       />
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none">
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
@@ -515,7 +516,7 @@ const ProjectCard = ({
                 <IconBook className="w-5 h-5" />
               </a>
             ))}
-              {project.webDemo?.map((link: any, index: number) => (
+            {project.webDemo?.map((link: any, index: number) => (
               <a
                 key={index}
                 href={link.url}
@@ -532,25 +533,14 @@ const ProjectCard = ({
       </div>
 
       <div className="md:col-span-2 flex flex-col relative">
-        <div className="relative flex-1 min-h-[400px] border-l border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30">
+        <div className="relative flex-1 min-h-[400px] border-l hover:scale-110 transition-all duration-500 border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30">
           <img
             ref={imageRef}
             src={project.image}
             alt={project.title}
             className="w-full h-full object-contain opacity-0"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-
-          <div className="absolute top-6 right-6">
-            <span
-              className={`inline-flex items-center px-4 py-2 bg-black/60 ${statusConfig.text} rounded-full text-sm font-light border ${statusConfig.border} backdrop-blur-sm shadow-lg`}
-            >
-              <div
-                className={`w-2 h-2 rounded-full mr-2 animate-pulse ${statusConfig.color}`}
-              />
-              {statusConfig.label}
-            </span>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t  from-black/70 via-transparent to-transparent" />
 
           {project.deployment && (
             <div className="absolute bottom-6 left-6">
@@ -633,74 +623,76 @@ const Tabs = ({
   );
 
   return (
-    <div ref={containerRef} className="my-8 lg:my-12 relative opacity-0">
-      <div className="hidden lg:flex flex-wrap gap-3 justify-center">
-        {tabs.map((tab, index) => (
+    <div className="relative z-50">
+      <div ref={containerRef} className="my-8 lg:my-12 relative opacity-0">
+        <div className="hidden lg:flex flex-wrap gap-3 justify-center">
+          {tabs.map((tab, index) => (
+            <button
+              key={tab.value}
+              ref={(el) => (tabRefs.current[index] = el)}
+              onClick={() => onTabChange(tab.value)}
+              className={`px-6 py-4 rounded-2xl border border-gray-600/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
+                activeTab === tab.value
+                  ? "bg-gray-800/40 border-blue-600/30 text-white shadow-sm shadow-blue-500/25"
+                  : "bg-gray-900/30 text-gray-300 border-gray-600/20 hover:border-blue-500/50 hover:text-white hover:bg-gray-800/40 hover:shadow-lg"
+              }`}
+            >
+              {tab.title}
+            </button>
+          ))}
+        </div>
+
+        <div className="lg:hidden" ref={dropdownRef}>
           <button
-            key={tab.value}
-            ref={(el) => (tabRefs.current[index] = el)}
-            onClick={() => onTabChange(tab.value)}
-            className={`px-6 py-4 rounded-2xl border border-gray-600/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
-              activeTab === tab.value
-                ? "bg-gray-800/40 border-blue-600/30 text-white shadow-sm shadow-blue-500/25"
-                : "bg-gray-900/30 text-gray-300 border-gray-600/20 hover:border-blue-500/50 hover:text-white hover:bg-gray-800/40 hover:shadow-lg"
-            }`}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="w-full flex items-center justify-between p-4 bg-gray-800/30 border border-gray-600/30 rounded-2xl text-white backdrop-blur-sm hover:border-blue-500/50 transition-all duration-300"
           >
-            {tab.title}
-          </button>
-        ))}
-      </div>
-
-      <div className="lg:hidden" ref={dropdownRef}>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="w-full flex items-center justify-between p-4 bg-gray-800/30 border border-gray-600/30 rounded-2xl text-white backdrop-blur-sm hover:border-blue-500/50 transition-all duration-300"
-        >
-          <div className="flex items-center gap-3">
-            <span className="font-light">{currentProject?.title}</span>
-          </div>
-          {isMobileMenuOpen ? (
-            <IconX className="w-5 h-5" />
-          ) : (
-            <IconMenu2 className="w-5 h-5" />
-          )}
-        </button>
-
-        {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 border border-gray-600/30 rounded-2xl backdrop-blur-sm z-[999] shadow-2xl overflow-hidden">
-            <div className="py-2 max-h-80 overflow-y-auto">
-              {tabs.map((tab, index) => {
-                const project = projectsData.find((p) => p.id === tab.value);
-                return (
-                  <button
-                    key={tab.value}
-                    onClick={() => {
-                      onTabChange(tab.value);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-all duration-300 ${
-                      activeTab === tab.value
-                        ? "bg-blue-500/20 text-white border-r-4 border-blue-500"
-                        : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                    }`}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <div className="font-light text-sm truncate">
-                        {tab.title}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {project?.category}
-                      </div>
-                    </div>
-                    {activeTab === tab.value && (
-                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                    )}
-                  </button>
-                );
-              })}
+            <div className="flex items-center gap-3">
+              <span className="font-light">{currentProject?.title}</span>
             </div>
-          </div>
-        )}
+            {isMobileMenuOpen ? (
+              <IconX className="w-5 h-5" />
+            ) : (
+              <IconMenu2 className="w-5 h-5" />
+            )}
+          </button>
+
+          {isMobileMenuOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 border border-gray-600/30 rounded-2xl backdrop-blur-sm z-[999] shadow-2xl overflow-hidden">
+              <div className="py-2 max-h-80 overflow-y-auto">
+                {tabs.map((tab, index) => {
+                  const project = projectsData.find((p) => p.id === tab.value);
+                  return (
+                    <button
+                      key={tab.value}
+                      onClick={() => {
+                        onTabChange(tab.value);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-all duration-300 ${
+                        activeTab === tab.value
+                          ? "bg-blue-500/20 text-white border-r-4 border-blue-500"
+                          : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-light text-sm truncate">
+                          {tab.title}
+                        </div>
+                        <div className="text-xs text-gray-400 truncate">
+                          {project?.category}
+                        </div>
+                      </div>
+                      {activeTab === tab.value && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -817,8 +809,7 @@ export function Projects() {
           duration: 1.5,
           ease: "power2.out",
         }
-      )
-      .fromTo(
+      ).fromTo(
         subtitleRef.current,
         {
           opacity: 0,
