@@ -11,7 +11,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  BarChart3,
   MessageCircle,
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,7 +20,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Contact = () => {
   const sectionRef = useRef(null);
-  const contactGridRef = useRef(null);
   const socialGridRef = useRef(null);
   const ctaRef = useRef(null);
 
@@ -31,8 +29,6 @@ const Contact = () => {
     linkedin: "https://linkedin.com/in/mariam-fathi-siam",
     github: "https://github.com/Mariam-Fathi",
     kaggle: "https://www.kaggle.com/mariamfathiamin",
-    whatsapp: "https://wa.me/201020103227",
-    location: "Egypt",
   };
 
   useGSAP(
@@ -46,25 +42,6 @@ const Contact = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-
-      gsap.fromTo(
-        contactGridRef.current,
-        {
-          opacity: 0,
-          scale: 0.8,
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: contactGridRef.current,
-            start: "top 80%",
             toggleActions: "play none none reverse",
           },
         }
@@ -126,46 +103,27 @@ const Contact = () => {
     window.open(whatsappUrl, "_blank");
   };
 
-  const contactMethods = [
+  const socialLinks = [
     {
       name: "Email",
       icon: Mail,
-      value: contactInfo.email,
-      href: `mailto:${contactInfo.email}?subject=Connecting from your portfolio&body=Hello Mariam,`,
-      color: "text-blue-400",
-      bg: "bg-blue-900/20",
-      border: "border-blue-700/30",
-      hover: "hover:border-blue-500/50 hover:bg-blue-900/30"
+      url: `mailto:${contactInfo.email}?subject=Connecting from your portfolio&body=Hello Mariam,`,
+      color: "bg-blue-900/80",
+      hover: "hover:bg-blue-800/80"
     },
     {
       name: "Phone",
       icon: Phone,
-      value: contactInfo.phone,
-      href: `tel:${contactInfo.phone}`,
-      color: "text-teal-400",
-      bg: "bg-teal-900/20",
-      border: "border-teal-700/30",
-      hover: "hover:border-teal-500/50 hover:bg-teal-900/30"
+      url: `tel:${contactInfo.phone}`,
+      color: "bg-teal-900/80",
+      hover: "hover:bg-teal-800/80"
     },
-    {
-      name: "Location",
-      icon: MapPin,
-      value: contactInfo.location,
-      href: "#",
-      color: "text-orange-400",
-      bg: "bg-orange-900/20",
-      border: "border-orange-700/30",
-      hover: "hover:border-orange-500/50 hover:bg-orange-900/30"
-    },
-  ];
-
-  const socialLinks = [
     {
       name: "LinkedIn",
       icon: Linkedin,
       url: contactInfo.linkedin,
-      color: "bg-blue-900/80",
-      hover: "hover:bg-blue-800/80"
+      color: "bg-blue-700/80",
+      hover: "hover:bg-blue-600/80"
     },
     {
       name: "GitHub",
@@ -178,8 +136,8 @@ const Contact = () => {
       name: "Kaggle",
       icon: faKaggle,
       url: contactInfo.kaggle,
-      color: "bg-cyan-400/80",
-      hover: "hover:bg-teal-800/80"
+      color: "bg-cyan-600/80",
+      hover: "hover:bg-teal-700/80"
     },
   ];
 
@@ -198,7 +156,7 @@ const Contact = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <TitleHeader
           title="Let's Create Together"
-          sub="Ready to turn ideas into reality? Let's build something extraordinary."
+          sub="Let's build something extraordinary."
         />
 
         <div className="text-center max-w-2xl mt-4 mx-auto mb-16">
@@ -209,39 +167,12 @@ const Contact = () => {
           </p>
         </div>
 
-        <div
-          ref={contactGridRef}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
-        >
-          {contactMethods.map((method, index) => (
-            <a
-              key={method.name}
-              href={method.href}
-              className={`group p-6 rounded-2xl ${method.bg} border ${method.border} ${method.hover} backdrop-blur-sm transition-all duration-500 hover:scale-105 transform perspective-1000`}
-            >
-              <div className="text-center">
-                <div
-                  className={`w-16 h-16 mx-auto mb-4 rounded-2xl ${method.bg} border ${method.border} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <method.icon className={`w-8 h-8 ${method.color}`} />
-                </div>
-                <h3 className="text-white font-semibold text-lg mb-2">
-                  {method.name}
-                </h3>
-                <p className="text-gray-400 text-sm font-light">
-                  {method.value}
-                </p>
-              </div>
-            </a>
-          ))}
-        </div>
-
-        <div ref={socialGridRef} className="flex justify-center gap-8 mb-16">
+        <div ref={socialGridRef} className="flex justify-center gap-6 mb-16 flex-wrap">
           {socialLinks.map((social, index) => (
             <a
               key={social.name}
               href={social.url}
-              target="_blank"
+              target={social.name === "Email" || social.name === "Phone" ? "_self" : "_blank"}
               rel="noopener noreferrer"
               className={`social-item w-14 h-14 rounded-2xl ${social.color} ${social.hover} border border-gray-700/50 flex items-center justify-center text-white transition-all duration-300 hover:scale-110 hover:rotate-12 transform perspective-1000`}
               title={social.name}
@@ -274,11 +205,10 @@ const Contact = () => {
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-gray-500/30 rounded-full"
+            className="absolute w-1 h-1 bg-gray-500/30 rounded-full animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animation: `float ${8 + Math.random() * 8}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 5}s`,
             }}
           />
@@ -287,8 +217,7 @@ const Contact = () => {
 
       <style jsx>{`
         @keyframes float {
-          0%,
-          100% {
+          0%, 100% {
             transform: translateY(0px) translateX(0px);
             opacity: 0.3;
           }
@@ -297,7 +226,7 @@ const Contact = () => {
             opacity: 0.6;
           }
         }
-
+        
         .perspective-1000 {
           transform-style: preserve-3d;
           perspective: 1000px;
