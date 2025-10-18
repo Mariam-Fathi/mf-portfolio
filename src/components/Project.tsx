@@ -209,7 +209,7 @@ const projectsData = [
         playStoreUrls: [
       {
         name: "Homi App",
-        url: "https://play.google.com/store/apps/details?id=com.smartkeylb",
+        url: "https://expo.dev/accounts/mariamfathi/projects/homi/builds/4c066908-834c-46f5-a581-bb60afcf80f2",
       },
     ],
   },
