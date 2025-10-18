@@ -11,7 +11,6 @@ import {
   IconDeviceLaptop,
   IconBook,
 } from "@tabler/icons-react";
-import { Play } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKaggle } from "@fortawesome/free-brands-svg-icons";
 import { useGSAP } from "@gsap/react";
@@ -383,7 +382,7 @@ const ProjectCard = ({
               </span>
             </div>
 
-            <h3 className="text-2xl lg:text-4xl font-light text-white mb-4 leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent tracking-tight">
+            <h3 className="text-2xl lg:text-4xl font-light text-white mb-4 leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text tracking-tight">
               {project.title}
             </h3>
           </div>
@@ -394,7 +393,7 @@ const ProjectCard = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div>
-              <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3 text-gray-400">
+              <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3 ">
                 Role
               </h4>
               <div className="text-base font-light  text-blue-400">
@@ -402,7 +401,7 @@ const ProjectCard = ({
               </div>
             </div>
             <div className="lg:col-span-2">
-              <h4 className="text-white font-semibold flex items-center gap-2 mb-3 text-gray-400 uppercase tracking-wider text-sm">
+              <h4 className="text-white font-semibold flex items-center gap-2 mb-3  uppercase tracking-wider text-sm">
                 Deliverables
               </h4>
               <div className="flex flex-wrap gap-3">
@@ -419,7 +418,7 @@ const ProjectCard = ({
           </div>
 
           <div className="mb-8">
-            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider text-gray-400">
+            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider">
               Technologies
             </h4>
             <div className="flex flex-wrap gap-3">
@@ -435,7 +434,7 @@ const ProjectCard = ({
           </div>
 
           <div className="mb-8">
-            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider text-gray-400">
+            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider">
               Key Achievements
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -529,11 +528,18 @@ const ProjectCard = ({
               </a>
             ))}
           </div>
+                   {project.deployment && (
+            <div className="">
+              <span className="inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
+                {project.deployment}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="md:col-span-2 flex flex-col relative">
-        <div className="relative flex-1 min-h-[400px] border-l hover:scale-110 transition-all duration-500 border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30">
+        <div className="relative flex-1 min-h-[400px] border-l hover:scale-110 transition-all duration-500 border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30 hover:border-transparent">
           <img
             ref={imageRef}
             src={project.image}
@@ -541,14 +547,6 @@ const ProjectCard = ({
             className="w-full h-full object-contain opacity-0"
           />
           <div className="absolute inset-0 bg-gradient-to-t  from-black/70 via-transparent to-transparent" />
-
-          {project.deployment && (
-            <div className="absolute bottom-6 left-6">
-              <span className="inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
-                {project.deployment}
-              </span>
-            </div>
-          )}
         </div>
       </div>
     </div>
