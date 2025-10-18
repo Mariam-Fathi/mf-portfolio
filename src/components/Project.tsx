@@ -915,7 +915,7 @@ export function Projects() {
         ))}
       </div>
 
-      <div className="max-w-7xl px-8">
+      <div className="max-w-7xl px-4">
         <div className="text-center">
           <h2
             ref={titleRef}
