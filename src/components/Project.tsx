@@ -41,6 +41,7 @@ const projectsData = [
     ],
     githubUrl: null,
     demoUrl: null,
+        deployment: "Apps on Google Play",
     playStoreUrls: [
       {
         name: "Long Beach Hotel",
@@ -146,7 +147,7 @@ const projectsData = [
       },
     ],
     status: "Research Completed",
-    deployment: "Academic Research & Web Application",
+    deployment: "Academic Book & Web Demo",
     featured: true,
     image: "/images/graduation.png",
     deliverables: ["Multimodal AI Models", "Graduation Book"],
@@ -201,7 +202,7 @@ const projectsData = [
     githubUrl: "https://github.com/Mariam-Fathi/homi-app",
     demoUrl: null,
     status: "Learning Project",
-    deployment: "Personal Development",
+    deployment: "App Demo Live Preview",
     featured: false,
     image: "/images/homi.png",
     deliverables: ["Mobile App", "Backend API"],
@@ -231,7 +232,7 @@ const projectsData = [
     githubUrl: "https://github.com/Mariam-Fathi/homi-analytics",
     demoUrl: null,
     status: "Learning Project",
-    deployment: "Personal Development",
+    deployment: "Live Web Demo",
     webDemo: [
       {
         name: "Honmi Dashboard ",

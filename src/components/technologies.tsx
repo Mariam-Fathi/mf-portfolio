@@ -80,7 +80,7 @@ const Technologies = () => {
         <section 
             ref={sectionRef}
             id="skills" 
-            className="py-16 bg-black"
+            className="py-16 max-sm:py-10 bg-black"
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
