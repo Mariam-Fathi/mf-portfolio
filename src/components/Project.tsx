@@ -7,6 +7,9 @@ import {
   IconCode,
   IconMenu2,
   IconX,
+  IconDeviceMobile,
+  IconDeviceLaptop,
+  IconBook,
 } from "@tabler/icons-react";
 import { Play } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -134,12 +137,12 @@ const projectsData = [
       "Node.js",
       "MongoDB",
     ],
-    githubUrl: "https://github.com/Mariam-Fathi/multimodal-personality",
+    githubUrl: "https://github.com/Mariam-Fathi/multimodal-personality-analysis",
     demoUrl: null,
     researchLinks: [
       {
         name: "Graduation Project Book",
-        url: "#",
+        url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view?usp=drive_link",
       },
     ],
     status: "Research Completed",
@@ -203,6 +206,12 @@ const projectsData = [
     image: "/images/homi.png",
     deliverables: ["Mobile App", "Backend API"],
     accentColor: "from-indigo-500 to-blue-500",
+        playStoreUrls: [
+      {
+        name: "Homi App",
+        url: "https://play.google.com/store/apps/details?id=com.smartkeylb",
+      },
+    ],
   },
   {
     id: "homi-dashboard",
@@ -219,10 +228,16 @@ const projectsData = [
       "Property performance tracking",
     ],
     technologies: ["React", "Firebase", "Chart.js", "Tailwind CSS", "REST API"],
-    githubUrl: "https://github.com/Mariam-Fathi/homi-app",
+    githubUrl: "https://github.com/Mariam-Fathi/homi-analytics",
     demoUrl: null,
     status: "Learning Project",
     deployment: "Personal Development",
+        webDemo: [
+      {
+        name: "Honmi Dashboard ",
+        url: "https://homi-analytics.vercel.app/",
+      },
+    ],
     featured: false,
     image: "/images/homi-dashboard.png",
     deliverables: ["Admin Dashboard", "Analytics System"],
@@ -473,7 +488,7 @@ const ProjectCard = ({
                 className="p-3 bg-green-600/20 text-green-400 rounded-xl border border-green-600/30 hover:bg-green-600/30 hover:text-green-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 title="Play Store"
               >
-                <Play className="w-5 h-5" />
+                <IconDeviceMobile className="w-5 h-5" />
               </a>
             ))}
             {project.kaggleLinks?.map((link: any, index: number) => (
@@ -497,7 +512,19 @@ const ProjectCard = ({
                 className="p-3 bg-purple-600/20 text-purple-400 rounded-xl border border-purple-600/30 hover:bg-purple-600/30 hover:text-purple-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 title="Research"
               >
-                <IconCode className="w-5 h-5" />
+                <IconBook className="w-5 h-5" />
+              </a>
+            ))}
+              {project.webDemo?.map((link: any, index: number) => (
+              <a
+                key={index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 bg-purple-600/20 text-purple-400 rounded-xl border border-purple-600/30 hover:bg-purple-600/30 hover:text-purple-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                title="Research"
+              >
+                <IconDeviceLaptop className="w-5 h-5" />
               </a>
             ))}
           </div>
