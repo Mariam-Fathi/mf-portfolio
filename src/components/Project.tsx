@@ -665,29 +665,6 @@ export function Projects() {
         {/* Tabs */}
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Navigation Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-          <button
-            onClick={prevProject}
-            className="flex items-center gap-3 px-6 py-3 text-gray-400 hover:text-white transition-all duration-300 hover:scale-105 group"
-          >
-            <IconArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-semibold">Previous</span>
-          </button>
-
-          <div className="text-sm text-gray-500 font-mono bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700/50">
-            {currentIndex + 1} / {tabs.length}
-          </div>
-
-          <button
-            onClick={nextProject}
-            className="flex items-center gap-3 px-6 py-3 text-gray-400 hover:text-white transition-all duration-300 hover:scale-105 group"
-          >
-            <span className="text-sm font-semibold">Next</span>
-            <IconArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </div>
-
         {/* Project Card */}
         {currentProject && (
           <ProjectCard project={currentProject} isActive={true} />
