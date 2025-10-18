@@ -205,7 +205,7 @@ const ProjectCard = ({ project }: { project: any }) => {
     };
 
     return (
-        <div className="group relative bg-black rounded-2xl border border-gray-700/50 overflow-hidden hover:border-blue-500/50 transition-all duration-500 grid md:grid-cols-3 mx-0 shadow-2xl hover:scale-125">
+        <div className="group relative bg-black rounded-2xl border border-gray-700/50 overflow-hidden hover:border-blue-500/50 transition-all duration-500 grid md:grid-cols-3 mx-0 shadow-2xl hover:scale-110">
             
             <div className="md:col-span-2 p-6 lg:p-8 flex flex-col">
                 <div className="flex-1">
