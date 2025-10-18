@@ -4,16 +4,14 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   IconBrandGithub,
   IconExternalLink,
-  IconDeviceMobile,
   IconCode,
-  IconArrowLeft,
-  IconArrowRight,
-  IconPlayerPlay,
-  IconPlayerPause,
+  IconMenu2,
+  IconX,
 } from "@tabler/icons-react";
 import { Play } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKaggle } from "@fortawesome/free-brands-svg-icons";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 const projectsData = [
@@ -232,7 +230,6 @@ const projectsData = [
   },
 ];
 
-// Project Card Component with GSAP Animations
 const ProjectCard = ({
   project,
   isActive,
@@ -244,41 +241,52 @@ const ProjectCard = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!cardRef.current || !isActive) return;
 
     const tl = gsap.timeline();
 
-    // Reset positions
+    // Reset positions with cinematic blur
     gsap.set([contentRef.current, imageRef.current], {
       opacity: 0,
       y: 50,
+      filter: "blur(10px)",
     });
 
-    // Animate content
+    // Cinematic reveal animation
     tl.to(contentRef.current, {
       opacity: 1,
       y: 0,
-      duration: 0.8,
+      filter: "blur(0px)",
+      duration: 1.2,
       ease: "power3.out",
     }).to(
       imageRef.current,
       {
         opacity: 1,
         y: 0,
-        duration: 0.8,
+        filter: "blur(0px)",
+        duration: 1.2,
         ease: "power3.out",
       },
-      "-=0.4"
+      "-=0.6"
     );
 
-    // Floating animation for the card
+    // Subtle floating animation
     gsap.to(cardRef.current, {
-      y: -10,
-      duration: 3,
+      y: -8,
+      duration: 4,
       repeat: -1,
       yoyo: true,
       ease: "sine.inOut",
+    });
+
+    // Background gradient pulse
+    gsap.to(cardRef.current, {
+      backgroundPosition: "200% 200%",
+      duration: 20,
+      repeat: -1,
+      ease: "none",
     });
   }, [isActive]);
 
@@ -300,13 +308,13 @@ const ProjectCard = ({
         color: "bg-yellow-500",
         text: "text-yellow-300",
         border: "border-yellow-500/30",
-        label: " Prototype",
+        label: "Prototype",
       },
       "learning project": {
         color: "bg-blue-500",
         text: "text-blue-300",
         border: "border-blue-500/30",
-        label: " Learning",
+        label: "Learning",
       },
     };
     return config[status.toLowerCase()] || config["learning project"];
@@ -317,46 +325,63 @@ const ProjectCard = ({
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-gradient-to-br from-gray-900/80 to-black rounded-3xl border-2 border-gray-700/30 overflow-hidden transition-all duration-700 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
-        isActive ? "scale-100 opacity-100" : "scale-95 opacity-40"
+      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30 overflow-hidden transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
+        isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
+      style={{
+        background: `linear-gradient(45deg, rgba(17, 24, 39, 0.8), rgba(0, 0, 0, 1), rgba(17, 24, 39, 0.8))`,
+      }}
     >
-      {/* Animated Gradient Border */}
       <div
-        className={`absolute inset-0 bg-gradient-to-r ${project.accentColor} opacity-0 group-hover:opacity-5 transition-opacity duration-1000`}
+        className={`absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-1000`}
       />
 
-      <div ref={contentRef} className="md:col-span-3 p-6 lg:p-8 flex flex-col">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white/20 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${6 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 2}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div
+        ref={contentRef}
+        className="md:col-span-3 p-6 lg:p-8 flex flex-col opacity-0"
+      >
         <div className="flex-1">
-          {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 text-sm mb-3">
-              <span
-                className={`bg-gradient-to-r ${project.accentColor} bg-clip-text text-transparent font-semibold`}
-              >
+              <span className={` text-blue-400 font-semibold tracking-wider`}>
                 {project.category}
               </span>
               <span className="text-gray-500">•</span>
-              <span className="text-gray-400">{project.duration}</span>
+              <span className="text-gray-400 font-light">
+                {project.duration}
+              </span>
             </div>
 
-            <h3 className="text-2xl lg:text-4xl font-bold text-white mb-4 leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            <h3 className="text-2xl lg:text-4xl font-light text-white mb-4 leading-tight bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent tracking-tight">
               {project.title}
             </h3>
           </div>
 
-          {/* Summary */}
-          <p className="text-gray-300 text-lg leading-relaxed mb-8 font-light">
+          <p className="text-gray-300 text-lg leading-relaxed mb-8 font-light tracking-wide">
             {project.summary}
           </p>
 
-          {/* Role & Deliverables Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div>
               <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3 text-gray-400">
                 Role
               </h4>
-              <div className="text-xl font-semibold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
+              <div className="text-base font-light  text-blue-400">
                 {project.role}
               </div>
             </div>
@@ -368,7 +393,7 @@ const ProjectCard = ({
                 {project.deliverables.map((item: string, index: number) => (
                   <span
                     key={index}
-                    className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-xl text-sm border border-gray-600/50 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                    className="px-4 py-2 bg-gray-800/30 text-gray-300 rounded-xl text-sm border border-gray-600/30 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm font-light"
                   >
                     {item}
                   </span>
@@ -377,7 +402,6 @@ const ProjectCard = ({
             </div>
           </div>
 
-          {/* Technologies */}
           <div className="mb-8">
             <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider text-gray-400">
               Technologies
@@ -386,7 +410,7 @@ const ProjectCard = ({
               {project.technologies.map((tech: string, idx: number) => (
                 <span
                   key={idx}
-                  className="px-4 py-2 bg-gray-800/80 text-gray-300 rounded-xl text-sm border border-gray-600/50 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                  className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-xl text-sm border border-gray-600/30 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm font-light"
                 >
                   {tech}
                 </span>
@@ -394,7 +418,6 @@ const ProjectCard = ({
             </div>
           </div>
 
-          {/* Achievements */}
           <div className="mb-8">
             <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider text-gray-400">
               Key Achievements
@@ -403,12 +426,12 @@ const ProjectCard = ({
               {project.achievements.map((achievement: string, idx: number) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 bg-gradient-to-r from-gray-800/50 to-gray-800/30 px-4 py-3 rounded-xl border border-gray-600/30 hover:border-gray-500/50 transition-all duration-300 group/achievement"
+                  className="flex items-center gap-3 bg-gradient-to-r from-gray-800/30 to-gray-800/10 px-4 py-3 rounded-xl border border-gray-600/20 hover:border-gray-500/30 transition-all duration-300 group/achievement backdrop-blur-sm"
                 >
                   <div
-                    className={`w-2 h-2 rounded-full bg-gradient-to-r ${project.accentColor}`}
+                    className={`w-2 h-2 rounded-full bg-green-400 animate-pulse`}
                   />
-                  <span className="text-gray-300 text-sm group-hover/achievement:text-white transition-colors">
+                  <span className="text-gray-300 text-sm font-light group-hover/achievement:text-white transition-colors">
                     {achievement}
                   </span>
                 </div>
@@ -417,7 +440,6 @@ const ProjectCard = ({
           </div>
         </div>
 
-        {/* Action Links */}
         <div className="flex items-center justify-between pt-6 border-t border-gray-700/30">
           <div className="flex items-center gap-3">
             {project.githubUrl && (
@@ -425,7 +447,7 @@ const ProjectCard = ({
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-gray-800/50 text-gray-400 rounded-xl border border-gray-600/50 hover:bg-gray-700/50 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm"
+                className="p-3 bg-gray-800/30 text-gray-400 rounded-xl border border-gray-600/30 hover:bg-gray-700/50 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm"
                 title="View Code"
               >
                 <IconBrandGithub className="w-5 h-5" />
@@ -482,21 +504,19 @@ const ProjectCard = ({
         </div>
       </div>
 
-      {/* Image Section */}
       <div className="md:col-span-2 flex flex-col relative">
-        <div className="relative flex-1 min-h-[400px] border-l border-gray-700/30 bg-gradient-to-br from-gray-900/50 to-black/50">
+        <div className="relative flex-1 min-h-[400px] border-l border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30">
           <img
             ref={imageRef}
             src={project.image}
             alt={project.title}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain opacity-0"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
-          {/* Status Badge */}
           <div className="absolute top-6 right-6">
             <span
-              className={`inline-flex items-center px-4 py-2 bg-black/80 ${statusConfig.text} rounded-full text-sm font-medium border ${statusConfig.border} backdrop-blur-sm shadow-lg`}
+              className={`inline-flex items-center px-4 py-2 bg-black/60 ${statusConfig.text} rounded-full text-sm font-light border ${statusConfig.border} backdrop-blur-sm shadow-lg`}
             >
               <div
                 className={`w-2 h-2 rounded-full mr-2 animate-pulse ${statusConfig.color}`}
@@ -505,26 +525,19 @@ const ProjectCard = ({
             </span>
           </div>
 
-          {/* Deployment Info */}
           {project.deployment && (
             <div className="absolute bottom-6 left-6">
-              <span className="inline-flex items-center px-3 py-1.5 bg-black/60 text-gray-300 rounded-lg text-xs border border-gray-600/50 backdrop-blur-sm">
+              <span className="inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
                 {project.deployment}
               </span>
             </div>
           )}
         </div>
       </div>
-
-      {/* Interactive Hover Effect */}
-      {/* <div
-        className={`absolute inset-0 rounded-3xl bg-gradient-to-r ${project.accentColor} opacity-0 group-hover:opacity-5 transition-opacity duration-1000 pointer-events-none`}
-      /> */}
     </div>
   );
 };
 
-// Enhanced Tabs Component
 const Tabs = ({
   tabs,
   activeTab,
@@ -534,7 +547,34 @@ const Tabs = ({
   activeTab: string;
   onTabChange: (tab: string) => void;
 }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
+
+      gsap.fromTo(
+        containerRef.current,
+        {
+          opacity: 0,
+          y: 30,
+          filter: "blur(10px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.5,
+        }
+      );
+    },
+    { scope: containerRef }
+  );
 
   useEffect(() => {
     const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
@@ -547,29 +587,98 @@ const Tabs = ({
     }
   }, [activeTab, tabs]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const currentProject = projectsData.find(
+    (project) => project.id === activeTab
+  );
+
   return (
-    <div className="mb-12">
-      <div className="flex flex-wrap gap-3 justify-center">
+    <div ref={containerRef} className="my-8 lg:my-12 relative opacity-0">
+      <div className="hidden lg:flex flex-wrap gap-3 justify-center">
         {tabs.map((tab, index) => (
           <button
             key={tab.value}
             ref={(el) => (tabRefs.current[index] = el)}
             onClick={() => onTabChange(tab.value)}
-            className={`px-6 py-4 rounded-2xl border-2 transition-all duration-500 text-base font-semibold backdrop-blur-sm ${
+            className={`px-6 py-4 rounded-2xl border border-gray-600/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
               activeTab === tab.value
-                ? "bg-gray-800/60 border-blue-600/30 text-white shadow-sm shadow-blue-500/25"
-                : "bg-gray-900/50 text-gray-300 border-gray-600/30 hover:border-blue-500/50 hover:text-white hover:bg-gray-800/50 hover:shadow-lg"
+                ? "bg-gray-800/40 border-blue-600/30 text-white shadow-sm shadow-blue-500/25"
+                : "bg-gray-900/30 text-gray-300 border-gray-600/20 hover:border-blue-500/50 hover:text-white hover:bg-gray-800/40 hover:shadow-lg"
             }`}
           >
             {tab.title}
           </button>
         ))}
       </div>
+
+      <div className="lg:hidden" ref={dropdownRef}>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="w-full flex items-center justify-between p-4 bg-gray-800/30 border border-gray-600/30 rounded-2xl text-white backdrop-blur-sm hover:border-blue-500/50 transition-all duration-300"
+        >
+          <div className="flex items-center gap-3">
+            <span className="font-light">{currentProject?.title}</span>
+          </div>
+          {isMobileMenuOpen ? (
+            <IconX className="w-5 h-5" />
+          ) : (
+            <IconMenu2 className="w-5 h-5" />
+          )}
+        </button>
+
+        {isMobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 border border-gray-600/30 rounded-2xl backdrop-blur-sm z-50 shadow-2xl overflow-hidden">
+            <div className="py-2 max-h-80 overflow-y-auto">
+              {tabs.map((tab, index) => {
+                const project = projectsData.find((p) => p.id === tab.value);
+                return (
+                  <button
+                    key={tab.value}
+                    onClick={() => {
+                      onTabChange(tab.value);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-all duration-300 ${
+                      activeTab === tab.value
+                        ? "bg-blue-500/20 text-white border-r-4 border-blue-500"
+                        : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-light text-sm truncate">
+                        {tab.title}
+                      </div>
+                      <div className="text-xs text-gray-400 truncate">
+                        {project?.category}
+                      </div>
+                    </div>
+                    {activeTab === tab.value && (
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-// Project Indicators
 const ProjectIndicators = ({
   tabs,
   activeTab,
@@ -579,15 +688,42 @@ const ProjectIndicators = ({
   activeTab: string;
   onTabChange: (tab: string) => void;
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
+
+      gsap.fromTo(
+        containerRef.current,
+        {
+          opacity: 0,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power2.out",
+          delay: 0.8,
+        }
+      );
+    },
+    { scope: containerRef }
+  );
+
   return (
-    <div className="flex justify-center gap-3 mt-8">
+    <div
+      ref={containerRef}
+      className="hidden sm:flex justify-center gap-3 mt-8 pb-1 opacity-0"
+    >
       {tabs.map((tab, index) => (
         <button
           key={tab.value}
           onClick={() => onTabChange(tab.value)}
-          className={`w-4 h-4 rounded-full transition-all duration-500 backdrop-blur-sm ${
+          className={`w-3 h-3 rounded-full transition-all duration-500 backdrop-blur-sm ${
             activeTab === tab.value
-              ? "bg-white-50 scale-125 shadow-lg shadow-blue-500/50"
+              ? "bg-white scale-125 shadow-lg shadow-blue-500/50"
               : "bg-gray-600 hover:bg-gray-400 hover:scale-110"
           }`}
         />
@@ -600,6 +736,8 @@ export function Projects() {
   const [activeTab, setActiveTab] = useState("smart-key");
   const [autoRotate, setAutoRotate] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
 
   const tabs = [
     { title: "Smart Key", value: "smart-key" },
@@ -625,19 +763,54 @@ export function Projects() {
     setActiveTab(tabs[prevIndex].value);
   };
 
-  // GSAP Section Animation
-  useEffect(() => {
-    if (!sectionRef.current) return;
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
 
-    const tl = gsap.timeline();
-    tl.fromTo(
-      sectionRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
-    );
-  }, []);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
 
-  // Auto-rotate and Keyboard Navigation
+      tl.fromTo(
+        titleRef.current,
+        {
+          opacity: 0,
+          y: 50,
+          filter: "blur(10px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.5,
+          ease: "power2.out",
+        }
+      )
+      .fromTo(
+        subtitleRef.current,
+        {
+          opacity: 0,
+          y: 30,
+          filter: "blur(8px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+        },
+        "-=0.5"
+      );
+    },
+    { scope: sectionRef }
+  );
+
   useEffect(() => {
     if (autoRotate) {
       const interval = setInterval(nextProject, 5000);
@@ -659,24 +832,105 @@ export function Projects() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeTab]);
 
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    };
+
+    const handleSwipe = () => {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0) {
+          nextProject();
+        } else {
+          prevProject();
+        }
+      }
+    };
+
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [activeTab]);
+
   return (
-    <section ref={sectionRef} id="work" className="py-20 bg-black min-h-screen">
-      <div className="max-w-7xl">
-        {/* Tabs */}
+    <section
+      ref={sectionRef}
+      id="work"
+      className="bg-black min-h-screen relative overflow-hidden"
+    >
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white/10 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${8 + Math.random() * 8}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="max-w-7xl relative z-10">
+        <div className="text-center">
+          <h2
+            ref={titleRef}
+            className="text-3xl lg:text-7xl font-light text-white mb-4 lg:mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent tracking-tight opacity-0"
+          >
+            Selected Work
+          </h2>
+          <p
+            ref={subtitleRef}
+            className="text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+          >
+            Exploring the connections between IoT, data engineering, and AI
+            through practical applications and research
+          </p>
+        </div>
+
         <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Project Card */}
         {currentProject && (
           <ProjectCard project={currentProject} isActive={true} />
         )}
 
-        {/* Indicators */}
         <ProjectIndicators
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
       </div>
+
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+            opacity: 0.1;
+          }
+          50% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.3;
+          }
+        }
+      `}</style>
     </section>
   );
 }
