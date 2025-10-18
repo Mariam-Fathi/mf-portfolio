@@ -78,11 +78,11 @@ const FriendsCinematicSection = () => {
   };
 
   return (
-    <div ref={containerRef} className="relative py-20 bg-black">
+    <div ref={containerRef} className="relative bg-black">
       {/* Scene 1 - Ross Theorem */}
       <div
         ref={(el) => addToRefs(el, 0)}
-        className="scene min-h-screen flex items-center justify-center py-20"
+        className="scene min-h-screen flex items-center justify-center py-10"
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -125,7 +125,7 @@ const FriendsCinematicSection = () => {
       {/* Scene 2 - Chandler Revelation */}
       <div
         ref={(el) => addToRefs(el, 1)}
-        className="scene min-h-screen flex items-center justify-center py-20"
+        className="scene min-h-screen flex items-center justify-center"
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -162,7 +162,7 @@ const FriendsCinematicSection = () => {
       {/* Scene 3 - Monica Clean */}
       <div
         ref={(el) => addToRefs(el, 2)}
-        className="scene min-h-screen flex items-center justify-center py-20"
+        className="scene min-h-screen flex items-center justify-center py-10"
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -203,7 +203,7 @@ const FriendsCinematicSection = () => {
 
       <div
         ref={(el) => addToRefs(el, 3)}
-        className="scene min-h-screen flex items-center justify-center py-20"
+        className="scene min-h-screen flex items-center justify-center py-10"
       >
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">

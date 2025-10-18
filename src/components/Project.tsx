@@ -640,7 +640,7 @@ const Tabs = ({
         </button>
 
         {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 border border-gray-600/30 rounded-2xl backdrop-blur-sm z-50 shadow-2xl overflow-hidden">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800/95 border border-gray-600/30 rounded-2xl backdrop-blur-sm z-[999] shadow-2xl overflow-hidden">
             <div className="py-2 max-h-80 overflow-y-auto">
               {tabs.map((tab, index) => {
                 const project = projectsData.find((p) => p.id === tab.value);
@@ -888,11 +888,11 @@ export function Projects() {
         ))}
       </div>
 
-      <div className="max-w-7xl relative z-10">
+      <div className="max-w-7xl px-8">
         <div className="text-center">
           <h2
             ref={titleRef}
-            className="text-3xl lg:text-7xl font-light text-white mb-4 lg:mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent tracking-tight opacity-0"
+            className="text-3xl lg:text-7xl font-light text-white mb-4 lg:mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text tracking-tight opacity-0"
           >
             Selected Work
           </h2>

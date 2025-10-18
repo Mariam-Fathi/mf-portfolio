@@ -70,7 +70,7 @@ const Experience = () => {
   }, []);
 
   return (
-    <section id="experience" className="py-20 bg-black">
+    <section id="experience" className="pb-20 max-sm:pb-10 bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <TitleHeader
           title="My Engineering Journey"
