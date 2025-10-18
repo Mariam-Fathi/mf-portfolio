@@ -179,9 +179,8 @@ const FriendsCinematicSection = () => {
                 Revolution
               </h2>
               <p className="text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
-                I attacked the memory
-                issues. The dataset was consuming resources inefficiently,
-                slowing down analysis.
+                I attacked the memory issues. The dataset was consuming
+                resources inefficiently, slowing down analysis.
               </p>
               <div className="space-y-4 text-lg">
                 <p className="flex items-center text-gray-400">
@@ -215,21 +214,11 @@ const FriendsCinematicSection = () => {
               <p className="text-xl lg:text-2xl text-gray-300 mb-8 leading-relaxed">
                 The real engineering work happens long before the machine
                 learning models - it's in the data pipelines that feed them.
+                Confronted with this "garbage in, garbage out" principle on a
+                massive scale, I understood that architecting a pipeline to
+                clean, validate, and prepare this messy, real-world data was not
+                a preliminary step—it was the core of the problem.
               </p>
-              <div className="space-y-4 text-lg mb-8">
-                <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
-                  <span>Production-ready pipeline</span>
-                </p>
-                <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
-                  <span>Automated validation system</span>
-                </p>
-                <p className="flex items-center text-gray-400">
-                  <span className="text-green-400 mr-3 bg-purple-400 w-2 h-2 rounded-full animate-pulse"></span>
-                  <span>Real-time monitoring dashboard</span>
-                </p>
-              </div>
             </div>
             <div className="scene-gif order-1 lg:order-2">
               <img
