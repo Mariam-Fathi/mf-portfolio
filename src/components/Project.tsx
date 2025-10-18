@@ -528,9 +528,9 @@ const ProjectCard = ({
               </a>
             ))}
           </div>
-                   {project.deployment && (
+            {project.deployment && (
             <div className="">
-              <span className="inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
+              <span className="hidden md:inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
                 {project.deployment}
               </span>
             </div>
