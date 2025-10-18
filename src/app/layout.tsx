@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mariam Fathi Portfolio",
+  title: "Mariam Fathi | Software Engineer",
   description:
     "Portfolio of Mariam Fathi — showcasing work at the intersection of data engineering, frontend development, and AI. Built as part of my application for the European Master in Artificial Intelligence (EMAI).",
   keywords: [
