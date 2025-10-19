@@ -3,6 +3,7 @@
 import React from "react";
 import { Projects } from "./Project";
 import FriendsCinematicSection from "./friends-cinematic";
+import FriendsConnectionBridge from "./bridge";
 
 export function ProjectSection() {
   return (
@@ -10,7 +11,7 @@ export function ProjectSection() {
       <div className="max-w-7xl mx-auto">
         <Projects />
       </div>
-      
+      <FriendsConnectionBridge />
       <FriendsCinematicSection />
     </section>
   );

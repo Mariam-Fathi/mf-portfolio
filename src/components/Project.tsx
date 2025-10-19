@@ -777,7 +777,7 @@ export function Projects() {
         <div className="text-center mb-16 lg:mb-24">
           <h2
             ref={titleRef}
-            className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 lg:mb-8 tracking-tight opacity-0"
+            className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 lg:mb-8  tracking-tight opacity-0"
           >
             SELECTED WORK
           </h2>
