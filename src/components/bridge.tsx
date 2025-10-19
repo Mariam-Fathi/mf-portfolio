@@ -168,15 +168,6 @@ const FriendsConnectionBridge = () => {
               className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border-2 border-yellow-400/30 opacity-0"
             />
           </div>
-          
-          <div className="mt-12 flex flex-col items-center">
-            <span className="text-gray-500 text-sm mb-4 tracking-widest uppercase">
-              Continue the Journey
-            </span>
-            <div className="w-6 h-10 border-2 border-yellow-500/50 rounded-full flex justify-center">
-              <div className="w-1 h-3 bg-yellow-500 rounded-full mt-2 animate-bounce"></div>
-            </div>
-          </div>
         </div>
       </div>
 
