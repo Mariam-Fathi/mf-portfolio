@@ -144,50 +144,55 @@ const projectsData = [
 const ProjectCard = ({
   project,
   isActive,
+  sectionInView,
 }: {
   project: any;
   isActive: boolean;
+  sectionInView: boolean;
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!cardRef.current || !isActive) return;
+    if (!cardRef.current || !sectionInView || !isActive) return;
 
-    const tl = gsap.timeline();
+    const tl = gsap.timeline({
+      defaults: { ease: "power3.out" }
+    });
 
     gsap.set([contentRef.current, imageRef.current], {
       opacity: 0,
-      y: 50,
-      filter: "blur(10px)",
+      y: 60,
+      filter: "blur(15px)",
     });
 
     tl.to(contentRef.current, {
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
-      duration: 1.2,
+      duration: 2.5,
       ease: "power3.out",
-    }).to(
+    })
+    .to(
       imageRef.current,
       {
         opacity: 1,
         y: 0,
         filter: "blur(0px)",
-        duration: 1.2,
+        duration: 2.5,
         ease: "power3.out",
       },
-      "-=0.6"
-    );
+      "-=0.8"
+    )
 
-    gsap.to(cardRef.current, {
-      y: -8,
+    .to(cardRef.current, {
+      y: -12,
       duration: 4,
       repeat: -1,
       yoyo: true,
       ease: "sine.inOut",
-    });
+    }, "-=1");
 
     gsap.to(cardRef.current, {
       backgroundPosition: "200% 200%",
@@ -195,42 +200,14 @@ const ProjectCard = ({
       repeat: -1,
       ease: "none",
     });
-  }, [isActive]);
 
-  const getStatusConfig = (status: string) => {
-    const config: any = {
-      live: {
-        color: "bg-green-500",
-        text: "text-green-300",
-        border: "border-green-500/30",
-        label: "Live",
-      },
-      "research completed": {
-        color: "bg-purple-500",
-        text: "text-purple-300",
-        border: "border-purple-500/30",
-        label: "Research",
-      },
-      "working prototype": {
-        color: "bg-yellow-500",
-        text: "text-yellow-300",
-        border: "border-yellow-500/30",
-        label: "Prototype",
-      },
-      "learning project": {
-        color: "bg-blue-500",
-        text: "text-blue-300",
-        border: "border-blue-500/30",
-        label: "Learning",
-      },
-    };
-    return config[status.toLowerCase()] || config["learning project"];
-  };
+  }, [isActive, sectionInView]);
+
 
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30  transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
+      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30 transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
       style={{
@@ -263,7 +240,7 @@ const ProjectCard = ({
         <div className="flex-1">
           <div className="mb-6">
             <div className="flex items-center gap-3 text-sm mb-3">
-              <span className={` text-blue-400 font-semibold tracking-wider`}>
+              <span className={`text-blue-400 font-semibold tracking-wider`}>
                 {project.category}
               </span>
               <span className="text-gray-500">•</span>
@@ -283,15 +260,15 @@ const ProjectCard = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div>
-              <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3 ">
+              <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3">
                 Role
               </h4>
-              <div className="text-base font-light  text-blue-400">
+              <div className="text-base font-light text-blue-400">
                 {project.role}
               </div>
             </div>
             <div className="lg:col-span-2 max-sm:hidden">
-              <h4 className="text-white font-semibold flex items-center gap-2 mb-3  uppercase tracking-wider text-sm">
+              <h4 className="text-white font-semibold flex items-center gap-2 mb-3 uppercase tracking-wider text-sm">
                 Deliverables
               </h4>
               <div className="flex flex-wrap gap-3">
@@ -319,17 +296,6 @@ const ProjectCard = ({
                 title="View Code"
               >
                 <IconBrandGithub className="w-5 h-5" />
-              </a>
-            )}
-            {project.demoUrl && (
-              <a
-                href={project.demoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/30 hover:bg-blue-500/30 hover:text-blue-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                title="Live Demo"
-              >
-                <IconExternalLink className="w-5 h-5" />
               </a>
             )}
             {project.playStoreUrls?.map((store: any, index: number) => (
@@ -399,21 +365,24 @@ const ProjectCard = ({
             alt={project.title}
             className="w-full h-full object-contain opacity-0"
           />
-          <div className="absolute inset-0 bg-gradient-to-t  from-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
         </div>
       </div>
     </div>
   );
 };
 
+
 const Tabs = ({
   tabs,
   activeTab,
   onTabChange,
+  sectionInView,
 }: {
   tabs: any[];
   activeTab: string;
   onTabChange: (tab: string) => void;
+  sectionInView: boolean;
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -422,7 +391,7 @@ const Tabs = ({
 
   useGSAP(
     () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !sectionInView) return;
 
       gsap.fromTo(
         containerRef.current,
@@ -437,14 +406,15 @@ const Tabs = ({
           filter: "blur(0px)",
           duration: 1.2,
           ease: "power2.out",
-          delay: 0.5,
         }
       );
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [sectionInView] }
   );
 
   useEffect(() => {
+    if (!sectionInView) return;
+    
     const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
     if (tabRefs.current[activeIndex]) {
       gsap.to(tabRefs.current[activeIndex], {
@@ -453,7 +423,7 @@ const Tabs = ({
         ease: "back.out(1.7)",
       });
     }
-  }, [activeTab, tabs]);
+  }, [activeTab, tabs, sectionInView]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -553,16 +523,18 @@ const ProjectIndicators = ({
   tabs,
   activeTab,
   onTabChange,
+  sectionInView,
 }: {
   tabs: any[];
   activeTab: string;
   onTabChange: (tab: string) => void;
+  sectionInView: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !sectionInView) return;
 
       gsap.fromTo(
         containerRef.current,
@@ -573,13 +545,12 @@ const ProjectIndicators = ({
         {
           opacity: 1,
           y: 0,
-          duration: 1,
+          duration: 2.2,
           ease: "power2.out",
-          delay: 0.8,
         }
       );
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [sectionInView] }
   );
 
   return (
@@ -605,9 +576,11 @@ const ProjectIndicators = ({
 export function Projects() {
   const [activeTab, setActiveTab] = useState("smart-key");
   const [autoRotate, setAutoRotate] = useState(false);
+  const [sectionInView, setSectionInView] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const tabs = [
     { title: "Smart Key", value: "smart-key" },
@@ -633,62 +606,103 @@ export function Projects() {
     setActiveTab(tabs[prevIndex].value);
   };
 
-  useGSAP(
-    () => {
-      if (!sectionRef.current) return;
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.fromTo(
-        titleRef.current,
-        {
-          opacity: 0,
-          y: 50,
-          filter: "blur(10px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1.5,
-          ease: "power2.out",
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !sectionInView) {
+          setSectionInView(true);
         }
-      ).fromTo(
-        subtitleRef.current,
-        {
-          opacity: 0,
-          y: 30,
-          filter: "blur(8px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1.2,
-          ease: "power2.out",
-        },
-        "-=0.5"
-      );
-    },
-    { scope: sectionRef }
-  );
+      },
+      {
+        threshold: 0.3,
+        rootMargin: "-50px 0px -50px 0px"
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [sectionInView]);
+
+  useGSAP(() => {
+    if (!sectionInView || !containerRef.current) return;
+
+    const tl = gsap.timeline({
+      defaults: { ease: "power3.out" }
+    });
+
+    gsap.set([titleRef.current, subtitleRef.current], {
+      opacity: 0,
+      y: 80,
+      filter: "blur(15px)"
+    });
+
+    tl.fromTo(titleRef.current,
+      { 
+        opacity: 0, 
+        y: 80,
+        filter: "blur(15px)",
+        scale: 0.9
+      },
+      { 
+        opacity: 1, 
+        y: 0,
+        filter: "blur(0px)",
+        scale: 1,
+        duration: 1.8,
+        ease: "power4.out"
+      }
+    )
+
+    .fromTo(subtitleRef.current,
+      { 
+        opacity: 0, 
+        y: 40,
+        filter: "blur(12px)",
+      },
+      { 
+        opacity: 1, 
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.4,
+        ease: "power2.out"
+      },
+      "-=1.2"
+    );
+
+    gsap.to(".floating-particle", {
+      y: -20,
+      x: 10,
+      rotation: 360,
+      duration: 8,
+      repeat: -1,
+      yoyo: true,
+      stagger: {
+        amount: 2,
+        from: "random"
+      },
+      ease: "sine.inOut"
+    });
+
+  }, { scope: containerRef, dependencies: [sectionInView] });
 
   useEffect(() => {
-    if (autoRotate) {
+    if (autoRotate && sectionInView) {
       const interval = setInterval(nextProject, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoRotate, activeTab]);
+  }, [autoRotate, activeTab, sectionInView]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!sectionInView) return;
+      
       if (e.key === "ArrowRight") nextProject();
       if (e.key === "ArrowLeft") prevProject();
       if (e.key === " ") {
@@ -699,7 +713,7 @@ export function Projects() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeTab]);
+  }, [activeTab, sectionInView]);
 
   useEffect(() => {
     let touchStartX = 0;
@@ -710,6 +724,8 @@ export function Projects() {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (!sectionInView) return;
+      
       touchEndX = e.changedTouches[0].screenX;
       handleSwipe();
     };
@@ -734,7 +750,7 @@ export function Projects() {
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [activeTab]);
+  }, [activeTab, sectionInView]);
 
   return (
     <section
@@ -742,59 +758,67 @@ export function Projects() {
       id="work"
       className="bg-black min-h-screen relative overflow-hidden"
     >
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/5 to-black" />
+      
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(15)].map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white/10 rounded-full"
+            className="floating-particle absolute w-1 h-1 bg-white/10 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animation: `float ${8 + Math.random() * 8}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
             }}
           />
         ))}
       </div>
 
-      <div className="max-w-7xl px-4">
-        <div className="text-center">
+      <div ref={containerRef} className="max-w-7xl px-4 py-20 max-sm:py-0">
+        <div className="text-center mb-16 lg:mb-24">
           <h2
             ref={titleRef}
-            className="text-3xl lg:text-7xl font-light text-white mb-4 lg:mb-6 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text tracking-tight opacity-0"
+            className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 lg:mb-8 tracking-tight opacity-0"
           >
-            Selected Work
+            SELECTED WORK
           </h2>
           <p
             ref={subtitleRef}
-            className="text-lg lg:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+            className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
           >
-            Exploring the connections between IoT, data engineering, and AI
-            through practical applications and research
+            Exploring the connections between IoT, data engineering, and AI through practical applications and research. Each project represents a unique intersection of technology and real-world problem solving.
           </p>
         </div>
 
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+        <Tabs 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onTabChange={setActiveTab}
+          sectionInView={sectionInView}
+        />
 
         {currentProject && (
-          <ProjectCard project={currentProject} isActive={true} />
+          <ProjectCard 
+            project={currentProject} 
+            isActive={true}
+            sectionInView={sectionInView}
+          />
         )}
 
         <ProjectIndicators
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          sectionInView={sectionInView}
         />
       </div>
 
       <style jsx>{`
         @keyframes float {
-          0%,
-          100% {
+          0%, 100% { 
             transform: translateY(0px) translateX(0px);
             opacity: 0.1;
           }
-          50% {
+          50% { 
             transform: translateY(-20px) translateX(10px);
             opacity: 0.3;
           }
