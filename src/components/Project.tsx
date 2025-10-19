@@ -24,42 +24,21 @@ const projectsData = [
     role: "Lead Mobile Engineer",
     duration: "2024 - Present",
     summary:
-      "Engineered a digital hospitality platform that transforms the complete guest journey from reservation to checkout. The solution features dedicated mobile applications for guests and staff, complemented by an admin web portal, fully replacing traditional key card systems with secure smartphone-based access control.",
-    achievements: [
-      "Scaled to 3 hotel chains including 960-room resort",
-      "Enterprise contracts secured",
-      "Hardware & IoT integration",
-      "Live production with 100% keyless access",
-    ],
-    technologies: [
-      "React Native",
-      "TypeScript",
-      "Bluetooth",
-      "NFC",
-      "Firebase",
-      "Appwrite",
-    ],
+      "Engineered an end-to-end digital hospitality platform that transforms the complete guest journey from reservation to checkout, fully replacing traditional key card systems with a secure, smartphone-based access control. The solution, featuring dedicated mobile applications for guests and staff and a centralized admin web portal, was first proven in a successful pilot at the Almadiafia Hotel. Following this validation, we scaled the platform to the entire Long Beach Resort chain, securing enterprise contracts and executing seamless hardware and IoT integrations to achieve a live production environment with 100% keyless access across all properties.",
     githubUrl: null,
-    demoUrl: null,
-        deployment: "Apps on Google Play",
+    deployment: "Apps on Google Play",
     playStoreUrls: [
       {
         name: "Long Beach Hotel",
         url: "https://play.google.com/store/apps/details?id=com.smartkeylb",
       },
       {
-        name: "Sapphire Hotel",
-        url: "https://play.google.com/store/apps/details?id=com.sapphiresk",
-      },
-      {
         name: "Almadiafa Hotel",
         url: "https://play.google.com/store/apps/details?id=com.madiafaaa",
       },
     ],
-    status: "Live",
     image: "/images/sk.png",
     deliverables: ["Guest Mobile App", "Staff Mobile App"],
-    accentColor: "from-blue-500 to-cyan-500",
   },
   {
     id: "real-estate",
@@ -68,24 +47,8 @@ const projectsData = [
     role: "Data Engineer & Analyst",
     duration: "2025",
     summary:
-      "Conducted comprehensive analysis of 2.2M+ property records, uncovering 38.19% data quality issues while building optimized data pipelines with 87.4% memory reduction. Transformed raw real estate data into actionable insights through rigorous exploratory analysis.",
-    achievements: [
-      "87.4% memory optimization (667MB → 83MB)",
-      "38.19% data quality issues identified",
-      "57,592 suspicious patterns detected",
-      "2.2M+ records processed",
-    ],
-    technologies: [
-      "Python",
-      "Pandas",
-      "Data Analysis",
-      "Jupyter",
-      "Scikit-learn",
-      "Data Pipelines",
-      "Memory Optimization",
-    ],
+      "Analyzed 2.2M+ real estate records from Kaggle's USA Real Estate Dataset, implementing comprehensive data quality auditing and anomaly detection systems. Engineered memory-optimized data pipelines achieving 87.4% memory reduction through strategic dtype optimization and categorical conversions. Identified 38.19% suspicious records including 734,297 placeholder dates and 115,872 duplicate price entries across the dataset. Developed sophisticated pattern recognition algorithms detecting 57,592 suspicious broker-price combinations spanning over 365 days. Generated comprehensive suspicious case reports for regulatory review and further investigative action.",
     githubUrl: null,
-    demoUrl: null,
     kaggleLinks: [
       {
         name: "Memory Optimized Analysis",
@@ -100,17 +63,9 @@ const projectsData = [
         url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis",
       },
     ],
-    status: "Research Completed",
     deployment: "Kaggle Notebooks",
-    featured: true,
     image: "/images/kaggle.png",
-    deliverables: [
-      "Data Quality Audit",
-      "Optimized Pipelines",
-      "Pattern Detection",
-      "Research Reports",
-    ],
-    accentColor: "from-green-500 to-emerald-500",
+    deliverables: ["Pattern Detection", "Research Reports"],
   },
   {
     id: "personality-ai",
@@ -119,24 +74,7 @@ const projectsData = [
     role: "AI Research Lead",
     duration: "2022 - 2023",
     summary:
-      "Engineered an end-to-end AI system that automates personality screening by analyzing visual, auditory, and textual cues from video interviews. The system predicts Big Five personality traits using multimodal deep learning.",
-    achievements: [
-      "Multimodal AI fusion (video, audio, text)",
-      "Advanced feature extraction pipelines",
-      "Data imbalance solutions with oversampling",
-      "Real-time personality prediction",
-    ],
-    technologies: [
-      "Python",
-      "PyTorch",
-      "TensorFlow",
-      "OpenCV",
-      "OpenFace",
-      "BERT",
-      "LSTNet",
-      "Node.js",
-      "MongoDB",
-    ],
+      "We engineered an end-to-end automated system for predicting job candidates' Big Five personality traits through multimodal video analysis. It utilizes the First Impressions V2 dataset, comprising 10,000 short, diverse video clips with annotated personality scores and text transcripts. The system processes visual cues by analyzing facial emotions and action units using models like LSTNet. Audio features, including MFCCs, are extracted via PyAudioAnalysis. Transcripts are encoded with BERT and analyzed for linguistic patterns. Predictions from all three modalities—video, audio, and text—are combined using a late fusion strategy with XGBoost.",
     githubUrl:
       "https://github.com/Mariam-Fathi/multimodal-personality-analysis",
     demoUrl: null,
@@ -146,12 +84,9 @@ const projectsData = [
         url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view?usp=drive_link",
       },
     ],
-    status: "Research Completed",
     deployment: "Academic Book & Web Demo",
-    featured: true,
     image: "/images/graduation.png",
     deliverables: ["Multimodal AI Models", "Graduation Book"],
-    accentColor: "from-purple-500 to-pink-500",
   },
   {
     id: "sales-ai",
@@ -160,29 +95,11 @@ const projectsData = [
     role: "Full-Stack Developer + AI Initiative",
     duration: "2025",
     summary:
-      "Built an internal tool using pre-trained models (85% confidence) integrated with their CRM to automate preliminary project estimations, reducing sales team dependency on technical staff.",
-    achievements: [
-      "Cut estimation time from days to minutes",
-      "Enabled sales team to provide technical estimates",
-      "Integrated tool with existing CRM system",
-      "Achieved 85% confidence with pre-trained model",
-    ],
-    technologies: [
-      "Python",
-      "Hugging Face",
-      "FastAPI",
-      "React",
-      "NLP",
-      "CRM Integration",
-    ],
+      "Recently, while working at Dracode, I noticed our sales team struggling to provide quick cost estimates due to their non-technical background. I designed and developed an internal tool leveraging a pre-trained model from Hugging Face to analyze project descriptions and generate instant cost estimations. This enabled our sales team to provide immediate, data-backed figures during client meetings. I achieved 85% confidence in estimates and integrated the tool with our existing CRM system. The solution reduced estimation time from days to minutes. I also proposed a roadmap to continuously improve the tool using actual deal data.",
     githubUrl: null,
-    demoUrl: null,
-    status: "Working Prototype",
     deployment: "Internal Tool + CRM Integration",
-    featured: false,
     image: "/images/ai.png",
-    deliverables: ["CRM-Integrated Web Tool", "Continuous Improvement Roadmap"],
-    accentColor: "from-orange-500 to-red-500",
+    deliverables: ["CRM-Integrated Web Tool", "Feedback Roadmap"],
   },
   {
     id: "homi-app",
@@ -191,22 +108,11 @@ const projectsData = [
     role: "Full-Stack Developer",
     duration: "2025",
     summary:
-      "Transformed tutorial into full-stack production-ready app with authentication, payments, and real-time features for modern real estate management.",
-    achievements: [
-      "Full-stack development",
-      "Production features integration",
-      "Third-party payment systems",
-      "Real-time notifications",
-    ],
-    technologies: ["React Native", "Firebase", "Stripe", "Appwrite", "OAuth"],
+      "Developed Homi, a production-ready real estate application by transforming a basic tutorial into a full-stack solution. Implemented secure user authentication via Google OAuth using Appwrite for robust backend services. Designed a comprehensive property management system with advanced search, filtering, and detailed property listings. Created personalized user experiences with favorite property tracking and intelligent preference analysis. Built real-time notification systems to alert users about new properties matching their interests. Integrated payment processing with Stripe. Established user activity monitoring to gather valuable behavioral insights.",
     githubUrl: "https://github.com/Mariam-Fathi/homi-app",
-    demoUrl: null,
-    status: "Learning Project",
-    deployment: "App Demo Live Preview",
-    featured: false,
+    deployment: "Live Preview",
     image: "/images/homi.png",
     deliverables: ["Mobile App", "Backend API"],
-    accentColor: "from-indigo-500 to-blue-500",
     playStoreUrls: [
       {
         name: "Homi App",
@@ -221,28 +127,17 @@ const projectsData = [
     role: "Full-Stack Developer",
     duration: "2025",
     summary:
-      "Built comprehensive admin dashboard for real estate management with advanced analytics, user management, and property performance tracking.",
-    achievements: [
-      "Real-time analytics dashboard",
-      "Interactive data visualizations",
-      "User management system",
-      "Property performance tracking",
-    ],
-    technologies: ["React", "Firebase", "Chart.js", "Tailwind CSS", "REST API"],
+      "Built a comprehensive analytics dashboard for Homi real estate App. Tracks revenue metrics, payment status, and growth patterns. Monitors user engagement, retention rates, and active user trends. Analyzes property performance through views, favorites, and category rankings. Measures platform health with conversion rates and engagement scores. Identifies peak activity hours and seasonal trends. Implements smart caching for optimal performance. Provides occupancy rates and property category comparisons. Transforms raw data into actionable business intelligence. Supports data-driven decision making across the organization. Delivers clear insights through structured visualizations.",
     githubUrl: "https://github.com/Mariam-Fathi/homi-analytics",
-    demoUrl: null,
-    status: "Learning Project",
-    deployment: "Live Web Demo",
+    deployment: "Live Preview",
     webDemo: [
       {
-        name: "Honmi Dashboard ",
+        name: "Honmi Dashboard",
         url: "https://homi-analytics.vercel.app/",
       },
     ],
-    featured: false,
     image: "/images/homi-dashboard.png",
-    deliverables: ["Admin Dashboard", "Analytics System"],
-    accentColor: "from-teal-500 to-cyan-500",
+    deliverables: ["Admin Dashboard", "Backend API"],
   },
 ];
 
@@ -262,14 +157,12 @@ const ProjectCard = ({
 
     const tl = gsap.timeline();
 
-    // Reset positions with cinematic blur
     gsap.set([contentRef.current, imageRef.current], {
       opacity: 0,
       y: 50,
       filter: "blur(10px)",
     });
 
-    // Cinematic reveal animation
     tl.to(contentRef.current, {
       opacity: 1,
       y: 0,
@@ -288,7 +181,6 @@ const ProjectCard = ({
       "-=0.6"
     );
 
-    // Subtle floating animation
     gsap.to(cardRef.current, {
       y: -8,
       duration: 4,
@@ -297,7 +189,6 @@ const ProjectCard = ({
       ease: "sine.inOut",
     });
 
-    // Background gradient pulse
     gsap.to(cardRef.current, {
       backgroundPosition: "200% 200%",
       duration: 20,
@@ -335,8 +226,6 @@ const ProjectCard = ({
     };
     return config[status.toLowerCase()] || config["learning project"];
   };
-
-  const statusConfig = getStatusConfig(project.status);
 
   return (
     <div
@@ -401,7 +290,7 @@ const ProjectCard = ({
                 {project.role}
               </div>
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 max-sm:hidden">
               <h4 className="text-white font-semibold flex items-center gap-2 mb-3  uppercase tracking-wider text-sm">
                 Deliverables
               </h4>
@@ -415,43 +304,6 @@ const ProjectCard = ({
                   </span>
                 ))}
               </div>
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider">
-              Technologies
-            </h4>
-            <div className="flex flex-wrap gap-3">
-              {project.technologies.map((tech: string, idx: number) => (
-                <span
-                  key={idx}
-                  className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-xl text-sm border border-gray-600/30 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm font-light"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h4 className="text-white text-sm font-semibold mb-4 uppercase tracking-wider">
-              Key Achievements
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {project.achievements.map((achievement: string, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 bg-gradient-to-r from-gray-800/30 to-gray-800/10 px-4 py-3 rounded-xl border border-gray-600/20 hover:border-gray-500/30 transition-all duration-300 group/achievement backdrop-blur-sm"
-                >
-                  <div
-                    className={`w-2 h-2 rounded-full bg-green-400 animate-pulse`}
-                  />
-                  <span className="text-gray-300 text-sm font-light group-hover/achievement:text-white transition-colors">
-                    {achievement}
-                  </span>
-                </div>
-              ))}
             </div>
           </div>
         </div>
@@ -529,7 +381,7 @@ const ProjectCard = ({
               </a>
             ))}
           </div>
-            {project.deployment && (
+          {project.deployment && (
             <div className="">
               <span className="hidden md:inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
                 {project.deployment}
