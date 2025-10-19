@@ -68,15 +68,7 @@ const CertificateCard: React.FC<CertificateCardProps> = ({ card, index }) => {
           <div className="mb-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-gray-500 text-xs font-medium uppercase tracking-wide">Skills</p>
-              {card.skills.length > 3 && (
-                <button 
-                  onClick={handleSkillsClick}
-                  className="flex items-center gap-1 px-2 py-1 bg-gray-700/50 text-gray-300 rounded text-xs font-medium border border-gray-600/50 hover:bg-gray-700/70 transition-all duration-200 cursor-pointer"
-                >
-                  <span className="text-xs">{showAllSkills ? "Less" : `+${card.skills.length - 3}`}</span>
-                  <ChevronDown className={`size-3 transition-transform ${showAllSkills ? "rotate-180" : ""}`} />
-                </button>
-              )}
+        
             </div>
 
             <div className="flex flex-wrap gap-1">

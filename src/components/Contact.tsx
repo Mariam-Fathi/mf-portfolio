@@ -4,13 +4,11 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import TitleHeader from "./TitleHeader";
 import {
   Linkedin,
   Github,
   Mail,
   Phone,
-  MapPin,
   MessageCircle,
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -22,6 +20,8 @@ const Contact = () => {
   const sectionRef = useRef(null);
   const socialGridRef = useRef(null);
   const ctaRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
 
   const contactInfo = {
     email: "mariam.fathi.siam@outlook.com",
@@ -33,18 +33,44 @@ const Contact = () => {
 
   useGSAP(
     () => {
-      gsap.fromTo(
-        sectionRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 1.2,
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      tl.fromTo(titleRef.current,
+        { 
+          opacity: 0, 
+          y: 80,
+          filter: "blur(15px)",
+          scale: 0.9
+        },
+        { 
+          opacity: 1, 
+          y: 0,
+          filter: "blur(0px)",
+          scale: 1,
+          duration: 1.8,
+          ease: "power4.out"
         }
+      )
+      .fromTo(subtitleRef.current,
+        { 
+          opacity: 0, 
+          y: 40,
+          filter: "blur(12px)",
+        },
+        { 
+          opacity: 1, 
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.4,
+          ease: "power2.out"
+        },
+        "-=1.2"
       );
 
       gsap.fromTo(
@@ -89,6 +115,19 @@ const Contact = () => {
           },
         }
       );
+
+      gsap.to(".floating-particle", {
+        y: -20,
+        x: 10,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        stagger: {
+          amount: 3,
+          from: "random"
+        },
+        ease: "sine.inOut"
+      });
     },
     { scope: sectionRef }
   );
@@ -145,27 +184,43 @@ const Contact = () => {
     <section
       ref={sectionRef}
       id="contact"
-      className="pt-20 bg-black relative overflow-hidden"
+      className="relative bg-black overflow-hidden pt-20 max-sm:pt-10"
     >
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-900 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-900 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-cyan-900 rounded-full blur-2xl"></div>
+      <div className="absolute inset-0 bg-black" />
+      
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <div
+            key={i}
+            className="floating-particle absolute w-1 h-1 bg-white/10 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+          />
+        ))}
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <TitleHeader
-          title="Let's Create Together"
-          sub="Let's build something extraordinary."
-        />
-
-        <div className="text-center max-w-2xl mt-4 mx-auto mb-16">
+        <div className="text-center mb-20">
+          <h2 
+            ref={titleRef}
+            className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
+          >
+            LET'S CREATE
+            <br />
+            <span className="text-blue-400">TOGETHER</span>
+          </h2>
+      <div className="text-center max-w-2xl mx-auto mb-16">
           <p className="text-gray-400 text-lg leading-relaxed font-light">
             Whether you have a project in mind, want to explore collaboration
             opportunities, or just want to discuss AI and engineering - I'm
             excited to connect with you!
           </p>
         </div>
+        </div>
+
+  
 
         <div ref={socialGridRef} className="flex justify-center gap-6 mb-16 flex-wrap">
           {socialLinks.map((social, index) => (
@@ -190,7 +245,7 @@ const Contact = () => {
           <button
             ref={ctaRef}
             onClick={handleWhatsAppRedirect}
-            className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-3 mx-auto group"
+            className="bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white px-12 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-3 mx-auto group backdrop-blur-sm border border-green-500/30"
           >
             <MessageCircle
               size={24}
@@ -201,30 +256,19 @@ const Contact = () => {
         </div>
       </div>
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-gray-500/30 rounded-full animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-            }}
-          />
-        ))}
-      </div>
-
       <style jsx>{`
         @keyframes float {
-          0%, 100% {
+          0%, 100% { 
             transform: translateY(0px) translateX(0px);
+            opacity: 0.1;
+          }
+          50% { 
+            transform: translateY(-20px) translateX(10px);
             opacity: 0.3;
           }
-          50% {
-            transform: translateY(-15px) translateX(8px);
-            opacity: 0.6;
-          }
+        }
+        .floating-particle {
+          animation: float 8s ease-in-out infinite;
         }
         
         .perspective-1000 {

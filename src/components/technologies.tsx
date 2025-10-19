@@ -5,7 +5,6 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { logoIconsList } from "../constants";
-import TitleHeader from "@/components/TitleHeader";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -30,22 +29,52 @@ const Technologies = () => {
     const sectionRef = useRef(null);
     const marqueeRef = useRef(null);
     const cardsRef = useRef([]);
+    const titleRef = useRef(null);
+    const subtitleRef = useRef(null);
 
     useGSAP(() => {
-        gsap.fromTo(sectionRef.current,
-            { opacity: 0, y: 50 },
-            {
-                opacity: 1,
+        // Hero header animations
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top 80%",
+                toggleActions: "play none none reverse",
+            },
+        });
+
+        tl.fromTo(titleRef.current,
+            { 
+                opacity: 0, 
+                y: 80,
+                filter: "blur(15px)",
+                scale: 0.9
+            },
+            { 
+                opacity: 1, 
                 y: 0,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                }
+                filter: "blur(0px)",
+                scale: 1,
+                duration: 1.8,
+                ease: "power4.out"
             }
+        )
+        .fromTo(subtitleRef.current,
+            { 
+                opacity: 0, 
+                y: 40,
+                filter: "blur(12px)",
+            },
+            { 
+                opacity: 1, 
+                y: 0,
+                filter: "blur(0px)",
+                duration: 1.4,
+                ease: "power2.out"
+            },
+            "-=1.2"
         );
 
+        // Marquee animation
         gsap.to(".marquee-box", {
             xPercent: -100,
             repeat: -1,
@@ -53,53 +82,63 @@ const Technologies = () => {
             ease: "none"
         });
 
-        gsap.fromTo(cardsRef.current,
-            { y: 30, opacity: 0 },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-                stagger: 0.2,
-                scrollTrigger: {
-                    trigger: cardsRef.current[0],
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                }
-            }
-        );
+        // Floating particles animation
+        gsap.to(".floating-particle", {
+            y: -20,
+            x: 10,
+            duration: 6,
+            repeat: -1,
+            yoyo: true,
+            stagger: {
+                amount: 3,
+                from: "random"
+            },
+            ease: "sine.inOut"
+        });
 
     }, { scope: sectionRef });
-
-    const addToCardsRef = (el, index) => {
-        if (el && !cardsRef.current.includes(el)) {
-            cardsRef.current[index] = el;
-        }
-    };
 
     return (
         <section 
             ref={sectionRef}
             id="skills" 
-            className="py-16 max-sm:py-10 bg-black"
+            className="relative bg-black overflow-hidden py-20 max-sm:py-10"
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <TitleHeader
-                        title="Technologies I Work With"
-                        sub="Tools & Technologies That Power My Projects"
+            <div className="absolute inset-0 bg-black" />
+            
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {Array.from({ length: 15 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="floating-particle absolute w-1 h-1 bg-white/10 rounded-full"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                        }}
                     />
-                    <p className="text-gray-500 max-w-2xl mx-auto mt-4 text-sm leading-relaxed">
+                ))}
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="text-center mb-20">
+                    <h2 
+                        ref={titleRef}
+                        className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
+                    >
+                        TECHNOLOGIES
+                    </h2>
+                    <p className="text-gray-500 max-w-2xl mx-auto mt-8 text-base leading-relaxed font-light">
                         From AI research to production applications, these are the technologies I've mastered
                         through hands-on projects and continuous learning
                     </p>
                 </div>
 
                 <div className="relative overflow-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-black to-transparent z-10" />
-                    <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-black to-transparent z-10" />
+                    <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black to-transparent z-10" />
+                    <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
                     
-                    <div className="marquee h-20 md:h-24">
-                        <div className="marquee-box gap-8 md:gap-12">
+                    <div className="marquee h-24 md:h-28">
+                        <div className="marquee-box gap-10 md:gap-14">
                             {logoIconsList.map((icon, index) => (
                                 <LogoIcon key={`first-${index}`} icon={icon} />
                             ))}
@@ -120,16 +159,20 @@ const Technologies = () => {
                 .marquee-box {
                     display: flex;
                     width: max-content;
-                    animation: marquee 40s linear infinite;
                 }
                 
-                @keyframes marquee {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-50%); }
+                @keyframes float {
+                    0%, 100% { 
+                        transform: translateY(0px) translateX(0px);
+                        opacity: 0.1;
+                    }
+                    50% { 
+                        transform: translateY(-20px) translateX(10px);
+                        opacity: 0.3;
+                    }
                 }
-                
-                .marquee:hover .marquee-box {
-                    animation-play-state: paused;
+                .floating-particle {
+                    animation: float 8s ease-in-out infinite;
                 }
             `}</style>
         </section>

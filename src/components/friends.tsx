@@ -11,8 +11,8 @@ export function ProjectSection() {
       <div className="max-w-7xl mx-auto">
         <Projects />
       </div>
-      <FriendsConnectionBridge />
-      <FriendsCinematicSection />
+      {/* <FriendsConnectionBridge /> */}
+      {/* <FriendsCinematicSection /> */}
     </section>
   );
 }

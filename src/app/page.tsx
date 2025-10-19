@@ -7,6 +7,7 @@ import Certificates from "@/components/Certificates";
 import Technologies from "@/components/technologies";
 import Footer from "@/components/Footer";
 import { ProjectSection } from "@/components/friends";
+import FriendsConnectionBridge from "@/components/bridge";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <ProjectSection />
+      <FriendsConnectionBridge />
       <Experience />
       <Technologies />
       <Certificates />

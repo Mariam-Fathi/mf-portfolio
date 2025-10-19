@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import TitleHeader from "@/components/TitleHeader";
 import CertificateCard from "@/components/CertificateCard";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -75,22 +74,52 @@ const CertificatesOption2 = () => {
 
     const sectionRef = useRef(null);
     const cardsRef = useRef([]);
+    const titleRef = useRef(null);
+    const subtitleRef = useRef(null);
 
     useGSAP(() => {
-        gsap.fromTo(sectionRef.current,
-            { opacity: 0, y: 50 },
-            {
-                opacity: 1,
+        // Hero header animations
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: sectionRef.current,
+                start: "top 80%",
+                toggleActions: "play none none reverse",
+            },
+        });
+
+        tl.fromTo(titleRef.current,
+            { 
+                opacity: 0, 
+                y: 80,
+                filter: "blur(15px)",
+                scale: 0.9
+            },
+            { 
+                opacity: 1, 
                 y: 0,
-                duration: 1,
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: "top 80%",
-                    toggleActions: "play none none reverse"
-                }
+                filter: "blur(0px)",
+                scale: 1,
+                duration: 1.8,
+                ease: "power4.out"
             }
+        )
+        .fromTo(subtitleRef.current,
+            { 
+                opacity: 0, 
+                y: 40,
+                filter: "blur(12px)",
+            },
+            { 
+                opacity: 1, 
+                y: 0,
+                filter: "blur(0px)",
+                duration: 1.4,
+                ease: "power2.out"
+            },
+            "-=1.2"
         );
 
+        // Cards animation
         gsap.fromTo(cardsRef.current,
             { y: 30, opacity: 0 },
             {
@@ -106,6 +135,20 @@ const CertificatesOption2 = () => {
             }
         );
 
+        // Floating particles animation
+        gsap.to(".floating-particle", {
+            y: -20,
+            x: 10,
+            duration: 6,
+            repeat: -1,
+            yoyo: true,
+            stagger: {
+                amount: 3,
+                from: "random"
+            },
+            ease: "sine.inOut"
+        });
+
     }, { scope: sectionRef });
 
     const addToCardsRef = (el, index) => {
@@ -115,14 +158,43 @@ const CertificatesOption2 = () => {
     };
 
     return (
-        <section id="certificates" ref={sectionRef} className="py-16 bg-black">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <TitleHeader
-                    title="Learning Journey & Certifications"
-                    sub="Continuous Growth Through Structured Learning"
-                />
+        <section 
+            id="certificates" 
+            ref={sectionRef} 
+            className="relative bg-black overflow-hidden py-20"
+        >
+            <div className="absolute inset-0 bg-black" />
+            
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {Array.from({ length: 15 }).map((_, i) => (
+                    <div
+                        key={i}
+                        className="floating-particle absolute w-1 h-1 bg-white/10 rounded-full"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                        }}
+                    />
+                ))}
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="text-center mb-20">
+                    <h2 
+                        ref={titleRef}
+                        className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
+                    >
+                        CERTIFICATIONS
+                    </h2>
+                    <p 
+                        ref={subtitleRef}
+                        className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+                    >
+                        Continuous Growth Through Structured Learning
+                    </p>
+                </div>
                 
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {certificates.map((cert, index) => (
                         <div 
                             key={index} 
@@ -134,6 +206,22 @@ const CertificatesOption2 = () => {
                     ))}
                 </div>
             </div>
+
+            <style jsx>{`
+                @keyframes float {
+                    0%, 100% { 
+                        transform: translateY(0px) translateX(0px);
+                        opacity: 0.1;
+                    }
+                    50% { 
+                        transform: translateY(-20px) translateX(10px);
+                        opacity: 0.3;
+                    }
+                }
+                .floating-particle {
+                    animation: float 8s ease-in-out infinite;
+                }
+            `}</style>
         </section>
     )
 }

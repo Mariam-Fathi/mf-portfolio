@@ -1,13 +1,22 @@
 "use client";
 
-import gsap from "gsap";
+import React, { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-import TitleHeader from "../TitleHeader";
-import GlowCard from "../GlowCard";
+import {
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+  motion,
+} from "framer-motion";
 
 gsap.registerPlugin(ScrollTrigger);
+
+interface TimelineEntry {
+  title: string;
+  content: React.ReactNode;
+}
 
 interface ExperienceCard {
   experience: string;
@@ -24,158 +33,234 @@ interface ExperienceCard {
   responsibilities: string[];
 }
 
-const Experience = () => {
-  useGSAP(() => {
-    gsap.utils.toArray(".timeline-card").forEach((card: unknown) => {
-      gsap.from(card as gsap.TweenTarget, {
-        xPercent: -100,
-        opacity: 0,
-        transformOrigin: "left left",
-        duration: 1,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: card as gsap.DOMTarget,
-          start: "top 80%",
-        },
-      });
-    });
+const Timeline = ({ data }: { data: TimelineEntry[] }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
 
-    gsap.to(".timeline", {
-      transformOrigin: "bottom bottom",
-      ease: "power1.inOut",
+  useGSAP(() => {
+    const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: ".timeline",
-        start: "top center",
-        end: "70% center",
-        onUpdate: (self) => {
-          gsap.to(".timeline", {
-            scaleY: 1 - self.progress,
-          });
-        },
+        trigger: containerRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
       },
     });
 
-    gsap.utils.toArray(".expText").forEach((text: unknown) => {
-      gsap.from(text as gsap.TweenTarget, {
-        opacity: 0,
-        xPercent: 0,
-        duration: 1,
-        ease: "power2.inOut",
-        scrollTrigger: {
-          trigger: text as gsap.DOMTarget,
-          start: "top 60%",
-        },
-      });
-    }, "<");
-  }, []);
+    tl.fromTo(titleRef.current,
+      { 
+        opacity: 0, 
+        y: 80,
+        filter: "blur(15px)",
+        scale: 0.9
+      },
+      { 
+        opacity: 1, 
+        y: 0,
+        filter: "blur(0px)",
+        scale: 1,
+        duration: 1.8,
+        ease: "power4.out"
+      }
+    )
+    .fromTo(subtitleRef.current,
+      { 
+        opacity: 0, 
+        y: 40,
+        filter: "blur(12px)",
+      },
+      { 
+        opacity: 1, 
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.4,
+        ease: "power2.out"
+      },
+      "-=1.2"
+    );
+  }, { scope: containerRef });
+
+  useEffect(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setHeight(rect.height);
+    }
+  }, [ref]);
+
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start 10%", "end 50%"],
+  });
+
+  const heightTransform = useTransform(scrollYProgress, [0, 1], [0, height]);
+  const opacityTransform = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
 
   return (
-    <section id="experience" className="pb-20 max-sm:pb-10 bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <TitleHeader
-          title="My Engineering Journey"
-          sub="From AI Research to Production Applications"
-        />
-        
-        <div className="mt-20 relative">
-          <div className="relative z-50 space-y-16 lg:space-y-24">
-            {expCards.map((card, index) => (
-              <div key={card.title} className="exp-card-wrapper group">
-                <div className="lg:grid lg:grid-cols-5 lg:gap-12">
-                  {/* Left Side - Experience Summary */}
-                  <div className="lg:col-span-2 mb-8 lg:mb-0">
-                    <GlowCard index={index}>
-                      <div className="p-6">
-                        <p className="text-gray-300 text-base leading-relaxed font-light">
-                          {card.experience}
-                        </p>
-                        <div className="mt-4 pt-4 border-t border-gray-700/50">
-                          <p className="text-sm text-gray-500 font-medium">
-                            {card.fromDate} {card.toDate && `→ ${card.toDate}`}
-                          </p>
-                          <p className="text-gray-400 text-sm mt-1">
-                            {card.type}
-                          </p>
-                        </div>
-                      </div>
-                    </GlowCard>
-                  </div>
+    <section
+      id="experience"
+      className="w-full bg-black font-sans md:px-10 relative overflow-hidden py-20 max-sm:py-10"
+      ref={containerRef}
+    >      
+      <div className="max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10 relative z-10">
+        <div className="text-center">
+          <h2 
+            ref={titleRef}
+            className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
+          >
+            ENGINEERING<br />JOURNEY
+          </h2>
+          <p 
+            ref={subtitleRef}
+            className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+          >
+            From AI Research to Production Applications
+          </p>
+        </div>
+      </div>
 
-                  <div className="lg:col-span-3">
-                    <div className="flex items-start space-x-6">
-                      <div className="flex flex-col items-center flex-shrink-0">
-                        <div className="w-16 h-16 rounded-2xl border-1 border-black-50/50 bg-black-50/50 flex items-center justify-center group-hover:border-black-50/50 transition-colors duration-300">
-                          <img
-                            src={card.logoPath}
-                            alt={`${card.company} logo`}
-                            className="w-full h-full object-contain rounded-lg"
-                          />
-                        </div>
-                        <div className="w-0.5 h-full bg-gradient-to-b from-gray-600 to-transparent mt-4" />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="expText">
-                          <h1 className="font-semibold text-2xl lg:text-3xl text-white mb-2">
-                            {card.title}
-                          </h1>
-                          <p className="text-lg lg:text-xl text-blue-400 mb-4 font-light">
-                            {card.company}
-                          </p>
-
-                          {card.story && (
-                            <div className="mb-8">
-                              <div className="space-y-6">
-                                {card.story.map((chapter, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="border-l-2 border-blue-500/50 pl-6 py-2 group-hover:border-blue-400 transition-colors duration-300"
-                                  >
-                                    <p className="text-blue-300 font-medium text-sm mb-2">
-                                      {chapter.chapter}
-                                    </p>
-                                    <p className="text-gray-400 text-sm leading-relaxed font-light">
-                                      {chapter.content}
-                                    </p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          <div>
-                            <p className="text-gray-500 text-sm font-medium mb-4 uppercase tracking-wide">
-                              Key Achievements
-                            </p>
-                            <ul className="space-y-3">
-                              {card.responsibilities.map((responsibility, idx) => (
-                                <li 
-                                  key={idx} 
-                                  className="text-gray-300 text-base leading-relaxed font-light pl-4 border-l-2 border-gray-700/50 group-hover:border-gray-600 transition-colors duration-300"
-                                >
-                                  {responsibility}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <div ref={ref} className="relative max-w-7xl mx-auto">
+        {data.map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-start pt-10 md:pb-40 md:gap-10"
+          >
+            <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
+              <div className="h-10 absolute left-3 md:left-3 w-10 rounded-full bg-black flex items-center justify-center">
+                <div className="h-4 w-4 rounded-full bg-neutral-800 border border-neutral-700 p-2" />
               </div>
-            ))}
+              <h3 className="hidden md:block text-xl md:pl-20 md:text-5xl font-bold text-neutral-500">
+                {item.title}
+              </h3>
+            </div>
+
+            <div className="relative pl-20 pr-4 md:pl-4 w-full">
+              <h3 className="md:hidden block text-2xl mb-4 text-left font-bold text-neutral-500">
+                {item.title}
+              </h3>
+              {item.content}
+            </div>
           </div>
+        ))}
+        <div
+          style={{
+            height: height + "px",
+          }}
+          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-[#2F3B59] to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"
+        >
+          <motion.div
+            style={{
+              height: heightTransform,
+              opacity: opacityTransform,
+            }}
+            className="absolute inset-x-0 top-0 w-[2px] bg-gradient-to-t from-white via-white-50 to-transparent from-[0%] via-[10%] rounded-full"
+          />
         </div>
       </div>
     </section>
   );
 };
 
-export default Experience;
+const ExperienceTimeline = () => {
+  const timelineData: TimelineEntry[] = expCards.map((card) => ({
+    title: card.company,
+    content: (
+      <div className="bg-gradient-to-br from-gray-900/80 to-black rounded-3xl border border-gray-700/30 p-8 backdrop-blur-sm">
+        <div className="flex items-start gap-6 mb-6">
+          <div className="w-16 h-16 rounded-2xl border border-gray-600/30 bg-black/50 flex items-center justify-center">
+            <img
+              src={card.logoPath}
+              alt={`${card.company} logo`}
+              className="w-10 h-10 object-contain"
+            />
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="text-2xl lg:text-3xl font-light text-white mb-2">
+              {card.title}
+            </h3>
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-gray-400 font-light">
+                {card.fromDate} {card.toDate && `→ ${card.toDate}`}
+              </span>
+              <span className="text-gray-500">•</span>
+              <span className="text-gray-400 font-light">
+                {card.type}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-gray-300 text-lg leading-relaxed font-light tracking-wide mb-6">
+          {card.experience}
+        </p>
+
+        {card.story && (
+          <div className="mb-6">
+            <div className="space-y-4">
+              {card.story.map((chapter, idx) => (
+                <div
+                  key={idx}
+                  className="border-l-2 border-blue-500/30 pl-6 py-3"
+                >
+                  <p className="text-blue-300 font-medium text-sm mb-2 tracking-wide">
+                    {chapter.chapter}
+                  </p>
+                  <p className="text-gray-400 text-base leading-relaxed font-light">
+                    {chapter.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <p className="text-gray-500 text-sm font-medium mb-4 uppercase tracking-wider">
+            Key Achievements
+          </p>
+          <ul className="space-y-3">
+            {card.responsibilities.map((responsibility, idx) => (
+              <li 
+                key={idx} 
+                className="text-gray-300 text-base leading-relaxed font-light pl-4 border-l-2 border-gray-700/50"
+              >
+                {responsibility}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    ),
+  }));
+
+  return <Timeline data={timelineData} />;
+};
+
+export default ExperienceTimeline;
 
 export const expCards: ExperienceCard[] = [
+
+
   {
+    experience:
+      "Led the video processing module for a multimodal AI system, where I uncovered and solved a critical data imbalance issue—transforming the project's direction and reinforcing my core belief: robust AI is built on trustworthy data, not just complex models.",
+    title: "AI Research Lead (Video Module) - Graduation Project",
+    company: "Benha University | Faculty of Engineering at Shoubra",
+    fromDate: "2022",
+    toDate: "2023",
+    type: "Academic Research",
+    logoPath: "/images/logos/experience/university-logo.svg",
+    responsibilities: [
+      "Spearheaded video analysis pipeline for multimodal system predicting Big Five personality traits from video interviews",
+      "Engineered feature extraction process using VGG-Face, OpenFace, and DeepFace for emotion & action unit detection",
+      "Diagnosed major class imbalance in dataset causing model bias; implemented oversampling strategy that significantly improved prediction fairness",
+      "Experimented with multiple architectures (LSTNet, TCN, MLP, XGBoost, Stacking Ensembles) to select best-performing model",
+      "Presented key findings on importance of data integrity as foundation for reliable AI systems",
+    ],
+  },
+    {
     experience:
       "Transitioned from intern to a core mobile engineer in a cross-functional team. Played a pivotal role in developing the flagship 'Smart Key' product, taking primary responsibility for architecting and building both the guest and staff React Native applications from scratch.",
     title: "Mobile Software Engineer",
@@ -192,7 +277,7 @@ export const expCards: ExperienceCard[] = [
       "Actively participated in cross-functional brainstorming sessions with stakeholders, ensuring technical alignment with business goals",
     ],
   },
-  {
+    {
     experience:
       "This lesson that while fascination often centers on the final 20% of the work—the model architecture—the decisive 80% that dictates real-world success lies in the unglamorous, rigorous work of building trustworthy data pipelines was powerfully reinforced when a simple React Native tutorial evolved into a mission to build intelligent features.",
     title: "From React Native Tutorial to Data Engineering Discovery",
@@ -250,23 +335,6 @@ export const expCards: ExperienceCard[] = [
       "Proactively designed and developed internal tool using pre-trained Hugging Face model to analyze project descriptions and generate instant cost estimations",
       "Empowered sales team to provide immediate, data-backed ballpark figures during initial client conversations, significantly improving response time",
       "Presented strategic roadmap for evolving prototype into refined, company-specific asset with data feedback loop for continuous model improvement",
-    ],
-  },
-  {
-    experience:
-      "Led the video processing module for a multimodal AI system, where I uncovered and solved a critical data imbalance issue—transforming the project's direction and reinforcing my core belief: robust AI is built on trustworthy data, not just complex models.",
-    title: "AI Research Lead (Video Module) - Graduation Project",
-    company: "Benha University | Faculty of Engineering at Shoubra",
-    fromDate: "2022",
-    toDate: "2023",
-    type: "Academic Research",
-    logoPath: "/images/logos/experience/university-logo.svg",
-    responsibilities: [
-      "Spearheaded video analysis pipeline for multimodal system predicting Big Five personality traits from video interviews",
-      "Engineered feature extraction process using VGG-Face, OpenFace, and DeepFace for emotion & action unit detection",
-      "Diagnosed major class imbalance in dataset causing model bias; implemented oversampling strategy that significantly improved prediction fairness",
-      "Experimented with multiple architectures (LSTNet, TCN, MLP, XGBoost, Stacking Ensembles) to select best-performing model",
-      "Presented key findings on importance of data integrity as foundation for reliable AI systems",
     ],
   },
 ];

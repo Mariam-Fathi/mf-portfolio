@@ -92,7 +92,7 @@ const projectsData = [
     id: "sales-ai",
     category: "AI Prototype & Automation",
     title: "Sales Estimation Automation Tool",
-    role: "Full-Stack Developer + AI Initiative",
+    role: "Full-Stack Developer",
     duration: "2025",
     summary:
       "Recently, while working at Dracode, I noticed our sales team struggling to provide quick cost estimates due to their non-technical background. I designed and developed an internal tool leveraging a pre-trained model from Hugging Face to analyze project descriptions and generate instant cost estimations. This enabled our sales team to provide immediate, data-backed figures during client meetings. I achieved 85% confidence in estimates and integrated the tool with our existing CRM system. The solution reduced estimation time from days to minutes. I also proposed a roadmap to continuously improve the tool using actual deal data.",
@@ -194,35 +194,27 @@ const ProjectCard = ({
       ease: "sine.inOut",
     }, "-=1");
 
-    gsap.to(cardRef.current, {
-      backgroundPosition: "200% 200%",
-      duration: 20,
-      repeat: -1,
-      ease: "none",
-    });
-
   }, [isActive, sectionInView]);
-
 
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-gradient-to-br from-gray-900/80 via-black to-gray-900/80 bg-[size:200%_200%] rounded-3xl border border-gray-700/30 transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl backdrop-blur-sm ${
+      className={`group relative bg-black-900/90 backdrop-blur-md rounded-3xl border-2 border-gray-600/40 transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl hover:shadow-3xl hover:border-gray-500/60 ${
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
-      style={{
-        background: `linear-gradient(45deg, rgba(17, 24, 39, 0.8), rgba(0, 0, 0, 1), rgba(17, 24, 39, 0.8))`,
-      }}
     >
-      <div
-        className={`absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-1000`}
-      />
-
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-500/30 to-transparent" />
+        <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gray-500/30 to-transparent" />
+        <div className="absolute left-0 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-gray-500/30 to-transparent" />
+        <div className="absolute right-0 top-6 bottom-6 w-px bg-gradient-to-b from-transparent via-gray-500/30 to-transparent" />
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full"
+            className="absolute w-1 h-1 bg-white/15 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -235,7 +227,7 @@ const ProjectCard = ({
 
       <div
         ref={contentRef}
-        className="md:col-span-3 p-6 lg:p-8 flex flex-col opacity-0"
+        className="md:col-span-3 p-6 lg:p-8 flex flex-col opacity-0 relative z-10"
       >
         <div className="flex-1">
           <div className="mb-6">
@@ -254,28 +246,28 @@ const ProjectCard = ({
             </h3>
           </div>
 
-          <p className="text-gray-300 text-lg leading-relaxed mb-8 font-light tracking-wide">
+          <p className="text-gray-300 text-lg leading-relaxed mb-8 font-light tracking-wide border-l-2 border-gray-600/30 pl-4">
             {project.summary}
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div>
-              <h4 className="text-white text-sm font-semibold uppercase tracking-wider mb-3">
+              <h4 className="text-white text-base font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
                 Role
               </h4>
-              <div className="text-base font-light text-blue-400">
+              <div className="text-base font-light text-blue-400 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20">
                 {project.role}
               </div>
             </div>
             <div className="lg:col-span-2 max-sm:hidden">
-              <h4 className="text-white font-semibold flex items-center gap-2 mb-3 uppercase tracking-wider text-sm">
+              <h4 className="text-white font-semibold flex items-center gap-2 mb-3 uppercase tracking-wider text-base">
                 Deliverables
               </h4>
               <div className="flex flex-wrap gap-3">
                 {project.deliverables.map((item: string, index: number) => (
                   <span
                     key={index}
-                    className="px-4 py-2 bg-gray-800/30 text-gray-300 rounded-xl text-sm border border-gray-600/30 hover:border-gray-400/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm font-light"
+                    className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-xl text-sm border border-gray-600/40 hover:border-gray-400/60 transition-all duration-300 hover:scale-105 backdrop-blur-sm font-light hover:bg-gray-700/50"
                   >
                     {item}
                   </span>
@@ -285,14 +277,14 @@ const ProjectCard = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-700/30">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-700/50">
           <div className="flex items-center gap-3">
             {project.githubUrl && (
               <a
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-gray-800/30 text-gray-400 rounded-xl border border-gray-600/30 hover:bg-gray-700/50 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm"
+                className="p-3 bg-gray-800/50 text-gray-400 rounded-xl border border-gray-600/40 hover:bg-gray-700/60 hover:text-white transition-all duration-300 hover:scale-110 hover:shadow-lg backdrop-blur-sm"
                 title="View Code"
               >
                 <IconBrandGithub className="w-5 h-5" />
@@ -341,7 +333,7 @@ const ProjectCard = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-purple-600/20 text-purple-400 rounded-xl border border-purple-600/30 hover:bg-purple-600/30 hover:text-purple-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                title="Research"
+                title="Web Demo"
               >
                 <IconDeviceLaptop className="w-5 h-5" />
               </a>
@@ -349,7 +341,7 @@ const ProjectCard = ({
           </div>
           {project.deployment && (
             <div className="">
-              <span className="hidden md:inline-flex items-center px-3 py-1.5 bg-black/40 text-gray-300 rounded-lg text-xs border border-gray-600/30 backdrop-blur-sm font-light">
+              <span className="hidden md:inline-flex items-center px-3 py-1.5 bg-black/60 text-gray-300 rounded-lg text-xs border border-gray-600/40 backdrop-blur-sm font-light">
                 {project.deployment}
               </span>
             </div>
@@ -358,20 +350,20 @@ const ProjectCard = ({
       </div>
 
       <div className="md:col-span-2 flex flex-col relative">
-        <div className="relative flex-1 min-h-[400px] border-l hover:scale-110 transition-all duration-500 border-gray-700/30 bg-gradient-to-br from-gray-900/30 to-black/30 hover:border-transparent">
+        <div className="relative flex-1 min-h-[400px] border-l border-gray-600/40 bg-gradient-to-br from-gray-800/40 to-black/40 hover:scale-105 transition-all duration-500 hover:border-transparent hover:bg-transparent hover:from-transparent hover:to-transparent">
           <img
             ref={imageRef}
             src={project.image}
             alt={project.title}
-            className="w-full h-full object-contain opacity-0"
+            className="w-full h-full object-contain opacity-0 p-4"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hover:to-transparent hover:from-transparent" />
+          <div className="absolute top-2 left-2 right-2 bottom-2 border hover:border-transparent border-gray-600/30 rounded-xl pointer-events-none" />
         </div>
       </div>
     </div>
   );
 };
-
 
 const Tabs = ({
   tabs,
@@ -758,7 +750,7 @@ export function Projects() {
       id="work"
       className="bg-black min-h-screen relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/5 to-black" />
+      <div className="absolute inset-0 bg-black" />
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 20 }).map((_, i) => (
@@ -774,7 +766,7 @@ export function Projects() {
       </div>
 
       <div ref={containerRef} className="max-w-7xl px-4 py-20 max-sm:py-0">
-        <div className="text-center mb-16 lg:mb-24">
+        <div className="text-center mb-16">
           <h2
             ref={titleRef}
             className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 lg:mb-8  tracking-tight opacity-0"
