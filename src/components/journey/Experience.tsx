@@ -168,11 +168,11 @@ const ExperienceTimeline = () => {
     content: (
       <div className="bg-gradient-to-br from-gray-900/80 to-black rounded-3xl border border-gray-700/30 p-8 backdrop-blur-sm">
         <div className="flex items-start gap-6 mb-6">
-          <div className="w-16 h-16 rounded-2xl border border-gray-600/30 bg-black/50 flex items-center justify-center">
+          <div className="w-16 h-16  flex items-center justify-center">
             <img
               src={card.logoPath}
               alt={`${card.company} logo`}
-              className="w-10 h-10 object-contain"
+              className="w-16 h-16 object-contain rounded-2xl border border-gray-600/30 bg-black/50 flex items-center justify-center"
             />
           </div>
           
