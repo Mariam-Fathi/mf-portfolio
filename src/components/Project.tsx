@@ -202,7 +202,7 @@ const ProjectCard = ({
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-black-900/90 backdrop-blur-md rounded-3xl border-2 border-gray-600/40 transition-all duration-1000 grid md:grid-cols-5 mx-0 shadow-2xl hover:shadow-3xl hover:border-gray-500/60 ${
+      className={`group relative bg-black-900/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700 transition-all duration-1000 grid md:grid-cols-5 mx-0  hover:shadow-3xl hover:border-gray-700/60 ${
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
     >
@@ -258,7 +258,7 @@ const ProjectCard = ({
               <h4 className="text-white text-base font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
                 Role
               </h4>
-              <div className="text-base font-light text-blue-400 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20">
+              <div className="inline-flex text-base font-light text-blue-400 bg-blue-500/10 px-3 py-2 rounded-lg border border-blue-500/20">
                 {project.role}
               </div>
             </div>
@@ -335,7 +335,7 @@ const ProjectCard = ({
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-purple-600/20 text-purple-400 rounded-xl border border-purple-600/30 hover:bg-purple-600/30 hover:text-purple-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
+                className="p-3 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-600/30 hover:bg-blue-600/30 hover:text-blue-300 transition-all duration-300 hover:scale-110 hover:shadow-lg"
                 title="Web Demo"
               >
                 <IconDeviceLaptop className="w-5 h-5" />
@@ -353,14 +353,14 @@ const ProjectCard = ({
       </div>
 
       <div className="md:col-span-2 flex flex-col relative">
-        <div className="relative flex-1 min-h-[400px] border-l border-gray-600/40 bg-gradient-to-br from-gray-800/40 to-black/40 hover:scale-105 transition-all duration-500 hover:border-transparent hover:bg-transparent hover:from-transparent hover:to-transparent">
+        <div className="relative flex-1 min-h-[400px] border-l border-gray-600/40 bg-gradient-to-br from-gray-700/40 to-black/40 hover:scale-105 transition-all duration-500 hover:border-transparent hover:bg-transparent hover:from-transparent hover:to-transparent">
           <img
             ref={imageRef}
             src={project.image}
             alt={project.title}
             className="w-full h-full object-contain opacity-0 p-4"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent hover:to-transparent hover:from-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent hover:to-transparent hover:from-transparent" />
           <div className="absolute top-2 left-2 right-2 bottom-2 border hover:border-transparent border-gray-600/30 rounded-xl pointer-events-none" />
         </div>
       </div>
@@ -399,7 +399,7 @@ const Tabs = ({
           opacity: 1,
           y: 0,
           filter: "blur(0px)",
-          duration: 1.2,
+          duration: 2.5,
           ease: "power2.out",
         }
       );
@@ -447,10 +447,10 @@ const Tabs = ({
               key={tab.value}
               ref={(el) => (tabRefs.current[index] = el)}
               onClick={() => onTabChange(tab.value)}
-              className={`px-6 py-4 rounded-2xl border border-gray-600/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
+              className={`px-6 py-4 rounded-2xl border border-gray-700/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
                 activeTab === tab.value
-                  ? "bg-gray-800/40 border-blue-600/30 text-white shadow-sm shadow-blue-500/25"
-                  : "bg-gray-900/30 text-gray-300 border-gray-600/20 hover:border-blue-500/50 hover:text-white hover:bg-gray-800/40 hover:shadow-lg"
+                  ? "bg-gray-700/40 border-gray-700 text-white shadow-sm shadow-gray-700/25"
+                  : "bg-gray-700/20 text-gray-300 border-gray-600/20 hover:border-gray-700/50 hover:text-white hover:bg-gray-700/40 hover:shadow-lg"
               }`}
             >
               {tab.title}
@@ -655,8 +655,7 @@ export function Projects() {
           duration: 1.8,
           ease: "power4.out",
         }
-      )
-      .fromTo(
+      ).fromTo(
         subtitleRef.current,
         {
           opacity: 0,

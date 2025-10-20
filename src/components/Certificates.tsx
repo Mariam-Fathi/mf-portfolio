@@ -162,6 +162,7 @@ const CertificatesSection = () => {
 
   return (
     <div
+      id="certificates"
       ref={containerRef}
       className="relative min-h-screen flex items-center justify-center bg-black overflow-hidden py-20"
     >

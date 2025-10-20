@@ -172,7 +172,7 @@ const ExperienceTimeline = () => {
   const timelineData: TimelineEntry[] = expCards.map((card) => ({
     title: card.company,
     content: (
-      <div className="bg-black rounded-3xl border border-yellow-400/30 p-8 backdrop-blur-sm">
+      <div className="bg-black rounded-3xl border-3 shadow border-gray-700/30 p-8 backdrop-blur-sm">
         <div className="flex items-start gap-6 mb-6">
           <div className="w-16 h-16  flex items-center justify-center">
             <img
