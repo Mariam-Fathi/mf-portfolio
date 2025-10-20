@@ -1,229 +1,243 @@
-'use client'
+"use client";
 
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import CertificateCard from "@/components/CertificateCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CertificatesOption2 = () => {
-    const certificates = [
+const CertificatesSection = () => {
+  const containerRef = useRef(null);
+  const titleRef = useRef(null);
+  const cardsRef = useRef([]);
+  const dotsRef = useRef([]);
+
+  const certificates = [
+    {
+      id: 1,
+      title: "Data Engineering",
+      platform: "DeepLearning.AI & AWS",
+      level: "Professional",
+      image: "/images/certificates/data-engineering.jpeg",
+      skills: [
+        "Data Pipeline",
+        "ETL Processes",
+        "Data Warehousing",
+        "Apache Airflow",
+      ],
+      link: "https://www.coursera.org/account/accomplishments/verify/Z57B0DTSERJK?utm_product=course",
+    },
+    {
+      id: 2,
+      title: "Time Series Analysis",
+      platform: "Kaggle",
+      level: "Intermediate",
+      image: "/images/certificates/time-series.png",
+      skills: ["ARIMA Models", "Forecasting", "Anomaly Detection", "LSTNet"],
+      link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
+    },
+    {
+      id: 3,
+      title: "Computer Vision",
+      platform: "Kaggle",
+      level: "Intermediate",
+      image: "/images/certificates/computer-vision.png",
+      skills: [
+        "Neural Networks",
+        "Model Evaluation",
+        "Feature Engineering",
+        "Hyperparameter Tuning",
+      ],
+      link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
+    },
+  ];
+
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      tl.fromTo(
+        titleRef.current,
         {
-            platform: [
-                {logo:"/images/deeplearning.ai.svg", educator:"DeepLearning.AI"},
-                {logo:"/images/kaggle.svg", educator:"AWS"}
-            ],
-            title: "Data Engineering",
-            skills: [
-                "Data Pipeline Design",
-                "Data Modeling",
-                "ETL Processes",
-                "Data Warehousing",
-                "Data Architecture",
-                "Apache Airflow",
-                "Data Quality",
-                "Big Data Processing"
-            ],
-            level: "Professional",
-            type: "Professional Certificate",
-            certificateImage: "/images/project2.jpeg",
-            link: 'https://coursera.org/share/your-certificate-link',
-            description: 'Mastered the complete data engineering lifecycle from ingestion to consumption. Learned to design scalable data pipelines, implement ETL processes, and build robust data architectures that power intelligent systems.'
+          opacity: 0,
+          y: 50,
+          filter: "blur(10px)",
         },
         {
-            platform: [
-                {logo:"/images/kaggle.svg", educator:"Kaggle"}
-            ],
-            title: "Time Series Analysis",
-            skills: [
-                "LSTNet",
-                "ARIMA Models",
-                "Seasonal Decomposition",
-                "Feature Engineering",
-                "Multivariate Analysis",
-                "Forecasting",
-                "Anomaly Detection"
-            ],
-            level: "Intermediate",
-            certificateImage: "/images/project1.png",
-            link: 'https://www.kaggle.com/learn/certification/your-certificate',
-            description: 'Applied time series analysis techniques to real-world datasets, focusing on temporal pattern recognition and forecasting. This knowledge was crucial for my work on behavioral modeling and recommendation systems.'
-        },
-        {
-            platform: [
-                {logo:"/images/kaggle.svg", educator:"Kaggle"}
-            ],
-            title: "Computer Vision",
-            skills: [
-                "Neural Networks",
-                "Model Evaluation",
-                "Feature Engineering",
-                "Hyperparameter Tuning",
-                "Ensemble Methods",
-                "Cross-Validation",
-                "Bias-Variance Tradeoff"
-            ],
-            level: "Intermediate",
-            certificateImage: "/images/project1.png",
-            link: 'https://coursera.org/share/your-ml-certificate',
-            description: 'Built a strong foundation in machine learning principles and practices. Learned to implement and optimize various algorithms, which directly informed my graduation project on multimodal personality analysis.'
-        },
-    ];
-
-    const sectionRef = useRef(null);
-    const cardsRef = useRef([]);
-    const titleRef = useRef(null);
-    const subtitleRef = useRef(null);
-
-    useGSAP(() => {
-        // Hero header animations
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: sectionRef.current,
-                start: "top 80%",
-                toggleActions: "play none none reverse",
-            },
-        });
-
-        tl.fromTo(titleRef.current,
-            { 
-                opacity: 0, 
-                y: 80,
-                filter: "blur(15px)",
-                scale: 0.9
-            },
-            { 
-                opacity: 1, 
-                y: 0,
-                filter: "blur(0px)",
-                scale: 1,
-                duration: 1.8,
-                ease: "power4.out"
-            }
-        )
-        .fromTo(subtitleRef.current,
-            { 
-                opacity: 0, 
-                y: 40,
-                filter: "blur(12px)",
-            },
-            { 
-                opacity: 1, 
-                y: 0,
-                filter: "blur(0px)",
-                duration: 1.4,
-                ease: "power2.out"
-            },
-            "-=1.2"
-        );
-
-        // Cards animation
-        gsap.fromTo(cardsRef.current,
-            { y: 30, opacity: 0 },
-            {
-                y: 0,
-                opacity: 1,
-                duration: 0.8,
-                stagger: 0.15,
-                scrollTrigger: {
-                    trigger: cardsRef.current[0],
-                    start: "top 85%",
-                    toggleActions: "play none none reverse"
-                }
-            }
-        );
-
-        // Floating particles animation
-        gsap.to(".floating-particle", {
-            y: -20,
-            x: 10,
-            duration: 6,
-            repeat: -1,
-            yoyo: true,
-            stagger: {
-                amount: 3,
-                from: "random"
-            },
-            ease: "sine.inOut"
-        });
-
-    }, { scope: sectionRef });
-
-    const addToCardsRef = (el, index) => {
-        if (el && !cardsRef.current.includes(el)) {
-            cardsRef.current[index] = el;
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.5,
+          ease: "power2.out",
         }
-    };
+      );
 
-    return (
-        <section 
-            id="certificates" 
-            ref={sectionRef} 
-            className="relative bg-black overflow-hidden py-20"
+      cardsRef.current.forEach((card, index) => {
+        if (!card) return;
+
+        gsap.fromTo(
+          card,
+          {
+            opacity: 0,
+            y: 60,
+            scale: 0.9,
+            rotationY: 15,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationY: 0,
+            duration: 1.2,
+            delay: index * 0.2,
+            ease: "back.out(1.5)",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+
+      dotsRef.current.forEach((dot, index) => {
+        if (!dot) return;
+
+        gsap.fromTo(
+          dot,
+          {
+            scale: 0,
+            opacity: 0,
+          },
+          {
+            scale: 1,
+            opacity: 0.3,
+            duration: 0.8,
+            delay: index * 0.1,
+            ease: "elastic.out(1, 0.5)",
+            scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top 70%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+
+      dotsRef.current.forEach((dot, index) => {
+        if (!dot) return;
+
+        gsap.to(dot, {
+          y: -20,
+          duration: 4 + index * 0.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: index * 0.2,
+        });
+      });
+    },
+    { scope: containerRef }
+  );
+
+  const addCardRef = (el, index) => {
+    if (el && !cardsRef.current.includes(el)) {
+      cardsRef.current[index] = el;
+    }
+  };
+
+  const addDotRef = (el, index) => {
+    if (el && !dotsRef.current.includes(el)) {
+      dotsRef.current[index] = el;
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative min-h-screen flex items-center justify-center bg-black overflow-hidden py-20"
+    >
+      <div className="relative z-10 text-center px-6 max-w-7xl mx-auto w-full">
+        <h2
+          ref={titleRef}
+          className="text-4xl md:text-6xl lg:text-7xl font-light text-white mb-16 tracking-tight opacity-0"
         >
-            <div className="absolute inset-0 bg-black" />
-            
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {Array.from({ length: 15 }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="floating-particle absolute w-1 h-1 bg-white/10 rounded-full"
-                        style={{
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                        }}
-                    />
-                ))}
-            </div>
+          CERTIFICATIONS
+        </h2>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                <div className="text-center mb-20">
-                    <h2 
-                        ref={titleRef}
-                        className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
-                    >
-                        CERTIFICATIONS
-                    </h2>
-                    <p 
-                        ref={subtitleRef}
-                        className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
-                    >
-                        Continuous Growth Through Structured Learning
-                    </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+          {certificates.map((cert, index) => (
+            <div
+              key={cert.id}
+              ref={(el) => addCardRef(el, index)}
+              className="bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-blue-400/30 hover:border-blue-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 group opacity-0"
+            >
+              <div className="relative overflow-hidden h-48">
+                <img
+                  src={cert.image}
+                  alt={`${cert.title} Certificate`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
+                  <a
+                    href={cert.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    View Certificate
+                  </a>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {certificates.map((cert, index) => (
-                        <div 
-                            key={index} 
-                            ref={el => addToCardsRef(el, index)}
-                            className="certificate-card"
-                        >
-                            <CertificateCard card={cert} index={index} />
-                        </div>
-                    ))}
+              </div>
+
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">{cert.title}</h3>
+                  <span className="text-xs font-medium bg-blue-500/20 text-blue-300 px-2 py-1 rounded">
+                    {cert.level}
+                  </span>
                 </div>
+
+                <p className="text-blue-300 text-sm font-medium text-left">
+                  {cert.platform}
+                </p>
+              </div>
             </div>
+          ))}
+        </div>
+      </div>
 
-            <style jsx>{`
-                @keyframes float {
-                    0%, 100% { 
-                        transform: translateY(0px) translateX(0px);
-                        opacity: 0.1;
-                    }
-                    50% { 
-                        transform: translateY(-20px) translateX(10px);
-                        opacity: 0.3;
-                    }
-                }
-                .floating-particle {
-                    animation: float 8s ease-in-out infinite;
-                }
-            `}</style>
-        </section>
-    )
-}
+      <style jsx>{`
+        .floating-dot {
+          animation: certificatesFloat 8s ease-in-out infinite;
+        }
 
-export default CertificatesOption2;
+        @keyframes certificatesFloat {
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+            opacity: 0.3;
+          }
+          33% {
+            transform: translateY(-20px) translateX(8px);
+            opacity: 0.6;
+          }
+          66% {
+            transform: translateY(15px) translateX(-8px);
+            opacity: 0.4;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default CertificatesSection;

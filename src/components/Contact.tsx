@@ -270,7 +270,7 @@ const Contact = () => {
               ref={gifRef}
               src="/images/gifs/joey-how-you-doin.gif"
               alt="Friends celebrating success"
-              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border-2 border-yellow-400/30 opacity-0"
+              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border-2 border-pink-400/30 opacity-0"
             />
           </div>
 
