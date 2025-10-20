@@ -158,7 +158,7 @@ const ProjectCard = ({
     if (!cardRef.current || !sectionInView || !isActive) return;
 
     const tl = gsap.timeline({
-      defaults: { ease: "power3.out" }
+      defaults: { ease: "power3.out" },
     });
 
     gsap.set([contentRef.current, imageRef.current], {
@@ -174,26 +174,29 @@ const ProjectCard = ({
       duration: 2.5,
       ease: "power3.out",
     })
-    .to(
-      imageRef.current,
-      {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 2.5,
-        ease: "power3.out",
-      },
-      "-=0.8"
-    )
+      .to(
+        imageRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 2.5,
+          ease: "power3.out",
+        },
+        "-=0.8"
+      )
 
-    .to(cardRef.current, {
-      y: -12,
-      duration: 4,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    }, "-=1");
-
+      .to(
+        cardRef.current,
+        {
+          y: -12,
+          duration: 4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        },
+        "-=1"
+      );
   }, [isActive, sectionInView]);
 
   return (
@@ -406,7 +409,7 @@ const Tabs = ({
 
   useEffect(() => {
     if (!sectionInView) return;
-    
+
     const activeIndex = tabs.findIndex((tab) => tab.value === activeTab);
     if (tabRefs.current[activeIndex]) {
       gsap.to(tabRefs.current[activeIndex], {
@@ -607,7 +610,7 @@ export function Projects() {
       },
       {
         threshold: 0.3,
-        rootMargin: "-50px 0px -50px 0px"
+        rootMargin: "-50px 0px -50px 0px",
       }
     );
 
@@ -622,67 +625,70 @@ export function Projects() {
     };
   }, [sectionInView]);
 
-  useGSAP(() => {
-    if (!sectionInView || !containerRef.current) return;
+  useGSAP(
+    () => {
+      if (!sectionInView || !containerRef.current) return;
 
-    const tl = gsap.timeline({
-      defaults: { ease: "power3.out" }
-    });
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out" },
+      });
 
-    gsap.set([titleRef.current, subtitleRef.current], {
-      opacity: 0,
-      y: 80,
-      filter: "blur(15px)"
-    });
-
-    tl.fromTo(titleRef.current,
-      { 
-        opacity: 0, 
+      gsap.set([titleRef.current, subtitleRef.current], {
+        opacity: 0,
         y: 80,
         filter: "blur(15px)",
-        scale: 0.9
-      },
-      { 
-        opacity: 1, 
-        y: 0,
-        filter: "blur(0px)",
-        scale: 1,
-        duration: 1.8,
-        ease: "power4.out"
-      }
-    )
+      });
 
-    .fromTo(subtitleRef.current,
-      { 
-        opacity: 0, 
-        y: 40,
-        filter: "blur(12px)",
-      },
-      { 
-        opacity: 1, 
-        y: 0,
-        filter: "blur(0px)",
-        duration: 1.4,
-        ease: "power2.out"
-      },
-      "-=1.2"
-    );
+      tl.fromTo(
+        titleRef.current,
+        {
+          opacity: 0,
+          y: 80,
+          filter: "blur(15px)",
+          scale: 0.9,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          scale: 1,
+          duration: 1.8,
+          ease: "power4.out",
+        }
+      )
+      .fromTo(
+        subtitleRef.current,
+        {
+          opacity: 0,
+          y: 40,
+          filter: "blur(12px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 2,
+          ease: "power2.out",
+        },
+        "-=1.2"
+      );
 
-    gsap.to(".floating-particle", {
-      y: -20,
-      x: 10,
-      rotation: 360,
-      duration: 8,
-      repeat: -1,
-      yoyo: true,
-      stagger: {
-        amount: 2,
-        from: "random"
-      },
-      ease: "sine.inOut"
-    });
-
-  }, { scope: containerRef, dependencies: [sectionInView] });
+      gsap.to(".floating-particle", {
+        y: -20,
+        x: 10,
+        rotation: 360,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        stagger: {
+          amount: 2,
+          from: "random",
+        },
+        ease: "sine.inOut",
+      });
+    },
+    { scope: containerRef, dependencies: [sectionInView] }
+  );
 
   useEffect(() => {
     if (autoRotate && sectionInView) {
@@ -694,7 +700,7 @@ export function Projects() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!sectionInView) return;
-      
+
       if (e.key === "ArrowRight") nextProject();
       if (e.key === "ArrowLeft") prevProject();
       if (e.key === " ") {
@@ -717,7 +723,7 @@ export function Projects() {
 
     const handleTouchEnd = (e: TouchEvent) => {
       if (!sectionInView) return;
-      
+
       touchEndX = e.changedTouches[0].screenX;
       handleSwipe();
     };
@@ -751,7 +757,7 @@ export function Projects() {
       className="bg-black min-h-screen relative overflow-hidden"
     >
       <div className="absolute inset-0 bg-black" />
-      
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {Array.from({ length: 20 }).map((_, i) => (
           <div
@@ -777,20 +783,22 @@ export function Projects() {
             ref={subtitleRef}
             className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
           >
-            Exploring the connections between IoT, data engineering, and AI through practical applications and research. Each project represents a unique intersection of technology and real-world problem solving.
+            Exploring the connections between IoT, data engineering, and AI
+            through practical applications and research. Each project represents
+            a unique intersection of technology and real-world problem solving.
           </p>
         </div>
 
-        <Tabs 
-          tabs={tabs} 
-          activeTab={activeTab} 
+        <Tabs
+          tabs={tabs}
+          activeTab={activeTab}
           onTabChange={setActiveTab}
           sectionInView={sectionInView}
         />
 
         {currentProject && (
-          <ProjectCard 
-            project={currentProject} 
+          <ProjectCard
+            project={currentProject}
             isActive={true}
             sectionInView={sectionInView}
           />
@@ -806,11 +814,12 @@ export function Projects() {
 
       <style jsx>{`
         @keyframes float {
-          0%, 100% { 
+          0%,
+          100% {
             transform: translateY(0px) translateX(0px);
             opacity: 0.1;
           }
-          50% { 
+          50% {
             transform: translateY(-20px) translateX(10px);
             opacity: 0.3;
           }
