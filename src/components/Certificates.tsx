@@ -202,12 +202,12 @@ const CertificatesSection = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold text-white">{cert.title}</h3>
-                  <span className="text-xs font-medium bg-gray-500/20 text-gray-300 px-2 py-1 rounded">
+                  <span className="text-xs font-medium bg-green-500/20 text-gray-300 px-2 py-1 rounded border border-green-500/40">
                     {cert.level}
                   </span>
                 </div>
 
-                <p className="text-gray-300 text-sm font-medium text-left">
+                <p className="text-blue-300 text-sm font-medium text-left">
                   {cert.platform}
                 </p>
               </div>
