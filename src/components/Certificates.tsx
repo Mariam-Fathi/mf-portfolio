@@ -179,7 +179,7 @@ const CertificatesSection = () => {
             <div
               key={cert.id}
               ref={(el) => addCardRef(el, index)}
-              className="bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-blue-400/30 hover:border-blue-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20 group opacity-0"
+              className="bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-400/30 hover:border-gray-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-gray-500/20 group opacity-0"
             >
               <div className="relative overflow-hidden h-48">
                 <img
@@ -192,7 +192,7 @@ const CertificatesSection = () => {
                     href={cert.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                   >
                     View Certificate
                   </a>
@@ -202,12 +202,12 @@ const CertificatesSection = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold text-white">{cert.title}</h3>
-                  <span className="text-xs font-medium bg-blue-500/20 text-blue-300 px-2 py-1 rounded">
+                  <span className="text-xs font-medium bg-gray-500/20 text-gray-300 px-2 py-1 rounded">
                     {cert.level}
                   </span>
                 </div>
 
-                <p className="text-blue-300 text-sm font-medium text-left">
+                <p className="text-gray-300 text-sm font-medium text-left">
                   {cert.platform}
                 </p>
               </div>
