@@ -137,8 +137,10 @@ const MinimalCinematicHero = () => {
             xPercent: -50,
             yPercent: -50,
             zIndex: 40,
+            fontSize: "6rem",
             textAlign: "center",
             margin: 0,
+            lineHeight: "1.1",
             duration: 0.1,
             ease: "none",
           },
@@ -173,7 +175,7 @@ const MinimalCinematicHero = () => {
           scale: 0.5,
           opacity: 0.6,
           duration: 15,
-          borderRadius: "24px",
+          borderRadius: "24px",   
           ease: "back.out",
         })
         .to(
