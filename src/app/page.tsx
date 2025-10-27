@@ -14,10 +14,10 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <ProjectSection />
-      <FriendsConnectionBridge />
+      {/* <FriendsConnectionBridge /> */}
       <Experience />
       <Technologies />
+      <ProjectSection />
       <Certificates />
       <Contact />
       <Footer />

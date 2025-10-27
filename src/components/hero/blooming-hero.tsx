@@ -3,110 +3,312 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const MinimalCinematicHero = () => {
-    const containerRef = useRef(null);
-    const titleRef = useRef(null);
-    const subtitleRef = useRef(null);
-    const imageRef = useRef(null);
+  const containerRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const imageRef = useRef(null);
+  const heroSectionRef = useRef(null);
+  const contentRef = useRef(null);
+  const overlayRef = useRef(null);
 
-    useGSAP(() => {
-        const tl = gsap.timeline();
+  useGSAP(
+    () => {
+      const initialTl = gsap.timeline();
 
-        tl.fromTo(titleRef.current,
-            { 
-                opacity: 0, 
-                y: 30,
-                filter: "blur(10px)"
-            },
-            { 
-                opacity: 1, 
-                y: 0,
-                filter: "blur(0px)",
-                duration: 1.5,
-                ease: "power2.out"
-            }
+      initialTl
+        .fromTo(
+          titleRef.current,
+          {
+            opacity: 0,
+            y: 30,
+            filter: "blur(10px)",
+          },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 2.5,
+            ease: "power3.out",
+          }
         )
-
-        .fromTo(subtitleRef.current,
-            { 
-                opacity: 0, 
-                y: 20,
-                filter: "blur(8px)",
-                height: 0, 
-                marginBottom: 0
-            },
-            { 
-                opacity: 1, 
-                y: 0,
-                filter: "blur(0px)",
-                height: "auto",
-                marginBottom: "4rem",
-                duration: 1.2,
-                ease: "power2.out"
-            },
-            "+=0.3"
+        .fromTo(
+          subtitleRef.current,
+          {
+            opacity: 0,
+            y: 20,
+            filter: "blur(8px)",
+            height: 0,
+            marginBottom: 0,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            height: "auto",
+            marginBottom: "4rem",
+            duration: 2,
+            ease: "power3.out",
+          },
+          "-=1.5"
         );
 
-    }, { scope: containerRef });
+      const overlay = document.createElement("div");
+      overlay.className =
+        "fixed inset-0 bg-black z-30 pointer-events-none opacity-0";
+      overlayRef.current = overlay;
+      document.body.appendChild(overlay);
 
-    return (
-        <div ref={containerRef} className="relative min-h-screen flex items-center justify-center py-40 bg-black">
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
-            
-            <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-                <h1 
-                    ref={titleRef}
-                    className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 tracking-tight opacity-0"
-                >
-                    EVERYTHING<br />IS CONNECTED
-                </h1>
+      gsap.set(imageRef.current, {
+        transformOrigin: "center center",
+      });
 
-                <p 
-                    ref={subtitleRef}
-                    className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto font-light tracking-wide opacity-0 h-0 overflow-hidden"
-                >
-                    We're sometimes trained—whether intuitively or in school—to isolate knowledge into pockets, where what exists in one pocket has nothing to do with what's in the other. When in reality, it's a web. And the one ingredient that fuels that web... CURIOSITY.
-                </p>
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroSectionRef.current,
+          start: "bottom bottom",
+          end: "+=500%",
+          scrub: 2,
+          pin: true,
+          anticipatePin: 1,
+        },
+      });
 
-                <div className="relative">
-                    <img 
-                        src="/images/gifs/brain-neuron.gif" 
-                        alt="Brain neurons connecting"
-                        className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
-                    />
-                </div>
-            </div>
+      scrollTl
+        .to(subtitleRef.current, {
+          opacity: 0,
+          y: -20,
+          duration: 2,
+          ease: "power2.inOut",
+        })
 
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {Array.from({ length: 12 }).map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute w-1 h-1 bg-white/10 rounded-full"
-                        style={{
-                            left: `${10 + (i * 8)}%`,
-                            top: `${20 + (Math.random() * 60)}%`,
-                            animation: `float ${8 + Math.random() * 8}s ease-in-out infinite`,
-                            animationDelay: `${Math.random() * 5}s`
-                        }}
-                    />
-                ))}
-            </div>
+        .to(
+          imageRef.current,
+          {
+            scale: 1.8,
+            duration: 8,
+            ease: "power1.inOut",
+          },
+          "-=1"
+        )
 
-            <style jsx>{`
-                @keyframes float {
-                    0%, 100% { 
-                        transform: translateY(0px) translateX(0px);
-                        opacity: 0.1;
-                    }
-                    50% { 
-                        transform: translateY(-20px) translateX(10px);
-                        opacity: 0.3;
-                    }
-                }
-            `}</style>
+        .to(
+          overlayRef.current,
+          {
+            opacity: 0.3,
+            duration: 6,
+            ease: "power2.inOut",
+          },
+          "-=6"
+        )
+
+        .to(imageRef.current, {
+          scale: 3,
+          duration: 10,
+          ease: "power1.inOut",
+        })
+
+        .to(imageRef.current, {
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          xPercent: -50,
+          yPercent: -50,
+          width: "100vw",
+          height: "100vh",
+          borderRadius: "0px",
+          border: "none",
+          objectFit: "cover",
+          zIndex: 35,
+          duration: 0.1,
+          ease: "none",
+        })
+
+        .to(
+          titleRef.current,
+          {
+            position: "fixed",
+            top: "20%",
+            left: "50%",
+            xPercent: -50,
+            yPercent: -50,
+            zIndex: 40,
+            textAlign: "center",
+            margin: 0,
+            duration: 0.1,
+            ease: "none",
+          },
+          "-=6"
+        )
+        .to(
+          titleRef.current,
+          {
+            top: "50%",
+            duration: 10,
+            ease: "sine",
+          },
+          "-=6"
+        )
+
+        .to(imageRef.current, {
+          scale: 5,
+          duration: 12,
+          ease: "power1.inOut",
+        })
+        .to(
+          overlayRef.current,
+          {
+            opacity: 0.7,
+            duration: 10,
+            ease: "power1.inOut",
+          },
+          "-=12"
+        )
+
+        .to(imageRef.current, {
+          scale: 0.5,
+          opacity: 0.6,
+          duration: 15,
+          borderRadius: "24px",
+          ease: "back.out",
+        })
+        .to(
+          titleRef.current,
+          {
+            scale: 0.5,
+            opacity: 0.3,
+            duration: 15,
+            ease: "power2.inOut",
+          },
+          "-=15"
+        )
+
+        .to(imageRef.current, {
+          scale: 0.1,
+          opacity: 0,
+          duration: 8,
+          ease: "power2.in",
+        })
+        .to(
+          titleRef.current,
+          {
+            scale: 0.2,
+            opacity: 0,
+            duration: 8,
+            ease: "power2.in",
+          },
+          "-=8"
+        )
+        .to(
+          overlayRef.current,
+          {
+            opacity: 0,
+            duration: 6,
+            ease: "power2.inOut",
+          },
+          "-=6"
+        );
+
+      return () => {
+        if (overlayRef.current && document.body.contains(overlayRef.current)) {
+          document.body.removeChild(overlayRef.current);
+        }
+      };
+    },
+    { scope: containerRef }
+  );
+
+  return (
+    <div ref={containerRef}>
+      <section
+        ref={heroSectionRef}
+        className="relative min-h-screen flex items-center justify-center bg-black pt-72"
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
+
+        <div
+          ref={contentRef}
+          className="relative z-10 text-center px-6 max-w-4xl mx-auto"
+        >
+          <h1
+            ref={titleRef}
+            className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 tracking-tight opacity-0"
+          >
+            EVERYTHING
+            <br />
+            IS CONNECTED
+          </h1>
+
+          <p
+            ref={subtitleRef}
+            className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto font-light tracking-wide opacity-0 h-0 overflow-hidden"
+          >
+            We're sometimes trained—whether intuitively or in school—to isolate
+            knowledge into pockets, where what exists in one pocket has nothing
+            to do with what's in the other. When in reality, it's a web. And the
+            one ingredient that fuels that web... CURIOSITY.
+          </p>
+
+          <div className="relative">
+            <img
+              ref={imageRef}
+              src="/images/gifs/brain-neuron.gif"
+              alt="Brain neurons connecting"
+              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
+              style={{ transformOrigin: "center center" }}
+            />
+          </div>
         </div>
-    );
+
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-white/10 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `cinematicFloat ${
+                  20 + Math.random() * 15
+                }s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 10}s`,
+              }}
+            />
+          ))}
+        </div>
+      </section>
+
+      <style jsx>{`
+        @keyframes cinematicFloat {
+          0%,
+          100% {
+            transform: translateY(0px) translateX(0px);
+            opacity: 0.05;
+          }
+          20% {
+            transform: translateY(-8px) translateX(3px);
+            opacity: 0.1;
+          }
+          40% {
+            transform: translateY(-16px) translateX(-3px);
+            opacity: 0.15;
+          }
+          60% {
+            transform: translateY(-24px) translateX(2px);
+            opacity: 0.2;
+          }
+          80% {
+            transform: translateY(-18px) translateX(-2px);
+            opacity: 0.1;
+          }
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default MinimalCinematicHero;

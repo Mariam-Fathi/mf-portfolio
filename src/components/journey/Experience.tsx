@@ -191,7 +191,7 @@ const ExperienceTimeline = () => {
                 {card.fromDate} {card.toDate && `→ ${card.toDate}`}
               </span>
               <span className="text-gray-500">•</span>
-              <span className="text-gray-400 font-light">{card.type}</span>
+              <span className="text-blue-400 font-light">{card.type}</span>
             </div>
           </div>
         </div>
@@ -221,14 +221,14 @@ const ExperienceTimeline = () => {
         )}
 
         <div>
-          <p className="text-gray-500 text-sm font-medium mb-4 uppercase tracking-wider">
+          <p className="text-blue-400 text-sm font-medium mb-4 uppercase tracking-wider">
             Key Achievements
           </p>
           <ul className="space-y-3">
             {card.responsibilities.map((responsibility, idx) => (
               <li
                 key={idx}
-                className="text-gray-300 text-base leading-relaxed font-light pl-4 border-l-2 border-gray-700/50"
+                className="text-gray-300 text-base leading-relaxed font-light pl-4 border-l-2 border-blue-500/30 hover:border-blue-400 transition-colors duration-300"
               >
                 {responsibility}
               </li>
