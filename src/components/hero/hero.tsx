@@ -32,7 +32,7 @@ const MinimalCinematicHero = () => {
             opacity: 1,
             y: 0,
             filter: "blur(0px)",
-            duration: 3,
+            duration: 2.5,
             ease: "power3.out",
           }
         )
@@ -54,24 +54,7 @@ const MinimalCinematicHero = () => {
             duration: 2,
             ease: "power3.out",
           },
-          "-=.5"
-        )
-        .fromTo(
-          imageRef.current,
-          {
-            opacity: 0,
-            y: 10,
-            filter: "blur(8px)",
-            marginBottom: 0,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 2,
-            ease: "power1.in",
-          },
-          "-=3.5"
+          "-=1.5"
         );
 
       const overlay = document.createElement("div");
@@ -88,7 +71,7 @@ const MinimalCinematicHero = () => {
         scrollTrigger: {
           trigger: heroSectionRef.current,
           start: "bottom bottom",
-          end: "+=600%",
+          end: "+=500%",
           scrub: 2,
           pin: true,
           anticipatePin: 1,
@@ -192,7 +175,7 @@ const MinimalCinematicHero = () => {
           scale: 0.5,
           opacity: 0.6,
           duration: 15,
-          borderRadius: "24px",
+          borderRadius: "24px",   
           ease: "back.out",
         })
         .to(
@@ -277,7 +260,7 @@ const MinimalCinematicHero = () => {
               ref={imageRef}
               src="/images/gifs/brain-neuron.gif"
               alt="Brain neurons connecting"
-              className="w-full lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
+              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
               style={{ transformOrigin: "center center" }}
             />
           </div>
