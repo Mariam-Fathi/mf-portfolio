@@ -50,7 +50,7 @@ const MinimalCinematicHero = () => {
             y: 0,
             filter: "blur(0px)",
             height: "auto",
-            marginBottom: "4rem",
+            marginBottom: "2rem",
             duration: 2,
             ease: "power3.out",
           },
@@ -175,7 +175,7 @@ const MinimalCinematicHero = () => {
           scale: 0.5,
           opacity: 0.6,
           duration: 15,
-          borderRadius: "24px",   
+          borderRadius: "24px",
           ease: "back.out",
         })
         .to(
