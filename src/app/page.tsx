@@ -1,7 +1,6 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/hero/hero";
-import Projects from "@/components/projects/projects";
 import ExperienceTimeline from "@/components/journey/Experience";
 import CinematicShowcase from "@/components/projects/projects";
 
@@ -11,7 +10,6 @@ export default function Home() {
       <Navbar />
       <Hero />
       <ExperienceTimeline />
-
       <CinematicShowcase />
     </>
   );

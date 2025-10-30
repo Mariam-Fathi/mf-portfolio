@@ -15,49 +15,36 @@ const MinimalCinematicHero = () => {
   const heroSectionRef = useRef<HTMLElement | null>(null);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const overlayRef = useRef<HTMLDivElement | null>(null);
+  const repriseSubtitleRef = useRef<HTMLParagraphElement | null>(null);
+  const subtitleLineRefs = useRef<HTMLSpanElement[]>([]);
+  const curiosityRef = useRef<HTMLDivElement | null>(null);
 
   useGSAP(
     () => {
       const initialTl = gsap.timeline();
 
-      initialTl
-        .fromTo(
-          titleRef.current,
-          {
-            opacity: 0,
-            y: 30,
-            filter: "blur(10px)",
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 2.5,
-            ease: "power3.out",
-          }
-        )
+      // Hide initial subtitle from the start
+      gsap.set(subtitleRef.current, {
+        opacity: 0,
+        visibility: "hidden",
+        display: "none",
+      });
 
-        
-        .fromTo(
-          subtitleRef.current,
-          {
-            opacity: 0,
-            y: 20,
-            filter: "blur(8px)",
-            height: 0,
-            marginBottom: 0,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            height: "auto",
-            marginBottom: "4rem",
-            duration: 2,
-            ease: "power3.out",
-          },
-          "-=1.5"
-        );
+      initialTl.fromTo(
+        titleRef.current,
+        {
+          opacity: 0,
+          y: 30,
+          filter: "blur(10px)",
+        },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 4,
+          ease: "power3.out",
+        }
+      );
 
       const overlay = document.createElement("div");
       overlay.className =
@@ -71,27 +58,20 @@ const MinimalCinematicHero = () => {
         scrollTrigger: {
           trigger: heroSectionRef.current,
           start: "bottom bottom",
-          end: "+=500%",
+          end: "+=340%",
           scrub: 2,
           pin: true,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 
       scrollTl
-        .to(subtitleRef.current, {
-          opacity: 0,
-          y: -20,
-          duration: 2,
-          ease: "power2.inOut",
-        })
-        
-
         .to(
           imageRef.current,
           {
             scale: 1.8,
-            duration: 8,
+            duration: 12,
             ease: "power1.inOut",
           },
           "-=1"
@@ -101,15 +81,15 @@ const MinimalCinematicHero = () => {
           overlayRef.current,
           {
             opacity: 0.3,
-            duration: 6,
+            duration: 9,
             ease: "power2.inOut",
           },
-          "-=6"
+          "-=9"
         )
 
         .to(imageRef.current, {
           scale: 3,
-          duration: 10,
+          duration: 15,
           ease: "power1.inOut",
         })
 
@@ -129,37 +109,40 @@ const MinimalCinematicHero = () => {
           duration: 0.1,
           ease: "none",
         })
-        
 
-        .to(titleRef.current, {
-          position: "fixed",
-          top: "20%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          zIndex: 40,
-          fontSize: "6rem",
-          textAlign: "center",
-          margin: 0,
-          lineHeight: "1.1",
-          duration: 0.1,
-          ease: "none",
-        }, "-=6")
-        .to(titleRef.current, { top: "50%", duration: 10, ease: "sine" }, "-=6")
+        .to(
+          titleRef.current,
+          {
+            position: "fixed",
+            top: "20%",
+            left: "50%",
+            xPercent: -50,
+            yPercent: -50,
+            zIndex: 40,
+            fontSize: "6rem",
+            textAlign: "center",
+            margin: 0,
+            lineHeight: "1.1",
+            duration: 0.1,
+            ease: "none",
+          },
+          "-=6"
+        )
+        .to(titleRef.current, { top: "50%", duration: 15, ease: "sine" }, "-=6")
 
         .to(imageRef.current, {
           scale: 5,
-          duration: 12,
+          duration: 18,
           ease: "power1.inOut",
         })
         .to(
           overlayRef.current,
           {
             opacity: 0.7,
-            duration: 10,
+            duration: 15,
             ease: "power1.inOut",
           },
-          "-=12"
+          "-=18"
         )
 
         // Start circular mask right when zooming OUT begins
@@ -170,8 +153,8 @@ const MinimalCinematicHero = () => {
 
         .to(imageRef.current, {
           scale: 0.5,
-          opacity: 0.6,
-          duration: 15,
+          opacity: 0,
+          duration: 22,
           ease: "power2.inOut",
         })
         .to(
@@ -179,16 +162,16 @@ const MinimalCinematicHero = () => {
           {
             scale: 0.5,
             opacity: 0.3,
-            duration: 15,
+            duration: 22,
             ease: "power2.inOut",
           },
-          "-=15"
+          "-=22"
         )
 
         .to(imageRef.current, {
           scale: 0.1,
           opacity: 0,
-          duration: 8,
+          duration: 12,
           clipPath: "circle(0vmax at 50vw 50vh)",
           ease: "power2.in",
         })
@@ -197,20 +180,111 @@ const MinimalCinematicHero = () => {
           {
             scale: 0.2,
             opacity: 0,
-            duration: 8,
+            duration: 12,
             ease: "power2.in",
           },
-          "-=8"
+          "-=12"
         )
         .to(
           overlayRef.current,
           {
             opacity: 0,
-            duration: 6,
+            duration: 9,
             ease: "power2.inOut",
           },
-          "-=6"
+          "-=9"
         );
+
+      // Re-introduce subtitle fullscreen (slightly bigger) - starts blurred and dimmed
+      scrollTl
+        .set(repriseSubtitleRef.current, {
+          display: "flex",
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          xPercent: -50,
+          yPercent: -50,
+          width: "90vw",
+          maxWidth: "1200px",
+          zIndex: 45,
+          margin: 0,
+          height: "auto",
+          textAlign: "center",
+          pointerEvents: "none",
+          fontSize: "clamp(1.25rem, 1.5vw + 1rem, 2rem)",
+          lineHeight: "1.6",
+          opacity: 0.4,
+          filter: "blur(12px)",
+          transformOrigin: "center center",
+          scale: 0.85,
+        })
+        .fromTo(
+          repriseSubtitleRef.current,
+          { opacity: 0.4, filter: "blur(12px)", scale: 0.85 },
+          {
+            opacity: 0.4,
+            filter: "blur(0px)",
+            scale: 1,
+            duration: 4,
+            ease: "power2.out",
+          }
+        )
+        // Set initial state of lines (blurred and dimmed)
+        .set(subtitleLineRefs.current, {
+          filter: "blur(8px)",
+          opacity: 0.4,
+          color: "#9ca3af",
+        })
+        // Very slowly brighten each line from dimmed to white and clear their blur
+        .to(
+          subtitleLineRefs.current,
+          {
+            color: "#ffffff",
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 22,
+            stagger: { amount: 6, from: "start" },
+            ease: "power1.inOut",
+          },
+          "<"
+        )
+        // Hold at full brightness for a moment before fading out
+        .to({}, { duration: 4, ease: "none" })
+        .to(repriseSubtitleRef.current, {
+          opacity: 0,
+          duration: 6,
+          ease: "power2.inOut",
+        })
+        // CURIOSITY: zoom in with circular fade-in at the end
+        .set(curiosityRef.current, {
+          display: "flex",
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          xPercent: -50,
+          yPercent: -50,
+          zIndex: 50,
+          opacity: 0,
+          scale: 0.5,
+          clipPath: "circle(0% at 50% 50%)",
+          transformOrigin: "center center",
+        })
+        .to(curiosityRef.current, {
+          opacity: 1,
+          scale: 1.2,
+          clipPath: "circle(100% at 50% 50%)",
+          duration: 9,
+          ease: "power2.out",
+        })
+        // Hold for a moment then fade out
+        .to({}, { duration: 3, ease: "none" })
+        .to(curiosityRef.current, {
+          opacity: 0,
+          scale: 1.5,
+          clipPath: "circle(0% at 50% 50%)",
+          duration: 6,
+          ease: "power2.inOut",
+        });
 
       return () => {
         if (overlayRef.current && document.body.contains(overlayRef.current)) {
@@ -225,12 +299,11 @@ const MinimalCinematicHero = () => {
     <div ref={containerRef}>
       <section
         ref={heroSectionRef}
-        className="relative min-h-screen flex items-center justify-center bg-black pt-72"
+        className="relative min-h-screen flex items-center justify-center bg-black pt-44"
       >
-
         <div
           ref={contentRef}
-          className="relative z-10 text-center px-6 max-w-4xl mx-auto"
+          className="relative z-10 text-center px-6 max-w-7xl mx-auto"
         >
           <h1
             ref={titleRef}
@@ -241,27 +314,74 @@ const MinimalCinematicHero = () => {
             IS CONNECTED
           </h1>
 
-          <p
-            ref={subtitleRef}
-            className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto font-light tracking-wide opacity-0 h-0 overflow-hidden"
-          >
-            We're sometimes trained—whether intuitively or in school—to isolate
-            knowledge into pockets, where what exists in one pocket has nothing
-            to do with what's in the other. When in reality, it's a web. And the
-            one ingredient that fuels that web... CURIOSITY.
-          </p>
-
-          <div className="relative">
+          <div className="relative w-full">
             <img
               ref={imageRef}
               src="/images/gifs/brain-neuron.gif"
               alt="Brain neurons connecting"
-              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
+              className="w-[60rem] h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
               style={{ transformOrigin: "center center" }}
             />
           </div>
         </div>
       </section>
+
+      {/* Reprise Subtitle - appears after title/GIF vanish */}
+      <p
+        ref={repriseSubtitleRef}
+        className="fixed inset-0 z-50 flex items-center justify-center px-6 opacity-0 pointer-events-none text-gray-500"
+        style={{ display: "none" }}
+      >
+        <span className="block text-center">
+          <span
+            ref={(el) => {
+              if (el) subtitleLineRefs.current[0] = el;
+            }}
+            className="block opacity-40"
+            style={{ filter: "blur(8px)", color: "#9ca3af" }}
+          >
+            We're sometimes trained—whether intuitively or in school—to isolate
+          </span>
+          <span
+            ref={(el) => {
+              if (el) subtitleLineRefs.current[1] = el;
+            }}
+            className="block opacity-40"
+            style={{ filter: "blur(8px)", color: "#9ca3af" }}
+          >
+            knowledge into pockets, where what exists in one pocket has nothing
+          </span>
+          <span
+            ref={(el) => {
+              if (el) subtitleLineRefs.current[2] = el;
+            }}
+            className="block opacity-40"
+            style={{ filter: "blur(8px)", color: "#9ca3af" }}
+          >
+            to do with what's in the other. When in reality, it's a web. And the
+          </span>
+          <span
+            ref={(el) => {
+              if (el) subtitleLineRefs.current[3] = el;
+            }}
+            className="block opacity-40"
+            style={{ filter: "blur(8px)", color: "#9ca3af" }}
+          >
+            one ingredient that fuels that web...
+          </span>
+        </span>
+      </p>
+
+      {/* CURIOSITY - appears at the end with circular fade-in zoom */}
+      <div
+        ref={curiosityRef}
+        className="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none"
+        style={{ display: "none" }}
+      >
+        <span className="text-6xl md:text-8xl lg:text-9xl xl:text-[12rem] font-light text-white tracking-tight">
+          CURIOSITY
+        </span>
+      </div>
 
       <style jsx>{`
         @keyframes cinematicFloat {
@@ -287,7 +407,6 @@ const MinimalCinematicHero = () => {
             opacity: 0.1;
           }
         }
-        
       `}</style>
     </div>
   );

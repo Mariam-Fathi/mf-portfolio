@@ -12,8 +12,7 @@ const projects = [
     role: "Lead Mobile Engineer",
     description:
       "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain.",
-    image:
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80",
+    image: "/images/sk.png",
     tags: ["IoT", "Mobile", "React Native"],
     links: [
       {
@@ -32,8 +31,7 @@ const projects = [
     role: "Data Engineer & Analyst",
     description:
       "Analyzed 2.2M+ records with comprehensive data quality auditing, achieving 87.4% memory reduction. Identified 38.19% suspicious records and developed pattern recognition algorithms for regulatory review.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/kaggle.png",
     tags: ["Data Engineering", "Python", "Analytics"],
     links: [
       {
@@ -52,8 +50,8 @@ const projects = [
     role: "AI Research Lead",
     description:
       "Engineered automated system predicting Big Five personality traits through multimodal video analysis using LSTNet, PyAudioAnalysis, and BERT with XGBoost late fusion strategy.",
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+    image: "/images/graduation.png",
+
     tags: ["AI", "Computer Vision", "Research"],
     links: [
       {
@@ -72,8 +70,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Internal tool leveraging Hugging Face models to analyze project descriptions and generate instant cost estimations, achieving 85% confidence and reducing estimation time from days to minutes.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/ai.png",
+
     tags: ["AI", "Automation", "CRM"],
     links: [],
   },
@@ -83,8 +81,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Production-ready PropTech solution with Google OAuth, advanced property search, real-time notifications, and Stripe payment integration. Features personalized tracking and intelligent preference analysis.",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
+    image: "/images/homi.png",
+
     tags: ["React Native", "Appwrite", "Stripe"],
     links: [
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-app" },
@@ -100,8 +98,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Comprehensive analytics dashboard tracking revenue metrics, user engagement, property performance, and platform health. Implements smart caching and transforms raw data into actionable business intelligence.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/homi-dashboard.png",
+
     tags: ["Analytics", "Next.js", "Dashboard"],
     links: [
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-analytics" },
@@ -112,217 +110,199 @@ const projects = [
 
 export default function CinematicShowcase() {
   const [currentProject, setCurrentProject] = useState(0);
-  const sectionRef = useRef(null);
-  const triggerRef = useRef(null);
-  const projectRefs = useRef([]);
-  const scrollTriggersRef = useRef([]);
-
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const projectRefs = useRef<HTMLDivElement[]>([]);
+  const scrollTriggersRef = useRef<ScrollTrigger[]>([]);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const headerSubtitleRef = useRef<HTMLParagraphElement | null>(null);
   useEffect(() => {
-    const section = sectionRef.current;
-    const trigger = triggerRef.current;
-    const projectElements = projectRefs.current;
-
-    // Only kill our own scroll triggers
-    scrollTriggersRef.current.forEach((st) => st && st.kill());
-    scrollTriggersRef.current = [];
-
-    // Set initial positions
-    gsap.set(projectElements, {
-      yPercent: (i) => i * 100, // Each project starts 100% below the previous
-      zIndex: (i) => projects.length - i,
-    });
-
-    // Create the main scroll trigger that pins the section
-    const mainTrigger = ScrollTrigger.create({
-      trigger: trigger,
-      start: "top top",
-      end: `+=${projects.length * window.innerHeight}`,
-      pin: section,
-      pinSpacing: true,
-      scrub: 1.5,
-      anticipatePin: 1,
-    });
-    scrollTriggersRef.current.push(mainTrigger);
-
-    // Create one continuous animation for all projects
-    const totalDuration = projects.length * window.innerHeight;
-
-    projectElements.forEach((project, index) => {
-      // Calculate start and end points for each project
-      const startPosition = index * window.innerHeight;
-      const endPosition = (index + 1) * window.innerHeight;
-
-      // For the first project (index 0)
-      if (index === 0) {
-        ScrollTrigger.create({
-          trigger: trigger,
-          start: `top top`,
-          end: `top+=${endPosition} top`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-
-            // First project moves up and fades out
-            gsap.to(projectElements[0], {
-              yPercent: -100 * progress,
-              scale: 1 - 0.05 * progress,
-              opacity: 1 - progress,
-              filter: `blur(${progress * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            // Second project enters
-            if (projectElements[1]) {
-              gsap.to(projectElements[1], {
-                yPercent: 100 - 100 * progress,
-                scale: 0.95 + 0.05 * progress,
-                opacity: progress,
-                filter: `blur(${(1 - progress) * 8}px)`,
-                ease: "none",
-                duration: 0,
-              });
-            }
-
-            if (progress > 0.5 && currentProject !== 1) {
-              setCurrentProject(1);
-            } else if (progress <= 0.5 && currentProject !== 0) {
-              setCurrentProject(0);
-            }
-          },
-        });
+    const updateHeader = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.getBoundingClientRect().height);
       }
-      // For middle projects
-      else if (index < projects.length - 1) {
-        ScrollTrigger.create({
-          trigger: trigger,
-          start: `top+=${startPosition} top`,
-          end: `top+=${endPosition} top`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
+    };
+    updateHeader();
+    window.addEventListener("resize", updateHeader);
+    return () => window.removeEventListener("resize", updateHeader);
+  }, []);
 
-            // Current project moves up and fades out
-            gsap.to(projectElements[index], {
-              yPercent: -100 * progress,
-              scale: 1 - 0.05 * progress,
-              opacity: 1 - progress,
-              filter: `blur(${progress * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            // Next project enters
-            gsap.to(projectElements[index + 1], {
-              yPercent: 100 - 100 * progress,
-              scale: 0.95 + 0.05 * progress,
-              opacity: progress,
-              filter: `blur(${(1 - progress) * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            if (progress > 0.5 && currentProject !== index + 1) {
-              setCurrentProject(index + 1);
-            } else if (progress <= 0.5 && currentProject !== index) {
-              setCurrentProject(index);
-            }
-          },
-        });
-      }
-      // Last project just stays in view
+  // Header entrance animation (match Journey section style)
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: headerRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
+      },
     });
+
+    tl.fromTo(
+      headerTitleRef.current,
+      { opacity: 0, y: 80, filter: "blur(15px)", scale: 0.9 },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        scale: 1,
+        duration: 1.8,
+        ease: "power4.out",
+      }
+    ).fromTo(
+      headerSubtitleRef.current,
+      { opacity: 0, y: 40, filter: "blur(12px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.4,
+        ease: "power2.out",
+      },
+      "-=1.2"
+    );
 
     return () => {
-      scrollTriggersRef.current.forEach((st) => st && st.kill());
+      tl.scrollTrigger && tl.scrollTrigger.kill();
+      tl.kill();
     };
-  }, [currentProject]);
+  }, []);
 
   // Alternative approach with simpler continuous animation
   useEffect(() => {
     const section = sectionRef.current;
-    const trigger = triggerRef.current;
+    const trigger = sectionRef.current; // trigger on the pinned container to avoid header offset
     const projectElements = projectRefs.current;
 
     // Kill existing triggers
     scrollTriggersRef.current.forEach((st) => st && st.kill());
     scrollTriggersRef.current = [];
 
-    // Set initial positions
+    // Set initial positions (horizontal stack)
     gsap.set(projectElements, {
-      yPercent: (i) => i * 100,
+      xPercent: (i) => i * 100,
       zIndex: (i) => projects.length - i,
     });
 
-    // Create main pin trigger
+    // Create main pin trigger (fixed view with snapping)
     const mainTrigger = ScrollTrigger.create({
       trigger: trigger,
       start: "top top",
-      end: `+=${(projects.length - 1) * window.innerHeight}`,
+      end: `+=${projects.length * window.innerHeight}`,
       pin: section,
       pinSpacing: true,
-      scrub: 1,
+      scrub: 0.7,
+      snap: {
+        snapTo: (value) => {
+          const step = 1 / (projects.length - 1);
+          const snapped = Math.round(value / step) * step;
+          const distance = Math.abs(value - snapped);
+          return distance < step * 0.5 ? snapped : value; // only snap when reasonably close
+        },
+        duration: { min: 0.08, max: 0.2 },
+        ease: "power2.out",
+      },
       anticipatePin: 1,
+      invalidateOnRefresh: true,
       onUpdate: (self) => {
-        const totalProgress = self.progress;
-        const currentIndex = Math.min(
-          Math.floor(totalProgress * projects.length),
-          projects.length - 1
-        );
+        const segments = Math.max(1, projects.length - 1);
+        const totalProgress = self.progress; // 0..1 across whole pinned area
+        const trackProgress = totalProgress * segments; // 0..(n-1) float
+        const nearestIndex = Math.round(trackProgress);
+        const stepSize = 1 / segments;
 
-        // Update current project indicator
-        if (currentIndex !== currentProject) {
-          setCurrentProject(currentIndex);
+        // Cinematic zoom: zoom in on entry, zoom out near exit
+        const zoomInEnd = 0.12; // first 12%
+        const zoomOutStart = 0.88; // last 12%
+        let scaleValue = 1;
+        if (totalProgress <= zoomInEnd) {
+          const p = Math.min(1, totalProgress / zoomInEnd);
+          scaleValue = 1 + p * 0.05;
+        } else if (totalProgress >= zoomOutStart) {
+          const p = Math.min(
+            1,
+            (totalProgress - zoomOutStart) / (1 - zoomOutStart)
+          );
+          scaleValue = 1.05 - p * 0.15;
+        } else {
+          scaleValue = 1.05;
+        }
+        gsap.to(section, {
+          scale: scaleValue,
+          transformOrigin: "center center",
+          duration: 0,
+          ease: "none",
+        });
+
+        // Slide the header up and fade it during the zoom-in so the project fills the viewport
+        if (headerRef.current && headerHeight > 0) {
+          const liftProgress = Math.min(1, totalProgress / zoomInEnd);
+          gsap.to(headerRef.current, {
+            y: -headerHeight * liftProgress,
+            opacity: 1 - 0.95 * liftProgress,
+            duration: 0,
+            ease: "none",
+          });
         }
 
-        // Animate all projects based on total progress
-        projectElements.forEach((project, index) => {
-          const projectProgress = Math.max(
-            0,
-            Math.min(1, totalProgress * projects.length - index)
-          );
-
-          if (index === currentIndex) {
-            // Current project
-            gsap.to(project, {
-              yPercent: -100 * projectProgress,
-              scale: 1 - 0.05 * projectProgress,
-              opacity: 1 - 0.5 * projectProgress,
-              filter: `blur(${projectProgress * 4}px)`,
-              ease: "none",
-              duration: 0,
-            });
-          } else if (index === currentIndex + 1) {
-            // Next project
-            gsap.to(project, {
-              yPercent: 100 - 100 * projectProgress,
-              scale: 0.95 + 0.05 * projectProgress,
-              opacity: 0.5 + 0.5 * projectProgress,
-              filter: `blur(${(1 - projectProgress) * 4}px)`,
-              ease: "none",
-              duration: 0,
-            });
-          } else if (index < currentIndex) {
-            // Past projects - fully off screen
-            gsap.to(project, {
-              yPercent: -100,
-              scale: 0.95,
-              opacity: 0,
-              filter: `blur(8px)`,
-              ease: "none",
-              duration: 0,
-            });
-          } else {
-            // Future projects - waiting below
-            gsap.to(project, {
-              yPercent: 100,
-              scale: 0.95,
-              opacity: 0,
-              filter: `blur(8px)`,
-              ease: "none",
-              duration: 0,
-            });
+        // Indicator: nearest slide with direction-aware bias in first segment
+        {
+          const goingUp = self.direction < 0;
+          let indicatorIndex = nearestIndex;
+          if (trackProgress < 1) {
+            const threshold = goingUp ? 0.6 : 0.4; // bias to 0 when scrolling up
+            indicatorIndex = trackProgress >= threshold ? 1 : 0;
           }
+          indicatorIndex = Math.min(
+            Math.max(indicatorIndex, 0),
+            projects.length - 1
+          );
+          if (indicatorIndex !== currentProject)
+            setCurrentProject(indicatorIndex);
+        }
+
+        // Position each slide like a horizontal track
+        projectElements.forEach((project, index) => {
+          const offset = (index - trackProgress) * 100; // percentage shift
+          const distanceFromActive = Math.abs(index - trackProgress);
+          const opacity = Math.max(0, 1 - Math.min(1, distanceFromActive));
+          const scale =
+            0.96 + 0.04 * Math.max(0, 1 - Math.min(1, distanceFromActive));
+          const blur = 4 * Math.min(1, distanceFromActive);
+          gsap.to(project, {
+            xPercent: offset,
+            opacity,
+            scale,
+            filter: `blur(${blur}px)`,
+            ease: "none",
+            duration: 0,
+          });
+        });
+      },
+      onScrubComplete: (self) => {
+        const segments = Math.max(1, projects.length - 1);
+        const totalProgress = self.progress;
+        const exactIndex = totalProgress * segments;
+        const snappedIndex = Math.min(
+          Math.max(Math.round(exactIndex), 0),
+          projects.length - 1
+        );
+        if (snappedIndex !== currentProject) {
+          setCurrentProject(snappedIndex);
+        }
+
+        // Ensure the snapped slide is perfectly crisp and neighbors are positioned (horizontal)
+        const projectElements = projectRefs.current;
+        projectElements.forEach((project, index) => {
+          const offset = (index - snappedIndex) * 100;
+          gsap.set(project, {
+            xPercent: offset,
+            scale: index === snappedIndex ? 1 : 0.98,
+            opacity: index === snappedIndex ? 1 : 0.4,
+            filter: index === snappedIndex ? "blur(0px)" : "blur(2px)",
+          });
         });
       },
     });
@@ -336,6 +316,26 @@ export default function CinematicShowcase() {
 
   return (
     <section ref={triggerRef} className="relative bg-black">
+      {/* Section Header (outside pin) */}
+      <div ref={headerRef} className="relative z-10">
+        <div className="max-w-7xl mx-auto py-12 md:py-16 px-4 md:px-8 lg:px-10">
+          <div className="text-left md:text-center">
+            <h2
+              ref={headerTitleRef}
+              className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-4 md:mb-6 tracking-tight opacity-0"
+            >
+              PROJECTS
+            </h2>
+            <p
+              ref={headerSubtitleRef}
+              className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+            >
+              A curated selection of recent work across mobile, AI and web.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Pinned Container */}
       <div ref={sectionRef} className="relative min-h-screen overflow-hidden">
         {/* Atmospheric Background */}
@@ -360,7 +360,7 @@ export default function CinematicShowcase() {
         </div>
 
         {/* Progress Indicator */}
-        <div className="absolute top-6 md:top-10 right-6 md:right-10 z-50 flex flex-col items-end gap-3">
+        <div className="absolute top-6 md:top-10 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
           <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
             {String(currentProject + 1).padStart(2, "0")} /{" "}
             {String(projects.length).padStart(2, "0")}
@@ -381,20 +381,16 @@ export default function CinematicShowcase() {
           </div>
         </div>
 
-        {/* Scroll Hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 opacity-60">
-          <div className="text-gray-500 text-xs tracking-[0.3em] uppercase font-light">
-            Scroll
-          </div>
-          <div className="w-px h-12 bg-gradient-to-b from-gray-500/50 to-transparent animate-pulse" />
-        </div>
-
         {/* Projects Stack */}
         <div className="absolute inset-0">
           {projects.map((project, index) => (
             <div
               key={project.id}
-              ref={(el) => (projectRefs.current[index] = el)}
+              ref={(el) => {
+                if (el) {
+                  projectRefs.current[index] = el;
+                }
+              }}
               className="absolute inset-0"
               style={{ willChange: "transform, opacity, filter" }}
             >
@@ -507,7 +503,7 @@ export default function CinematicShowcase() {
                         <img
                           src={project.image}
                           alt={project.title}
-                          className="w-full h-72 md:h-96 lg:h-[500px] xl:h-[600px] object-cover transition-all duration-1000 group-hover:scale-105"
+                          className="w-full h-72 md:h-96 lg:h-[500px] xl:h-[600px] object-contain transition-all duration-1000 group-hover:scale-105"
                         />
 
                         {/* Overlay */}
