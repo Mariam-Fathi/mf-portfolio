@@ -112,131 +112,10 @@ const projects = [
 
 export default function CinematicShowcase() {
   const [currentProject, setCurrentProject] = useState(0);
-  const sectionRef = useRef(null);
-  const triggerRef = useRef(null);
-  const projectRefs = useRef([]);
-  const scrollTriggersRef = useRef([]);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const trigger = triggerRef.current;
-    const projectElements = projectRefs.current;
-
-    // Only kill our own scroll triggers
-    scrollTriggersRef.current.forEach((st) => st && st.kill());
-    scrollTriggersRef.current = [];
-
-    // Set initial positions
-    gsap.set(projectElements, {
-      yPercent: (i) => i * 100, // Each project starts 100% below the previous
-      zIndex: (i) => projects.length - i,
-    });
-
-    // Create the main scroll trigger that pins the section
-    const mainTrigger = ScrollTrigger.create({
-      trigger: trigger,
-      start: "top top",
-      end: `+=${projects.length * window.innerHeight}`,
-      pin: section,
-      pinSpacing: true,
-      scrub: 1.5,
-      anticipatePin: 1,
-    });
-    scrollTriggersRef.current.push(mainTrigger);
-
-    // Create one continuous animation for all projects
-    const totalDuration = projects.length * window.innerHeight;
-
-    projectElements.forEach((project, index) => {
-      // Calculate start and end points for each project
-      const startPosition = index * window.innerHeight;
-      const endPosition = (index + 1) * window.innerHeight;
-
-      // For the first project (index 0)
-      if (index === 0) {
-        ScrollTrigger.create({
-          trigger: trigger,
-          start: `top top`,
-          end: `top+=${endPosition} top`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-
-            // First project moves up and fades out
-            gsap.to(projectElements[0], {
-              yPercent: -100 * progress,
-              scale: 1 - 0.05 * progress,
-              opacity: 1 - progress,
-              filter: `blur(${progress * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            // Second project enters
-            if (projectElements[1]) {
-              gsap.to(projectElements[1], {
-                yPercent: 100 - 100 * progress,
-                scale: 0.95 + 0.05 * progress,
-                opacity: progress,
-                filter: `blur(${(1 - progress) * 8}px)`,
-                ease: "none",
-                duration: 0,
-              });
-            }
-
-            if (progress > 0.5 && currentProject !== 1) {
-              setCurrentProject(1);
-            } else if (progress <= 0.5 && currentProject !== 0) {
-              setCurrentProject(0);
-            }
-          },
-        });
-      }
-      // For middle projects
-      else if (index < projects.length - 1) {
-        ScrollTrigger.create({
-          trigger: trigger,
-          start: `top+=${startPosition} top`,
-          end: `top+=${endPosition} top`,
-          scrub: 1.5,
-          onUpdate: (self) => {
-            const progress = self.progress;
-
-            // Current project moves up and fades out
-            gsap.to(projectElements[index], {
-              yPercent: -100 * progress,
-              scale: 1 - 0.05 * progress,
-              opacity: 1 - progress,
-              filter: `blur(${progress * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            // Next project enters
-            gsap.to(projectElements[index + 1], {
-              yPercent: 100 - 100 * progress,
-              scale: 0.95 + 0.05 * progress,
-              opacity: progress,
-              filter: `blur(${(1 - progress) * 8}px)`,
-              ease: "none",
-              duration: 0,
-            });
-
-            if (progress > 0.5 && currentProject !== index + 1) {
-              setCurrentProject(index + 1);
-            } else if (progress <= 0.5 && currentProject !== index) {
-              setCurrentProject(index);
-            }
-          },
-        });
-      }
-      // Last project just stays in view
-    });
-
-    return () => {
-      scrollTriggersRef.current.forEach((st) => st && st.kill());
-    };
-  }, [currentProject]);
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const projectRefs = useRef<HTMLDivElement[]>([]);
+  const scrollTriggersRef = useRef<ScrollTrigger[]>([]);
 
   // Alternative approach with simpler continuous animation
   useEffect(() => {
@@ -254,73 +133,173 @@ export default function CinematicShowcase() {
       zIndex: (i) => projects.length - i,
     });
 
-    // Create main pin trigger
+    // Create main pin trigger (fixed view with snapping)
     const mainTrigger = ScrollTrigger.create({
       trigger: trigger,
       start: "top top",
-      end: `+=${(projects.length - 1) * window.innerHeight}`,
+      end: `+=${projects.length * window.innerHeight}`,
       pin: section,
       pinSpacing: true,
-      scrub: 1,
+      scrub: 0.7,
+      snap: {
+        snapTo: (value) => {
+          const step = 1 / (projects.length - 1);
+          const snapped = Math.round(value / step) * step;
+          const distance = Math.abs(value - snapped);
+          return distance < step * 0.5 ? snapped : value; // only snap when reasonably close
+        },
+        duration: { min: 0.08, max: 0.2 },
+        ease: "power2.out",
+      },
       anticipatePin: 1,
       onUpdate: (self) => {
-        const totalProgress = self.progress;
+        const segments = Math.max(1, projects.length - 1);
+        const totalProgress = self.progress; // 0..1 across whole pinned area
+        const exactIndex = totalProgress * segments; // 0..(n-1)
+        const baseIndex = Math.floor(exactIndex);
+        const withinSegmentProgress = exactIndex - baseIndex; // 0..1 within current segment
+
+        // Determine nearest snapped slide for crisp view
+        const nearestIndex = Math.round(exactIndex);
+        const distanceToSnap = Math.abs(exactIndex - nearestIndex);
+        const isSettled = distanceToSnap < 0.01; // near snap point
+
         const currentIndex = Math.min(
-          Math.floor(totalProgress * projects.length),
+          Math.max(baseIndex, 0),
           projects.length - 1
         );
 
-        // Update current project indicator
-        if (currentIndex !== currentProject) {
-          setCurrentProject(currentIndex);
+        // Update current project indicator with direction-aware hysteresis
+        const goingUp = self.direction < 0;
+        let indicatorIndex = baseIndex;
+        if (goingUp) {
+          // require slightly earlier threshold when going up to switch backwards
+          indicatorIndex =
+            withinSegmentProgress <= 0.48 ? baseIndex : baseIndex + 1;
+        } else {
+          // require slightly later threshold when going down to switch forwards
+          indicatorIndex =
+            withinSegmentProgress >= 0.52 ? baseIndex + 1 : baseIndex;
+        }
+        indicatorIndex = Math.min(
+          Math.max(indicatorIndex, 0),
+          projects.length - 1
+        );
+        if (indicatorIndex !== currentProject) {
+          setCurrentProject(indicatorIndex);
         }
 
-        // Animate all projects based on total progress
+        // Animate all projects based on segment math
         projectElements.forEach((project, index) => {
-          const projectProgress = Math.max(
-            0,
-            Math.min(1, totalProgress * projects.length - index)
-          );
-
-          if (index === currentIndex) {
-            // Current project
-            gsap.to(project, {
-              yPercent: -100 * projectProgress,
-              scale: 1 - 0.05 * projectProgress,
-              opacity: 1 - 0.5 * projectProgress,
-              filter: `blur(${projectProgress * 4}px)`,
-              ease: "none",
-              duration: 0,
-            });
-          } else if (index === currentIndex + 1) {
-            // Next project
-            gsap.to(project, {
-              yPercent: 100 - 100 * projectProgress,
-              scale: 0.95 + 0.05 * projectProgress,
-              opacity: 0.5 + 0.5 * projectProgress,
-              filter: `blur(${(1 - projectProgress) * 4}px)`,
-              ease: "none",
-              duration: 0,
-            });
-          } else if (index < currentIndex) {
-            // Past projects - fully off screen
+          // Determine relationship of this project to current segment
+          if (index < baseIndex) {
+            // Past slides: fully off top
             gsap.to(project, {
               yPercent: -100,
-              scale: 0.95,
+              scale: 0.98,
               opacity: 0,
-              filter: `blur(8px)`,
+              filter: "blur(4px)",
               ease: "none",
               duration: 0,
             });
-          } else {
-            // Future projects - waiting below
+            return;
+          }
+
+          if (index > baseIndex + 1) {
+            // Far future slides: parked below
             gsap.to(project, {
               yPercent: 100,
-              scale: 0.95,
+              scale: 0.98,
               opacity: 0,
-              filter: `blur(8px)`,
+              filter: "blur(4px)",
               ease: "none",
               duration: 0,
+            });
+            return;
+          }
+
+          if (isSettled && index === indicatorIndex) {
+            // At snap: make active slide perfectly crisp and centered
+            gsap.to(project, {
+              yPercent: 0,
+              scale: 1,
+              opacity: 1,
+              filter: "blur(0px)",
+              ease: "none",
+              duration: 0,
+            });
+            return;
+          }
+
+          if (index === baseIndex) {
+            // Leaving current slide
+            gsap.to(project, {
+              yPercent: -100 * withinSegmentProgress,
+              scale: 1 - 0.04 * withinSegmentProgress,
+              opacity: 1 - 0.6 * withinSegmentProgress,
+              filter: `blur(${withinSegmentProgress * 4}px)`,
+              ease: "none",
+              duration: 0,
+            });
+            return;
+          }
+
+          if (index === baseIndex + 1) {
+            // Entering next slide
+            gsap.to(project, {
+              yPercent: 100 - 100 * withinSegmentProgress,
+              scale: 0.96 + 0.04 * withinSegmentProgress,
+              opacity: 0.4 + 0.6 * withinSegmentProgress,
+              filter: `blur(${(1 - withinSegmentProgress) * 3}px)`,
+              ease: "none",
+              duration: 0,
+            });
+            return;
+          }
+        });
+      },
+      onScrubComplete: (self) => {
+        const segments = Math.max(1, projects.length - 1);
+        const totalProgress = self.progress;
+        const exactIndex = totalProgress * segments;
+        const snappedIndex = Math.min(
+          Math.max(Math.round(exactIndex), 0),
+          projects.length - 1
+        );
+        if (snappedIndex !== currentProject) {
+          setCurrentProject(snappedIndex);
+        }
+
+        // Ensure the snapped slide is perfectly crisp and neighbors are positioned
+        const projectElements = projectRefs.current;
+        projectElements.forEach((project, index) => {
+          if (index < snappedIndex) {
+            gsap.set(project, {
+              yPercent: -100,
+              scale: 0.98,
+              opacity: 0,
+              filter: "blur(2px)",
+            });
+          } else if (index === snappedIndex) {
+            gsap.set(project, {
+              yPercent: 0,
+              scale: 1,
+              opacity: 1,
+              filter: "blur(0px)",
+            });
+          } else if (index === snappedIndex + 1) {
+            gsap.set(project, {
+              yPercent: 100,
+              scale: 0.98,
+              opacity: 0.4,
+              filter: "blur(2px)",
+            });
+          } else {
+            gsap.set(project, {
+              yPercent: 100,
+              scale: 0.98,
+              opacity: 0,
+              filter: "blur(2px)",
             });
           }
         });
@@ -360,7 +339,7 @@ export default function CinematicShowcase() {
         </div>
 
         {/* Progress Indicator */}
-        <div className="absolute top-6 md:top-10 right-6 md:right-10 z-50 flex flex-col items-end gap-3">
+        <div className="absolute top-6 md:top-20 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
           <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
             {String(currentProject + 1).padStart(2, "0")} /{" "}
             {String(projects.length).padStart(2, "0")}
@@ -381,20 +360,16 @@ export default function CinematicShowcase() {
           </div>
         </div>
 
-        {/* Scroll Hint */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 opacity-60">
-          <div className="text-gray-500 text-xs tracking-[0.3em] uppercase font-light">
-            Scroll
-          </div>
-          <div className="w-px h-12 bg-gradient-to-b from-gray-500/50 to-transparent animate-pulse" />
-        </div>
-
         {/* Projects Stack */}
         <div className="absolute inset-0">
           {projects.map((project, index) => (
             <div
               key={project.id}
-              ref={(el) => (projectRefs.current[index] = el)}
+              ref={(el) => {
+                if (el) {
+                  projectRefs.current[index] = el;
+                }
+              }}
               className="absolute inset-0"
               style={{ willChange: "transform, opacity, filter" }}
             >
