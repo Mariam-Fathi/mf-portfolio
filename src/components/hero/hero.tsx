@@ -98,6 +98,7 @@ const CinematicHero = () => {
 
         gsap.set(lines, {
           opacity: 0.25,
+          yPercent: 42,
           backgroundPosition: "110% 50%",
           filter: "drop-shadow(0px 0px 0px rgba(94,234,212,0))",
         });
@@ -242,11 +243,12 @@ const CinematicHero = () => {
             lines,
             {
               opacity: 1,
+              yPercent: -12,
               backgroundPosition: "-10% 50%",
               filter: "drop-shadow(0px 0px 28px rgba(94,234,212,0.35))",
-              duration: 0.85,
-              ease: "power2.out",
-              stagger: 0.32,
+              duration: 0.95,
+              ease: "power3.out",
+              stagger: 0.34,
             },
             "<+0.05"
           )
