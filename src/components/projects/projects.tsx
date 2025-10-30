@@ -129,7 +129,6 @@ export default function CinematicShowcase() {
     return () => window.removeEventListener("resize", updateHeader);
   }, []);
 
-  // Header entrance animation (match Journey section style)
   useEffect(() => {
     if (!headerRef.current) return;
     const tl = gsap.timeline({
@@ -170,23 +169,19 @@ export default function CinematicShowcase() {
     };
   }, []);
 
-  // Alternative approach with simpler continuous animation
   useEffect(() => {
     const section = sectionRef.current;
-    const trigger = sectionRef.current; // trigger on the pinned container to avoid header offset
+    const trigger = sectionRef.current;
     const projectElements = projectRefs.current;
 
-    // Kill existing triggers
     scrollTriggersRef.current.forEach((st) => st && st.kill());
     scrollTriggersRef.current = [];
 
-    // Set initial positions (horizontal stack)
     gsap.set(projectElements, {
       xPercent: (i) => i * 100,
       zIndex: (i) => projects.length - i,
     });
 
-    // Create main pin trigger (fixed view with snapping)
     const mainTrigger = ScrollTrigger.create({
       trigger: trigger,
       start: "top top",
@@ -199,7 +194,7 @@ export default function CinematicShowcase() {
           const step = 1 / (projects.length - 1);
           const snapped = Math.round(value / step) * step;
           const distance = Math.abs(value - snapped);
-          return distance < step * 0.5 ? snapped : value; // only snap when reasonably close
+          return distance < step * 0.5 ? snapped : value;
         },
         duration: { min: 0.08, max: 0.2 },
         ease: "power2.out",
@@ -208,14 +203,13 @@ export default function CinematicShowcase() {
       invalidateOnRefresh: true,
       onUpdate: (self) => {
         const segments = Math.max(1, projects.length - 1);
-        const totalProgress = self.progress; // 0..1 across whole pinned area
-        const trackProgress = totalProgress * segments; // 0..(n-1) float
+        const totalProgress = self.progress;
+        const trackProgress = totalProgress * segments;
         const nearestIndex = Math.round(trackProgress);
         const stepSize = 1 / segments;
 
-        // Cinematic zoom: zoom in on entry, zoom out near exit
-        const zoomInEnd = 0.12; // first 12%
-        const zoomOutStart = 0.88; // last 12%
+        const zoomInEnd = 0.12;
+        const zoomOutStart = 0.88;
         let scaleValue = 1;
         if (totalProgress <= zoomInEnd) {
           const p = Math.min(1, totalProgress / zoomInEnd);
@@ -236,7 +230,6 @@ export default function CinematicShowcase() {
           ease: "none",
         });
 
-        // Slide the header up and fade it during the zoom-in so the project fills the viewport
         if (headerRef.current && headerHeight > 0) {
           const liftProgress = Math.min(1, totalProgress / zoomInEnd);
           gsap.to(headerRef.current, {
@@ -247,12 +240,11 @@ export default function CinematicShowcase() {
           });
         }
 
-        // Indicator: nearest slide with direction-aware bias in first segment
         {
           const goingUp = self.direction < 0;
           let indicatorIndex = nearestIndex;
           if (trackProgress < 1) {
-            const threshold = goingUp ? 0.6 : 0.4; // bias to 0 when scrolling up
+            const threshold = goingUp ? 0.6 : 0.4;
             indicatorIndex = trackProgress >= threshold ? 1 : 0;
           }
           indicatorIndex = Math.min(
@@ -263,9 +255,8 @@ export default function CinematicShowcase() {
             setCurrentProject(indicatorIndex);
         }
 
-        // Position each slide like a horizontal track
         projectElements.forEach((project, index) => {
-          const offset = (index - trackProgress) * 100; // percentage shift
+          const offset = (index - trackProgress) * 100;
           const distanceFromActive = Math.abs(index - trackProgress);
           const opacity = Math.max(0, 1 - Math.min(1, distanceFromActive));
           const scale =
@@ -293,7 +284,6 @@ export default function CinematicShowcase() {
           setCurrentProject(snappedIndex);
         }
 
-        // Ensure the snapped slide is perfectly crisp and neighbors are positioned (horizontal)
         const projectElements = projectRefs.current;
         projectElements.forEach((project, index) => {
           const offset = (index - snappedIndex) * 100;
@@ -316,7 +306,6 @@ export default function CinematicShowcase() {
 
   return (
     <section ref={triggerRef} className="relative bg-black">
-      {/* Section Header (outside pin) */}
       <div ref={headerRef} className="relative z-10">
         <div className="max-w-7xl mx-auto py-12 md:py-16 px-4 md:px-8 lg:px-10">
           <div className="text-left md:text-center">
@@ -336,12 +325,9 @@ export default function CinematicShowcase() {
         </div>
       </div>
 
-      {/* Pinned Container */}
       <div ref={sectionRef} className="relative min-h-screen overflow-hidden">
-        {/* Atmospheric Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/5 to-black pointer-events-none" />
 
-        {/* Floating Particles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
@@ -359,7 +345,6 @@ export default function CinematicShowcase() {
           ))}
         </div>
 
-        {/* Progress Indicator */}
         <div className="absolute top-6 md:top-10 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
           <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
             {String(currentProject + 1).padStart(2, "0")} /{" "}
@@ -381,7 +366,6 @@ export default function CinematicShowcase() {
           </div>
         </div>
 
-        {/* Projects Stack */}
         <div className="absolute inset-0">
           {projects.map((project, index) => (
             <div
@@ -394,38 +378,31 @@ export default function CinematicShowcase() {
               className="absolute inset-0"
               style={{ willChange: "transform, opacity, filter" }}
             >
-              {/* Subtle Grid Pattern */}
               <div className="absolute inset-0">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:4rem_4rem]" />
               </div>
 
-              {/* Content Layout */}
               <div className="relative h-full flex items-center px-4 md:px-8 lg:px-16 xl:px-24">
                 <div
                   className={`w-full max-w-[1600px] mx-auto flex flex-col ${
                     index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
                   } items-center gap-8 lg:gap-16 xl:gap-24`}
                 >
-                  {/* Content Section */}
                   <div className="w-full lg:w-1/2 space-y-6 md:space-y-8">
-                    {/* Role Badge */}
                     <div className="inline-block px-4 py-2 bg-white/5 border border-white/10 rounded-full">
                       <span className="text-gray-400 text-xs md:text-sm font-light tracking-wider">
                         {project.role}
                       </span>
                     </div>
 
-                    {/* Title */}
                     <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light text-white tracking-tight leading-tight">
                       {project.title}
                     </h1>
 
-                    {/* Description */}
                     <p className="text-base md:text-lg text-gray-400 leading-relaxed font-light max-w-2xl">
                       {project.description}
                     </p>
 
-                    {/* Tags */}
                     <div className="flex flex-wrap gap-2">
                       {project.tags.map((tag, i) => (
                         <span
@@ -437,7 +414,6 @@ export default function CinematicShowcase() {
                       ))}
                     </div>
 
-                    {/* Links Menu */}
                     {project.links.length > 0 && (
                       <div className="relative group pt-4">
                         <button className="flex items-center gap-3 px-6 md:px-8 py-3 md:py-4 bg-white text-black rounded-full font-light tracking-wide transition-all duration-500 text-sm md:text-base hover:bg-gray-200">
@@ -457,7 +433,6 @@ export default function CinematicShowcase() {
                           </svg>
                         </button>
 
-                        {/* Dropdown Menu */}
                         <div className="absolute top-full left-0 mt-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 z-50">
                           <div className="bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                             {project.links.map((link, i) => (
@@ -492,13 +467,10 @@ export default function CinematicShowcase() {
                     )}
                   </div>
 
-                  {/* Image Section */}
                   <div className="w-full lg:w-1/2">
                     <div className="relative group">
-                      {/* Ambient Glow */}
                       <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 rounded-3xl blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-1000" />
 
-                      {/* Image Container */}
                       <div className="relative overflow-hidden rounded-2xl border border-white/10">
                         <img
                           src={project.image}
@@ -506,11 +478,9 @@ export default function CinematicShowcase() {
                           className="w-full h-72 md:h-96 lg:h-[500px] xl:h-[600px] object-contain transition-all duration-1000 group-hover:scale-105"
                         />
 
-                        {/* Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                       </div>
 
-                      {/* Corner Accents */}
                       <div className="absolute -top-3 -right-3 w-20 h-20 border-t border-r border-white/10 rounded-tr-2xl" />
                       <div className="absolute -bottom-3 -left-3 w-20 h-20 border-b border-l border-white/10 rounded-bl-2xl" />
                     </div>
