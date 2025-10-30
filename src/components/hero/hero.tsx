@@ -37,7 +37,6 @@ const MinimalCinematicHero = () => {
           }
         )
 
-        
         .fromTo(
           subtitleRef.current,
           {
@@ -85,7 +84,6 @@ const MinimalCinematicHero = () => {
           duration: 2,
           ease: "power2.inOut",
         })
-        
 
         .to(
           imageRef.current,
@@ -129,22 +127,25 @@ const MinimalCinematicHero = () => {
           duration: 0.1,
           ease: "none",
         })
-        
 
-        .to(titleRef.current, {
-          position: "fixed",
-          top: "20%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          zIndex: 40,
-          fontSize: "6rem",
-          textAlign: "center",
-          margin: 0,
-          lineHeight: "1.1",
-          duration: 0.1,
-          ease: "none",
-        }, "-=6")
+        .to(
+          titleRef.current,
+          {
+            position: "fixed",
+            top: "20%",
+            left: "50%",
+            xPercent: -50,
+            yPercent: -50,
+            zIndex: 40,
+            fontSize: "6rem",
+            textAlign: "center",
+            margin: 0,
+            lineHeight: "1.1",
+            duration: 0.1,
+            ease: "none",
+          },
+          "-=6"
+        )
         .to(titleRef.current, { top: "50%", duration: 10, ease: "sine" }, "-=6")
 
         .to(imageRef.current, {
@@ -170,7 +171,7 @@ const MinimalCinematicHero = () => {
 
         .to(imageRef.current, {
           scale: 0.5,
-          opacity: 0.6,
+          opacity: 0,
           duration: 15,
           ease: "power2.inOut",
         })
@@ -227,7 +228,6 @@ const MinimalCinematicHero = () => {
         ref={heroSectionRef}
         className="relative min-h-screen flex items-center justify-center bg-black pt-72"
       >
-
         <div
           ref={contentRef}
           className="relative z-10 text-center px-6 max-w-4xl mx-auto"
@@ -287,7 +287,6 @@ const MinimalCinematicHero = () => {
             opacity: 0.1;
           }
         }
-        
       `}</style>
     </div>
   );
