@@ -113,9 +113,7 @@ const Timeline = ({ data }: { data: TimelineEntry[] }) => {
             ref={titleRef}
             className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-6 tracking-tight opacity-0"
           >
-            ENGINEERING
-            <br />
-            JOURNEY
+            EXPERIENCE
           </h2>
           <p
             ref={subtitleRef}
@@ -219,22 +217,6 @@ const ExperienceTimeline = () => {
             </div>
           </div>
         )}
-
-        <div>
-          <p className="text-blue-400 text-sm font-medium mb-4 uppercase tracking-wider">
-            Key Achievements
-          </p>
-          <ul className="space-y-3">
-            {card.responsibilities.map((responsibility, idx) => (
-              <li
-                key={idx}
-                className="text-gray-300 text-base leading-relaxed font-light pl-4 border-l-2 border-blue-500/30 hover:border-blue-400 transition-colors duration-300"
-              >
-                {responsibility}
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     ),
   }));
@@ -245,21 +227,6 @@ const ExperienceTimeline = () => {
 export default ExperienceTimeline;
 
 export const expCards: ExperienceCard[] = [
-  {
-    experience:
-      "Engineered an end-to-end system to predict the Big Five personality traits by fusing visual, auditory, and textual data from videos. Developed and integrated dedicated deep learning models (LSTNet, OpenFace, BERT) on the First Impressions V2 dataset (10,000+ videos). Addressed critical challenges like high-dimensional time-series data and severe class imbalance through advanced oversampling, culminating in a robust late-fusion model (XGBoost) deployed via a full-stack web application.",
-    title: "AI Research Engineer / ML Engineer",
-    company: "Benha University | Faculty of Engineering at Shoubra",
-    fromDate: "2022",
-    toDate: "2023",
-    type: "Academic AI Research: Multimodal Personality Trait Prediction",
-    logoPath: "/images/logos/experience/university-logo.svg",
-    responsibilities: [
-      "Resolved a critical data imbalance via a strategic oversampling technique, significantly enhancing model accuracy and prediction reliability across all modalities.",
-      "Engineered a video analysis pipeline using OpenFace and LSTNet to model long-term facial behavior from action units, establishing a robust foundation for trait recognition.",
-      "Processed and modeled a large-scale dataset of 10,000+ videos to extract and analyze meaningful behavioral cues for personality recognition.",
-    ],
-  },
   {
     experience:
       "Transitioned from intern to a core mobile engineer in a cross-functional team, playing a pivotal role in developing the flagship Smart Key product. Took primary responsibility for architecting and building both guest and staff React Native applications from the ground up. Our work was central to a critical PoC deployment at the Almadiafa Hotel, which served as our live test environment. The success of this pilot directly enabled us to secure and deploy the product with Long Beach Resort in Hurghada as our major enterprise client.",
@@ -273,22 +240,6 @@ export const expCards: ExperienceCard[] = [
       "Led end-to-end development of React Native applications for guest and staff, from initial architecture to deployment in live hotel pilot environment",
       "Contributed directly to securing enterprise contract with Long Beach Resort through successful PoC deployment",
       "Gained hands-on experience across full product lifecycle in high-pressure startup environment, from development to stakeholder management",
-    ],
-  },
-  {
-    experience:
-      "Transformed a basic React Native UI tutorial into a full-stack real estate platform with analytics dashboard, creating a personal learning environment for intelligent feature development. While pursuing the DeepLearning.AI Data Engineering Professional Certificate, I sourced the USA Real Estate Dataset (2.2M+ records) to build a recommendation system. During deep exploratory analysis, I uncovered critical data quality issues that shifted the project focus from model development to robust data engineering and anomaly detection.",
-    title: "From UI Tutorial to Data Engineering Discovery Environment",
-    company: "Self-Directed Learning Project",
-    fromDate: "Jan 2025",
-    toDate: "Present",
-    type: "Technical Discovery",
-    logoPath: "/images/logos/experience/mf-logo.svg",
-
-    responsibilities: [
-      "Uncovered critical data quality issues in a 2.2M+ record dataset, identifying that 38.19% of records contained anomalous data through rigorous exploratory analysis",
-      "Engineered memory-optimized data pipelines achieving 87.4% memory reduction while detecting 57,592 suspicious patterns with 99.4% accuracy",
-      "Built full-stack PropTech platform with mobile app, analytics dashboard, and real-time notification systems deployed to production",
     ],
   },
   {
