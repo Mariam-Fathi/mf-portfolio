@@ -1,316 +1,383 @@
 "use client";
 
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const MinimalCinematicHero = () => {
-  const containerRef = useRef(null);
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const imageRef = useRef(null);
-  const heroSectionRef = useRef(null);
-  const contentRef = useRef(null);
-  const overlayRef = useRef(null);
+const SUBTITLE_LINES = [
+  "Where intuition meets immersive narrative, products find their voice.",
+  "We choreograph pixels, light, and motion to guide every curious scroll.",
+  "Each interaction reveals intent, momentum, and the story beneath the surface.",
+  "Stay for the afterglow—the experience evolves as long as you do.",
+];
+
+const CinematicHero = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const mediaWrapperRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const initialTl = gsap.timeline();
+      const lines = subtitleRef.current
+        ? gsap.utils.toArray<HTMLElement>(
+            subtitleRef.current.querySelectorAll("[data-line]")
+          )
+        : [];
 
-      initialTl
-        .fromTo(
-          titleRef.current,
-          {
-            opacity: 0,
-            y: 30,
-            filter: "blur(10px)",
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 2.5,
-            ease: "power3.out",
-          }
-        )
-        .fromTo(
-          subtitleRef.current,
-          {
-            opacity: 0,
-            y: 20,
-            filter: "blur(8px)",
-            height: 0,
-            marginBottom: 0,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            height: "auto",
-            marginBottom: "2rem",
-            duration: 2,
-            ease: "power3.out",
-          },
-          "-=1.5"
-        );
-
-      const overlay = document.createElement("div");
-      overlay.className =
-        "fixed inset-0 bg-black z-30 pointer-events-none opacity-0";
-      overlayRef.current = overlay;
-      document.body.appendChild(overlay);
-
-      gsap.set(imageRef.current, {
-        transformOrigin: "center center",
-      });
-
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: heroSectionRef.current,
-          start: "bottom bottom",
-          end: "+=500%",
-          scrub: 2,
-          pin: true,
-          anticipatePin: 1,
+      /**
+       * Intro animation: title emerges softly with blur reduction before scroll begins.
+       */
+      gsap.fromTo(
+        titleRef.current,
+        {
+          opacity: 0,
+          filter: "blur(24px)",
+          yPercent: 18,
         },
-      });
+        {
+          opacity: 1,
+          filter: "blur(0px)",
+          yPercent: 0,
+          duration: 1.8,
+          ease: "power3.out",
+          delay: 0.15,
+        }
+      );
 
-      scrollTl
-        .to(subtitleRef.current, {
+      const matchMedia = gsap.matchMedia();
+
+      const createTimeline = (sizes: {
+        initialWidth: string;
+        initialHeight: string;
+        initialRadius: string;
+        midZoom: number;
+        maxZoom: number;
+        transitionRadius: string;
+        circleSize: string;
+        circleScale: number;
+      }): gsap.core.Timeline | undefined => {
+        if (!heroRef.current || !mediaWrapperRef.current || !titleRef.current) {
+          return undefined;
+        }
+
+        const timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "+=520%",
+            scrub: 1.2,
+            pin: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+          defaults: { ease: "power2.out" },
+        });
+
+        gsap.set(mediaWrapperRef.current, {
+          width: sizes.initialWidth,
+          height: sizes.initialHeight,
+          borderRadius: sizes.initialRadius,
           opacity: 0,
-          y: -20,
-          duration: 2,
-          ease: "power2.inOut",
-        })
+          scale: 0.92,
+          filter: "blur(22px)",
+        });
 
-        .to(
-          imageRef.current,
-          {
-            scale: 1.8,
-            duration: 8,
-            ease: "power1.inOut",
-          },
-          "-=1"
-        )
+        gsap.set(titleRef.current, {
+          transformOrigin: "50% 50%",
+        });
 
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0.3,
-            duration: 6,
-            ease: "power2.inOut",
-          },
-          "-=6"
-        )
-
-        .to(imageRef.current, {
-          scale: 3,
-          duration: 10,
-          ease: "power1.inOut",
-        })
-
-        .to(imageRef.current, {
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          width: "100vw",
-          height: "100vh",
-          borderRadius: "0px",
-          border: "none",
-          objectFit: "cover",
-          zIndex: 35,
-          duration: 0.1,
-          ease: "none",
-        })
-
-        .to(
-          titleRef.current,
-          {
-            position: "fixed",
-            top: "20%",
-            left: "50%",
-            xPercent: -50,
-            yPercent: -50,
-            zIndex: 40,
-            fontSize: "6rem",
-            textAlign: "center",
-            margin: 0,
-            lineHeight: "1.1",
-            duration: 0.1,
-            ease: "none",
-          },
-          "-=6"
-        )
-        .to(
-          titleRef.current,
-          {
-            top: "50%",
-            duration: 10,
-            ease: "sine",
-          },
-          "-=6"
-        )
-
-        .to(imageRef.current, {
-          scale: 5,
-          duration: 12,
-          ease: "power1.inOut",
-        })
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0.7,
-            duration: 10,
-            ease: "power1.inOut",
-          },
-          "-=12"
-        )
-
-        .to(imageRef.current, {
-          scale: 0.5,
-          opacity: 0.6,
-          duration: 15,
-          borderRadius: "24px",
-          ease: "back.out",
-        })
-        .to(
-          titleRef.current,
-          {
-            scale: 0.5,
-            opacity: 0.3,
-            duration: 15,
-            ease: "power2.inOut",
-          },
-          "-=15"
-        )
-
-        .to(imageRef.current, {
-          scale: 0.1,
+        gsap.set(subtitleRef.current, {
           opacity: 0,
-          duration: 8,
-          ease: "power2.in",
-        })
-        .to(
-          titleRef.current,
-          {
-            scale: 0.2,
-            opacity: 0,
-            duration: 8,
-            ease: "power2.in",
-          },
-          "-=8"
-        )
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0,
-            duration: 6,
-            ease: "power2.inOut",
-          },
-          "-=6"
-        );
+          yPercent: 18,
+        });
+
+        gsap.set(lines, {
+          opacity: 0.25,
+          backgroundPosition: "110% 50%",
+          filter: "drop-shadow(0px 0px 0px rgba(94,234,212,0))",
+        });
+
+        timeline
+          /**
+           * Phase 1 — Reveal GIF with gentle zoom while title glides upward.
+           */
+          .to(
+            mediaWrapperRef.current,
+            {
+              opacity: 1,
+              filter: "blur(0px)",
+              scale: 1,
+              duration: 1.5,
+            },
+            0
+          )
+          .to(
+            titleRef.current,
+            {
+              yPercent: -48,
+              duration: 1.4,
+              ease: "power3.inOut",
+            },
+            0.1
+          )
+          .to(
+            mediaWrapperRef.current,
+            {
+              scale: sizes.midZoom,
+              duration: 1.6,
+              ease: "power1.inOut",
+            },
+            "<"
+          )
+
+          /**
+           * Phase 2 — Title sweeps downward while zoom intensifies.
+           */
+          .to(
+            titleRef.current,
+            {
+              yPercent: 62,
+              duration: 1.5,
+              ease: "power3.inOut",
+            },
+            ">-0.15"
+          )
+          .to(
+            mediaWrapperRef.current,
+            {
+              scale: sizes.maxZoom,
+              duration: 1.6,
+              ease: "power1.inOut",
+            },
+            "<"
+          )
+
+          /**
+           * Phase 3 — Title returns to center as the scene prepares to morph.
+           */
+          .to(
+            titleRef.current,
+            {
+              yPercent: 0,
+              duration: 1.35,
+              ease: "power3.inOut",
+            },
+            ">-0.2"
+          )
+          .to(
+            mediaWrapperRef.current,
+            {
+              borderRadius: sizes.transitionRadius,
+              duration: 1.1,
+              ease: "power3.inOut",
+            },
+            "<"
+          )
+
+          /**
+           * Phase 4 — Morph GIF into a circular portal and fade it away.
+           */
+          .to(
+            mediaWrapperRef.current,
+            {
+              width: sizes.circleSize,
+              height: sizes.circleSize,
+              borderRadius: "50%",
+              duration: 1.5,
+              ease: "power2.inOut",
+            }
+          )
+          .to(
+            mediaWrapperRef.current,
+            {
+              scale: sizes.circleScale,
+              duration: 1.3,
+              ease: "power3.inOut",
+            },
+            "<"
+          )
+          .to(
+            mediaWrapperRef.current,
+            {
+              opacity: 0,
+              scale: sizes.circleScale * 0.45,
+              duration: 1.2,
+              ease: "power3.in",
+            },
+            ">-0.25"
+          )
+
+          /**
+           * Phase 5 — Subtitle emerges with line-by-line highlight reveal.
+           */
+          .to(
+            titleRef.current,
+            {
+              opacity: 0.18,
+              duration: 1,
+              ease: "power1.inOut",
+            },
+            "<"
+          )
+          .fromTo(
+            subtitleRef.current,
+            {
+              opacity: 0,
+              yPercent: 18,
+            },
+            {
+              opacity: 1,
+              yPercent: 0,
+              duration: 1.4,
+              ease: "power3.out",
+            },
+            ">-0.3"
+          )
+          .to(
+            lines,
+            {
+              opacity: 1,
+              backgroundPosition: "-10% 50%",
+              filter: "drop-shadow(0px 0px 28px rgba(94,234,212,0.35))",
+              duration: 0.85,
+              ease: "power2.out",
+              stagger: 0.32,
+            },
+            "<"
+          )
+          .to(
+            subtitleRef.current,
+            {
+              yPercent: -4,
+              duration: 1.1,
+              ease: "power1.inOut",
+            },
+            ">-0.15"
+          )
+          .to({}, { duration: 0.6 });
+
+        return timeline;
+      };
+
+      matchMedia.add(
+        {
+          isDesktop: "(min-width: 1024px)",
+          isTablet: "(min-width: 768px) and (max-width: 1023px)",
+          isMobile: "(max-width: 767px)",
+        },
+        (context) => {
+          const conditions = context.conditions as Record<string, boolean>;
+          const sizes = {
+            initialWidth: conditions.isDesktop
+              ? "58vw"
+              : conditions.isTablet
+              ? "72vw"
+              : "88vw",
+            initialHeight: conditions.isDesktop
+              ? "34vw"
+              : conditions.isTablet
+              ? "48vw"
+              : "70vw",
+            initialRadius: conditions.isMobile ? "24px" : "36px",
+            midZoom: conditions.isDesktop ? 1.28 : conditions.isTablet ? 1.22 : 1.17,
+            maxZoom: conditions.isDesktop ? 1.68 : conditions.isTablet ? 1.54 : 1.42,
+            transitionRadius: conditions.isDesktop ? "48px" : "32px",
+            circleSize: conditions.isDesktop
+              ? "32vw"
+              : conditions.isTablet
+              ? "44vw"
+              : "66vw",
+            circleScale: conditions.isDesktop ? 0.9 : conditions.isTablet ? 0.86 : 0.82,
+          };
+
+          const timeline = createTimeline(sizes);
+
+          return () => {
+            timeline?.scrollTrigger?.kill();
+            timeline?.kill();
+          };
+        }
+      );
 
       return () => {
-        if (overlayRef.current && document.body.contains(overlayRef.current)) {
-          document.body.removeChild(overlayRef.current);
-        }
+        matchMedia.revert();
       };
     },
     { scope: containerRef }
   );
 
   return (
-    <div ref={containerRef}>
-      <section
-        ref={heroSectionRef}
-        className="relative min-h-screen flex items-center justify-center bg-black pt-72"
+    <section
+      ref={containerRef}
+      className="relative w-full overflow-hidden bg-black text-white"
+    >
+      <div
+        ref={heroRef}
+        className="relative flex min-h-screen flex-col items-center justify-center px-6 py-32 md:px-10 lg:px-16"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-black to-slate-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(88,28,135,0.25),_transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(15,118,110,0.18),_transparent_60%)] mix-blend-screen" />
+          <div className="absolute -right-20 top-1/3 h-64 w-64 rounded-full bg-cyan-500/20 blur-[120px]" />
+          <div className="absolute -left-10 bottom-12 h-72 w-72 rounded-full bg-purple-600/25 blur-3xl" />
+        </div>
 
-        <div
-          ref={contentRef}
-          className="relative z-10 text-center px-6 max-w-4xl mx-auto"
-        >
-          <h1
-            ref={titleRef}
-            className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 tracking-tight opacity-0"
+        <div className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-16">
+          <div className="flex flex-col items-center gap-6 text-center">
+            <span className="text-sm uppercase tracking-[0.5em] text-cyan-100/60">
+              Immersive Experience
+            </span>
+            <h1
+              ref={titleRef}
+              className="text-balance text-5xl font-light tracking-tight text-white md:text-6xl lg:text-7xl"
+              style={{ willChange: "transform, opacity, filter" }}
+            >
+              Crafting Cinematic Journeys for the Modern Web
+            </h1>
+          </div>
+
+          <div
+            ref={mediaWrapperRef}
+            className="relative flex items-center justify-center overflow-hidden border border-white/10 bg-white/5 shadow-[0_40px_120px_rgba(12,12,20,0.55)] backdrop-blur-sm"
+            style={{
+              width: "min(88vw, 920px)",
+              height: "min(64vw, 560px)",
+              willChange: "transform, filter, opacity",
+            }}
           >
-            EVERYTHING
-            <br />
-            IS CONNECTED
-          </h1>
-
-          <p
-            ref={subtitleRef}
-            className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-3xl mx-auto font-light tracking-wide opacity-0 h-0 overflow-hidden"
-          >
-            We're sometimes trained—whether intuitively or in school—to isolate
-            knowledge into pockets, where what exists in one pocket has nothing
-            to do with what's in the other. When in reality, it's a web. And the
-            one ingredient that fuels that web... CURIOSITY.
-          </p>
-
-          <div className="relative">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-cyan-300/20 mix-blend-screen" />
             <img
-              ref={imageRef}
               src="/images/gifs/brain-neuron.gif"
-              alt="Brain neurons connecting"
-              className="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
-              style={{ transformOrigin: "center center" }}
+              alt="Animated neural connections pulsing with energy"
+              className="h-full w-full object-cover"
             />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
+          </div>
+
+          <div
+            ref={subtitleRef}
+            className="w-full max-w-3xl space-y-3 text-left text-base font-light leading-relaxed text-slate-200 md:text-center md:text-lg"
+          >
+            {SUBTITLE_LINES.map((line, index) => (
+              <span
+                key={line}
+                data-line
+                className="block bg-gradient-to-r from-transparent via-white/40 to-transparent bg-[length:200%_100%] bg-[position:120%_50%] bg-clip-text text-transparent will-change-[transform,opacity]"
+              >
+                {line}
+              </span>
+            ))}
           </div>
         </div>
-
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/10 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `cinematicFloat ${
-                  20 + Math.random() * 15
-                }s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 10}s`,
-              }}
-            />
-          ))}
-        </div>
-      </section>
-
-      <style jsx>{`
-        @keyframes cinematicFloat {
-          0%,
-          100% {
-            transform: translateY(0px) translateX(0px);
-            opacity: 0.05;
-          }
-          20% {
-            transform: translateY(-8px) translateX(3px);
-            opacity: 0.1;
-          }
-          40% {
-            transform: translateY(-16px) translateX(-3px);
-            opacity: 0.15;
-          }
-          60% {
-            transform: translateY(-24px) translateX(2px);
-            opacity: 0.2;
-          }
-          80% {
-            transform: translateY(-18px) translateX(-2px);
-            opacity: 0.1;
-          }
-        }
-      `}</style>
-    </div>
+      </div>
+    </section>
   );
 };
 
-export default MinimalCinematicHero;
+export default CinematicHero;
