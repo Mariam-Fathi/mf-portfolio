@@ -12,8 +12,7 @@ const projects = [
     role: "Lead Mobile Engineer",
     description:
       "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain.",
-    image:
-      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&q=80",
+    image: "/images/sk.png",
     tags: ["IoT", "Mobile", "React Native"],
     links: [
       {
@@ -32,8 +31,7 @@ const projects = [
     role: "Data Engineer & Analyst",
     description:
       "Analyzed 2.2M+ records with comprehensive data quality auditing, achieving 87.4% memory reduction. Identified 38.19% suspicious records and developed pattern recognition algorithms for regulatory review.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/kaggle.png",
     tags: ["Data Engineering", "Python", "Analytics"],
     links: [
       {
@@ -52,8 +50,8 @@ const projects = [
     role: "AI Research Lead",
     description:
       "Engineered automated system predicting Big Five personality traits through multimodal video analysis using LSTNet, PyAudioAnalysis, and BERT with XGBoost late fusion strategy.",
-    image:
-      "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+    image: "/images/graduation.png",
+
     tags: ["AI", "Computer Vision", "Research"],
     links: [
       {
@@ -72,8 +70,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Internal tool leveraging Hugging Face models to analyze project descriptions and generate instant cost estimations, achieving 85% confidence and reducing estimation time from days to minutes.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/ai.png",
+
     tags: ["AI", "Automation", "CRM"],
     links: [],
   },
@@ -83,8 +81,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Production-ready PropTech solution with Google OAuth, advanced property search, real-time notifications, and Stripe payment integration. Features personalized tracking and intelligent preference analysis.",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80",
+    image: "/images/homi.png",
+
     tags: ["React Native", "Appwrite", "Stripe"],
     links: [
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-app" },
@@ -100,8 +98,8 @@ const projects = [
     role: "Full-Stack Developer",
     description:
       "Comprehensive analytics dashboard tracking revenue metrics, user engagement, property performance, and platform health. Implements smart caching and transforms raw data into actionable business intelligence.",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+    image: "/images/homi-dashboard.png",
+
     tags: ["Analytics", "Next.js", "Dashboard"],
     links: [
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-analytics" },
@@ -145,11 +143,24 @@ export default function CinematicShowcase() {
     tl.fromTo(
       headerTitleRef.current,
       { opacity: 0, y: 80, filter: "blur(15px)", scale: 0.9 },
-      { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, duration: 1.8, ease: "power4.out" }
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        scale: 1,
+        duration: 1.8,
+        ease: "power4.out",
+      }
     ).fromTo(
       headerSubtitleRef.current,
       { opacity: 0, y: 40, filter: "blur(12px)" },
-      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1.4,
+        ease: "power2.out",
+      },
       "-=1.2"
     );
 
@@ -158,7 +169,6 @@ export default function CinematicShowcase() {
       tl.kill();
     };
   }, []);
-  
 
   // Alternative approach with simpler continuous animation
   useEffect(() => {
@@ -237,7 +247,6 @@ export default function CinematicShowcase() {
           });
         }
 
-
         // Indicator: nearest slide with direction-aware bias in first segment
         {
           const goingUp = self.direction < 0;
@@ -246,8 +255,12 @@ export default function CinematicShowcase() {
             const threshold = goingUp ? 0.6 : 0.4; // bias to 0 when scrolling up
             indicatorIndex = trackProgress >= threshold ? 1 : 0;
           }
-          indicatorIndex = Math.min(Math.max(indicatorIndex, 0), projects.length - 1);
-          if (indicatorIndex !== currentProject) setCurrentProject(indicatorIndex);
+          indicatorIndex = Math.min(
+            Math.max(indicatorIndex, 0),
+            projects.length - 1
+          );
+          if (indicatorIndex !== currentProject)
+            setCurrentProject(indicatorIndex);
         }
 
         // Position each slide like a horizontal track
@@ -307,10 +320,16 @@ export default function CinematicShowcase() {
       <div ref={headerRef} className="relative z-10">
         <div className="max-w-7xl mx-auto py-12 md:py-16 px-4 md:px-8 lg:px-10">
           <div className="text-left md:text-center">
-            <h2 ref={headerTitleRef} className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-4 md:mb-6 tracking-tight opacity-0">
+            <h2
+              ref={headerTitleRef}
+              className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-4 md:mb-6 tracking-tight opacity-0"
+            >
               PROJECTS
             </h2>
-            <p ref={headerSubtitleRef} className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0">
+            <p
+              ref={headerSubtitleRef}
+              className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0"
+            >
               A curated selection of recent work across mobile, AI and web.
             </p>
           </div>
@@ -339,8 +358,6 @@ export default function CinematicShowcase() {
             />
           ))}
         </div>
-
-        
 
         {/* Progress Indicator */}
         <div className="absolute top-6 md:top-10 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
@@ -486,7 +503,7 @@ export default function CinematicShowcase() {
                         <img
                           src={project.image}
                           alt={project.title}
-                          className="w-full h-72 md:h-96 lg:h-[500px] xl:h-[600px] object-cover transition-all duration-1000 group-hover:scale-105"
+                          className="w-full h-72 md:h-96 lg:h-[500px] xl:h-[600px] object-contain transition-all duration-1000 group-hover:scale-105"
                         />
 
                         {/* Overlay */}
