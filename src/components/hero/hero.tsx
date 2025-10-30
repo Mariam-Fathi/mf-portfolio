@@ -70,10 +70,11 @@ const MinimalCinematicHero = () => {
         scrollTrigger: {
           trigger: heroSectionRef.current,
           start: "bottom bottom",
-          end: "+=500%",
-          scrub: 2,
+          end: "+=250%",
+          scrub: 1.2,
           pin: true,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
       });
 

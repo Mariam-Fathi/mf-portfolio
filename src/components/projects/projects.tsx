@@ -116,11 +116,54 @@ export default function CinematicShowcase() {
   const triggerRef = useRef<HTMLElement | null>(null);
   const projectRefs = useRef<HTMLDivElement[]>([]);
   const scrollTriggersRef = useRef<ScrollTrigger[]>([]);
+  const headerRef = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const headerSubtitleRef = useRef<HTMLParagraphElement | null>(null);
+  useEffect(() => {
+    const updateHeader = () => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.getBoundingClientRect().height);
+      }
+    };
+    updateHeader();
+    window.addEventListener("resize", updateHeader);
+    return () => window.removeEventListener("resize", updateHeader);
+  }, []);
+
+  // Header entrance animation (match Journey section style)
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: headerRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
+      },
+    });
+
+    tl.fromTo(
+      headerTitleRef.current,
+      { opacity: 0, y: 80, filter: "blur(15px)", scale: 0.9 },
+      { opacity: 1, y: 0, filter: "blur(0px)", scale: 1, duration: 1.8, ease: "power4.out" }
+    ).fromTo(
+      headerSubtitleRef.current,
+      { opacity: 0, y: 40, filter: "blur(12px)" },
+      { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.4, ease: "power2.out" },
+      "-=1.2"
+    );
+
+    return () => {
+      tl.scrollTrigger && tl.scrollTrigger.kill();
+      tl.kill();
+    };
+  }, []);
+  
 
   // Alternative approach with simpler continuous animation
   useEffect(() => {
     const section = sectionRef.current;
-    const trigger = triggerRef.current;
+    const trigger = sectionRef.current; // trigger on the pinned container to avoid header offset
     const projectElements = projectRefs.current;
 
     // Kill existing triggers
@@ -152,6 +195,7 @@ export default function CinematicShowcase() {
         ease: "power2.out",
       },
       anticipatePin: 1,
+      invalidateOnRefresh: true,
       onUpdate: (self) => {
         const segments = Math.max(1, projects.length - 1);
         const totalProgress = self.progress; // 0..1 across whole pinned area
@@ -181,6 +225,18 @@ export default function CinematicShowcase() {
           duration: 0,
           ease: "none",
         });
+
+        // Slide the header up and fade it during the zoom-in so the project fills the viewport
+        if (headerRef.current && headerHeight > 0) {
+          const liftProgress = Math.min(1, totalProgress / zoomInEnd);
+          gsap.to(headerRef.current, {
+            y: -headerHeight * liftProgress,
+            opacity: 1 - 0.95 * liftProgress,
+            duration: 0,
+            ease: "none",
+          });
+        }
+
 
         // Indicator: nearest slide with direction-aware bias in first segment
         {
@@ -247,6 +303,20 @@ export default function CinematicShowcase() {
 
   return (
     <section ref={triggerRef} className="relative bg-black">
+      {/* Section Header (outside pin) */}
+      <div ref={headerRef} className="relative z-10">
+        <div className="max-w-7xl mx-auto py-12 md:py-16 px-4 md:px-8 lg:px-10">
+          <div className="text-left md:text-center">
+            <h2 ref={headerTitleRef} className="text-4xl md:text-6xl lg:text-8xl font-light text-white mb-4 md:mb-6 tracking-tight opacity-0">
+              PROJECTS
+            </h2>
+            <p ref={headerSubtitleRef} className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto font-light leading-relaxed tracking-wide opacity-0">
+              A curated selection of recent work across mobile, AI and web.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Pinned Container */}
       <div ref={sectionRef} className="relative min-h-screen overflow-hidden">
         {/* Atmospheric Background */}
@@ -270,8 +340,10 @@ export default function CinematicShowcase() {
           ))}
         </div>
 
+        
+
         {/* Progress Indicator */}
-        <div className="absolute top-6 md:top-20 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
+        <div className="absolute top-6 md:top-10 right-6 md:right-6 z-50 flex flex-col items-end gap-3">
           <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
             {String(currentProject + 1).padStart(2, "0")} /{" "}
             {String(projects.length).padStart(2, "0")}
