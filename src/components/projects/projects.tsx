@@ -110,114 +110,287 @@ const projects = [
   },
 ];
 
-export default function Projects() {
+export default function CinematicShowcase() {
   const [currentProject, setCurrentProject] = useState(0);
-  const containerRef = useRef(null);
+  const sectionRef = useRef(null);
+  const triggerRef = useRef(null);
   const projectRefs = useRef([]);
+  const scrollTriggersRef = useRef([]);
 
   useEffect(() => {
-    const container = containerRef.current;
+    const section = sectionRef.current;
+    const trigger = triggerRef.current;
     const projectElements = projectRefs.current;
 
-    ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    // Only kill our own scroll triggers
+    scrollTriggersRef.current.forEach((st) => st && st.kill());
+    scrollTriggersRef.current = [];
 
-    gsap.set(projectElements, { yPercent: (i) => i * 100 });
-
-    projectElements.forEach((project, index) => {
-      if (index === projectElements.length - 1) return;
-
-      ScrollTrigger.create({
-        trigger: container,
-        start: () => `top+=${index * window.innerHeight} top`,
-        end: () => `top+=${(index + 1) * window.innerHeight} top`,
-        scrub: 1.5,
-        onUpdate: (self) => {
-          const progress = self.progress;
-
-          gsap.to(projectElements[index], {
-            yPercent: -100 * progress,
-            scale: 1 - 0.05 * progress,
-            opacity: 1 - 0.2 * progress,
-            filter: `blur(${progress * 8}px)`,
-            ease: "none",
-            duration: 0,
-          });
-
-          gsap.to(projectElements[index + 1], {
-            yPercent: 100 - 100 * progress,
-            scale: 0.95 + 0.05 * progress,
-            opacity: 0.8 + 0.2 * progress,
-            filter: `blur(${(1 - progress) * 8}px)`,
-            ease: "none",
-            duration: 0,
-          });
-
-          if (progress > 0.5 && currentProject !== index + 1) {
-            setCurrentProject(index + 1);
-          } else if (progress <= 0.5 && currentProject !== index) {
-            setCurrentProject(index);
-          }
-        },
-      });
+    // Set initial positions
+    gsap.set(projectElements, {
+      yPercent: (i) => i * 100, // Each project starts 100% below the previous
+      zIndex: (i) => projects.length - i,
     });
 
-    gsap.set(container, {
-      height: `${projectElements.length * 100}vh`,
+    // Create the main scroll trigger that pins the section
+    const mainTrigger = ScrollTrigger.create({
+      trigger: trigger,
+      start: "top top",
+      end: `+=${projects.length * window.innerHeight}`,
+      pin: section,
+      pinSpacing: true,
+      scrub: 1.5,
+      anticipatePin: 1,
+    });
+    scrollTriggersRef.current.push(mainTrigger);
+
+    // Create one continuous animation for all projects
+    const totalDuration = projects.length * window.innerHeight;
+
+    projectElements.forEach((project, index) => {
+      // Calculate start and end points for each project
+      const startPosition = index * window.innerHeight;
+      const endPosition = (index + 1) * window.innerHeight;
+
+      // For the first project (index 0)
+      if (index === 0) {
+        ScrollTrigger.create({
+          trigger: trigger,
+          start: `top top`,
+          end: `top+=${endPosition} top`,
+          scrub: 1.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+
+            // First project moves up and fades out
+            gsap.to(projectElements[0], {
+              yPercent: -100 * progress,
+              scale: 1 - 0.05 * progress,
+              opacity: 1 - progress,
+              filter: `blur(${progress * 8}px)`,
+              ease: "none",
+              duration: 0,
+            });
+
+            // Second project enters
+            if (projectElements[1]) {
+              gsap.to(projectElements[1], {
+                yPercent: 100 - 100 * progress,
+                scale: 0.95 + 0.05 * progress,
+                opacity: progress,
+                filter: `blur(${(1 - progress) * 8}px)`,
+                ease: "none",
+                duration: 0,
+              });
+            }
+
+            if (progress > 0.5 && currentProject !== 1) {
+              setCurrentProject(1);
+            } else if (progress <= 0.5 && currentProject !== 0) {
+              setCurrentProject(0);
+            }
+          },
+        });
+      }
+      // For middle projects
+      else if (index < projects.length - 1) {
+        ScrollTrigger.create({
+          trigger: trigger,
+          start: `top+=${startPosition} top`,
+          end: `top+=${endPosition} top`,
+          scrub: 1.5,
+          onUpdate: (self) => {
+            const progress = self.progress;
+
+            // Current project moves up and fades out
+            gsap.to(projectElements[index], {
+              yPercent: -100 * progress,
+              scale: 1 - 0.05 * progress,
+              opacity: 1 - progress,
+              filter: `blur(${progress * 8}px)`,
+              ease: "none",
+              duration: 0,
+            });
+
+            // Next project enters
+            gsap.to(projectElements[index + 1], {
+              yPercent: 100 - 100 * progress,
+              scale: 0.95 + 0.05 * progress,
+              opacity: progress,
+              filter: `blur(${(1 - progress) * 8}px)`,
+              ease: "none",
+              duration: 0,
+            });
+
+            if (progress > 0.5 && currentProject !== index + 1) {
+              setCurrentProject(index + 1);
+            } else if (progress <= 0.5 && currentProject !== index) {
+              setCurrentProject(index);
+            }
+          },
+        });
+      }
+      // Last project just stays in view
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      scrollTriggersRef.current.forEach((st) => st && st.kill());
+    };
+  }, [currentProject]);
+
+  // Alternative approach with simpler continuous animation
+  useEffect(() => {
+    const section = sectionRef.current;
+    const trigger = triggerRef.current;
+    const projectElements = projectRefs.current;
+
+    // Kill existing triggers
+    scrollTriggersRef.current.forEach((st) => st && st.kill());
+    scrollTriggersRef.current = [];
+
+    // Set initial positions
+    gsap.set(projectElements, {
+      yPercent: (i) => i * 100,
+      zIndex: (i) => projects.length - i,
+    });
+
+    // Create main pin trigger
+    const mainTrigger = ScrollTrigger.create({
+      trigger: trigger,
+      start: "top top",
+      end: `+=${(projects.length - 1) * window.innerHeight}`,
+      pin: section,
+      pinSpacing: true,
+      scrub: 1,
+      anticipatePin: 1,
+      onUpdate: (self) => {
+        const totalProgress = self.progress;
+        const currentIndex = Math.min(
+          Math.floor(totalProgress * projects.length),
+          projects.length - 1
+        );
+
+        // Update current project indicator
+        if (currentIndex !== currentProject) {
+          setCurrentProject(currentIndex);
+        }
+
+        // Animate all projects based on total progress
+        projectElements.forEach((project, index) => {
+          const projectProgress = Math.max(
+            0,
+            Math.min(1, totalProgress * projects.length - index)
+          );
+
+          if (index === currentIndex) {
+            // Current project
+            gsap.to(project, {
+              yPercent: -100 * projectProgress,
+              scale: 1 - 0.05 * projectProgress,
+              opacity: 1 - 0.5 * projectProgress,
+              filter: `blur(${projectProgress * 4}px)`,
+              ease: "none",
+              duration: 0,
+            });
+          } else if (index === currentIndex + 1) {
+            // Next project
+            gsap.to(project, {
+              yPercent: 100 - 100 * projectProgress,
+              scale: 0.95 + 0.05 * projectProgress,
+              opacity: 0.5 + 0.5 * projectProgress,
+              filter: `blur(${(1 - projectProgress) * 4}px)`,
+              ease: "none",
+              duration: 0,
+            });
+          } else if (index < currentIndex) {
+            // Past projects - fully off screen
+            gsap.to(project, {
+              yPercent: -100,
+              scale: 0.95,
+              opacity: 0,
+              filter: `blur(8px)`,
+              ease: "none",
+              duration: 0,
+            });
+          } else {
+            // Future projects - waiting below
+            gsap.to(project, {
+              yPercent: 100,
+              scale: 0.95,
+              opacity: 0,
+              filter: `blur(8px)`,
+              ease: "none",
+              duration: 0,
+            });
+          }
+        });
+      },
+    });
+
+    scrollTriggersRef.current.push(mainTrigger);
+
+    return () => {
+      scrollTriggersRef.current.forEach((st) => st && st.kill());
     };
   }, []);
 
   return (
-    <div className="relative w-full bg-black overflow-hidden">
-      {/* Atmospheric Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-black via-purple-900/5 to-black pointer-events-none" />
+    <section ref={triggerRef} className="relative bg-black">
+      {/* Pinned Container */}
+      <div ref={sectionRef} className="relative min-h-screen overflow-hidden">
+        {/* Atmospheric Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/5 to-black pointer-events-none" />
 
-      {/* Floating Particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white/5 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `float ${
-                20 + Math.random() * 15
-              }s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 10}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Progress Indicator */}
-      <div className="fixed top-6 md:top-10 right-6 md:right-10 z-50 flex flex-col items-end gap-3">
-        <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
-          {String(currentProject + 1).padStart(2, "0")} /{" "}
-          {String(projects.length).padStart(2, "0")}
-        </div>
-        <div className="flex flex-col gap-2">
-          {projects.map((_, index) => (
+        {/* Floating Particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {Array.from({ length: 12 }).map((_, i) => (
             <div
-              key={index}
-              className={`h-0.5 rounded-full transition-all duration-700 ease-out ${
-                index === currentProject
-                  ? "w-12 bg-white/80"
-                  : index < currentProject
-                  ? "w-8 bg-white/30"
-                  : "w-6 bg-white/10"
-              }`}
+              key={i}
+              className="absolute w-1 h-1 bg-white/5 rounded-full"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${
+                  20 + Math.random() * 15
+                }s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 10}s`,
+              }}
             />
           ))}
         </div>
-      </div>
 
-      {/* Projects Container */}
-      <div ref={containerRef} className="relative">
-        <div className="fixed inset-0">
+        {/* Progress Indicator */}
+        <div className="absolute top-6 md:top-10 right-6 md:right-10 z-50 flex flex-col items-end gap-3">
+          <div className="text-gray-500 text-xs md:text-sm font-light tracking-[0.2em]">
+            {String(currentProject + 1).padStart(2, "0")} /{" "}
+            {String(projects.length).padStart(2, "0")}
+          </div>
+          <div className="flex flex-col gap-2">
+            {projects.map((_, index) => (
+              <div
+                key={index}
+                className={`h-0.5 rounded-full transition-all duration-700 ease-out ${
+                  index === currentProject
+                    ? "w-12 bg-white/80"
+                    : index < currentProject
+                    ? "w-8 bg-white/30"
+                    : "w-6 bg-white/10"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Scroll Hint */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 opacity-60">
+          <div className="text-gray-500 text-xs tracking-[0.3em] uppercase font-light">
+            Scroll
+          </div>
+          <div className="w-px h-12 bg-gradient-to-b from-gray-500/50 to-transparent animate-pulse" />
+        </div>
+
+        {/* Projects Stack */}
+        <div className="absolute inset-0">
           {projects.map((project, index) => (
             <div
               key={project.id}
@@ -374,6 +547,6 @@ export default function Projects() {
           }
         }
       `}</style>
-    </div>
+    </section>
   );
 }

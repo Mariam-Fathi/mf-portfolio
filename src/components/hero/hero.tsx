@@ -8,13 +8,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const MinimalCinematicHero = () => {
-  const containerRef = useRef(null);
-  const titleRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const imageRef = useRef(null);
-  const heroSectionRef = useRef(null);
-  const contentRef = useRef(null);
-  const overlayRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const subtitleRef = useRef<HTMLParagraphElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const heroSectionRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   useGSAP(
     () => {
@@ -36,6 +36,8 @@ const MinimalCinematicHero = () => {
             ease: "power3.out",
           }
         )
+
+        
         .fromTo(
           subtitleRef.current,
           {
@@ -50,7 +52,7 @@ const MinimalCinematicHero = () => {
             y: 0,
             filter: "blur(0px)",
             height: "auto",
-            marginBottom: "2rem",
+            marginBottom: "4rem",
             duration: 2,
             ease: "power3.out",
           },
@@ -63,9 +65,7 @@ const MinimalCinematicHero = () => {
       overlayRef.current = overlay;
       document.body.appendChild(overlay);
 
-      gsap.set(imageRef.current, {
-        transformOrigin: "center center",
-      });
+      gsap.set(imageRef.current, { transformOrigin: "center center" });
 
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -85,6 +85,7 @@ const MinimalCinematicHero = () => {
           duration: 2,
           ease: "power2.inOut",
         })
+        
 
         .to(
           imageRef.current,
@@ -123,38 +124,28 @@ const MinimalCinematicHero = () => {
           borderRadius: "0px",
           border: "none",
           objectFit: "cover",
+          objectPosition: "center center",
           zIndex: 35,
           duration: 0.1,
           ease: "none",
         })
+        
 
-        .to(
-          titleRef.current,
-          {
-            position: "fixed",
-            top: "20%",
-            left: "50%",
-            xPercent: -50,
-            yPercent: -50,
-            zIndex: 40,
-            fontSize: "6rem",
-            textAlign: "center",
-            margin: 0,
-            lineHeight: "1.1",
-            duration: 0.1,
-            ease: "none",
-          },
-          "-=6"
-        )
-        .to(
-          titleRef.current,
-          {
-            top: "50%",
-            duration: 10,
-            ease: "sine",
-          },
-          "-=6"
-        )
+        .to(titleRef.current, {
+          position: "fixed",
+          top: "20%",
+          left: "50%",
+          xPercent: -50,
+          yPercent: -50,
+          zIndex: 40,
+          fontSize: "6rem",
+          textAlign: "center",
+          margin: 0,
+          lineHeight: "1.1",
+          duration: 0.1,
+          ease: "none",
+        }, "-=6")
+        .to(titleRef.current, { top: "50%", duration: 10, ease: "sine" }, "-=6")
 
         .to(imageRef.current, {
           scale: 5,
@@ -171,12 +162,17 @@ const MinimalCinematicHero = () => {
           "-=12"
         )
 
+        // Start circular mask right when zooming OUT begins
+        .set(imageRef.current, {
+          clipPath: "circle(100vmax at 50vw 50vh)",
+          willChange: "transform, clip-path",
+        })
+
         .to(imageRef.current, {
           scale: 0.5,
           opacity: 0.6,
           duration: 15,
-          borderRadius: "24px",
-          ease: "back.out",
+          ease: "power2.inOut",
         })
         .to(
           titleRef.current,
@@ -193,6 +189,7 @@ const MinimalCinematicHero = () => {
           scale: 0.1,
           opacity: 0,
           duration: 8,
+          clipPath: "circle(0vmax at 50vw 50vh)",
           ease: "power2.in",
         })
         .to(
@@ -230,7 +227,6 @@ const MinimalCinematicHero = () => {
         ref={heroSectionRef}
         className="relative min-h-screen flex items-center justify-center bg-black pt-72"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/10 to-black" />
 
         <div
           ref={contentRef}
@@ -265,23 +261,6 @@ const MinimalCinematicHero = () => {
             />
           </div>
         </div>
-
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/10 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animation: `cinematicFloat ${
-                  20 + Math.random() * 15
-                }s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 10}s`,
-              }}
-            />
-          ))}
-        </div>
       </section>
 
       <style jsx>{`
@@ -308,6 +287,7 @@ const MinimalCinematicHero = () => {
             opacity: 0.1;
           }
         }
+        
       `}</style>
     </div>
   );
