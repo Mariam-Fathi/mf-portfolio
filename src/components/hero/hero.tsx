@@ -16,7 +16,7 @@ const SUBTITLE_LINES = [
 
 const CinematicHero = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const mediaWrapperRef = useRef<HTMLDivElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
@@ -93,7 +93,7 @@ const CinematicHero = () => {
 
         gsap.set(subtitleRef.current, {
           opacity: 0,
-          yPercent: 18,
+          yPercent: 36,
         });
 
         gsap.set(lines, {
@@ -228,12 +228,12 @@ const CinematicHero = () => {
             subtitleRef.current,
             {
               opacity: 0,
-              yPercent: 18,
+              yPercent: 36,
             },
             {
               opacity: 1,
-              yPercent: 0,
-              duration: 1.4,
+              yPercent: 14,
+              duration: 1.2,
               ease: "power3.out",
             },
             ">-0.3"
@@ -248,16 +248,16 @@ const CinematicHero = () => {
               ease: "power2.out",
               stagger: 0.32,
             },
-            "<"
+            "<+0.05"
           )
           .to(
             subtitleRef.current,
             {
-              yPercent: -4,
-              duration: 1.1,
-              ease: "power1.inOut",
+              yPercent: -18,
+              duration: 1.7,
+              ease: "power2.inOut",
             },
-            ">-0.15"
+            ">-0.05"
           )
           .to({}, { duration: 0.6 });
 
