@@ -23,7 +23,6 @@ const MinimalCinematicHero = () => {
     () => {
       const initialTl = gsap.timeline();
 
-      // Hide initial subtitle from the start
       gsap.set(subtitleRef.current, {
         opacity: 0,
         visibility: "hidden",
@@ -145,7 +144,6 @@ const MinimalCinematicHero = () => {
           "-=18"
         )
 
-        // Start circular mask right when zooming OUT begins
         .set(imageRef.current, {
           clipPath: "circle(100vmax at 50vw 50vh)",
           willChange: "transform, clip-path",
@@ -195,7 +193,6 @@ const MinimalCinematicHero = () => {
           "-=9"
         );
 
-      // Re-introduce subtitle fullscreen (slightly bigger) - starts blurred and dimmed
       scrollTl
         .set(repriseSubtitleRef.current, {
           display: "flex",
@@ -229,13 +226,11 @@ const MinimalCinematicHero = () => {
             ease: "power2.out",
           }
         )
-        // Set initial state of lines (blurred and dimmed)
         .set(subtitleLineRefs.current, {
           filter: "blur(8px)",
           opacity: 0.4,
           color: "#9ca3af",
         })
-        // Very slowly brighten each line from dimmed to white and clear their blur
         .to(
           subtitleLineRefs.current,
           {
@@ -248,14 +243,12 @@ const MinimalCinematicHero = () => {
           },
           "<"
         )
-        // Hold at full brightness for a moment before fading out
         .to({}, { duration: 4, ease: "none" })
         .to(repriseSubtitleRef.current, {
           opacity: 0,
           duration: 6,
           ease: "power2.inOut",
         })
-        // CURIOSITY: zoom in with circular fade-in at the end
         .set(curiosityRef.current, {
           display: "flex",
           position: "fixed",
@@ -276,7 +269,6 @@ const MinimalCinematicHero = () => {
           duration: 9,
           ease: "power2.out",
         })
-        // Hold for a moment then fade out
         .to({}, { duration: 3, ease: "none" })
         .to(curiosityRef.current, {
           opacity: 0,
@@ -326,7 +318,6 @@ const MinimalCinematicHero = () => {
         </div>
       </section>
 
-      {/* Reprise Subtitle - appears after title/GIF vanish */}
       <p
         ref={repriseSubtitleRef}
         className="fixed inset-0 z-50 flex items-center justify-center px-6 opacity-0 pointer-events-none text-gray-500"
@@ -372,7 +363,6 @@ const MinimalCinematicHero = () => {
         </span>
       </p>
 
-      {/* CURIOSITY - appears at the end with circular fade-in zoom */}
       <div
         ref={curiosityRef}
         className="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none"
