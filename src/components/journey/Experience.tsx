@@ -348,7 +348,7 @@ const HorizontalTimeline = () => {
       <div ref={containerRef} className="w-full">
       {/* Header Section - Magazine Style - Smoothly connected from hero */}
       <div 
-        className="relative z-10 py-20 px-4 md:px-8 lg:px-10"
+        className="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-10"
         style={{
           background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
         }}
@@ -356,14 +356,14 @@ const HorizontalTimeline = () => {
         <div className="max-w-7xl mx-auto">
           <h2
             ref={titleRef}
-            className="text-7xl md:text-9xl lg:text-[12rem] font-light text-white mb-6 tracking-tight leading-none opacity-0"
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-white mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
           >
             EXPERIENCE
           </h2>
-          <div className="w-24 h-1 bg-blue-500 mb-8" />
+          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-blue-500 mb-6 sm:mb-8" />
           <p
             ref={subtitleRef}
-            className="text-xl md:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0 px-4 sm:px-0"
           >
             From AI Research to Production Applications
           </p>
@@ -405,32 +405,32 @@ const HorizontalTimeline = () => {
                     backfaceVisibility: "hidden",
                   }}
                 >
-                  <div className="w-full max-w-7xl mx-auto px-8 md:px-12 lg:px-16">
+                  <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16">
                     {/* Magazine Ad Style Layout - Like Vintage Ads */}
-                    <div className="space-y-6 md:space-y-10 lg:space-y-12">
-                      <div className="flex items-center justify-between">
-                      {/* Period - Small, Vintage Style */}
-                      <div className="text-xs md:text-sm font-light text-gray-500 tracking-[0.5em] uppercase">
-                        {period}
-                      </div>
-                            {/* Type - Magazine Tagline Style */}
-                            <div className="text-lg md:text-xl text-gray-400 font-light tracking-widest uppercase">
-                        {card.type}
-                      </div>
+                    <div className="space-y-4 sm:space-y-6 md:space-y-8 lg:space-y-10 xl:space-y-12">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+                        {/* Period - Small, Vintage Style */}
+                        <div className="text-[10px] sm:text-xs md:text-sm font-light text-gray-500 tracking-[0.3em] sm:tracking-[0.4em] md:tracking-[0.5em] uppercase">
+                          {period}
+                        </div>
+                        {/* Type - Magazine Tagline Style */}
+                        <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 font-light tracking-widest uppercase">
+                          {card.type}
+                        </div>
                       </div>
 
                       {/* Title - HUGE Magazine Headline - Ad Style */}
-                      <h3 className="text-7xl md:text-9xl lg:text-[11rem] font-light text-white leading-none tracking-tight">
+                      <h3 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-9xl 2xl:text-[11rem] font-light text-white leading-none tracking-tight break-words">
                         {card.title}
                       </h3>
 
                       {/* Company - Large Magazine Subhead - Vintage Ad Style */}
-                      <p className="text-5xl md:text-7xl lg:text-8xl font-light text-blue-400 leading-tight">
+                      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl 2xl:text-8xl font-light text-blue-400 leading-tight break-words">
                         {card.company}
                       </p>
 
                       {/* Decorative Line - Vintage Magazine Style */}
-                      <div className="w-40 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-60" />
+                      <div className="w-24 sm:w-32 md:w-40 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-60" />
                     </div>
                   </div>
                 </div>

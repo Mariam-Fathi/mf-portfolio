@@ -23,24 +23,26 @@ const NavBar = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    // Magazine-style horizontal entrance animations
     useGSAP(() => {
         gsap.fromTo(navRef.current,
-            { y: -100, opacity: 0 },
-            { y: 0, opacity: 1, duration: 1, ease: "power3.out" }
+            { x: -100, opacity: 0, filter: "blur(10px)" },
+            { x: 0, opacity: 1, filter: "blur(0px)", duration: 1.2, ease: "power3.out" }
         );
 
         gsap.fromTo(logoRef.current,
-            { x: -50, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.8, delay: 0.3, ease: "back.out(1.7)" }
+            { x: -50, opacity: 0, filter: "blur(8px)" },
+            { x: 0, opacity: 1, filter: "blur(0px)", duration: 0.8, delay: 0.3, ease: "power2.out" }
         );
 
         gsap.fromTo(navItemsRef.current,
-            { y: -30, opacity: 0 },
+            { x: 50, opacity: 0, filter: "blur(8px)" },
             { 
-                y: 0, 
+                x: 0, 
                 opacity: 1, 
-                duration: 0.6, 
-                stagger: 0.1, 
+                filter: "blur(0px)",
+                duration: 0.7, 
+                stagger: 0.08, 
                 delay: 0.5,
                 ease: "power2.out"
             }
@@ -53,11 +55,13 @@ const NavBar = () => {
             gsap.fromTo(mobileMenuRef.current,
                 { 
                     x: "100%",
-                    opacity: 0 
+                    opacity: 0,
+                    filter: "blur(10px)"
                 },
                 { 
                     x: 0,
                     opacity: 1,
+                    filter: "blur(0px)",
                     duration: 0.4,
                     ease: "power2.out"
                 }
@@ -66,11 +70,13 @@ const NavBar = () => {
             gsap.fromTo(".mobile-nav-item",
                 { 
                     x: 50,
-                    opacity: 0 
+                    opacity: 0,
+                    filter: "blur(8px)"
                 },
                 { 
                     x: 0,
                     opacity: 1,
+                    filter: "blur(0px)",
                     duration: 0.3,
                     stagger: 0.1,
                     delay: 0.2
@@ -81,6 +87,7 @@ const NavBar = () => {
             gsap.to(mobileMenuRef.current, {
                 x: "100%",
                 opacity: 0,
+                filter: "blur(10px)",
                 duration: 0.3,
                 ease: "power2.in"
             });
@@ -113,31 +120,33 @@ const NavBar = () => {
                 ref={navRef}
                 className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
                     scrolled 
-                        ? "backdrop-blur-md shadow-lg py-2" 
-                        : "bg-transparent py-4"
+                        ? "bg-black/80 backdrop-blur-sm border-b border-white/10 py-3" 
+                        : "bg-transparent py-5"
                 }`}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
                     <div className="flex items-center justify-between">
+                        {/* Logo - Magazine Style */}
                         <a 
                             ref={logoRef}
                             href="#hero" 
-                            className="text-xl font-bold text-white hover:text-white-50 transition-colors duration-300"
+                            className="text-xl md:text-2xl font-light text-white tracking-tight hover:text-gray-300 transition-colors duration-300"
                             onClick={(e) => {
                                 e.preventDefault();
                                 handleNavClick('#hero');
                             }}
                         >
-                            Mariam<span className="text-white-50">.</span>
+                            MARIAM<span className="text-blue-400">.</span>
                         </a>
 
-                        <nav className="hidden md:flex items-center space-x-8">
-                            <ul className="flex items-center space-x-6">
+                        {/* Navigation - Magazine Style */}
+                        <nav className="hidden md:flex items-center space-x-1">
+                            <ul className="flex items-center space-x-2">
                                 {navLinks.map(({ link, name }, index) => (
                                     <li 
                                         key={name}
                                         ref={el => addToNavRefs(el, index)}
-                                        className="group"
+                                        className="group relative"
                                     >
                                         <a
                                             href={link}
@@ -145,27 +154,38 @@ const NavBar = () => {
                                                 e.preventDefault();
                                                 handleNavClick(link);
                                             }}
-                                            className="text-gray-300 hover:text-white transition-colors duration-300 relative py-2 text-sm font-medium"
+                                            className="text-gray-300 hover:text-white font-light transition-colors duration-300 relative py-2 px-4 text-sm tracking-wide uppercase"
+                                            style={{
+                                                letterSpacing: '0.1em',
+                                            }}
                                         >
                                             {name}
-                                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white-50 group-hover:w-full transition-all duration-300" />
+                                            {/* Magazine-style underline */}
+                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-400 group-hover:w-full transition-all duration-300" />
                                         </a>
                                     </li>
                                 ))}
                             </ul>
                             
-                            <a
-                                href="#contact"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    handleNavClick('#contact');
-                                }}
-                                className="bg-white text-black group-hover:bg-black-50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-white-50/20"
-                            >
-                                Contact
-                            </a>
+                            {/* Contact Button - Magazine Style */}
+                            <div className="ml-4 pl-4 border-l border-white/10">
+                                <a
+                                    href="#contact"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleNavClick('#contact');
+                                    }}
+                                    className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 py-2 rounded-full text-xs font-light tracking-widest uppercase transition-all duration-300 transform hover:scale-105"
+                                    style={{
+                                        letterSpacing: '0.15em',
+                                    }}
+                                >
+                                    Contact
+                                </a>
+                            </div>
                         </nav>
 
+                        {/* Mobile Menu Button - Magazine Style */}
                         <button
                             onClick={toggleMobileMenu}
                             className="md:hidden flex flex-col items-center justify-center w-8 h-8 space-y-1.5 group"
@@ -184,20 +204,22 @@ const NavBar = () => {
                 </div>
             </header>
 
+            {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
                 <div 
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                    className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
+            {/* Mobile Menu - Magazine Style */}
             <div 
                 ref={mobileMenuRef}
-                className="fixed top-0 right-0 bottom-0 w-80 backdrop-blur-md z-50 md:hidden transform translate-x-full"
+                className="fixed top-0 right-0 bottom-0 w-80 bg-black/95 backdrop-blur-md border-l border-white/10 z-50 md:hidden transform translate-x-full"
             >
-                <div className="flex flex-col h-full pt-20 px-6">
+                <div className="flex flex-col h-full pt-20 px-8">
                     <nav className="flex-1">
-                        <ul className="space-y-6">
+                        <ul className="space-y-4">
                             {navLinks.map(({ link, name }, index) => (
                                 <li key={name} className="mobile-nav-item">
                                     <a
@@ -206,7 +228,10 @@ const NavBar = () => {
                                             e.preventDefault();
                                             handleNavClick(link);
                                         }}
-                                        className="text-white text-lg font-medium py-3 block border-b border-gray-700 hover:text-white-50 transition-colors duration-300"
+                                        className="text-white text-base font-light py-4 block border-b border-white/10 hover:text-blue-400 transition-colors duration-300 tracking-wide uppercase"
+                                        style={{
+                                            letterSpacing: '0.1em',
+                                        }}
                                     >
                                         {name}
                                     </a>
@@ -215,14 +240,17 @@ const NavBar = () => {
                         </ul>
                     </nav>
 
-                    <div className="pb-8 mobile-nav-item">
+                    <div className="pb-8 mobile-nav-item border-t border-white/10 pt-8">
                         <a
                             href="#contact"
                             onClick={(e) => {
                                 e.preventDefault();
                                 handleNavClick('#contact');
                             }}
-                            className="bg-white text-black group-hover:bg-black-50 w-full py-3 rounded-lg text-center block font-medium transition-all duration-300 transform hover:scale-105"
+                            className="bg-white/10 hover:bg-white/20 text-white border border-white/20 w-full py-3 rounded-full text-center block font-light tracking-widest uppercase transition-all duration-300 transform hover:scale-105"
+                            style={{
+                                letterSpacing: '0.15em',
+                            }}
                         >
                             Contact Me
                         </a>

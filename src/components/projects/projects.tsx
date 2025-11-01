@@ -270,6 +270,18 @@ export default function CinematicShowcase() {
         0
       );
 
+      // Force clear all cards initially on mobile - ensure no blur persists
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      if (isMobile) {
+        projectPagesRef.current.forEach((page) => {
+          if (page) {
+            gsap.set(page, {
+              filter: "blur(0px)",
+            });
+          }
+        });
+      }
+
       // Animate each project page with magazine-style entrance
       // Give each card proper time to appear, settle, and be readable
       projects.forEach((project, index) => {
@@ -327,6 +339,8 @@ export default function CinematicShowcase() {
 
           // First card exits to the left (15% of its duration)
           const exitStart = pageStart + pageDuration * 0.85;
+          const isMobileExit = typeof window !== 'undefined' && window.innerWidth < 768;
+          
           mainTimeline.to(
             projectPage,
             {
@@ -334,7 +348,7 @@ export default function CinematicShowcase() {
               scale: 0.95,
               rotationY: -10,
               x: -100,
-              filter: "blur(8px)",
+              filter: isMobileExit ? "blur(0px)" : "blur(8px)", // No blur on mobile
               duration: pageDuration * 0.15,
               ease: "power2.in",
             },
@@ -344,6 +358,9 @@ export default function CinematicShowcase() {
           // Special handling for second card - start visible earlier, faster entry
           const isSecondCard = index === 1;
           
+          // Check if mobile - less blur on mobile
+          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+          
           if (isSecondCard) {
             // Second card: Start it visible but offset, then slide in quickly
             gsap.set(projectPage, {
@@ -351,7 +368,7 @@ export default function CinematicShowcase() {
               scale: 0.95,
               rotationY: 5,
               x: 100, // Slightly to the right, but closer
-              filter: "blur(2px)", // Much less blur
+              filter: isMobile ? "blur(0px)" : "blur(2px)", // No blur on mobile
             });
 
             // Quick entry - faster and sooner
@@ -392,6 +409,8 @@ export default function CinematicShowcase() {
 
             // Exit
             const exitStart = holdStart + holdDuration;
+            const isMobileExit = typeof window !== 'undefined' && window.innerWidth < 768;
+            
             mainTimeline.to(
               projectPage,
               {
@@ -399,7 +418,7 @@ export default function CinematicShowcase() {
                 scale: 0.95,
                 rotationY: -10,
                 x: -100,
-                filter: "blur(8px)",
+                filter: isMobileExit ? "blur(0px)" : "blur(8px)", // No blur on mobile
                 duration: pageDuration * 0.15,
                 ease: "power2.in",
               },
@@ -411,12 +430,15 @@ export default function CinematicShowcase() {
             
             if (isThirdCard || index >= 2) {
               // Third card and beyond: Start visible but offset, then slide in quickly
+              // Check if mobile - less blur on mobile
+              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+              
               gsap.set(projectPage, {
                 opacity: 0.85, // Already visible
                 scale: 0.95,
                 rotationY: 5,
                 x: 100, // Slightly to the right, but closer
-                filter: "blur(3px)", // Minimal blur
+                filter: isMobile ? "blur(0px)" : "blur(3px)", // No blur on mobile
               });
 
               // Quick entry - faster and sooner
@@ -472,12 +494,15 @@ export default function CinematicShowcase() {
               );
             } else {
               // Fallback for any other cards
+              // Check if mobile - less blur on mobile
+              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+              
               gsap.set(projectPage, {
                 opacity: 0,
                 scale: 0.9,
                 rotationY: 15,
                 x: 150,
-                filter: "blur(10px)",
+                filter: isMobile ? "blur(0px)" : "blur(10px)", // No blur on mobile
               });
 
               const entryStart = pageStart;
@@ -548,25 +573,25 @@ export default function CinematicShowcase() {
       <div ref={containerRef} className="w-full">
         {/* Header Section */}
         <div
-          className="relative z-10 py-20 px-4 md:px-8 lg:px-10"
+          className="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-10"
           style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
           }}
         >
           <div className="max-w-7xl mx-auto">
-            <h2
-              ref={titleRef}
-              className="text-7xl md:text-9xl lg:text-[12rem] font-light text-white mb-6 tracking-tight leading-none opacity-0"
-            >
-              PROJECTS
-            </h2>
-            <div className="w-24 h-1 bg-blue-500 mb-8" />
-            <p
-              ref={subtitleRef}
-              className="text-xl md:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0"
-            >
-              A curated selection of recent work across mobile, AI and web.
-            </p>
+          <h2
+            ref={titleRef}
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-white mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
+          >
+            PROJECTS
+          </h2>
+          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-blue-500 mb-6 sm:mb-8" />
+          <p
+            ref={subtitleRef}
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0 px-4 sm:px-0"
+          >
+            A curated selection of recent work across mobile, AI and web.
+          </p>
           </div>
         </div>
 
@@ -599,29 +624,29 @@ export default function CinematicShowcase() {
                 }}
               >
                 {/* Magazine Page Layout - Centered */}
-                <div className="w-full max-w-7xl mx-auto px-6 md:px-8 lg:px-12 h-full flex items-center justify-center py-12 md:py-16">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 w-full items-center justify-center">
+                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-full flex items-center justify-center py-8 sm:py-12 md:py-16 overflow-y-auto">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full items-center justify-center">
                     {/* Left Side - Text Content (Magazine Style) */}
-                    <div className="space-y-5 md:space-y-6 lg:space-y-7 order-2 lg:order-1">
+                    <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-7 order-2 lg:order-1">
                       {/* Page Number - Magazine Style */}
-                      <div className="text-[10px] md:text-xs font-light text-gray-500 tracking-[0.4em] uppercase">
+                      <div className="text-[10px] sm:text-xs font-light text-gray-500 tracking-[0.3em] sm:tracking-[0.4em] uppercase">
                         {String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
                       </div>
 
                       {/* Role - Magazine Caption */}
-                      <div className="inline-block px-4 py-2 border border-white/20 bg-white/5 rounded-full">
-                        <span className="text-[10px] md:text-xs font-light text-gray-400 tracking-[0.25em] uppercase">
+                      <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 border border-white/20 bg-white/5 rounded-full">
+                        <span className="text-[10px] sm:text-xs font-light text-gray-400 tracking-[0.2em] sm:tracking-[0.25em] uppercase">
                           {project.role}
                         </span>
                       </div>
 
                       {/* Title - Magazine Headline (Reduced Size) */}
-                      <h3 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-white leading-tight tracking-tight">
+                      <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-white leading-tight tracking-tight break-words">
                         {project.title}
                       </h3>
 
                       {/* Description - Magazine Body Text */}
-                      <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-wide max-w-xl">
+                      <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-wide max-w-xl">
                         {project.description}
                       </p>
 
@@ -630,7 +655,7 @@ export default function CinematicShowcase() {
                         {project.tags.map((tag, i) => (
                           <span
                             key={i}
-                            className="px-3 py-1 text-xs md:text-sm font-light text-gray-400 border border-white/10 rounded-full tracking-wide"
+                            className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs md:text-sm font-light text-gray-400 border border-white/10 rounded-full tracking-wide"
                           >
                             {tag}
                           </span>
@@ -639,7 +664,7 @@ export default function CinematicShowcase() {
 
                       {/* Links - Magazine Links */}
                       {project.links.length > 0 && (
-                        <div className="flex flex-col gap-2 pt-4">
+                        <div className="flex flex-col gap-2 pt-3 sm:pt-4">
                           {project.links.map((link, i) => (
                             <a
                               key={i}
@@ -648,9 +673,9 @@ export default function CinematicShowcase() {
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-light tracking-wide transition-colors duration-300 group max-w-fit"
                             >
-                              <span className="text-sm md:text-base">{link.name}</span>
+                              <span className="text-xs sm:text-sm md:text-base">{link.name}</span>
                               <svg
-                                className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                                className="w-3 h-3 sm:w-4 sm:h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -668,7 +693,7 @@ export default function CinematicShowcase() {
                       )}
 
                       {/* Decorative Line */}
-                      <div className="w-20 h-0.5 bg-gradient-to-r from-blue-500 to-transparent opacity-60 pt-2" />
+                      <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-blue-500 to-transparent opacity-60 pt-2" />
                     </div>
 
                     {/* Right Side - Image (Magazine Style) */}
@@ -676,16 +701,16 @@ export default function CinematicShowcase() {
                       {/* Magazine Image Frame */}
                       <div className="relative w-full">
                         {/* Decorative corners - magazine style */}
-                        <div className="absolute -top-3 -left-3 w-12 h-12 border-t border-l border-white/20 pointer-events-none" />
-                        <div className="absolute -bottom-3 -right-3 w-12 h-12 border-b border-r border-white/20 pointer-events-none" />
+                        <div className="absolute -top-2 sm:-top-3 -left-2 sm:-left-3 w-8 h-8 sm:w-12 sm:h-12 border-t border-l border-white/20 pointer-events-none" />
+                        <div className="absolute -bottom-2 sm:-bottom-3 -right-2 sm:-right-3 w-8 h-8 sm:w-12 sm:h-12 border-b border-r border-white/20 pointer-events-none" />
 
-                        <div className="relative overflow-hidden border border-white/10 bg-white/5 p-4 md:p-6">
+                        <div className="relative overflow-hidden border border-white/10 bg-white/5 p-3 sm:p-4 md:p-6">
                           <img
                             src={project.image}
                             alt={project.title}
                             className="w-full h-auto object-contain"
                             style={{
-                              maxHeight: '50vh',
+                              maxHeight: '40vh',
                               objectFit: 'contain',
                             }}
                           />
