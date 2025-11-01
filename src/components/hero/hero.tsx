@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,281 +8,108 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const MinimalCinematicHero = () => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const titleRef = useRef<HTMLHeadingElement | null>(null);
-  const subtitleRef = useRef<HTMLParagraphElement | null>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
-  const heroSectionRef = useRef<HTMLElement | null>(null);
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const repriseSubtitleRef = useRef<HTMLParagraphElement | null>(null);
-  const subtitleLineRefs = useRef<HTMLSpanElement[]>([]);
-  const curiosityRef = useRef<HTMLDivElement | null>(null);
+  const heroSectionRef = useRef<HTMLDivElement>(null);
+  const lightBeamRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLHeadingElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Match GIF width to title width
+  useEffect(() => {
+    const matchWidths = () => {
+      if (titleRef.current) {
+        const titleRect = titleRef.current.getBoundingClientRect();
+        const titleStyle = window.getComputedStyle(titleRef.current);
+        const titlePaddingLeft = parseFloat(titleStyle.paddingLeft) || 0;
+        const titlePaddingRight = parseFloat(titleStyle.paddingRight) || 0;
+        
+        const titleWidth = titleRect.width + titlePaddingLeft + titlePaddingRight;
+        
+        // No image container needed for this design
+      }
+    };
+
+    const initialTimer = setTimeout(matchWidths, 100);
+    const animationTimer = setTimeout(matchWidths, 2500);
+    
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(matchWidths, 150);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(initialTimer);
+      clearTimeout(animationTimer);
+      clearTimeout(resizeTimer);
+    };
+  }, []);
 
   useGSAP(
     () => {
-      const initialTl = gsap.timeline();
+      if (!heroSectionRef.current || !lightBeamRef.current || !titleRef.current || !subtitleRef.current) return;
 
-      gsap.set(subtitleRef.current, {
+      // Initial states
+      gsap.set(lightBeamRef.current, {
         opacity: 0,
-        visibility: "hidden",
-        display: "none",
+        scaleX: 0,
+        transformOrigin: "left center",
       });
 
-      initialTl.fromTo(
-        titleRef.current,
-        {
-          opacity: 0,
-          y: 30,
-          filter: "blur(10px)",
-        },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 4,
-          ease: "power3.out",
-        }
-      );
-
-      const overlay = document.createElement("div");
-      overlay.className =
-        "fixed inset-0 bg-black z-30 pointer-events-none opacity-0";
-      overlayRef.current = overlay;
-      document.body.appendChild(overlay);
-
-      gsap.set(imageRef.current, { transformOrigin: "center center" });
-
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: heroSectionRef.current,
-          start: "bottom bottom",
-          end: "+=340%",
-          scrub: 2,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+      gsap.set([titleRef.current, subtitleRef.current], {
+        opacity: 0,
+        y: 50,
       });
 
-      scrollTl
-        .to(
-          imageRef.current,
-          {
-            scale: 1.8,
-            duration: 12,
-            ease: "power1.inOut",
-          },
-          "-=1"
-        )
+      // Create cinematic timeline
+      const tl = gsap.timeline({ delay: 0.5 });
 
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0.3,
-            duration: 9,
-            ease: "power2.inOut",
-          },
-          "-=9"
-        )
+      // Light beam animation
+      tl.to(lightBeamRef.current, {
+        opacity: 1,
+        scaleX: 1,
+        duration: 2.5,
+        ease: "power3.out",
+      }, 0);
 
-        .to(imageRef.current, {
-          scale: 3,
-          duration: 15,
-          ease: "power1.inOut",
-        })
+      // Title animation
+      tl.to(titleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "power2.out",
+      }, 1);
 
-        .to(imageRef.current, {
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          width: "100vw",
-          height: "100vh",
-          borderRadius: "0px",
-          border: "none",
-          objectFit: "cover",
-          objectPosition: "center center",
-          zIndex: 35,
-          duration: 0.1,
-          ease: "none",
-        })
+      // Subtitle animation
+      tl.to(subtitleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+      }, 1.5);
 
-        .to(
-          titleRef.current,
-          {
-            position: "fixed",
-            top: "20%",
-            left: "50%",
-            xPercent: -50,
-            yPercent: -50,
-            zIndex: 40,
-            fontSize: "6rem",
-            textAlign: "center",
-            margin: 0,
-            lineHeight: "1.1",
-            duration: 0.1,
-            ease: "none",
-          },
-          "-=6"
-        )
-        .to(titleRef.current, { top: "50%", duration: 15, ease: "sine" }, "-=6")
-
-        .to(imageRef.current, {
-          scale: 5,
-          duration: 18,
-          ease: "power1.inOut",
-        })
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0.7,
-            duration: 15,
-            ease: "power1.inOut",
-          },
-          "-=18"
-        )
-
-        .set(imageRef.current, {
-          clipPath: "circle(100vmax at 50vw 50vh)",
-          willChange: "transform, clip-path",
-        })
-
-        .to(imageRef.current, {
-          scale: 0.5,
-          opacity: 0,
-          duration: 22,
-          ease: "power2.inOut",
-        })
-        .to(
-          titleRef.current,
-          {
-            scale: 0.5,
-            opacity: 0.3,
-            duration: 22,
-            ease: "power2.inOut",
-          },
-          "-=22"
-        )
-
-        .to(imageRef.current, {
-          scale: 0.1,
-          opacity: 0,
-          duration: 12,
-          clipPath: "circle(0vmax at 50vw 50vh)",
-          ease: "power2.in",
-        })
-        .to(
-          titleRef.current,
-          {
-            scale: 0.2,
-            opacity: 0,
-            duration: 12,
-            ease: "power2.in",
-          },
-          "-=12"
-        )
-        .to(
-          overlayRef.current,
-          {
-            opacity: 0,
-            duration: 9,
-            ease: "power2.inOut",
-          },
-          "-=9"
-        );
-
-      scrollTl
-        .set(repriseSubtitleRef.current, {
-          display: "flex",
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          width: "90vw",
-          maxWidth: "1200px",
-          zIndex: 45,
-          margin: 0,
-          height: "auto",
-          textAlign: "center",
-          pointerEvents: "none",
-          fontSize: "clamp(1.25rem, 1.5vw + 1rem, 2rem)",
-          lineHeight: "1.6",
-          opacity: 0.4,
-          filter: "blur(12px)",
-          transformOrigin: "center center",
-          scale: 0.85,
-        })
-        .fromTo(
-          repriseSubtitleRef.current,
-          { opacity: 0.4, filter: "blur(12px)", scale: 0.85 },
-          {
-            opacity: 0.4,
-            filter: "blur(0px)",
-            scale: 1,
-            duration: 4,
-            ease: "power2.out",
+      // Scroll-triggered light beam extension
+      ScrollTrigger.create({
+        trigger: heroSectionRef.current,
+        start: "top top",
+        end: "bottom top",
+        scrub: 1,
+        onUpdate: (self) => {
+          if (lightBeamRef.current) {
+            const progress = self.progress;
+            gsap.to(lightBeamRef.current, {
+              scaleX: 1 + progress * 0.3,
+              opacity: 1 - progress * 0.5,
+              duration: 0.1,
+            });
           }
-        )
-        .set(subtitleLineRefs.current, {
-          filter: "blur(8px)",
-          opacity: 0.4,
-          color: "#9ca3af",
-        })
-        .to(
-          subtitleLineRefs.current,
-          {
-            color: "#ffffff",
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 22,
-            stagger: { amount: 6, from: "start" },
-            ease: "power1.inOut",
-          },
-          "<"
-        )
-        .to({}, { duration: 4, ease: "none" })
-        .to(repriseSubtitleRef.current, {
-          opacity: 0,
-          duration: 6,
-          ease: "power2.inOut",
-        })
-        .set(curiosityRef.current, {
-          display: "flex",
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          xPercent: -50,
-          yPercent: -50,
-          zIndex: 50,
-          opacity: 0,
-          scale: 0.5,
-          clipPath: "circle(0% at 50% 50%)",
-          transformOrigin: "center center",
-        })
-        .to(curiosityRef.current, {
-          opacity: 1,
-          scale: 1.2,
-          clipPath: "circle(100% at 50% 50%)",
-          duration: 9,
-          ease: "power2.out",
-        })
-        .to({}, { duration: 3, ease: "none" })
-        .to(curiosityRef.current, {
-          opacity: 0,
-          scale: 1.5,
-          clipPath: "circle(0% at 50% 50%)",
-          duration: 6,
-          ease: "power2.inOut",
-        });
+        },
+      });
 
-      return () => {
-        if (overlayRef.current && document.body.contains(overlayRef.current)) {
-          document.body.removeChild(overlayRef.current);
-        }
-      };
     },
     { scope: containerRef }
   );
@@ -291,113 +118,85 @@ const MinimalCinematicHero = () => {
     <div ref={containerRef}>
       <section
         ref={heroSectionRef}
-        className="relative min-h-screen flex items-center justify-center bg-black pt-44"
+        className="relative min-h-screen flex items-end bg-black overflow-hidden"
+        style={{
+          background: "linear-gradient(to bottom, #0a0a0a 0%, #1a0f0a 50%, #000000 100%)",
+        }}
       >
+        {/* Dark Green Volumetric Light Beam - Autumn Aesthetic */}
+        <div
+          ref={lightBeamRef}
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{
+            background: "linear-gradient(90deg, rgba(26, 77, 46, 0.8) 0%, rgba(45, 80, 22, 0.6) 20%, rgba(67, 120, 45, 0.3) 50%, rgba(100, 150, 80, 0.1) 80%, transparent 100%)",
+            maskImage: "radial-gradient(ellipse 120% 60% at left center, black 0%, transparent 70%)",
+            WebkitMaskImage: "radial-gradient(ellipse 120% 60% at left center, black 0%, transparent 70%)",
+          }}
+        >
+          {/* Additional volumetric layers for depth - autumn orange glow */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: "radial-gradient(ellipse 100% 50% at 30% center, rgba(217, 119, 6, 0.15) 0%, rgba(234, 88, 12, 0.1) 30%, transparent 60%)",
+              filter: "blur(60px)",
+            }}
+          />
+          
+          {/* Main light core - dark green */}
+          <div
+            className="absolute left-0 top-1/2 w-full h-1/3 -translate-y-1/2"
+            style={{
+              background: "linear-gradient(90deg, rgba(26, 77, 46, 0.7) 0%, rgba(45, 80, 22, 0.4) 40%, transparent 100%)",
+              filter: "blur(30px)",
+            }}
+          />
+
+          {/* Distant figure silhouette */}
+          <div
+            className="absolute top-1/2 left-1/2 w-1 h-32 bg-white/30"
+            style={{
+              transform: "translate(-50%, -50%)",
+              filter: "blur(3px)",
+              boxShadow: "0 0 20px rgba(255, 255, 255, 0.3)",
+            }}
+          />
+        </div>
+
+
+        {/* Content Container - Bottom Black Bar with Text */}
         <div
           ref={contentRef}
-          className="relative z-10 text-center px-6 max-w-7xl mx-auto"
+          className="relative z-10 w-full bg-black pt-8 pb-12 px-6 md:px-12 lg:px-16 ml-24 md:ml-32"
         >
-          <h1
-            ref={titleRef}
-            className="text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 tracking-tight opacity-0"
-          >
-            EVERYTHING
-            <br />
-            IS CONNECTED
-          </h1>
+          <div className="max-w-7xl mx-auto">
+            {/* Subtitle - Right aligned */}
+            <h2
+              ref={subtitleRef}
+              className="font-bold uppercase text-sm md:text-base lg:text-lg mb-3 md:mb-4 text-right tracking-wider"
+              style={{
+                letterSpacing: '0.15em',
+                color: '#d97706',
+              }}
+            >
+              SOFTWARE ENGINEER
+            </h2>
 
-          <div className="relative w-full">
-            <img
-              ref={imageRef}
-              src="/images/gifs/brain-neuron.gif"
-              alt="Brain neurons connecting"
-              className="w-[60rem] h-96 lg:h-[500px] object-cover rounded-3xl shadow-2xl border border-gray-700"
-              style={{ transformOrigin: "center center" }}
-            />
+            {/* Main Title - Left aligned, very large */}
+            <h1
+              ref={titleRef}
+              className="font-bold uppercase text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] tracking-tight leading-none"
+              style={{
+                letterSpacing: '-0.02em',
+                textAlign: 'left',
+                lineHeight: '0.9',
+                color: '#d97706',
+              }}
+            >
+              MARIAM FATHI SIAM
+            </h1>
           </div>
         </div>
       </section>
-
-      <p
-        ref={repriseSubtitleRef}
-        className="fixed inset-0 z-50 flex items-center justify-center px-6 opacity-0 pointer-events-none text-gray-500"
-        style={{ display: "none" }}
-      >
-        <span className="block text-center">
-          <span
-            ref={(el) => {
-              if (el) subtitleLineRefs.current[0] = el;
-            }}
-            className="block opacity-40"
-            style={{ filter: "blur(8px)", color: "#9ca3af" }}
-          >
-            We're sometimes trained—whether intuitively or in school—to isolate
-          </span>
-          <span
-            ref={(el) => {
-              if (el) subtitleLineRefs.current[1] = el;
-            }}
-            className="block opacity-40"
-            style={{ filter: "blur(8px)", color: "#9ca3af" }}
-          >
-            knowledge into pockets, where what exists in one pocket has nothing
-          </span>
-          <span
-            ref={(el) => {
-              if (el) subtitleLineRefs.current[2] = el;
-            }}
-            className="block opacity-40"
-            style={{ filter: "blur(8px)", color: "#9ca3af" }}
-          >
-            to do with what's in the other. When in reality, it's a web. And the
-          </span>
-          <span
-            ref={(el) => {
-              if (el) subtitleLineRefs.current[3] = el;
-            }}
-            className="block opacity-40"
-            style={{ filter: "blur(8px)", color: "#9ca3af" }}
-          >
-            one ingredient that fuels that web...
-          </span>
-        </span>
-      </p>
-
-      <div
-        ref={curiosityRef}
-        className="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none"
-        style={{ display: "none" }}
-      >
-        <span className="text-6xl md:text-8xl lg:text-9xl xl:text-[12rem] font-light text-white tracking-tight">
-          CURIOSITY
-        </span>
-      </div>
-
-      <style jsx>{`
-        @keyframes cinematicFloat {
-          0%,
-          100% {
-            transform: translateY(0px) translateX(0px);
-            opacity: 0.05;
-          }
-          20% {
-            transform: translateY(-8px) translateX(3px);
-            opacity: 0.1;
-          }
-          40% {
-            transform: translateY(-16px) translateX(-3px);
-            opacity: 0.15;
-          }
-          60% {
-            transform: translateY(-24px) translateX(2px);
-            opacity: 0.2;
-          }
-          80% {
-            transform: translateY(-18px) translateX(-2px);
-            opacity: 0.1;
-          }
-        }
-      `}</style>
     </div>
   );
 };
