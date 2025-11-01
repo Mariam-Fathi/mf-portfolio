@@ -191,7 +191,20 @@ const MinimalCinematicHero = () => {
             ease: "power2.inOut",
           },
           "-=9"
-        );
+        )
+        // Ensure title and everything connected is completely hidden before repriseSubtitle appears
+        .set(
+          titleRef.current,
+          {
+            opacity: 0,
+            visibility: "hidden",
+            display: "none",
+            pointerEvents: "none",
+          },
+          ">"
+        )
+        // Add a small gap to ensure title is fully gone
+        .to({}, { duration: 0.5, ease: "none" });
 
       scrollTl
         .set(repriseSubtitleRef.current, {
