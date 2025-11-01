@@ -356,11 +356,11 @@ const HorizontalTimeline = () => {
         <div className="max-w-7xl mx-auto">
           <h2
             ref={titleRef}
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-white mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
+            className="text-[#d97706] text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
           >
             EXPERIENCE
           </h2>
-          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-blue-500 mb-6 sm:mb-8" />
+          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-[#d97706] mb-6 sm:mb-8" />
           <p
             ref={subtitleRef}
             className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0 px-4 sm:px-0"
@@ -425,12 +425,12 @@ const HorizontalTimeline = () => {
                       </h3>
 
                       {/* Company - Large Magazine Subhead - Vintage Ad Style */}
-                      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl 2xl:text-8xl font-light text-blue-400 leading-tight break-words">
+                      <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-7xl 2xl:text-8xl font-light text-[#d97706] leading-tight break-words">
                         {card.company}
                       </p>
 
                       {/* Decorative Line - Vintage Magazine Style */}
-                      <div className="w-24 sm:w-32 md:w-40 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-60" />
+                      <div className="w-24 sm:w-32 md:w-40 h-0.5 sm:h-1 bg-gradient-to-r from-transparent via-[#d97706] to-transparent opacity-60" />
                     </div>
                   </div>
                 </div>

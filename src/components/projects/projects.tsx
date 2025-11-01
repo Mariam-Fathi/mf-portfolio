@@ -581,11 +581,11 @@ export default function CinematicShowcase() {
           <div className="max-w-7xl mx-auto">
           <h2
             ref={titleRef}
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-white mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
+            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-[#d97706] mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
           >
             PROJECTS
           </h2>
-          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-blue-500 mb-6 sm:mb-8" />
+          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-[#d97706] mb-6 sm:mb-8" />
           <p
             ref={subtitleRef}
             className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0 px-4 sm:px-0"
@@ -671,7 +671,7 @@ export default function CinematicShowcase() {
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 font-light tracking-wide transition-colors duration-300 group max-w-fit"
+                              className="inline-flex items-center gap-2 text-[#d97706] hover:text-[#d97706]/80 font-light tracking-wide transition-colors duration-300 group max-w-fit"
                             >
                               <span className="text-xs sm:text-sm md:text-base">{link.name}</span>
                               <svg
@@ -693,7 +693,7 @@ export default function CinematicShowcase() {
                       )}
 
                       {/* Decorative Line */}
-                      <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-blue-500 to-transparent opacity-60 pt-2" />
+                      <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-[#d97706] to-transparent opacity-60 pt-2" />
                     </div>
 
                     {/* Right Side - Image (Magazine Style) */}

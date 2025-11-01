@@ -162,6 +162,7 @@ const MinimalCinematicHero = () => {
           />
         </div>
 
+
         {/* Content Container - Bottom Black Bar with Text */}
         <div
           ref={contentRef}
