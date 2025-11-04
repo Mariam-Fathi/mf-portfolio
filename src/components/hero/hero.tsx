@@ -85,28 +85,81 @@ const MinimalCinematicHero = () => {
         top: "3rem", // Space from top of viewport
         xPercent: 0,
         yPercent: 0,
-        opacity: 1, // Start visible
+        opacity: 0, // Start hidden - will be written in
+        clipPath: "inset(0 100% 0 0%)", // Start completely hidden (typed from left to right)
       });
 
       // Set initial states for MAR and IAM parts
       gsap.set(marPartRef.current, {
-        opacity: 1,
-        clipPath: "inset(0 0% 0 0%)", // Start fully visible
+        opacity: 0, // Start hidden
+        clipPath: "inset(0 100% 0 0%)", // Start hidden
         x: 0,
       });
 
       gsap.set(iamPartRef.current, {
-        opacity: 1,
+        opacity: 0, // Start hidden
+        clipPath: "inset(0 100% 0 0%)", // Start hidden
         x: 0, // Start at original position
       });
 
       // Create cinematic timeline
       const tl = gsap.timeline({ delay: 0.3 });
 
-      // Stage 1: MARIAM appears at left top (already visible, just ensure it's shown)
-      // No animation needed as it starts visible
+      // Stage 0: Write MARIAM letter by letter (true typing effect)
+      // Animate clipPath progressively to reveal each letter
+      if (mariamFullRef.current) {
+        // Set initial state - fully hidden
+        gsap.set(mariamFullRef.current, {
+          opacity: 1,
+          clipPath: "inset(0 100% 0 0%)", // Start fully hidden from right
+        });
+        
+        // Create letter-by-letter reveal
+        // Use short durations with immediate transitions for typing effect
+        const letterDelay = 0.3; // Delay between each letter
+        
+        // Animate from 100% hidden to 0% visible in 6 steps
+        // Use call() to set each step immediately for typing feel
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { clipPath: "inset(0 83.33% 0 0%)" }); // M
+        }, [], 0);
+        
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { clipPath: "inset(0 66.67% 0 0%)" }); // MA
+        }, [], letterDelay);
+        
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { clipPath: "inset(0 50% 0 0%)" }); // MAR
+        }, [], letterDelay * 2);
+        
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { clipPath: "inset(0 33.33% 0 0%)" }); // MARI
+        }, [], letterDelay * 3);
+        
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { clipPath: "inset(0 16.67% 0 0%)" }); // MARIA
+        }, [], letterDelay * 4);
+        
+        tl.call(function() {
+          gsap.set(mariamFullRef.current, { 
+            clipPath: "inset(0 0% 0 0%)" // MARIAM - fully visible
+          });
+          // After MARIAM is fully written, show MAR and IAM parts
+          if (marPartRef.current && iamPartRef.current) {
+            gsap.set(marPartRef.current, {
+              opacity: 1,
+              clipPath: "inset(0 0% 0 0%)",
+            });
+            gsap.set(iamPartRef.current, {
+              opacity: 1,
+              clipPath: "inset(0 0% 0 0%)",
+            });
+          }
+        }, [], letterDelay * 5);
+      }
 
       // Stage 2: Erase "MAR" part - animate it out with motion (like erasing)
+      // Start after MARIAM is fully written (1.8s typing + 0.3s pause = 2.1s)
       // Use clipPath to create erasing effect from right to left
       tl.to(marPartRef.current, {
         clipPath: "inset(0 0% 0 100%)", // Clip from right to left (erasing effect)
@@ -125,7 +178,7 @@ const MinimalCinematicHero = () => {
             });
           }
         },
-      }, 2);
+      }, 2.1); // Start 0.3s after MARIAM typing completes (1.8s typing + 0.3s pause)
 
       // Stage 3: Shift IAM up and show ENGINEER below with same font
       tl.to(mariamFullRef.current, {
@@ -288,9 +341,6 @@ const MinimalCinematicHero = () => {
           const finalLeft = mariamRight + spacing;
           const finalTop = mariamTop; // Align with MARIAM's top for same-line alignment
           
-          // Dispatch navbar appearance event
-          window.dispatchEvent(new CustomEvent('heroAnimationComplete'));
-          
           // Animate FATHI directly to final position - one smooth transition, no corrections
           tl.to(fathiRef.current, {
             left: `${finalLeft}px`,
@@ -448,13 +498,23 @@ const MinimalCinematicHero = () => {
           // Store smallFontSize for use in onComplete callback
           const fontSizeForFallback = parseFloat(smallFontSize);
           
+          // Calculate scale factor FIRST (needed for position calculations) - reuse variables from above
+          // These are already calculated above, just reuse them
+          const scaleFactorForPosition = Math.min(widthScaleFactor, heightScaleFactor, 1.0);
+          
           // Position ENGINEER aligned with "IAM" in MARIAM
-          // Align with the left edge of "IAM" span
+          // Calculate position based on FINAL position to avoid cropping
           if (iamPartRef.current && marPartRef.current && typeof document !== 'undefined') {
-            // Get position of "IAM" span to calculate its center
+            // Calculate final MARIAM bottom position (after scaling and positioning)
+            const scaledMariamHeight = mariamHeight * scaleFactorForPosition;
+            const finalMariamBottom = finalTop + scaledMariamHeight;
+            
+            // Get position of "IAM" span to calculate its center (use current position for initial setup)
             const iamRect = iamPartRef.current.getBoundingClientRect();
             const iamCenter = iamRect.left - containerRect.left + (iamRect.width / 2);
-            const engineerTop = mariamRect.bottom - containerRect.top + 20; // 20px below MARIAM
+            
+            // Calculate ENGINEER top based on FINAL MARIAM position to prevent cropping
+            const engineerTop = finalMariamBottom - containerRect.top + 20; // 20px below final MARIAM position
               
               // Calculate total width of "SOFTWARE ENGINEER" for centering
               const fontSize = parseFloat(smallFontSize);
@@ -503,17 +563,7 @@ const MinimalCinematicHero = () => {
               });
               
               // Animate MARIAM and FATHI to bottom position with scaling
-              // Calculate scale factor (use the same calculation as above)
-              const navbarWidth = 80;
-              const sidePadding = 32;
-              const viewportWidth = window.innerWidth;
-              const viewportHeight = window.innerHeight;
-              const availableWidth = viewportWidth - navbarWidth - (sidePadding * 2);
-              const availableHeight = viewportHeight - finalTop - 80;
-              const currentTotalWidth = mariamRect.width + currentSpacing + fathiRect.width;
-              const widthScaleFactor = availableWidth / currentTotalWidth;
-              const heightScaleFactor = availableHeight / mariamHeight;
-              const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor, 1.0);
+              // scaleFactor already calculated above
               
               // Animate MARIAM and FATHI separately to keep FATHI's CSS positioning
               // MARIAM uses transforms, FATHI uses left/top CSS properties
@@ -569,7 +619,11 @@ const MinimalCinematicHero = () => {
                     // Center SOFTWARE ENGINEER under "IAM"
                     // Calculate center of IAM
                     const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
-                    const currentEngineerTop = currentMariamRect.bottom - currentContainerRect.top + 20;
+                    // Use interpolated position between start and final to prevent cropping
+                    const startEngineerTop = mariamRect.bottom - containerRect.top + 20;
+                    const finalEngineerTop = finalMariamTop + (mariamHeight * scaleFactorForPosition) - currentContainerRect.top + 20;
+                    // Interpolate based on progress
+                    const currentEngineerTop = startEngineerTop + (finalEngineerTop - startEngineerTop) * progress;
                     
                     // Get SOFTWARE and ENGINEER widths for centering
                     let softwareWidth = 0;
@@ -824,6 +878,9 @@ const MinimalCinematicHero = () => {
                         WebkitTextFillColor: 'transparent',
                       });
                     }
+                    
+                    // Dispatch navbar appearance event AFTER content has settled at final bottom position
+                    window.dispatchEvent(new CustomEvent('heroAnimationComplete'));
                 }
               }, ">");
               
@@ -852,8 +909,8 @@ const MinimalCinematicHero = () => {
           }
       }, [], 10.3); // Start 0.4s after Stage 7 completes (9.9 + 0.4 = 10.3)
 
-      // Navbar appearance is now synchronized with FATHI moving up (dispatched at 7.7 in onStart)
-      // This ensures navbar appears during the transition without blocking other animations
+      // Navbar appearance is now dispatched after content settles at final bottom position (Stage 8 onComplete)
+      // This ensures navbar appears only after all animations are complete and content is in final position
 
       // SOFTWARE and ENGINEER final positioning will be handled later if needed
       // For now, the animation ends with IAM and ENGINEER at bottom left
