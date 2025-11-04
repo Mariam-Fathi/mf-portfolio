@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -105,460 +105,376 @@ const projects = [
   },
 ];
 
-export default function CinematicShowcase() {
+export default function GalleryShowcase() {
+  const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pinContainerRef = useRef<HTMLDivElement>(null);
-  const magazineScrollRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const projectPagesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const sectionRef = useRef<HTMLElement>(null);
-  const transitionOverlayRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const pinContainerRef = useRef<HTMLDivElement>(null);
+  const projectsWrapperRef = useRef<HTMLDivElement>(null);
+  const previousProjectIndexRef = useRef<number>(0);
+  const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Smooth transition from experience section
   useGSAP(
     () => {
-      if (!sectionRef.current || !transitionOverlayRef.current) return;
+      if (
+        !sectionRef.current ||
+        !pinContainerRef.current ||
+        !titleRef.current ||
+        !subtitleRef.current ||
+        !headerRef.current ||
+        !projectsWrapperRef.current
+      )
+        return;
 
-      const overlay = document.createElement("div");
-      overlay.className = "fixed inset-0 bg-black z-40 pointer-events-none";
-      transitionOverlayRef.current = overlay;
-      document.body.appendChild(overlay);
+      // Use dynamic viewport dimensions for horizontal scrolling
+      const windowHeight = window.innerHeight || window.visualViewport?.height || 800;
+      const windowWidth = window.innerWidth || 1920;
+      const isMobile = windowWidth < 768;
+      const navbarWidth = isMobile ? 80 : 112;
+      // Horizontal scroll: each project + half blank page between them
+      // Each project gets 1 viewport width + 0.5 blank page (except last project)
+      const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
+      const navbarOffset = 0; // Start from top of viewport
 
-      gsap.set(transitionOverlayRef.current, {
-        opacity: 0.85,
+      // Initial states - Title visible and clear
+      gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
+        opacity: 1,
+        filter: "blur(0px)",
+        y: 0,
       });
 
-      const transitionTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "+=100vh",
-          scrub: 2,
+      // Calculate responsive navbar width
+      const calculateNavbarWidth = () => {
+        return window.innerWidth < 768 ? 80 : 112;
+      };
+      
+      const navbarPadding = calculateNavbarWidth();
+      
+      // Initial states - Projects wrapper (no blur, position control only)
+      gsap.set(projectsWrapperRef.current, {
+        x: 0, // Start at x:0 for horizontal
+        y: 0,
+      });
+      
+      // Initialize individual projects - all start hidden (ready for blink effect)
+      projects.forEach((_, index) => {
+        const projectRef = projectRefsRef.current[index];
+        if (projectRef) {
+          gsap.set(projectRef, {
+            opacity: 0, // Start hidden
+            filter: "blur(0px)", // No blur for blink effect
+          });
+        }
+        
+      });
+      
+      // No padding needed - navbar is hidden during projects section
+      if (projectsWrapperRef.current) {
+        projectsWrapperRef.current.style.paddingLeft = '0px';
+        projectsWrapperRef.current.style.paddingTop = '0px';
+      }
+
+      // Get navbar element for smooth hide/show during transitions
+      const navbarElement = document.querySelector("nav.fixed") ||
+        (document.querySelector('nav[class*="fixed"]') as HTMLElement);
+
+      // Main ScrollTrigger - Account for navbar/platform at top
+      const pinTrigger = ScrollTrigger.create({
+          trigger: pinContainerRef.current,
+        start: `top-=0 top`,
+        end: `+=${scrollDistance}`,
+          pin: true,
+        scrub: 6.0, // Slow motion scrolling - very smooth and cinematic
           anticipatePin: 1,
+        pinSpacing: true,
+        onUpdate: (self) => {
+          const progress = self.progress;
+
+          // === ACT 1: Title Appears and Settles === (0-12%)
+          if (progress <= 0.12) {
+            const titleProgress = progress / 0.12;
+            // Appear from blur (0-50% of title phase)
+            if (titleProgress <= 0.50) {
+              const appearEase = titleProgress / 0.50;
+              const ease = 1 - Math.pow(1 - appearEase, 3); // Smooth ease-out
+              gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
+                opacity: ease,
+                filter: `blur(${25 * (1 - ease)}px)`,
+                y: (1 - ease) * 20,
+              });
+            }
+            // Hold and settle (50-100% of title phase)
+            else {
+              gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
+                opacity: 1,
+                filter: "blur(0px)",
+                y: 0,
+              });
+            }
+          }
+          // === ACT 2: Title Vanishes with Elegant Blur === (12-25%)
+          else if (progress <= 0.25) {
+            const vanishProgress = (progress - 0.12) / 0.13;
+            // Smooth vanish with cinematic blur and upward motion
+            const vanishEase = Math.pow(vanishProgress, 1.5); // Slower start, faster end
+            gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
+              opacity: 1 - vanishEase,
+              filter: `blur(${vanishEase * 25}px)`,
+              y: -vanishEase * 40,
+              scale: 1 - vanishEase * 0.05,
+              visibility: "visible", // Ensure visible for reverse animation
+            });
+            
+            // Hide navbar smoothly during title vanishing
+            if (navbarElement) {
+              const navbarHideProgress = Math.min(vanishProgress * 1.2, 1); // Slightly faster
+              gsap.set(navbarElement, {
+                opacity: 1 - navbarHideProgress,
+                x: -navbarHideProgress * 120,
+                pointerEvents: navbarHideProgress >= 0.8 ? "none" : "auto",
+              });
+            }
+          }
+          // === ACT 3: First Project Enters from Blur to Focus === (25-50%)
+          else if (progress <= 0.50) {
+            // Hide title completely (but keep visibility so it can reappear when scrolling back)
+            gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
+              opacity: 0,
+              filter: "blur(25px)",
+              y: -40,
+              scale: 0.95,
+              visibility: "visible", // Keep visible so it can reappear
+            });
+            
+            // Hide navbar completely
+            if (navbarElement) {
+              gsap.set(navbarElement, {
+                opacity: 0,
+                x: -120,
+                pointerEvents: "none",
+              });
+            }
+            
+            // Reset project index tracker for first entrance
+            previousProjectIndexRef.current = 0;
+            
+            // First project blink entrance - synced appearance
+            const projectEnterProgress = (progress - 0.25) / 0.25;
+            // Fast blink open effect - synchronized with scroll progress
+            const enterEase = Math.pow(Math.min(projectEnterProgress, 1), 1.8);
+            
+            // First project appears at x:0, synced with opacity fade
+            gsap.set(projectsWrapperRef.current, {
+              x: 0, // First project stays at x:0 during entrance
+              y: 0,
+            });
+            
+            // Apply blink effect to first project individually
+            const firstProjectRef = projectRefsRef.current[0];
+            if (firstProjectRef) {
+              gsap.set(firstProjectRef, {
+                opacity: enterEase,
+                filter: "blur(0px)",
+              });
+            }
+          }
+          // === ACT 4: Navigate Through Projects with Proper Settling Time === (50%+)
+          else {
+            // Keep navbar hidden when in projects section
+            // But allow it to reappear when scrolling back (progress < 0.25)
+            if (navbarElement) {
+              if (progress < 0.25) {
+                // Reappear navbar when scrolling back to title section
+                const navbarReappearProgress = (0.25 - progress) / 0.13; // Reverse of vanish
+                const navbarReappearEase = Math.pow(Math.min(navbarReappearProgress, 1), 1.2);
+                gsap.set(navbarElement, {
+                  opacity: navbarReappearEase,
+                  x: -(1 - navbarReappearEase) * 120,
+                  pointerEvents: navbarReappearEase >= 0.2 ? "auto" : "none",
+                });
+              } else {
+                // Keep hidden in projects section
+                gsap.set(navbarElement, {
+                  opacity: 0,
+                  x: -120,
+                  pointerEvents: "none",
+                });
+              }
+            }
+            
+            // Calculate project navigation - synchronized timing with half blank pages
+            // Each project occupies 1.5 viewport widths (1 project + 0.5 blank)
+            const projectScrollStart = (progress - 0.50) / 0.50;
+            // Each project occupies 1.5 units (1 project + 0.5 blank)
+            // We'll use a scale where 1 project = 2 units, half blank = 1 unit (total 3 units per project)
+            const totalProjectUnits = projectScrollStart * (projects.length * 3);
+            const currentUnitIndex = Math.floor(totalProjectUnits);
+            // Determine if we're in a project or blank page
+            // Pattern: Project (units 0-1), Blank (unit 2), Project (units 3-4), Blank (unit 5), etc.
+            const unitInProjectCycle = currentUnitIndex % 3;
+            const isInBlankPage = unitInProjectCycle === 2; // Unit 2 in each cycle is blank page
+            const currentProjectIndex = Math.min(
+              Math.floor(currentUnitIndex / 3),
+              projects.length - 1
+            );
+            
+            // Calculate progress within current unit (project or blank)
+            // Normalize unitLocalProgress: for projects it's 0-1, for blanks it's also 0-1
+            const unitLocalProgress = totalProjectUnits - currentUnitIndex;
+            
+            // Detect project change for transition effects
+            const projectChanged = currentProjectIndex !== previousProjectIndexRef.current;
+            previousProjectIndexRef.current = currentProjectIndex;
+            
+            // Ensure first project is fully visible and synced when entering navigation phase
+            if (currentProjectIndex === 0 && !isInBlankPage && unitLocalProgress < 0.1) {
+              // First project should be fully visible
+              if (progress >= 0.50) {
+                gsap.set(projectsWrapperRef.current, {
+                  opacity: 1,
+                  filter: "blur(0px)",
+                  scale: 1,
+                });
+              }
+            }
+            
+            // Calculate smooth horizontal offset - synced with transitions
+            // Each project cycle = 1.5 viewport widths (1 project + 0.5 blank)
+            const projectCycleWidth = windowWidth * 1.5;
+            
+            // Calculate offset based on current position
+            let rawProjectOffset = 0;
+            
+            if (isInBlankPage) {
+              // In blank page: completed projects + full current project + progress through blank
+              rawProjectOffset = -(currentProjectIndex * projectCycleWidth + windowWidth + (unitLocalProgress * windowWidth * 0.5));
+            } else {
+              // In project: completed cycles + progress through current project
+              // Project spans 2 units, so calculate actual project progress
+              const projectProgress = (unitInProjectCycle + unitLocalProgress) / 2; // 0-1
+              rawProjectOffset = -(currentProjectIndex * projectCycleWidth + (projectProgress * windowWidth));
+            }
+            
+            const nextProjectIndex = Math.min(currentProjectIndex + 1, projects.length - 1);
+            const isLastProject = currentProjectIndex === projects.length - 1;
+            const isFirstProject = currentProjectIndex === 0;
+            
+            // Blink effect: projects instantly disappear/appear during blank page
+            // Blank page is half viewport (50vw) between projects
+            let smoothOffset = rawProjectOffset;
+            
+            // Apply blink effect: wrapper position + individual project opacity
+            // First, move the wrapper horizontally
+            gsap.set(projectsWrapperRef.current, {
+              x: smoothOffset,
+              y: 0,
+            });
+            
+            // Then, apply fade-in/out to individual projects as they enter/leave viewport
+            projects.forEach((project, index) => {
+              const projectRef = projectRefsRef.current[index];
+              if (!projectRef) return;
+              
+              // Calculate if this project is current, previous, or next
+              const isCurrentProject = index === currentProjectIndex;
+              const isPreviousProject = index === currentProjectIndex - 1;
+              const isNextProject = index === currentProjectIndex + 1;
+              
+              let projectOpacity = 1;
+              
+              if (isCurrentProject && !isInBlankPage) {
+                // Current project: fully visible while scrolling through it
+                projectOpacity = 1;
+              } else if (isCurrentProject && isInBlankPage) {
+                // Current project in blank page - fade out
+                projectOpacity = 1 - Math.pow(unitLocalProgress, 1.5); // Fade out smoothly
+              } else if (isNextProject) {
+                // Next project: calculate how much is visible in viewport and fade in accordingly
+                // The next project is positioned at (currentProjectIndex + 1) * projectCycleWidth from wrapper start
+                // Current wrapper offset is rawProjectOffset (negative)
+                // Next project's left edge in viewport space = (currentProjectIndex + 1) * projectCycleWidth + rawProjectOffset
+                
+                const nextProjectLeftEdge = (currentProjectIndex + 1) * projectCycleWidth + rawProjectOffset;
+                
+                // If next project's left edge is > windowWidth, it's not visible yet (opacity 0)
+                // As it enters (left edge moves from windowWidth to 0), fade in from 0 to 1
+                if (nextProjectLeftEdge >= windowWidth) {
+                  // Not yet entered viewport
+                  projectOpacity = 0;
+                } else if (nextProjectLeftEdge <= 0) {
+                  // Fully entered viewport
+                  projectOpacity = 1;
+                } else {
+                  // Partially visible - calculate fade based on how much is visible
+                  // When leftEdge = windowWidth, opacity = 0
+                  // When leftEdge = 0, opacity = 1
+                  const visibleRatio = 1 - (nextProjectLeftEdge / windowWidth); // 0 to 1
+                  projectOpacity = Math.pow(visibleRatio, 1.5); // Smooth fade in
+                }
+                
+              } else if (isPreviousProject) {
+                // Previous project: hidden
+                projectOpacity = 0;
+              } else {
+                // Other projects - hidden
+                projectOpacity = 0;
+              }
+              
+              gsap.set(projectRef, {
+                opacity: projectOpacity,
+                filter: "blur(0px)", // No blur
+              });
+            });
+          }
+        },
+        onLeave: () => {
+          // Show navbar when leaving projects section
+          if (navbarElement) {
+            gsap.to(navbarElement, {
+                  opacity: 1,
+              x: 0,
+              duration: 0.6,
+              ease: "power3.out",
+              pointerEvents: "auto",
+            });
+          }
+        },
+        onLeaveBack: () => {
+          // Show navbar when scrolling back up
+          if (navbarElement) {
+            gsap.to(navbarElement, {
+                  opacity: 1,
+              x: 0,
+              duration: 0.6,
+              ease: "power3.out",
+              pointerEvents: "auto",
+            });
+          }
         },
       });
 
-      transitionTl.to(
-        transitionOverlayRef.current,
-        {
-          opacity: 0,
-          duration: 1,
-          ease: "power2.out",
-        },
-        0
-      );
+      // Handle resize - recalculate for horizontal scrolling
+      const handleResize = () => {
+        const newWindowWidth = window.innerWidth || 1920;
+        if (projectsWrapperRef.current) {
+          projectsWrapperRef.current.style.paddingLeft = '0px';
+          projectsWrapperRef.current.style.width = `${projects.length * 150}vw`;
+        }
+        ScrollTrigger.refresh();
+      };
+      
+      window.addEventListener("resize", handleResize);
 
-      gsap.set(sectionRef.current, {
-        opacity: 0.2,
-        filter: "blur(8px)",
-      });
-
-      transitionTl.to(
-        sectionRef.current,
-        {
-          opacity: 1,
-          filter: "blur(0px)",
-          duration: 1,
-          ease: "power2.out",
-        },
-        0
-      );
+      ScrollTrigger.refresh();
 
       return () => {
-        if (transitionOverlayRef.current && document.body.contains(transitionOverlayRef.current)) {
-          document.body.removeChild(transitionOverlayRef.current);
-        }
+        pinTrigger?.kill();
+        window.removeEventListener("resize", handleResize);
       };
     },
     { scope: containerRef }
-  );
-
-  // Title and subtitle animation
-  useGSAP(
-    () => {
-      if (!containerRef.current || !titleRef.current || !subtitleRef.current) return;
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 75%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.fromTo(
-        titleRef.current,
-        {
-          opacity: 0,
-          x: -150,
-          rotation: -3,
-          filter: "blur(20px)",
-          scale: 0.95,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          rotation: 0,
-          filter: "blur(0px)",
-          scale: 1,
-          duration: 2,
-          ease: "power3.out",
-        }
-      ).fromTo(
-        subtitleRef.current,
-        {
-          opacity: 0,
-          x: -80,
-          y: 20,
-          filter: "blur(12px)",
-        },
-        {
-          opacity: 1,
-          x: 0,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1.5,
-          ease: "power2.out",
-        },
-        "-=1.5"
-      );
-    },
-    { scope: containerRef }
-  );
-
-  // Horizontal magazine scroll - flipping through pages
-  useGSAP(
-    () => {
-      if (!pinContainerRef.current || !magazineScrollRef.current) return;
-
-      const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
-      const pageWidth = viewportWidth;
-      const totalWidth = pageWidth * projects.length;
-
-      // Set initial state for horizontal scroll
-      gsap.set(magazineScrollRef.current, {
-        x: 0,
-        transformOrigin: "left center",
-      });
-
-      // Calculate adjusted total width with space for first card
-      const initialSpace = pageWidth * 0.2; // 20% extra space for first card
-      const adjustedTotalWidth = totalWidth + initialSpace;
-
-      // Create main timeline for horizontal scrolling
-      const mainTimeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: pinContainerRef.current,
-          start: "top top",
-          end: () => `+=${adjustedTotalWidth}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Animate horizontal movement - start with offset for first card space
-      mainTimeline.to(
-        magazineScrollRef.current,
-        {
-          x: -adjustedTotalWidth + pageWidth,
-          duration: 1,
-          ease: "none",
-        },
-        0
-      );
-
-      // Force clear all cards initially on mobile - ensure no blur persists
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-      if (isMobile) {
-        projectPagesRef.current.forEach((page) => {
-          if (page) {
-            gsap.set(page, {
-              filter: "blur(0px)",
-            });
-          }
-        });
-      }
-
-      // Animate each project page with magazine-style entrance
-      // Give each card proper time to appear, settle, and be readable
-      projects.forEach((project, index) => {
-        const projectPage = projectPagesRef.current[index];
-        if (!projectPage) return;
-
-        // Calculate scroll positions as normalized progress (0-1)
-        // Each card gets equal space, but first card starts earlier
-        let pageStart, pageDuration;
-        
-        if (index === 0) {
-          // First card: starts immediately, gets bonus initial space
-          pageStart = 0;
-          // First card duration = initial space + normal page width
-          pageDuration = (initialSpace + pageWidth) / adjustedTotalWidth;
-        } else {
-          // Other cards: evenly distributed after first card space
-          const accumulatedSpace = initialSpace + pageWidth; // First card's space
-          const previousCardsSpace = (index - 1) * pageWidth; // Space for previous cards
-          const scrollPosition = (accumulatedSpace + previousCardsSpace) / adjustedTotalWidth;
-          
-          pageStart = scrollPosition;
-          pageDuration = pageWidth / adjustedTotalWidth; // Equal duration for each card
-        }
-        
-        // Ensure values are within valid range
-        pageStart = Math.max(0, Math.min(1, pageStart));
-        pageDuration = Math.max(0, Math.min(1, pageDuration));
-
-        // Initial state - page slides in from the side (horizontal movement)
-        // For first card, start it visible and clear immediately
-        if (index === 0) {
-          gsap.set(projectPage, {
-            opacity: 1,
-            scale: 1,
-            rotationY: 0,
-            x: 0,
-            filter: "blur(0px)",
-          });
-          
-          // First card holds visible for extended period (85% of its duration)
-          mainTimeline.to(
-            projectPage,
-            {
-              opacity: 1,
-              scale: 1,
-              rotationY: 0,
-              x: 0,
-              filter: "blur(0px)",
-              duration: pageDuration * 0.85,
-              ease: "none",
-            },
-            pageStart
-          );
-
-          // First card exits to the left (15% of its duration)
-          const exitStart = pageStart + pageDuration * 0.85;
-          const isMobileExit = typeof window !== 'undefined' && window.innerWidth < 768;
-          
-          mainTimeline.to(
-            projectPage,
-            {
-              opacity: 0,
-              scale: 0.95,
-              rotationY: -10,
-              x: -100,
-              filter: isMobileExit ? "blur(0px)" : "blur(8px)", // No blur on mobile
-              duration: pageDuration * 0.15,
-              ease: "power2.in",
-            },
-            exitStart
-          );
-        } else {
-          // Special handling for second card - start visible earlier, faster entry
-          const isSecondCard = index === 1;
-          
-          // Check if mobile - less blur on mobile
-          const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-          
-          if (isSecondCard) {
-            // Second card: Start it visible but offset, then slide in quickly
-            gsap.set(projectPage, {
-              opacity: 0.9, // Already visible
-              scale: 0.95,
-              rotationY: 5,
-              x: 100, // Slightly to the right, but closer
-              filter: isMobile ? "blur(0px)" : "blur(2px)", // No blur on mobile
-            });
-
-            // Quick entry - faster and sooner
-            const entryStart = pageStart; // Start immediately when card section begins
-            const entryDuration = pageDuration * 0.12; // Faster entry
-
-            mainTimeline.to(
-              projectPage,
-              {
-                opacity: 1,
-                scale: 1,
-                rotationY: 0,
-                x: 0,
-                filter: "blur(0px)",
-                duration: entryDuration,
-                ease: "power2.out",
-              },
-              entryStart
-            );
-
-            // Long hold time - plenty of time to read
-            const holdStart = entryStart + entryDuration;
-            const holdDuration = pageDuration * 0.73; // Much longer hold
-
-            mainTimeline.to(
-              projectPage,
-              {
-                opacity: 1,
-                scale: 1,
-                rotationY: 0,
-                x: 0,
-                filter: "blur(0px)",
-                duration: holdDuration,
-                ease: "none",
-              },
-              holdStart
-            );
-
-            // Exit
-            const exitStart = holdStart + holdDuration;
-            const isMobileExit = typeof window !== 'undefined' && window.innerWidth < 768;
-            
-            mainTimeline.to(
-              projectPage,
-              {
-                opacity: 0,
-                scale: 0.95,
-                rotationY: -10,
-                x: -100,
-                filter: isMobileExit ? "blur(0px)" : "blur(8px)", // No blur on mobile
-                duration: pageDuration * 0.15,
-                ease: "power2.in",
-              },
-              exitStart
-            );
-          } else {
-            // Third card and beyond: start visible earlier with minimal blur for smooth appearance
-            const isThirdCard = index === 2;
-            
-            if (isThirdCard || index >= 2) {
-              // Third card and beyond: Start visible but offset, then slide in quickly
-              // Check if mobile - less blur on mobile
-              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-              
-              gsap.set(projectPage, {
-                opacity: 0.85, // Already visible
-                scale: 0.95,
-                rotationY: 5,
-                x: 100, // Slightly to the right, but closer
-                filter: isMobile ? "blur(0px)" : "blur(3px)", // No blur on mobile
-              });
-
-              // Quick entry - faster and sooner
-              const entryStart = pageStart; // Start immediately
-              const entryDuration = pageDuration * 0.12; // Faster entry
-
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 1,
-                  scale: 1,
-                  rotationY: 0,
-                  x: 0,
-                  filter: "blur(0px)",
-                  duration: entryDuration,
-                  ease: "power2.out",
-                },
-                entryStart
-              );
-
-              // Long hold time - plenty of time to read
-              const holdStart = entryStart + entryDuration;
-              const holdDuration = pageDuration * 0.73; // Much longer hold
-
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 1,
-                  scale: 1,
-                  rotationY: 0,
-                  x: 0,
-                  filter: "blur(0px)",
-                  duration: holdDuration,
-                  ease: "none",
-                },
-                holdStart
-              );
-
-              // Exit
-              const exitStart = holdStart + holdDuration;
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 0,
-                  scale: 0.95,
-                  rotationY: -10,
-                  x: -100,
-                  filter: "blur(8px)",
-                  duration: pageDuration * 0.15,
-                  ease: "power2.in",
-                },
-                exitStart
-              );
-            } else {
-              // Fallback for any other cards
-              // Check if mobile - less blur on mobile
-              const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-              
-              gsap.set(projectPage, {
-                opacity: 0,
-                scale: 0.9,
-                rotationY: 15,
-                x: 150,
-                filter: isMobile ? "blur(0px)" : "blur(10px)", // No blur on mobile
-              });
-
-              const entryStart = pageStart;
-              const entryDuration = pageDuration * 0.12;
-
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 1,
-                  scale: 1,
-                  rotationY: 0,
-                  x: 0,
-                  filter: "blur(0px)",
-                  duration: entryDuration,
-                  ease: "power2.out",
-                },
-                entryStart
-              );
-
-              const holdStart = entryStart + entryDuration;
-              const holdDuration = pageDuration * 0.73;
-
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 1,
-                  scale: 1,
-                  rotationY: 0,
-                  x: 0,
-                  filter: "blur(0px)",
-                  duration: holdDuration,
-                  ease: "none",
-                },
-                holdStart
-              );
-
-              const exitStart = holdStart + holdDuration;
-              mainTimeline.to(
-                projectPage,
-                {
-                  opacity: 0,
-                  scale: 0.95,
-                  rotationY: -10,
-                  x: -100,
-                  filter: "blur(8px)",
-                  duration: pageDuration * 0.15,
-                  ease: "power2.in",
-                },
-                exitStart
-              );
-            }
-          }
-        }
-      });
-    },
-    { scope: containerRef, dependencies: [projects] }
   );
 
   return (
@@ -571,119 +487,142 @@ export default function CinematicShowcase() {
       }}
     >
       <div ref={containerRef} className="w-full">
-        {/* Header Section */}
+        {/* Header Section with Title */}
         <div
+          ref={headerRef}
           className="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-10"
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)',
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)",
           }}
         >
           <div className="max-w-7xl mx-auto">
           <h2
             ref={titleRef}
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-[#d97706] mb-4 sm:mb-6 tracking-tight leading-none opacity-0"
+              className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-[#d97706] mb-4 sm:mb-6 tracking-tight leading-none"
           >
             PROJECTS
           </h2>
           <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-[#d97706] mb-6 sm:mb-8" />
           <p
             ref={subtitleRef}
-            className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide opacity-0 px-4 sm:px-0"
+              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide px-4 sm:px-0"
           >
             A curated selection of recent work across mobile, AI and web.
           </p>
           </div>
         </div>
 
-        {/* Horizontal Magazine Scroll Container */}
+        {/* Pinned Container - Full Viewport Fixed */}
         <div
           ref={pinContainerRef}
-          className="relative w-full h-screen bg-black overflow-hidden"
+          className="relative w-full bg-black"
           style={{
-            background: 'linear-gradient(to bottom, #000000 0%, #0a0a0a 50%, #000000 100%)',
+            height: "100dvh",
+            minHeight: "100dvh",
+            overflow: "hidden",
           }}
         >
-          {/* Horizontal Scrolling Magazine */}
+          {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
           <div
-            ref={magazineScrollRef}
-            className="relative h-full flex"
+            ref={projectsWrapperRef}
+            className="absolute top-0 left-0 flex"
             style={{
-              width: `${projects.length * 100}vw`,
+              width: `${projects.length * 150}vw`, // Each project (100vw) + half blank page (50vw)
+              height: '100dvh',
+              paddingLeft: '0px',
+              transformOrigin: 'center center', // For smooth scale animations
             }}
           >
-            {projects.map((project, index) => (
-              <div
-                key={project.id}
+            {projects.map((project, index) => {
+              // Store ref for individual project blur control
+              if (!projectRefsRef.current[index]) {
+                projectRefsRef.current[index] = null;
+              }
+              
+              return (
+              <React.Fragment key={project.id}>
+                {/* Project */}
+                <div
                 ref={(el) => {
-                  projectPagesRef.current[index] = el;
+                    projectRefsRef.current[index] = el;
                 }}
-                className="relative flex-shrink-0 w-screen h-full flex items-center justify-center"
+                  className="flex-shrink-0 w-screen flex flex-col"
                 style={{
-                  transformStyle: "preserve-3d",
-                  willChange: "transform, opacity, filter",
-                }}
-              >
-                {/* Magazine Page Layout - Centered */}
-                <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-12 h-full flex items-center justify-center py-8 sm:py-12 md:py-16 overflow-y-auto">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 xl:gap-16 w-full items-center justify-center">
-                    {/* Left Side - Text Content (Magazine Style) */}
-                    <div className="space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-7 order-2 lg:order-1">
-                      {/* Page Number - Magazine Style */}
-                      <div className="text-[10px] sm:text-xs font-light text-gray-500 tracking-[0.3em] sm:tracking-[0.4em] uppercase">
-                        {String(index + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
+                    width: "100vw",
+                    height: "100dvh",
+                    minHeight: "100dvh",
+                    maxHeight: "100dvh",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div className="w-full h-full mx-auto px-4 md:px-8 lg:px-12 xl:px-16 max-w-[1600px] flex flex-col">
+                {/* Top Section - Role and Title at Top */}
+                <div className="flex-1 min-h-0 flex flex-col gap-4 md:gap-6 lg:gap-8 py-4 md:py-6 lg:py-8 overflow-hidden">
+                  {/* Top Row - Role and Title */}
+                  <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 flex-shrink-0">
+                    {/* Role */}
+                    <span className="text-xs md:text-sm font-light text-[#d97706]/80 tracking-[0.15em] uppercase">
+                      {project.role}
+                    </span>
+
+                    {/* Hero Title */}
+                    <h2
+                      className="text-[40px] md:text-[56px] lg:text-[72px] xl:text-[84px] font-light text-white leading-[0.95] tracking-[-0.02em]"
+                      style={{
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                        fontWeight: 200,
+                        letterSpacing: "-0.02em",
+                      }}
+                    >
+                      {project.title}
+                    </h2>
+                  </div>
+
+                  {/* Main Content - 4 Column Grid */}
+                  <div className="flex-1 min-h-0 grid grid-cols-4 gap-4 md:gap-6 lg:gap-8 items-end">
+                    {/* Left - Image (2 columns) */}
+                    <div className="col-span-2 h-full flex items-end justify-center overflow-hidden rounded-lg">
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="w-full h-full object-contain max-h-full"
+                      />
+                    </div>
+
+                    {/* Right - Description and Links (2 columns) */}
+                    <div className="col-span-2 flex flex-col gap-4 md:gap-6 lg:gap-8 justify-end">
+                      {/* Description */}
+                      <div className="flex flex-col">
+                        <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal">
+                          {project.description}
+                        </p>
                       </div>
 
-                      {/* Role - Magazine Caption */}
-                      <div className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 border border-white/20 bg-white/5 rounded-full">
-                        <span className="text-[10px] sm:text-xs font-light text-gray-400 tracking-[0.2em] sm:tracking-[0.25em] uppercase">
-                          {project.role}
-                        </span>
-                      </div>
-
-                      {/* Title - Magazine Headline (Reduced Size) */}
-                      <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-white leading-tight tracking-tight break-words">
-                        {project.title}
-                      </h3>
-
-                      {/* Description - Magazine Body Text */}
-                      <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-wide max-w-xl">
-                        {project.description}
-                      </p>
-
-                      {/* Tags - Magazine Tags */}
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {project.tags.map((tag, i) => (
-                          <span
-                            key={i}
-                            className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs md:text-sm font-light text-gray-400 border border-white/10 rounded-full tracking-wide"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Links - Magazine Links */}
+                      {/* Links */}
                       {project.links.length > 0 && (
-                        <div className="flex flex-col gap-2 pt-3 sm:pt-4">
+                        <div className="flex flex-col gap-3 md:gap-4">
                           {project.links.map((link, i) => (
                             <a
                               key={i}
                               href={link.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-[#d97706] hover:text-[#d97706]/80 font-light tracking-wide transition-colors duration-300 group max-w-fit"
+                              className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm md:text-base font-normal tracking-wide transition-all duration-300 group w-fit"
                             >
-                              <span className="text-xs sm:text-sm md:text-base">{link.name}</span>
+                              <span className="border-b border-white/40 group-hover:border-white/60 transition-colors pb-0.5">
+                                {link.name}
+                              </span>
                               <svg
-                                className="w-3 h-3 sm:w-4 sm:h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300"
+                                className="w-4 h-4 md:w-5 md:h-5 opacity-60 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
+                                strokeWidth={1.5}
                               >
                                 <path
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
-                                  strokeWidth={1.5}
                                   d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                                 />
                               </svg>
@@ -691,37 +630,25 @@ export default function CinematicShowcase() {
                           ))}
                         </div>
                       )}
-
-                      {/* Decorative Line */}
-                      <div className="w-16 sm:w-20 h-0.5 bg-gradient-to-r from-[#d97706] to-transparent opacity-60 pt-2" />
-                    </div>
-
-                    {/* Right Side - Image (Magazine Style) */}
-                    <div className="relative order-1 lg:order-2 flex items-center justify-center">
-                      {/* Magazine Image Frame */}
-                      <div className="relative w-full">
-                        {/* Decorative corners - magazine style */}
-                        <div className="absolute -top-2 sm:-top-3 -left-2 sm:-left-3 w-8 h-8 sm:w-12 sm:h-12 border-t border-l border-white/20 pointer-events-none" />
-                        <div className="absolute -bottom-2 sm:-bottom-3 -right-2 sm:-right-3 w-8 h-8 sm:w-12 sm:h-12 border-b border-r border-white/20 pointer-events-none" />
-
-                        <div className="relative overflow-hidden border border-white/10 bg-white/5 p-3 sm:p-4 md:p-6">
-                          <img
-                            src={project.image}
-                            alt={project.title}
-                            className="w-full h-auto object-contain"
-                            style={{
-                              maxHeight: '40vh',
-                              objectFit: 'contain',
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
+                </div>
               </div>
-            ))}
+                
+                {/* Blank Page - half width, except after last project */}
+                {index < projects.length - 1 && (
+                  <div
+                    key={`blank-${project.id}`}
+                    className="flex-shrink-0 relative bg-black overflow-hidden"
+                    style={{
+                      width: "50vw",
+                      height: "100dvh",
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            )})}
           </div>
         </div>
       </div>

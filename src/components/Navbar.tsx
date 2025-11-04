@@ -12,6 +12,7 @@ const NavBar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [activeLink, setActiveLink] = useState("#hero");
+    const [isVisible, setIsVisible] = useState(false);
     const navRef = useRef<HTMLElement | null>(null);
     const navItemsRef = useRef<(HTMLElement | null)[]>([]);
     const mobileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -34,8 +35,24 @@ const NavBar = () => {
             if (currentSection) setActiveLink(currentSection);
         };
 
+        // Listen for hero animation events
+        const handleAnimationStart = () => {
+            setIsVisible(false);
+        };
+
+        const handleAnimationComplete = () => {
+            setIsVisible(true);
+        };
+
         window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
+        window.addEventListener("heroAnimationStart", handleAnimationStart);
+        window.addEventListener("heroAnimationComplete", handleAnimationComplete);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("heroAnimationStart", handleAnimationStart);
+            window.removeEventListener("heroAnimationComplete", handleAnimationComplete);
+        };
     }, []);
 
     // Cinematic entrance animations
@@ -46,34 +63,45 @@ const NavBar = () => {
         gsap.set(navRef.current, {
             x: -100,
             opacity: 0,
+            visibility: "hidden",
         });
 
-        // Slide in from left
-        gsap.to(navRef.current, {
-            x: 0,
-            opacity: 1,
-            duration: 1.2,
-            ease: "power3.out",
-            delay: 0.3,
-        });
-
-        // Stagger nav items
-        navItemsRef.current.forEach((item, index) => {
-            if (!item) return;
-            gsap.set(item, {
-                y: 50,
-                opacity: 0,
-            });
-
-            gsap.to(item, {
-                y: 0,
+        // Show navbar when animation completes
+        if (isVisible) {
+            gsap.to(navRef.current, {
+                x: 0,
                 opacity: 1,
-                duration: 0.8,
-                delay: 0.5 + index * 0.1,
-                ease: "power2.out",
+                visibility: "visible",
+                duration: 1.2,
+                ease: "power3.out",
+                delay: 0.2,
             });
-        });
-    }, { scope: navRef });
+
+            // Stagger nav items
+            navItemsRef.current.forEach((item, index) => {
+                if (!item) return;
+                gsap.set(item, {
+                    y: 50,
+                    opacity: 0,
+                });
+
+                gsap.to(item, {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.8,
+                    delay: 0.4 + index * 0.1,
+                    ease: "power2.out",
+                });
+            });
+        } else {
+            // Hide navbar during hero animation
+            gsap.set(navRef.current, {
+                x: -100,
+                opacity: 0,
+                visibility: "hidden",
+            });
+        }
+    }, [isVisible, navRef]);
 
     const handleNavClick = (link: string) => {
         if (isMobileMenuOpen) {
@@ -126,7 +154,7 @@ const NavBar = () => {
             {/* Vertical Left Navigation */}
             <nav 
                 ref={navRef}
-                className="fixed left-0 top-0 bottom-0 z-50 w-20 md:w-28 bg-black flex flex-col justify-center items-center py-8"
+                className="fixed left-0 top-0 bottom-0 z-50 w-20 md:w-20 bg-[#FEFCE0] flex flex-col justify-center items-center py-8"
             >
                 <div className="flex flex-col items-center justify-center">
                     {allNavLinks.map(({ link, name }, index) => {
@@ -154,8 +182,8 @@ const NavBar = () => {
                                     }}
                                     className={`relative inline-block px-2 py-1 transition-all duration-300 uppercase font-bold text-sm md:text-base tracking-widest ${
                                         isActive
-                                            ? "text-orange-600"
-                                            : "text-white hover:text-orange-500"
+                                            ? "text-[#1A281E]"
+                                            : "text-[#1A281E] hover:text-[#1A281E]/80"
                                     }`}
                                     style={{
                                         color: isActive ? '#d97706' : undefined,
@@ -178,7 +206,9 @@ const NavBar = () => {
             {/* Mobile Menu Button */}
             <button
                 onClick={toggleMobileMenu}
-                className="fixed top-4 right-4 z-50 md:hidden flex flex-col items-center justify-center w-10 h-10 space-y-1.5 bg-black/80 backdrop-blur-sm p-2 rounded"
+                className={`fixed top-4 right-4 z-50 md:hidden flex flex-col items-center justify-center w-10 h-10 space-y-1.5 bg-black/80 backdrop-blur-sm p-2 rounded transition-opacity duration-300 ${
+                    isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                }`}
             >
                 <span className={`block h-0.5 w-6 bg-white transition-all duration-300 ${
                     isMobileMenuOpen ? "rotate-45 translate-y-2" : ""
