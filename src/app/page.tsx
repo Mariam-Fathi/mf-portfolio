@@ -12,11 +12,11 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
-      <EverythingConnected />
+      {/* <EverythingConnected />
       <ReadingSection />
-      <CuriositySection />
-      <ExperienceTimeline />
-      <CinematicShowcase />
+      <CuriositySection /> */}
+      {/* <ExperienceTimeline />
+      <CinematicShowcase /> */}
     </>
   );
 }
