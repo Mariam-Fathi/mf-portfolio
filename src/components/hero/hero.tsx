@@ -77,89 +77,50 @@ const MinimalCinematicHero = () => {
         scale: 1,
       });
 
-      // Position MARIAM at top left with proper spacing from navbar and browser edges
-      // Navbar is w-20 (5rem = 80px) on mobile, so we need space from left
-      // Add top padding to avoid navbar overlap and browser edge
+      // Position MARIAM - starts from LEFT (off-screen) and slides into position
+      // This creates seamless transition from preloader where MARIAM exits to the right
+      const viewportWidth = window.innerWidth;
+      const finalLeft = "7rem"; // Final position: Space from navbar (80px + 32px padding)
+      const finalTop = "3rem"; // Final position: Space from top of viewport
+      
+      // Set MARIAM to start from left side (off-screen) - continuing from preloader
       gsap.set(mariamFullRef.current, {
-        left: "7rem", // Space from navbar (80px + 32px padding)
-        top: "3rem", // Space from top of viewport
+        left: finalLeft,
+        top: finalTop,
+        x: -viewportWidth, // Start from left side (off-screen) - as if continuing from preloader
+        y: 0,
         xPercent: 0,
         yPercent: 0,
-        opacity: 0, // Start hidden - will be written in
-        clipPath: "inset(0 100% 0 0%)", // Start completely hidden (typed from left to right)
+        opacity: 1, // Fully visible from the start
+        clipPath: "inset(0 0% 0 0%)", // Fully visible
       });
 
-      // Set initial states for MAR and IAM parts
+      // Set initial states for MAR and IAM parts - visible from start
       gsap.set(marPartRef.current, {
-        opacity: 0, // Start hidden
-        clipPath: "inset(0 100% 0 0%)", // Start hidden
+        opacity: 1, // Visible from start
+        clipPath: "inset(0 0% 0 0%)", // Fully visible
         x: 0,
       });
 
       gsap.set(iamPartRef.current, {
-        opacity: 0, // Start hidden
-        clipPath: "inset(0 100% 0 0%)", // Start hidden
+        opacity: 1, // Visible from start
+        clipPath: "inset(0 0% 0 0%)", // Fully visible
         x: 0, // Start at original position
       });
 
-      // Create cinematic timeline
-      const tl = gsap.timeline({ delay: 0.3 });
+      // Create cinematic timeline - NO delay to ensure immediate appearance after preloader
+      const tl = gsap.timeline({ delay: 0 });
 
-      // Stage 0: Write MARIAM letter by letter (true typing effect)
-      // Animate clipPath progressively to reveal each letter
-      if (mariamFullRef.current) {
-        // Set initial state - fully hidden
-        gsap.set(mariamFullRef.current, {
-          opacity: 1,
-          clipPath: "inset(0 100% 0 0%)", // Start fully hidden from right
-        });
-        
-        // Create letter-by-letter reveal
-        // Use short durations with immediate transitions for typing effect
-        const letterDelay = 0.3; // Delay between each letter
-        
-        // Animate from 100% hidden to 0% visible in 6 steps
-        // Use call() to set each step immediately for typing feel
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { clipPath: "inset(0 83.33% 0 0%)" }); // M
-        }, [], 0);
-        
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { clipPath: "inset(0 66.67% 0 0%)" }); // MA
-        }, [], letterDelay);
-        
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { clipPath: "inset(0 50% 0 0%)" }); // MAR
-        }, [], letterDelay * 2);
-        
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { clipPath: "inset(0 33.33% 0 0%)" }); // MARI
-        }, [], letterDelay * 3);
-        
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { clipPath: "inset(0 16.67% 0 0%)" }); // MARIA
-        }, [], letterDelay * 4);
-        
-        tl.call(function() {
-          gsap.set(mariamFullRef.current, { 
-            clipPath: "inset(0 0% 0 0%)" // MARIAM - fully visible
-          });
-          // After MARIAM is fully written, show MAR and IAM parts
-          if (marPartRef.current && iamPartRef.current) {
-            gsap.set(marPartRef.current, {
-              opacity: 1,
-              clipPath: "inset(0 0% 0 0%)",
-            });
-            gsap.set(iamPartRef.current, {
-              opacity: 1,
-              clipPath: "inset(0 0% 0 0%)",
-            });
-          }
-        }, [], letterDelay * 5);
-      }
+      // Stage 0: Slide MARIAM in from the left (continuing from preloader animation)
+      // This creates seamless transition - MARIAM appears immediately as if coming from preloader
+      tl.to(mariamFullRef.current, {
+        x: 0, // Slide to final position
+        duration: 1.2, // Smooth slide-in animation
+        ease: "power2.out", // Smooth deceleration
+      }, 0);
 
       // Stage 2: Erase "MAR" part - animate it out with motion (like erasing)
-      // Start after MARIAM is fully written (1.8s typing + 0.3s pause = 2.1s)
+      // Start after MARIAM slides into position (1.2s slide-in + 0.3s pause = 1.5s)
       // Use clipPath to create erasing effect from right to left
       tl.to(marPartRef.current, {
         clipPath: "inset(0 0% 0 100%)", // Clip from right to left (erasing effect)
@@ -178,7 +139,7 @@ const MinimalCinematicHero = () => {
             });
           }
         },
-      }, 2.1); // Start 0.3s after MARIAM typing completes (1.8s typing + 0.3s pause)
+      }, 1.5); // Start 0.3s after MARIAM slide-in completes (1.2s + 0.3s pause)
 
       // Stage 3: Shift IAM up and show ENGINEER below with same font
       tl.to(mariamFullRef.current, {
@@ -226,7 +187,7 @@ const MinimalCinematicHero = () => {
             });
           }
         },
-      }, 3.5);
+      }, 2.5); // Start after Stage 2 completes (1.5 + 1.0 = 2.5)
 
       // Stage 4: Simultaneously erase ENGINEER while rewriting "MAR"
       // First, prepare for FATHI positioning (get ENGINEER position before erasing)
@@ -265,14 +226,14 @@ const MinimalCinematicHero = () => {
             clipPath: "inset(0 0% 0 0%)", // Fully visible
           });
         }
-      }, [], 5);
+      }, [], 4.5); // Start after ENGINEER typing completes (3.3 + 1.2 = 4.5)
 
       // Stage 4a: Shift IAM back to its original position (to make room for MAR)
       tl.to(iamPartRef.current, {
         x: 0, // Shift back to original position (to the right of MAR)
         duration: 0.8,
         ease: "power2.inOut",
-      }, 5);
+      }, 4.5);
 
       // Stage 4b: Simultaneously - Erase ENGINEER and Restore MAR visibility
       // Erase ENGINEER from left to right (slower)
@@ -290,7 +251,7 @@ const MinimalCinematicHero = () => {
             });
           }
         }
-      }, 5.2);
+      }, 4.7); // Start slightly after Stage 4a
 
       // Restore MAR visibility - happens simultaneously with ENGINEER erasing
       tl.to(marPartRef.current, {
@@ -298,7 +259,7 @@ const MinimalCinematicHero = () => {
         opacity: 1,
         duration: 1.5, // Match ENGINEER erasing duration for synchronization
         ease: "power2.out",
-      }, 5.2); // Start at same time as ENGINEER erasing
+      }, 4.7); // Start at same time as ENGINEER erasing
 
       // Stage 5: After ENGINEER is erased and MAR is rewritten, type FATHI
       tl.to(fathiRef.current, {
@@ -306,10 +267,10 @@ const MinimalCinematicHero = () => {
         opacity: 1,
         duration: 0.8,
         ease: "power2.inOut",
-      }, 6.9); // Start after both ENGINEER erasing and MAR rewriting complete (5.2 + 1.5 = 6.7, then 0.2s delay)
+      }, 6.4); // Start after both ENGINEER erasing and MAR rewriting complete (4.7 + 1.5 = 6.2, then 0.2s delay)
 
       // Stage 6: Move FATHI up beside MARIAM immediately after typing (start while typing completes)
-      // FATHI typing completes at 6.9 + 0.8 = 7.7
+      // FATHI typing completes at 6.4 + 0.8 = 7.2
       tl.call(function() {
         if (fathiRef.current && mariamFullRef.current && contentRef.current) {
           // First, clear ALL transforms to get accurate position measurements
@@ -363,7 +324,7 @@ const MinimalCinematicHero = () => {
             }
           }, ">");
         }
-      }, [], 7.7); // Start immediately when FATHI typing completes (6.9 + 0.8 = 7.7)
+      }, [], 7.2); // Start immediately when FATHI typing completes (6.4 + 0.8 = 7.2)
 
       // Stage 7: Shift both MARIAM and FATHI down together (after FATHI is beside MARIAM)
       // Use y transform for MARIAM, sync FATHI's top in real-time to stay on same line
@@ -402,7 +363,7 @@ const MinimalCinematicHero = () => {
             }
           }, ">");
         }
-      }, [], 8.7); // Start slightly after FATHI completes to ensure position is locked (7.7 + 0.8 + 0.2 = 8.7)
+      }, [], 8.0); // Start slightly after FATHI completes to ensure position is locked (7.2 + 0.8 = 8.0)
 
       // Stage 8: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
       tl.call(function() {
@@ -907,7 +868,7 @@ const MinimalCinematicHero = () => {
               }, "<"); // Start at same time as MARIAM
             }
           }
-      }, [], 10.3); // Start 0.4s after Stage 7 completes (9.9 + 0.4 = 10.3)
+      }, [], 9.4); // Start 0.4s after Stage 7 completes (8.0 + 1.0 + 0.4 = 9.4)
 
       // Navbar appearance is now dispatched after content settles at final bottom position (Stage 8 onComplete)
       // This ensures navbar appears only after all animations are complete and content is in final position
