@@ -13,6 +13,7 @@ const MinimalCinematicHero = () => {
   const mariamFullRef = useRef<HTMLHeadingElement>(null); // Stage 1: Full MARIAM at left top
   const marPartRef = useRef<HTMLSpanElement>(null); // The "MAR" part to be erased
   const iamPartRef = useRef<HTMLSpanElement>(null); // The "IAM" part that shifts left
+  const apostropheSRef = useRef<HTMLSpanElement>(null); // The "'S" part that drops cinematically
   const iamRef = useRef<HTMLHeadingElement>(null); // Stage 2: IAM only (after MAR erased)
   const engineerZoomRef = useRef<HTMLHeadingElement>(null); // Stage 3: ENGINEER below IAM
   const fathiRef = useRef<HTMLHeadingElement>(null); // FATHI that appears while ENGINEER erases
@@ -63,7 +64,7 @@ const MinimalCinematicHero = () => {
       if (typeof window === 'undefined' || typeof document === 'undefined') return;
       
       if (!heroSectionRef.current || !titleRef.current || !mariamFullRef.current || 
-          !marPartRef.current || !iamPartRef.current || !iamRef.current || !engineerZoomRef.current || 
+          !marPartRef.current || !iamPartRef.current || !apostropheSRef.current || !iamRef.current || !engineerZoomRef.current || 
           !fathiRef.current || !softwareRef.current || !engineerRef.current || !contentRef.current) return;
 
       // Dispatch event to hide navbar
@@ -79,9 +80,10 @@ const MinimalCinematicHero = () => {
 
       // Position MARIAM - starts from LEFT (off-screen) and slides into position
       // This creates seamless transition from preloader where MARIAM exits to the right
+      // Match preloader's top position: top-20 = 5rem (80px)
       const viewportWidth = window.innerWidth;
       const finalLeft = "7rem"; // Final position: Space from navbar (80px + 32px padding)
-      const finalTop = "3rem"; // Final position: Space from top of viewport
+      const finalTop = "5rem"; // Match preloader's top-20 position (same top position)
       
       // Set MARIAM to start from left side (off-screen) - continuing from preloader
       gsap.set(mariamFullRef.current, {
@@ -106,6 +108,14 @@ const MinimalCinematicHero = () => {
         opacity: 1, // Visible from start
         clipPath: "inset(0 0% 0 0%)", // Fully visible
         x: 0, // Start at original position
+      });
+
+      gsap.set(apostropheSRef.current, {
+        opacity: 1, // Visible from start
+        x: 0,
+        y: 0,
+        rotation: 0,
+        scale: 1,
       });
 
       // Create cinematic timeline - NO delay to ensure immediate appearance after preloader
@@ -141,7 +151,76 @@ const MinimalCinematicHero = () => {
         },
       }, 1.5); // Start 0.3s after MARIAM slide-in completes (1.2s + 0.3s pause)
 
+      // Stage 2.5: Drop 'S cinematically when MAR is erased - REALISTIC PHYSICS-BASED DROP
+      // Start simultaneously with MAR erasing for dramatic effect
+      tl.call(function() {
+        if (apostropheSRef.current && heroSectionRef.current) {
+          // Force reflow to get accurate position
+          void apostropheSRef.current.offsetHeight;
+          
+          // Get 'S current position in viewport (before any transforms)
+          const apostropheSRect = apostropheSRef.current.getBoundingClientRect();
+          
+          // Calculate random rotation values once for consistency
+          const initialRotation = 180 + Math.random() * 180; // 180-360 degrees
+          const midRotation = 360 + Math.random() * 180; // 360-540 degrees
+          const finalRotation = 540 + Math.random() * 180; // 540-720 degrees
+          
+          // Extract 'S from parent flow and position fixed for drop (escape all transforms)
+          gsap.set(apostropheSRef.current, {
+            position: 'fixed', // Use fixed to escape all parent transforms
+            left: `${apostropheSRect.left}px`, // Use viewport coordinates
+            top: `${apostropheSRect.top}px`, // Use viewport coordinates
+            x: 0, // Reset any existing transforms
+            y: 0,
+            transformOrigin: 'center center',
+            zIndex: 10000, // Very high z-index to stay above everything
+            filter: 'blur(0px)', // Start with no blur
+            margin: 0,
+            padding: 0,
+            willChange: 'transform, opacity, filter',
+          });
+        }
+      }, [], 1.5); // Start at same time as MAR erasing
+      
+      // REALISTIC DROP ANIMATION - Physics-based with acceleration
+      // Phase 1: Initial drop with acceleration (gravity pulling it down)
+      tl.to(apostropheSRef.current, {
+        y: 300, // Drop much further down (300px)
+        x: 20, // Slight horizontal drift (like real falling)
+        rotation: 180 + Math.random() * 180, // Spin 180-360 degrees
+        scale: 0.8, // Slight shrink
+        filter: 'blur(3px)', // Motion blur during fast fall
+        duration: 0.8,
+        ease: "power2.in", // Accelerating (gravity pulling faster)
+      }, 1.5); // Start at same time as MAR erasing
+      
+      // Phase 2: Continue falling with more acceleration and fade
+      tl.to(apostropheSRef.current, {
+        y: 600, // Continue falling further (relative to start)
+        x: 40, // More horizontal drift
+        rotation: 360 + Math.random() * 180, // Continue spinning
+        scale: 0.4, // Shrink more as it falls away
+        filter: 'blur(8px)', // More motion blur
+        opacity: 0.3, // Start fading
+        duration: 0.6,
+        ease: "power3.in", // Even faster acceleration
+      }, 2.3); // Continue from phase 1 (1.5 + 0.8 = 2.3)
+      
+      // Phase 3: Final drop with fade out
+      tl.to(apostropheSRef.current, {
+        y: 1000, // Final drop position (off screen)
+        x: 60, // Final horizontal position
+        rotation: 540 + Math.random() * 180, // Keep spinning
+        scale: 0.2, // Very small
+        filter: 'blur(15px)', // Heavy blur
+        opacity: 0, // Fully fade out
+        duration: 0.4,
+        ease: "power4.in", // Maximum acceleration
+      }, 2.9); // Continue from phase 2 (2.3 + 0.6 = 2.9)
+
       // Stage 3: Shift IAM up and show ENGINEER below with same font
+      // Also position FATHI directly beside MARIAM at the same time
       tl.to(mariamFullRef.current, {
         y: "-4rem", // Shift up (adjust based on line height)
         duration: 0.8,
@@ -190,38 +269,9 @@ const MinimalCinematicHero = () => {
       }, 2.5); // Start after Stage 2 completes (1.5 + 1.0 = 2.5)
 
       // Stage 4: Simultaneously erase ENGINEER while rewriting "MAR"
-      // First, prepare for FATHI positioning (get ENGINEER position before erasing)
+      // Ensure ENGINEER starts with visible clipPath for erasing
       tl.call(function() {
-        if (engineerZoomRef.current && fathiRef.current && contentRef.current) {
-          // Get ENGINEER's current position and font properties before erasing
-          const engineerRect = engineerZoomRef.current.getBoundingClientRect();
-          const containerRect = contentRef.current.getBoundingClientRect();
-          const engineerLeft = engineerRect.left - containerRect.left;
-          const engineerTop = engineerRect.top - containerRect.top;
-          
-          // Get ENGINEER's computed font properties
-          const engineerStyle = window.getComputedStyle(engineerZoomRef.current);
-          const engineerFontSize = engineerStyle.fontSize;
-          const engineerFontWeight = engineerStyle.fontWeight;
-          const engineerLetterSpacing = engineerStyle.letterSpacing;
-          const engineerLineHeight = engineerStyle.lineHeight;
-          
-          // Position FATHI at the same location as ENGINEER with same font
-          gsap.set(fathiRef.current, {
-            left: `${engineerLeft}px`,
-            top: `${engineerTop}px`,
-            xPercent: 0,
-            yPercent: 0,
-            fontSize: engineerFontSize,
-            fontWeight: engineerFontWeight,
-            letterSpacing: engineerLetterSpacing,
-            lineHeight: engineerLineHeight,
-            textAlign: "left",
-            opacity: 0,
-            clipPath: "inset(0 100% 0 0%)", // Start fully clipped (hidden)
-          });
-          
-          // Ensure ENGINEER starts with visible clipPath for erasing
+        if (engineerZoomRef.current) {
           gsap.set(engineerZoomRef.current, {
             clipPath: "inset(0 0% 0 0%)", // Fully visible
           });
@@ -261,113 +311,104 @@ const MinimalCinematicHero = () => {
         ease: "power2.out",
       }, 4.7); // Start at same time as ENGINEER erasing
 
-      // Stage 5: After ENGINEER is erased and MAR is rewritten, type FATHI
-      tl.to(fathiRef.current, {
-        clipPath: "inset(0 0% 0 0%)", // Reveal from left to right
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.inOut",
-      }, 6.4); // Start after both ENGINEER erasing and MAR rewriting complete (4.7 + 1.5 = 6.2, then 0.2s delay)
-
-      // Stage 6: Move FATHI up beside MARIAM - start overlapping with typing to eliminate lag
-      // Start movement slightly before typing completes for seamless transition
-      // FATHI typing completes at 6.4 + 0.8 = 7.2, so start movement at 7.0 (0.2s overlap)
+      // Stage 5: Position and type FATHI simultaneously with ENGINEER erasing
+      // Position FATHI accurately after MAR restoration starts
       tl.call(function() {
-        if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-          // First, clear ALL transforms to get accurate position measurements
-          gsap.set(fathiRef.current, {
-            x: 0,
-            y: 0,
-            xPercent: 0,
-            yPercent: 0,
-            clearProps: "transform",
-          });
-          
-          // Force reflow to ensure transforms are cleared
-          void fathiRef.current.offsetHeight;
-          void mariamFullRef.current.offsetHeight;
-          
-          // Get positions using getBoundingClientRect for accurate visual positions
-          const mariamRect = mariamFullRef.current.getBoundingClientRect();
-          const containerRect = contentRef.current.getBoundingClientRect();
-          
-          // Calculate final position relative to container
-          const mariamRight = mariamRect.right - containerRect.left;
-          const mariamTop = mariamRect.top - containerRect.top;
-          
-          // Get FATHI's current position (after clearing transforms, should match CSS)
-          const fathiRect = fathiRef.current.getBoundingClientRect();
-          
-          // Calculate final position: to the right of MARIAM, aligned on the same line
-          const spacing = parseFloat(window.getComputedStyle(mariamFullRef.current).fontSize) * 0.1;
-          const finalLeft = mariamRight + spacing;
-          const finalTop = mariamTop; // Align with MARIAM's top for same-line alignment
-          
-          // Animate FATHI directly to final position - start immediately without delay
-          // Use absolute time position (7.0) instead of ">" to start overlapping with typing
-          tl.to(fathiRef.current, {
-            left: `${finalLeft}px`,
-            top: `${finalTop}px`,
-            duration: 0.8,
-            ease: "power1.out",
-            onComplete: function() {
-              // Finalize position - set once, no verification loops
-              if (fathiRef.current) {
+        if (fathiRef.current && mariamFullRef.current && engineerZoomRef.current && contentRef.current && marPartRef.current) {
+          // Use requestAnimationFrame to ensure accurate positioning after MAR starts restoring
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (fathiRef.current && mariamFullRef.current && engineerZoomRef.current && contentRef.current && marPartRef.current) {
+                // Force reflow to get accurate measurements
+                void mariamFullRef.current.offsetHeight;
+                void marPartRef.current.offsetHeight;
+                
+                // Get MARIAM's computed font properties (FATHI should match MARIAM exactly)
+                const mariamStyle = window.getComputedStyle(mariamFullRef.current);
+                const mariamFontSize = mariamStyle.fontSize;
+                const mariamFontWeight = mariamStyle.fontWeight;
+                const mariamLetterSpacing = mariamStyle.letterSpacing;
+                const mariamLineHeight = mariamStyle.lineHeight;
+                
+                // Get MARIAM's actual rendered position (with MAR being restored)
+                const mariamRect = mariamFullRef.current.getBoundingClientRect();
+                const containerRect = contentRef.current.getBoundingClientRect();
+                
+                // Calculate position directly beside MARIAM (using actual rendered right edge)
+                const mariamRight = mariamRect.right - containerRect.left;
+                const mariamTop = mariamRect.top - containerRect.top;
+                
+                // Position FATHI directly beside MARIAM with EXACT same font properties as MARIAM
                 gsap.set(fathiRef.current, {
-                  left: `${finalLeft}px`,
-                  top: `${finalTop}px`,
-                  x: 0,
-                  y: 0,
+                  left: `${mariamRight}px`, // Directly beside MARIAM with no gap
+                  top: `${mariamTop}px`, // Same top as MARIAM (same line)
                   xPercent: 0,
                   yPercent: 0,
-                  clearProps: "transform",
+                  fontSize: mariamFontSize, // Match MARIAM's font size exactly
+                  fontWeight: mariamFontWeight, // Match MARIAM's weight exactly
+                  letterSpacing: mariamLetterSpacing, // Match MARIAM's letter spacing exactly
+                  lineHeight: mariamLineHeight, // Match MARIAM's line height exactly
+                  textAlign: "left",
+                  opacity: 0,
+                  clipPath: "inset(0 100% 0 0%)", // Start fully clipped (hidden)
+                  whiteSpace: "nowrap", // Prevent wrapping
+                  overflow: "visible", // Ensure it's not cropped
+                  zIndex: 10, // Ensure it's above other elements
                 });
               }
-            }
-          }, 7.0); // Start 0.2s before typing completes for seamless transition
+            });
+          });
         }
-      }, [], 7.0); // Prepare and start movement 0.2s before typing completes
+      }, [], 4.7); // Position when ENGINEER erasing and MAR restoration starts
 
-      // Stage 7: Shift both MARIAM and FATHI down together (after FATHI is beside MARIAM)
-      // Use y transform for MARIAM, sync FATHI's top in real-time to stay on same line
-      tl.call(function() {
-        if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-          // Shift MARIAM using transform (for smooth animation)
-          tl.to(mariamFullRef.current, {
-            y: "+=4rem",
-            duration: 1,
-            ease: "power2.inOut",
-            onUpdate: function(this: any) {
-              // Sync FATHI's top with MARIAM's vertical position in real-time
-              if (mariamFullRef.current && fathiRef.current && contentRef.current) {
-                const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
-                const currentContainerRect = contentRef.current.getBoundingClientRect();
-                const mariamCurrentTop = currentMariamRect.top - currentContainerRect.top;
-                
-                // Update FATHI's top to match MARIAM's current top position exactly
-                gsap.set(fathiRef.current, {
-                  top: `${mariamCurrentTop}px`,
-                });
-              }
-            },
-            onComplete: function() {
-              // Lock FATHI's final position
-              if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-                const finalMariamRect = mariamFullRef.current.getBoundingClientRect();
-                const finalContainerRect = contentRef.current.getBoundingClientRect();
-                const finalTop = finalMariamRect.top - finalContainerRect.top;
-                
-                gsap.set(fathiRef.current, {
-                  top: `${finalTop}px`,
-                  clearProps: "transform",
-                });
-              }
-            }
-          }, ">");
+      // Type FATHI simultaneously with ENGINEER erasing - slowly written
+      tl.to(fathiRef.current, {
+        clipPath: "inset(0 0% 0 0%)", // Reveal from left to right (slow typing effect)
+        opacity: 1,
+        duration: 2.5, // Slower duration for gradual writing effect
+        ease: "power1.inOut", // Slower easing for more gradual reveal
+        onComplete: function() {
+          // Ensure FATHI is completely written before moving down
+          // This callback ensures smooth transition
         }
-      }, [], 7.8); // Start immediately after FATHI movement completes (7.0 + 0.8 = 7.8)
+      }, 4.7); // Start at same time as ENGINEER erasing
 
-      // Stage 8: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
+      // Stage 6: Shift both MARIAM and FATHI down together - start AFTER FATHI is completely written
+      // FATHI typing: starts at 4.7s, duration 2.5s, completes at 7.2s
+      // Start movement AFTER FATHI completes typing for smooth transition
+      tl.to(mariamFullRef.current, {
+        y: "+=4rem",
+        duration: 1,
+        ease: "power2.inOut",
+        onUpdate: function(this: any) {
+          // Sync FATHI's top with MARIAM's vertical position in real-time
+          if (mariamFullRef.current && fathiRef.current && contentRef.current) {
+            const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
+            const currentContainerRect = contentRef.current.getBoundingClientRect();
+            const mariamCurrentTop = currentMariamRect.top - currentContainerRect.top;
+            
+            // Update FATHI's top to match MARIAM's current top position exactly
+            gsap.set(fathiRef.current, {
+              top: `${mariamCurrentTop}px`,
+            });
+          }
+        },
+        onComplete: function() {
+          // Lock FATHI's final position
+          if (fathiRef.current && mariamFullRef.current && contentRef.current) {
+            const finalMariamRect = mariamFullRef.current.getBoundingClientRect();
+            const finalContainerRect = contentRef.current.getBoundingClientRect();
+            const finalTop = finalMariamRect.top - finalContainerRect.top;
+            
+            gsap.set(fathiRef.current, {
+              top: `${finalTop}px`,
+              clearProps: "transform",
+            });
+          }
+        }
+      }, 7.2); // Start AFTER FATHI typing completes (4.7 + 2.5 = 7.2s) for smooth transition
+
+      // Stage 7: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
       tl.call(function() {
         if (mariamFullRef.current && fathiRef.current && engineerRef.current && softwareRef.current && contentRef.current && heroSectionRef.current) {
           // Force reflow
@@ -846,6 +887,75 @@ const MinimalCinematicHero = () => {
                     
                     // Dispatch navbar appearance event AFTER content has settled at final bottom position
                     window.dispatchEvent(new CustomEvent('heroAnimationComplete'));
+                    
+                    // Stage 8: Cinematic wave animation after everything settles
+                    // Create a wave effect with staggered animation on all elements
+                    const waveElements = [
+                      mariamFullRef.current,
+                      fathiRef.current,
+                      softwareRef.current,
+                      engineerRef.current,
+                    ].filter(Boolean) as HTMLElement[];
+                    
+                    if (waveElements.length > 0) {
+                      // Store original positions before wave animation
+                      const originalPositions = waveElements.map(el => {
+                        const rect = el.getBoundingClientRect();
+                        const containerRect = contentRef.current!.getBoundingClientRect();
+                        return {
+                          top: rect.top - containerRect.top,
+                          left: rect.left - containerRect.left,
+                        };
+                      });
+                      
+                      // Wave animation: elements move up in a staggered wave pattern (cinematic)
+                      tl.to(waveElements, {
+                        y: -40, // Move up more dramatically
+                        scale: 1.08, // Scale up more for cinematic effect
+                        rotation: 2, // Slight rotation for dynamic feel
+                        duration: 0.7,
+                        ease: "power3.out",
+                        stagger: {
+                          amount: 1.0, // Stagger over 1s for smooth wave effect
+                          from: "start",
+                          ease: "power2.inOut",
+                        },
+                      }, ">+=0.5"); // Start 0.5s after settling
+                      
+                      // Wave back down and settle with cinematic easing
+                      tl.to(waveElements, {
+                        y: 0, // Return to original position
+                        scale: 1, // Return to original scale
+                        rotation: 0, // Return to no rotation
+                        duration: 1.0,
+                        ease: "back.out(1.7)", // Bounce back for cinematic settle
+                        stagger: {
+                          amount: 0.8, // Stagger over 0.8s for smooth wave back
+                          from: "start",
+                          ease: "power2.inOut",
+                        },
+                        onComplete: function() {
+                          // Ensure all elements are back to their original positions
+                          waveElements.forEach((el, index) => {
+                            if (el === fathiRef.current) {
+                              // FATHI uses top/left, ensure it's reset
+                              gsap.set(el, {
+                                y: 0,
+                                clearProps: "transform",
+                              });
+                            } else {
+                              // Other elements use transforms
+                              gsap.set(el, {
+                                y: 0,
+                                scale: 1,
+                                rotation: 0,
+                                clearProps: "transform",
+                              });
+                            }
+                          });
+                        }
+                      }, ">");
+                    }
                 }
               }, ">");
               
@@ -946,6 +1056,9 @@ const MinimalCinematicHero = () => {
         <div
           ref={contentRef}
           className="absolute z-10"
+          style={{
+            overflow: "visible", // Ensure FATHI is not cropped
+          }}
         >
           <div className="w-full relative">
             {/* Software - positioned above MARIAM, aligned with M */}
@@ -977,6 +1090,7 @@ const MinimalCinematicHero = () => {
             >
               <span ref={marPartRef} style={{ display: 'inline-block' }}>MAR</span>
               <span ref={iamPartRef} style={{ display: 'inline-block' }}>IAM</span>
+              <span ref={apostropheSRef} style={{ display: 'inline-block' }}>'S</span>
             </h1>
 
             {/* Stage 2: IAM (after MAR erased) */}

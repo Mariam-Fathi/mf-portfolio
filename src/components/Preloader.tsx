@@ -160,7 +160,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
             textShadow: "0 0 30px rgba(158, 167, 147, 0.3)",
           }}
         >
-          MARIAM
+          MARIAM'S
         </div>
       </div>
 
