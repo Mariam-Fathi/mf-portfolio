@@ -644,7 +644,7 @@ const MinimalCinematicHero = () => {
                     const revealPercent = progress * 100;
                     if (iamPartRef.current) {
                       // Target color (sage green) - transitions to sage green
-                      const targetColor = '#9EA793';
+                      const targetColor = '#CEF17B';
                       // Starting color (darker/muted)
                       const startColor = '#888888';
                       
@@ -660,7 +660,7 @@ const MinimalCinematicHero = () => {
                     }
                     
                     // Also transition SOFTWARE ENGINEER to sage green during animation
-                    const sageGreen = '#9EA793';
+                    const sageGreen = '#CEF17B';
                     if (softwareRef.current && engineerRef.current) {
                       // Transition color to sage green as progress increases
                       gsap.set(softwareRef.current, {
@@ -810,7 +810,7 @@ const MinimalCinematicHero = () => {
                     const engineerLeft = softwareLeft + softwareWidth + softwareEngineerSpacing;
                     
                     // Set SOFTWARE ENGINEER to sage green when settled at bottom
-                    const sageGreen = '#9EA793';
+                    const sageGreen = '#CEF17B';
                     gsap.set(softwareRef.current, {
                       left: `${softwareLeft}px`,
                       top: `${engineerTop}px`,
@@ -830,7 +830,7 @@ const MinimalCinematicHero = () => {
                     
                     // Finalize IAM color - sage green when settled at bottom
                     if (iamPartRef.current) {
-                      const sageGreen = '#9EA793';
+                      const sageGreen = '#CEF17B';
                       gsap.set(iamPartRef.current, {
                         backgroundImage: `linear-gradient(to right, ${sageGreen} 0%, ${sageGreen} 100%)`,
                         backgroundClip: 'text',
