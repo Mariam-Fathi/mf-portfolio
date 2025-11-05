@@ -112,6 +112,8 @@ export default function GalleryShowcase() {
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
   const previousProjectIndexRef = useRef<number>(0);
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -129,6 +131,9 @@ export default function GalleryShowcase() {
       // Horizontal scroll: each project + half blank page between them
       // Each project gets 1 viewport width + 0.5 blank page (except last project)
       const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
+      
+      // Store pin trigger reference for navbar ScrollTrigger to check active state
+      let pinTriggerInstance: ScrollTrigger | null = null;
       
       // Initial states - Projects wrapper (no blur, position control only)
       gsap.set(projectsWrapperRef.current, {
@@ -153,9 +158,150 @@ export default function GalleryShowcase() {
         projectsWrapperRef.current.style.paddingTop = '0px';
       }
 
+      // Initialize Projects title - hidden initially
+      if (titleRef.current && titleContainerRef.current) {
+        gsap.set(titleRef.current, {
+          opacity: 0,
+          y: 30,
+          scale: 0.95,
+        });
+        gsap.set(titleContainerRef.current, {
+          opacity: 0,
+        });
+      }
+
       // Get navbar element for smooth hide/show during transitions
       const navbarElement = document.querySelector("nav.fixed") ||
         (document.querySelector('nav[class*="fixed"]') as HTMLElement);
+
+      // Projects Title ScrollTrigger - Ad-style fade in/out, stays until first project is 90% visible
+      if (titleContainerRef.current && titleRef.current && pinContainerRef.current) {
+        // Track section entry and calculate when first project is 90% visible
+        // Use sectionRef as trigger, calculate end point based on viewport height
+        // Title stays visible until we've scrolled 90% of viewport height into projects section
+        
+        const viewportHeight = window.innerHeight || 800;
+        const scrollDistance90Percent = viewportHeight * 0.9; // 90% of viewport height
+        
+        // Create timeline that tracks scroll progress
+        const titleTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom-=300", // Start fading in 300px before section enters
+            end: `+=${scrollDistance90Percent}`, // End when scrolled 90% of viewport height relative to start (first project 90% visible)
+            scrub: 1.5, // Smooth scrubbing for ad-style effect
+            toggleActions: "play none reverse none", // Reverse on scroll back
+          },
+        });
+
+        // Timeline: Fade in (10%) → Stay visible (80%) → Fade out (10%)
+        titleTimeline
+          // Fade in quickly - first 10% of scroll
+          .fromTo(titleRef.current, {
+            opacity: 0,
+            y: 50,
+            scale: 0.8,
+          }, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            ease: "power2.out",
+            duration: 0.1, // 10% of timeline - quick fade in
+          })
+          .to(titleContainerRef.current, {
+            opacity: 1,
+            ease: "power2.out",
+            duration: 0.1,
+          }, "<") // Start at same time
+          // Stay fully visible - 80% of scroll (until 90% total - when first project is 90% visible)
+          .to({}, { duration: 0.8 }) // Hold at full visibility until first project is 90% visible
+          // Fade out - last 10% of scroll (when first project reaches 90% visible)
+          .to([titleRef.current, titleContainerRef.current], {
+            opacity: 0,
+            y: -30,
+            scale: 0.95,
+            ease: "power2.in",
+            duration: 0.1, // 10% of timeline - fade out as first project takes over
+          });
+
+        // Navbar hide/show - hides when first project enters view, stays hidden throughout horizontal scrolling
+        // Create navbar ScrollTrigger that covers entire projects section
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top bottom-=100", // Start when section is 100px from entering (first project about to be visible)
+          end: () => {
+            // End point accounts for full section height including pinned scroll distance
+            // Add extra buffer to ensure it covers entire horizontal scroll
+            return `bottom+=${scrollDistance * 0.1} top+=100`; // Extended end to cover full scroll
+          },
+          onEnter: () => {
+            // Hide navbar when scrolling down - first project is about to enter view
+            if (navbarElement) {
+              gsap.to(navbarElement, {
+                opacity: 0,
+                x: -120,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "none",
+              });
+            }
+          },
+          onUpdate: (self) => {
+            // Continuously check if we're in projects section and keep navbar hidden
+            // This ensures navbar stays hidden during horizontal scrolling
+            if (navbarElement && self.isActive) {
+              // Check if pin trigger is active (horizontal scrolling) by checking progress
+              const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
+              
+              if (isPinActive || self.direction === 1) {
+                // Pin is active (horizontal scrolling) or scrolling down - keep hidden
+                gsap.set(navbarElement, {
+                  opacity: 0,
+                  x: -120,
+                  pointerEvents: "none",
+                });
+              }
+            }
+          },
+          onLeave: () => {
+            // Keep navbar hidden when scrolling further down (still in projects section, including horizontal scroll)
+            if (navbarElement) {
+              gsap.set(navbarElement, {
+                opacity: 0,
+                x: -120,
+                pointerEvents: "none",
+              });
+            }
+          },
+          onEnterBack: () => {
+            // Hide navbar again when scrolling back down into projects section
+            // This covers the case when scrolling back down after scrolling up
+            if (navbarElement) {
+              gsap.to(navbarElement, {
+                opacity: 0,
+                x: -120,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "none",
+              });
+            }
+          },
+          onLeaveBack: () => {
+            // Only show navbar when completely leaving projects section (scrolling back up past it)
+            // Double check that pin trigger is not active
+            const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
+            if (navbarElement && !isPinActive) {
+              gsap.to(navbarElement, {
+                opacity: 1,
+                x: 0,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "auto",
+              });
+            }
+          },
+        });
+      }
 
       // Main ScrollTrigger - Account for navbar/platform at top
       const pinTrigger = ScrollTrigger.create({
@@ -168,15 +314,6 @@ export default function GalleryShowcase() {
         pinSpacing: true,
         onUpdate: (self) => {
           const progress = self.progress;
-
-          // Hide navbar when in projects section
-          if (navbarElement) {
-            gsap.set(navbarElement, {
-              opacity: 0,
-              x: -120,
-              pointerEvents: "none",
-            });
-          }
             
           // Calculate project navigation - synchronized timing with half blank pages
           // Each project occupies 1.5 viewport widths (1 project + 0.5 blank)
@@ -317,6 +454,9 @@ export default function GalleryShowcase() {
         },
       });
 
+      // Store pin trigger reference for navbar ScrollTrigger to check active state
+      pinTriggerInstance = pinTrigger;
+
       // Handle resize - recalculate for horizontal scrolling
       const handleResize = () => {
         const newWindowWidth = window.innerWidth || 1920;
@@ -351,7 +491,30 @@ export default function GalleryShowcase() {
       {/* Spacer Section - Creates space between Hero and Projects */}
       <div className="w-full h-32 md:h-48 lg:h-64 xl:h-80 bg-[#9EA793]" />
       
-      <div ref={containerRef} className="w-full">
+      <div ref={containerRef} className="w-full relative">
+        {/* Projects Title - Ad-style fade in/out, overlapping first project */}
+        <div 
+          ref={titleContainerRef}
+          className="absolute top-0 left-0 w-full flex items-center justify-center z-30 pointer-events-none"
+          style={{
+            marginTop: '-15vh', // Overlap with first project card
+            transform: 'translateY(0)',
+          }}
+        >
+          <h2
+            ref={titleRef}
+            className="font-bold uppercase text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] tracking-tight leading-none text-[#F1BE49]"
+            style={{
+              letterSpacing: '-0.02em',
+              textAlign: 'center',
+              textShadow: '0 0 40px rgba(241, 190, 73, 0.3)',
+              WebkitTextStroke: '2px rgba(241, 190, 73, 0.1)',
+              WebkitTextFillColor: '#F1BE49',
+            } as React.CSSProperties}
+          >
+            PROJECTS
+          </h2>
+        </div>
         {/* Pinned Container - Full Viewport Fixed */}
         <div
           ref={pinContainerRef}

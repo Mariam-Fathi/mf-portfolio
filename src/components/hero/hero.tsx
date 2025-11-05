@@ -880,6 +880,55 @@ const MinimalCinematicHero = () => {
       // SOFTWARE and ENGINEER final positioning will be handled later if needed
       // For now, the animation ends with IAM and ENGINEER at bottom left
 
+      // Stage 9: Scroll exit animation - Move horizontally to the right side with stagger when scrolling to projects
+      // Wait for projects section to exist before setting up ScrollTrigger
+      const setupScrollExit = () => {
+        const projectsSection = document.querySelector('#projects');
+        if (!projectsSection) {
+          // Retry after a short delay if projects section isn't loaded yet
+          setTimeout(setupScrollExit, 100);
+          return;
+        }
+
+        // Collect all hero text elements to animate
+        const heroTextElements = [
+          mariamFullRef.current,
+          fathiRef.current,
+          softwareRef.current,
+          engineerRef.current,
+        ].filter(Boolean) as HTMLElement[]; // Filter out null refs
+
+        if (heroTextElements.length === 0) return;
+
+        // Create timeline for smooth scrubbed horizontal exit animation
+        const exitTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: projectsSection,
+            start: "top bottom-=300", // Start when projects section is 300px from entering viewport
+            end: "top bottom+=100", // End slightly after projects enters viewport
+            scrub: 3.0, // Slower scrubbing for smoother, more controlled animation
+            toggleActions: "play none reverse none", // Reverse on scroll back
+          },
+        });
+
+        // Move horizontally to the right side of screen with stagger animation (SLOW)
+        const viewportWidth = window.innerWidth;
+        exitTimeline.to(heroTextElements, {
+          x: viewportWidth, // Move to right side of screen (off-screen)
+          opacity: 0,
+          duration: 2.5, // Increased duration for slower movement
+          ease: "power1.inOut", // Slower easing for more gradual motion
+          stagger: {
+            amount: 1.5, // Increased stagger over 1.5s - creates slower cascading effect
+            from: "start", // Start from first element
+            ease: "power1.inOut",
+          },
+        });
+      };
+
+      // Setup scroll exit animation after a short delay to ensure DOM is ready
+      setTimeout(setupScrollExit, 500);
+
     },
     { scope: heroSectionRef }
   );
