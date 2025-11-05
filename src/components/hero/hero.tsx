@@ -269,8 +269,9 @@ const MinimalCinematicHero = () => {
         ease: "power2.inOut",
       }, 6.4); // Start after both ENGINEER erasing and MAR rewriting complete (4.7 + 1.5 = 6.2, then 0.2s delay)
 
-      // Stage 6: Move FATHI up beside MARIAM immediately after typing (start while typing completes)
-      // FATHI typing completes at 6.4 + 0.8 = 7.2
+      // Stage 6: Move FATHI up beside MARIAM - start overlapping with typing to eliminate lag
+      // Start movement slightly before typing completes for seamless transition
+      // FATHI typing completes at 6.4 + 0.8 = 7.2, so start movement at 7.0 (0.2s overlap)
       tl.call(function() {
         if (fathiRef.current && mariamFullRef.current && contentRef.current) {
           // First, clear ALL transforms to get accurate position measurements
@@ -302,7 +303,8 @@ const MinimalCinematicHero = () => {
           const finalLeft = mariamRight + spacing;
           const finalTop = mariamTop; // Align with MARIAM's top for same-line alignment
           
-          // Animate FATHI directly to final position - one smooth transition, no corrections
+          // Animate FATHI directly to final position - start immediately without delay
+          // Use absolute time position (7.0) instead of ">" to start overlapping with typing
           tl.to(fathiRef.current, {
             left: `${finalLeft}px`,
             top: `${finalTop}px`,
@@ -322,9 +324,9 @@ const MinimalCinematicHero = () => {
                 });
               }
             }
-          }, ">");
+          }, 7.0); // Start 0.2s before typing completes for seamless transition
         }
-      }, [], 7.2); // Start immediately when FATHI typing completes (6.4 + 0.8 = 7.2)
+      }, [], 7.0); // Prepare and start movement 0.2s before typing completes
 
       // Stage 7: Shift both MARIAM and FATHI down together (after FATHI is beside MARIAM)
       // Use y transform for MARIAM, sync FATHI's top in real-time to stay on same line
@@ -363,7 +365,7 @@ const MinimalCinematicHero = () => {
             }
           }, ">");
         }
-      }, [], 8.0); // Start slightly after FATHI completes to ensure position is locked (7.2 + 0.8 = 8.0)
+      }, [], 7.8); // Start immediately after FATHI movement completes (7.0 + 0.8 = 7.8)
 
       // Stage 8: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
       tl.call(function() {
@@ -868,7 +870,7 @@ const MinimalCinematicHero = () => {
               }, "<"); // Start at same time as MARIAM
             }
           }
-      }, [], 9.4); // Start 0.4s after Stage 7 completes (8.0 + 1.0 + 0.4 = 9.4)
+      }, [], 9.2); // Start 0.4s after Stage 7 completes (7.8 + 1.0 + 0.4 = 9.2)
 
       // Navbar appearance is now dispatched after content settles at final bottom position (Stage 8 onComplete)
       // This ensures navbar appears only after all animations are complete and content is in final position
