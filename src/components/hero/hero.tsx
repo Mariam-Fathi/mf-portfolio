@@ -571,24 +571,26 @@ const MinimalCinematicHero = () => {
                   }
                   
                   // Update SOFTWARE and ENGINEER positions (aligned with "IAM" span as MARIAM moves)
-                  if (softwareRef.current && engineerRef.current && iamPartRef.current && contentRef.current) {
+                  // Track MARIAM's position directly in real-time for smooth movement
+                  if (softwareRef.current && engineerRef.current && iamPartRef.current && contentRef.current && mariamFullRef.current) {
                     const currentContainerRect = contentRef.current.getBoundingClientRect();
                     
-                    // Recalculate "IAM" span position (left edge)
-                    const currentIamRect = iamPartRef.current.getBoundingClientRect();
-                    const currentMariamRect = mariamFullRef.current?.getBoundingClientRect();
+                    // Get MARIAM's current position in real-time (this ensures smooth tracking)
+                    const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
                     if (!currentMariamRect) return;
                     
-                    // Center SOFTWARE ENGINEER under "IAM"
-                    // Calculate center of IAM
-                    const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
-                    // Use interpolated position between start and final to prevent cropping
-                    const startEngineerTop = mariamRect.bottom - containerRect.top + 20;
-                    const finalEngineerTop = finalMariamTop + (mariamHeight * scaleFactorForPosition) - currentContainerRect.top + 20;
-                    // Interpolate based on progress
-                    const currentEngineerTop = startEngineerTop + (finalEngineerTop - startEngineerTop) * progress;
+                    // Calculate SOFTWARE ENGINEER top position directly from MARIAM's current bottom position
+                    // This ensures it always stays exactly 20px below MARIAM, no matter where MARIAM is
+                    const currentMariamBottom = currentMariamRect.bottom - currentContainerRect.top;
+                    const currentEngineerTop = currentMariamBottom + 20; // 20px below MARIAM's bottom
                     
-                    // Get SOFTWARE and ENGINEER widths for centering
+                    // Recalculate "IAM" span position to center SOFTWARE ENGINEER under it
+                    const currentIamRect = iamPartRef.current.getBoundingClientRect();
+                    
+                    // Calculate center of IAM for centering SOFTWARE ENGINEER
+                    const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
+                    
+                    // Get SOFTWARE and ENGINEER widths for centering (use cached or measure once)
                     let softwareWidth = 0;
                     let engineerWidth = 0;
                     if (softwareRef.current) {
@@ -617,13 +619,13 @@ const MinimalCinematicHero = () => {
                     const currentSoftwareLeft = currentSoftwareEngineerLeft;
                     const currentEngineerLeft = currentSoftwareLeft + softwareWidth + softwareEngineerSpacing;
                     
-                    // Update SOFTWARE position
+                    // Update SOFTWARE position - smooth tracking using current MARIAM position
                     gsap.set(softwareRef.current, {
                       left: `${currentSoftwareLeft}px`,
                       top: `${currentEngineerTop}px`,
                     });
                     
-                    // Update ENGINEER position
+                    // Update ENGINEER position - smooth tracking using current MARIAM position
                     gsap.set(engineerRef.current, {
                       left: `${currentEngineerLeft}px`,
                       top: `${currentEngineerTop}px`,
