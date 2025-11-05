@@ -27,8 +27,8 @@ export default function Home() {
           {/* <EverythingConnected />
           <ReadingSection />
           <CuriositySection /> */}
-          {/* <ExperienceTimeline />
-          <CinematicShowcase /> */}
+          {/* <ExperienceTimeline /> */}
+          <CinematicShowcase />
         </>
       )}
     </>

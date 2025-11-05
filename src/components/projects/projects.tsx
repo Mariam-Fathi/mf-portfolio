@@ -108,22 +108,18 @@ const projects = [
 export default function GalleryShowcase() {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
   const previousProjectIndexRef = useRef<number>(0);
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const titleContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       if (
         !sectionRef.current ||
         !pinContainerRef.current ||
-        !titleRef.current ||
-        !subtitleRef.current ||
-        !headerRef.current ||
         !projectsWrapperRef.current
       )
         return;
@@ -132,25 +128,12 @@ export default function GalleryShowcase() {
       const windowHeight = window.innerHeight || window.visualViewport?.height || 800;
       const windowWidth = window.innerWidth || 1920;
       const isMobile = windowWidth < 768;
-      const navbarWidth = isMobile ? 80 : 112;
       // Horizontal scroll: each project + half blank page between them
       // Each project gets 1 viewport width + 0.5 blank page (except last project)
       const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
-      const navbarOffset = 0; // Start from top of viewport
-
-      // Initial states - Title visible and clear
-      gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
-        opacity: 1,
-        filter: "blur(0px)",
-        y: 0,
-      });
-
-      // Calculate responsive navbar width
-      const calculateNavbarWidth = () => {
-        return window.innerWidth < 768 ? 80 : 112;
-      };
       
-      const navbarPadding = calculateNavbarWidth();
+      // Store pin trigger reference for navbar ScrollTrigger to check active state
+      let pinTriggerInstance: ScrollTrigger | null = null;
       
       // Initial states - Projects wrapper (no blur, position control only)
       gsap.set(projectsWrapperRef.current, {
@@ -158,16 +141,15 @@ export default function GalleryShowcase() {
         y: 0,
       });
       
-      // Initialize individual projects - all start hidden (ready for blink effect)
+      // Initialize individual projects - first one visible, others hidden
       projects.forEach((_, index) => {
         const projectRef = projectRefsRef.current[index];
         if (projectRef) {
           gsap.set(projectRef, {
-            opacity: 0, // Start hidden
+            opacity: index === 0 ? 1 : 0, // First project visible, others hidden
             filter: "blur(0px)", // No blur for blink effect
           });
         }
-        
       });
       
       // No padding needed - navbar is hidden during projects section
@@ -176,9 +158,150 @@ export default function GalleryShowcase() {
         projectsWrapperRef.current.style.paddingTop = '0px';
       }
 
+      // Initialize Projects title - hidden initially
+      if (titleRef.current && titleContainerRef.current) {
+        gsap.set(titleRef.current, {
+          opacity: 0,
+          y: 30,
+          scale: 0.95,
+        });
+        gsap.set(titleContainerRef.current, {
+          opacity: 0,
+        });
+      }
+
       // Get navbar element for smooth hide/show during transitions
       const navbarElement = document.querySelector("nav.fixed") ||
         (document.querySelector('nav[class*="fixed"]') as HTMLElement);
+
+      // Projects Title ScrollTrigger - Ad-style fade in/out, stays until first project is 90% visible
+      if (titleContainerRef.current && titleRef.current && pinContainerRef.current) {
+        // Track section entry and calculate when first project is 90% visible
+        // Use sectionRef as trigger, calculate end point based on viewport height
+        // Title stays visible until we've scrolled 90% of viewport height into projects section
+        
+        const viewportHeight = window.innerHeight || 800;
+        const scrollDistance90Percent = viewportHeight * 0.9; // 90% of viewport height
+        
+        // Create timeline that tracks scroll progress
+        const titleTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top bottom-=300", // Start fading in 300px before section enters
+            end: `+=${scrollDistance90Percent}`, // End when scrolled 90% of viewport height relative to start (first project 90% visible)
+            scrub: 1.5, // Smooth scrubbing for ad-style effect
+            toggleActions: "play none reverse none", // Reverse on scroll back
+          },
+        });
+
+        // Timeline: Fade in (10%) → Stay visible (80%) → Fade out (10%)
+        titleTimeline
+          // Fade in quickly - first 10% of scroll
+          .fromTo(titleRef.current, {
+            opacity: 0,
+            y: 50,
+            scale: 0.8,
+          }, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            ease: "power2.out",
+            duration: 0.1, // 10% of timeline - quick fade in
+          })
+          .to(titleContainerRef.current, {
+            opacity: 1,
+            ease: "power2.out",
+            duration: 0.1,
+          }, "<") // Start at same time
+          // Stay fully visible - 80% of scroll (until 90% total - when first project is 90% visible)
+          .to({}, { duration: 0.8 }) // Hold at full visibility until first project is 90% visible
+          // Fade out - last 10% of scroll (when first project reaches 90% visible)
+          .to([titleRef.current, titleContainerRef.current], {
+            opacity: 0,
+            y: -30,
+            scale: 0.95,
+            ease: "power2.in",
+            duration: 0.1, // 10% of timeline - fade out as first project takes over
+          });
+
+        // Navbar hide/show - hides when first project enters view, stays hidden throughout horizontal scrolling
+        // Create navbar ScrollTrigger that covers entire projects section
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top bottom-=100", // Start when section is 100px from entering (first project about to be visible)
+          end: () => {
+            // End point accounts for full section height including pinned scroll distance
+            // Add extra buffer to ensure it covers entire horizontal scroll
+            return `bottom+=${scrollDistance * 0.1} top+=100`; // Extended end to cover full scroll
+          },
+          onEnter: () => {
+            // Hide navbar when scrolling down - first project is about to enter view
+            if (navbarElement) {
+              gsap.to(navbarElement, {
+                opacity: 0,
+                x: -120,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "none",
+              });
+            }
+          },
+          onUpdate: (self) => {
+            // Continuously check if we're in projects section and keep navbar hidden
+            // This ensures navbar stays hidden during horizontal scrolling
+            if (navbarElement && self.isActive) {
+              // Check if pin trigger is active (horizontal scrolling) by checking progress
+              const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
+              
+              if (isPinActive || self.direction === 1) {
+                // Pin is active (horizontal scrolling) or scrolling down - keep hidden
+                gsap.set(navbarElement, {
+                  opacity: 0,
+                  x: -120,
+                  pointerEvents: "none",
+                });
+              }
+            }
+          },
+          onLeave: () => {
+            // Keep navbar hidden when scrolling further down (still in projects section, including horizontal scroll)
+            if (navbarElement) {
+              gsap.set(navbarElement, {
+                opacity: 0,
+                x: -120,
+                pointerEvents: "none",
+              });
+            }
+          },
+          onEnterBack: () => {
+            // Hide navbar again when scrolling back down into projects section
+            // This covers the case when scrolling back down after scrolling up
+            if (navbarElement) {
+              gsap.to(navbarElement, {
+                opacity: 0,
+                x: -120,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "none",
+              });
+            }
+          },
+          onLeaveBack: () => {
+            // Only show navbar when completely leaving projects section (scrolling back up past it)
+            // Double check that pin trigger is not active
+            const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
+            if (navbarElement && !isPinActive) {
+              gsap.to(navbarElement, {
+                opacity: 1,
+                x: 0,
+                duration: 0.6,
+                ease: "power2.inOut",
+                pointerEvents: "auto",
+              });
+            }
+          },
+        });
+      }
 
       // Main ScrollTrigger - Account for navbar/platform at top
       const pinTrigger = ScrollTrigger.create({
@@ -191,122 +314,10 @@ export default function GalleryShowcase() {
         pinSpacing: true,
         onUpdate: (self) => {
           const progress = self.progress;
-
-          // === ACT 1: Title Appears and Settles === (0-12%)
-          if (progress <= 0.12) {
-            const titleProgress = progress / 0.12;
-            // Appear from blur (0-50% of title phase)
-            if (titleProgress <= 0.50) {
-              const appearEase = titleProgress / 0.50;
-              const ease = 1 - Math.pow(1 - appearEase, 3); // Smooth ease-out
-              gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
-                opacity: ease,
-                filter: `blur(${25 * (1 - ease)}px)`,
-                y: (1 - ease) * 20,
-              });
-            }
-            // Hold and settle (50-100% of title phase)
-            else {
-              gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
-                opacity: 1,
-                filter: "blur(0px)",
-                y: 0,
-              });
-            }
-          }
-          // === ACT 2: Title Vanishes with Elegant Blur === (12-25%)
-          else if (progress <= 0.25) {
-            const vanishProgress = (progress - 0.12) / 0.13;
-            // Smooth vanish with cinematic blur and upward motion
-            const vanishEase = Math.pow(vanishProgress, 1.5); // Slower start, faster end
-            gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
-              opacity: 1 - vanishEase,
-              filter: `blur(${vanishEase * 25}px)`,
-              y: -vanishEase * 40,
-              scale: 1 - vanishEase * 0.05,
-              visibility: "visible", // Ensure visible for reverse animation
-            });
             
-            // Hide navbar smoothly during title vanishing
-            if (navbarElement) {
-              const navbarHideProgress = Math.min(vanishProgress * 1.2, 1); // Slightly faster
-              gsap.set(navbarElement, {
-                opacity: 1 - navbarHideProgress,
-                x: -navbarHideProgress * 120,
-                pointerEvents: navbarHideProgress >= 0.8 ? "none" : "auto",
-              });
-            }
-          }
-          // === ACT 3: First Project Enters from Blur to Focus === (25-50%)
-          else if (progress <= 0.50) {
-            // Hide title completely (but keep visibility so it can reappear when scrolling back)
-            gsap.set([titleRef.current, subtitleRef.current, headerRef.current], {
-              opacity: 0,
-              filter: "blur(25px)",
-              y: -40,
-              scale: 0.95,
-              visibility: "visible", // Keep visible so it can reappear
-            });
-            
-            // Hide navbar completely
-            if (navbarElement) {
-              gsap.set(navbarElement, {
-                opacity: 0,
-                x: -120,
-                pointerEvents: "none",
-              });
-            }
-            
-            // Reset project index tracker for first entrance
-            previousProjectIndexRef.current = 0;
-            
-            // First project blink entrance - synced appearance
-            const projectEnterProgress = (progress - 0.25) / 0.25;
-            // Fast blink open effect - synchronized with scroll progress
-            const enterEase = Math.pow(Math.min(projectEnterProgress, 1), 1.8);
-            
-            // First project appears at x:0, synced with opacity fade
-            gsap.set(projectsWrapperRef.current, {
-              x: 0, // First project stays at x:0 during entrance
-              y: 0,
-            });
-            
-            // Apply blink effect to first project individually
-            const firstProjectRef = projectRefsRef.current[0];
-            if (firstProjectRef) {
-              gsap.set(firstProjectRef, {
-                opacity: enterEase,
-                filter: "blur(0px)",
-              });
-            }
-          }
-          // === ACT 4: Navigate Through Projects with Proper Settling Time === (50%+)
-          else {
-            // Keep navbar hidden when in projects section
-            // But allow it to reappear when scrolling back (progress < 0.25)
-            if (navbarElement) {
-              if (progress < 0.25) {
-                // Reappear navbar when scrolling back to title section
-                const navbarReappearProgress = (0.25 - progress) / 0.13; // Reverse of vanish
-                const navbarReappearEase = Math.pow(Math.min(navbarReappearProgress, 1), 1.2);
-                gsap.set(navbarElement, {
-                  opacity: navbarReappearEase,
-                  x: -(1 - navbarReappearEase) * 120,
-                  pointerEvents: navbarReappearEase >= 0.2 ? "auto" : "none",
-                });
-              } else {
-                // Keep hidden in projects section
-                gsap.set(navbarElement, {
-                  opacity: 0,
-                  x: -120,
-                  pointerEvents: "none",
-                });
-              }
-            }
-            
-            // Calculate project navigation - synchronized timing with half blank pages
-            // Each project occupies 1.5 viewport widths (1 project + 0.5 blank)
-            const projectScrollStart = (progress - 0.50) / 0.50;
+          // Calculate project navigation - synchronized timing with half blank pages
+          // Each project occupies 1.5 viewport widths (1 project + 0.5 blank)
+          const projectScrollStart = progress;
             // Each project occupies 1.5 units (1 project + 0.5 blank)
             // We'll use a scale where 1 project = 2 units, half blank = 1 unit (total 3 units per project)
             const totalProjectUnits = projectScrollStart * (projects.length * 3);
@@ -328,17 +339,6 @@ export default function GalleryShowcase() {
             const projectChanged = currentProjectIndex !== previousProjectIndexRef.current;
             previousProjectIndexRef.current = currentProjectIndex;
             
-            // Ensure first project is fully visible and synced when entering navigation phase
-            if (currentProjectIndex === 0 && !isInBlankPage && unitLocalProgress < 0.1) {
-              // First project should be fully visible
-              if (progress >= 0.50) {
-                gsap.set(projectsWrapperRef.current, {
-                  opacity: 1,
-                  filter: "blur(0px)",
-                  scale: 1,
-                });
-              }
-            }
             
             // Calculate smooth horizontal offset - synced with transitions
             // Each project cycle = 1.5 viewport widths (1 project + 0.5 blank)
@@ -427,7 +427,6 @@ export default function GalleryShowcase() {
                 filter: "blur(0px)", // No blur
               });
             });
-          }
         },
         onLeave: () => {
           // Show navbar when leaving projects section
@@ -455,6 +454,9 @@ export default function GalleryShowcase() {
         },
       });
 
+      // Store pin trigger reference for navbar ScrollTrigger to check active state
+      pinTriggerInstance = pinTrigger;
+
       // Handle resize - recalculate for horizontal scrolling
       const handleResize = () => {
         const newWindowWidth = window.innerWidth || 1920;
@@ -481,42 +483,42 @@ export default function GalleryShowcase() {
     <section
       id="projects"
       ref={sectionRef}
-      className="w-full bg-black relative overflow-hidden"
+      className="w-full bg-[#9EA793] relative overflow-hidden"
       style={{
         minHeight: "100vh",
       }}
     >
-      <div ref={containerRef} className="w-full">
-        {/* Header Section with Title */}
-        <div
-          ref={headerRef}
-          className="relative z-10 py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 lg:px-10"
+      {/* Spacer Section - Creates space between Hero and Projects */}
+      <div className="w-full h-32 md:h-48 lg:h-64 xl:h-80 bg-[#9EA793]" />
+      
+      <div ref={containerRef} className="w-full relative">
+        {/* Projects Title - Ad-style fade in/out, overlapping first project */}
+        <div 
+          ref={titleContainerRef}
+          className="absolute top-0 left-0 w-full flex items-center justify-center z-30 pointer-events-none"
           style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%)",
+            marginTop: '-15vh', // Overlap with first project card
+            transform: 'translateY(0)',
           }}
         >
-          <div className="max-w-7xl mx-auto">
           <h2
             ref={titleRef}
-              className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] font-light text-[#d97706] mb-4 sm:mb-6 tracking-tight leading-none"
+            className="font-bold uppercase text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] tracking-tight leading-none text-[#F1BE49]"
+            style={{
+              letterSpacing: '-0.02em',
+              textAlign: 'center',
+              textShadow: '0 0 40px rgba(241, 190, 73, 0.3)',
+              WebkitTextStroke: '2px rgba(241, 190, 73, 0.1)',
+              WebkitTextFillColor: '#F1BE49',
+            } as React.CSSProperties}
           >
             PROJECTS
           </h2>
-          <div className="w-16 sm:w-20 md:w-24 h-0.5 sm:h-1 bg-[#d97706] mb-6 sm:mb-8" />
-          <p
-            ref={subtitleRef}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 font-light leading-relaxed tracking-wide px-4 sm:px-0"
-          >
-            A curated selection of recent work across mobile, AI and web.
-          </p>
-          </div>
         </div>
-
         {/* Pinned Container - Full Viewport Fixed */}
         <div
           ref={pinContainerRef}
-          className="relative w-full bg-black"
+          className="relative w-full bg-[#9EA793]"
           style={{
             height: "100dvh",
             minHeight: "100dvh",
@@ -556,91 +558,90 @@ export default function GalleryShowcase() {
                     overflow: "hidden",
                   }}
                 >
-                  <div className="w-full h-full mx-auto px-4 md:px-8 lg:px-12 xl:px-16 max-w-[1600px] flex flex-col">
-                {/* Top Section - Role and Title at Top */}
-                <div className="flex-1 min-h-0 flex flex-col gap-4 md:gap-6 lg:gap-8 py-4 md:py-6 lg:py-8 overflow-hidden">
-                  {/* Top Row - Role and Title */}
-                  <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 flex-shrink-0">
-                    {/* Role */}
-                    <span className="text-xs md:text-sm font-light text-[#d97706]/80 tracking-[0.15em] uppercase">
-                      {project.role}
-                    </span>
-
-                    {/* Hero Title */}
-                    <h2
-                      className="text-[40px] md:text-[56px] lg:text-[72px] xl:text-[84px] font-light text-white leading-[0.95] tracking-[-0.02em]"
+                  <div className="w-full h-full mx-auto px-4 md:px-8 lg:px-12 xl:px-16 max-w-[1600px] flex flex-col relative">
+                    {/* Rounded Card Container with Hero Background */}
+                    <div 
+                      className="w-full h-full rounded-3xl md:rounded-[2rem] lg:rounded-[3rem] p-6 md:p-8 lg:p-12 relative overflow-hidden"
                       style={{
-                        fontFamily: "system-ui, -apple-system, sans-serif",
-                        fontWeight: 200,
-                        letterSpacing: "-0.02em",
+                        background: "#1A281E",
                       }}
                     >
-                      {project.title}
-                    </h2>
-                  </div>
-
-                  {/* Main Content - 4 Column Grid */}
-                  <div className="flex-1 min-h-0 grid grid-cols-4 gap-4 md:gap-6 lg:gap-8 items-end">
-                    {/* Left - Image (2 columns) */}
-                    <div className="col-span-2 h-full flex items-end justify-center overflow-hidden rounded-lg">
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-contain max-h-full"
-                      />
-                    </div>
-
-                    {/* Right - Description and Links (2 columns) */}
-                    <div className="col-span-2 flex flex-col gap-4 md:gap-6 lg:gap-8 justify-end">
-                      {/* Description */}
-                      <div className="flex flex-col">
-                        <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal">
-                          {project.description}
-                        </p>
+                      {/* Project Number - Magazine Style */}
+                      <div className="absolute top-6 left-6 md:top-8 md:left-8 lg:top-12 lg:left-12 z-10">
+                        <div className="text-[200px] md:text-[300px] lg:text-[400px] xl:text-[500px] font-bold text-white/5 leading-none tracking-tight select-none"
+                          style={{
+                            fontFamily: "system-ui, -apple-system, sans-serif",
+                            fontWeight: 900,
+                            WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                          } as React.CSSProperties}
+                        >
+                          {String(index + 1).padStart(2, '0')}
+                        </div>
                       </div>
 
-                      {/* Links */}
-                      {project.links.length > 0 && (
-                        <div className="flex flex-col gap-3 md:gap-4">
-                          {project.links.map((link, i) => (
-                            <a
-                              key={i}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm md:text-base font-normal tracking-wide transition-all duration-300 group w-fit"
-                            >
-                              <span className="border-b border-white/40 group-hover:border-white/60 transition-colors pb-0.5">
-                                {link.name}
-                              </span>
-                              <svg
-                                className="w-4 h-4 md:w-5 md:h-5 opacity-60 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={1.5}
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                />
-                              </svg>
-                            </a>
-                          ))}
+                      {/* Main Content - 3 Column Grid */}
+                      <div className="flex-1 min-h-0 grid grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-center relative z-20 h-full">
+                        {/* Left - Links */}
+                        <div className="col-span-1 flex flex-col gap-3 md:gap-4 lg:gap-6 justify-center items-start">
+                          {project.links.length > 0 && (
+                            <div className="flex flex-col gap-3 md:gap-4">
+                              {project.links.map((link, i) => (
+                                <a
+                                  key={i}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm md:text-base font-normal tracking-wide transition-all duration-300 group w-fit"
+                                >
+                                  <span className="border-b border-white/40 group-hover:border-white/60 transition-colors pb-0.5">
+                                    {link.name}
+                                  </span>
+                                  <svg
+                                    className="w-4 h-4 md:w-5 md:h-5 opacity-60 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={1.5}
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
+                                  </svg>
+                                </a>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+
+                        {/* Center - Image */}
+                        <div className="col-span-1 h-full flex items-center justify-center overflow-hidden">
+                          <img
+                            src={project.image}
+                            alt={project.title}
+                            className="w-full h-full object-contain max-h-[80vh]"
+                          />
+                        </div>
+
+                        {/* Right - Description at Bottom */}
+                        <div className="col-span-1 flex flex-col justify-end items-end">
+                          <div className="flex flex-col text-right">
+                            <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal max-w-md">
+                              {project.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                </div>
-              </div>
                 
                 {/* Blank Page - half width, except after last project */}
                 {index < projects.length - 1 && (
                   <div
                     key={`blank-${project.id}`}
-                    className="flex-shrink-0 relative bg-black overflow-hidden"
+                    className="flex-shrink-0 relative  bg-[#9EA793] overflow-hidden"
                     style={{
                       width: "50vw",
                       height: "100dvh",

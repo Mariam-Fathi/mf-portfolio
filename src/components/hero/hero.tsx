@@ -269,8 +269,9 @@ const MinimalCinematicHero = () => {
         ease: "power2.inOut",
       }, 6.4); // Start after both ENGINEER erasing and MAR rewriting complete (4.7 + 1.5 = 6.2, then 0.2s delay)
 
-      // Stage 6: Move FATHI up beside MARIAM immediately after typing (start while typing completes)
-      // FATHI typing completes at 6.4 + 0.8 = 7.2
+      // Stage 6: Move FATHI up beside MARIAM - start overlapping with typing to eliminate lag
+      // Start movement slightly before typing completes for seamless transition
+      // FATHI typing completes at 6.4 + 0.8 = 7.2, so start movement at 7.0 (0.2s overlap)
       tl.call(function() {
         if (fathiRef.current && mariamFullRef.current && contentRef.current) {
           // First, clear ALL transforms to get accurate position measurements
@@ -302,7 +303,8 @@ const MinimalCinematicHero = () => {
           const finalLeft = mariamRight + spacing;
           const finalTop = mariamTop; // Align with MARIAM's top for same-line alignment
           
-          // Animate FATHI directly to final position - one smooth transition, no corrections
+          // Animate FATHI directly to final position - start immediately without delay
+          // Use absolute time position (7.0) instead of ">" to start overlapping with typing
           tl.to(fathiRef.current, {
             left: `${finalLeft}px`,
             top: `${finalTop}px`,
@@ -322,9 +324,9 @@ const MinimalCinematicHero = () => {
                 });
               }
             }
-          }, ">");
+          }, 7.0); // Start 0.2s before typing completes for seamless transition
         }
-      }, [], 7.2); // Start immediately when FATHI typing completes (6.4 + 0.8 = 7.2)
+      }, [], 7.0); // Prepare and start movement 0.2s before typing completes
 
       // Stage 7: Shift both MARIAM and FATHI down together (after FATHI is beside MARIAM)
       // Use y transform for MARIAM, sync FATHI's top in real-time to stay on same line
@@ -363,7 +365,7 @@ const MinimalCinematicHero = () => {
             }
           }, ">");
         }
-      }, [], 8.0); // Start slightly after FATHI completes to ensure position is locked (7.2 + 0.8 = 8.0)
+      }, [], 7.8); // Start immediately after FATHI movement completes (7.0 + 0.8 = 7.8)
 
       // Stage 8: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
       tl.call(function() {
@@ -569,24 +571,26 @@ const MinimalCinematicHero = () => {
                   }
                   
                   // Update SOFTWARE and ENGINEER positions (aligned with "IAM" span as MARIAM moves)
-                  if (softwareRef.current && engineerRef.current && iamPartRef.current && contentRef.current) {
+                  // Track MARIAM's position directly in real-time for smooth movement
+                  if (softwareRef.current && engineerRef.current && iamPartRef.current && contentRef.current && mariamFullRef.current) {
                     const currentContainerRect = contentRef.current.getBoundingClientRect();
                     
-                    // Recalculate "IAM" span position (left edge)
-                    const currentIamRect = iamPartRef.current.getBoundingClientRect();
-                    const currentMariamRect = mariamFullRef.current?.getBoundingClientRect();
+                    // Get MARIAM's current position in real-time (this ensures smooth tracking)
+                    const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
                     if (!currentMariamRect) return;
                     
-                    // Center SOFTWARE ENGINEER under "IAM"
-                    // Calculate center of IAM
-                    const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
-                    // Use interpolated position between start and final to prevent cropping
-                    const startEngineerTop = mariamRect.bottom - containerRect.top + 20;
-                    const finalEngineerTop = finalMariamTop + (mariamHeight * scaleFactorForPosition) - currentContainerRect.top + 20;
-                    // Interpolate based on progress
-                    const currentEngineerTop = startEngineerTop + (finalEngineerTop - startEngineerTop) * progress;
+                    // Calculate SOFTWARE ENGINEER top position directly from MARIAM's current bottom position
+                    // This ensures it always stays exactly 20px below MARIAM, no matter where MARIAM is
+                    const currentMariamBottom = currentMariamRect.bottom - currentContainerRect.top;
+                    const currentEngineerTop = currentMariamBottom + 20; // 20px below MARIAM's bottom
                     
-                    // Get SOFTWARE and ENGINEER widths for centering
+                    // Recalculate "IAM" span position to center SOFTWARE ENGINEER under it
+                    const currentIamRect = iamPartRef.current.getBoundingClientRect();
+                    
+                    // Calculate center of IAM for centering SOFTWARE ENGINEER
+                    const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
+                    
+                    // Get SOFTWARE and ENGINEER widths for centering (use cached or measure once)
                     let softwareWidth = 0;
                     let engineerWidth = 0;
                     if (softwareRef.current) {
@@ -615,13 +619,13 @@ const MinimalCinematicHero = () => {
                     const currentSoftwareLeft = currentSoftwareEngineerLeft;
                     const currentEngineerLeft = currentSoftwareLeft + softwareWidth + softwareEngineerSpacing;
                     
-                    // Update SOFTWARE position
+                    // Update SOFTWARE position - smooth tracking using current MARIAM position
                     gsap.set(softwareRef.current, {
                       left: `${currentSoftwareLeft}px`,
                       top: `${currentEngineerTop}px`,
                     });
                     
-                    // Update ENGINEER position
+                    // Update ENGINEER position - smooth tracking using current MARIAM position
                     gsap.set(engineerRef.current, {
                       left: `${currentEngineerLeft}px`,
                       top: `${currentEngineerTop}px`,
@@ -643,8 +647,8 @@ const MinimalCinematicHero = () => {
                     // Use a gradient mask to reveal color from left to right
                     const revealPercent = progress * 100;
                     if (iamPartRef.current) {
-                      // Target color (sage green) - transitions to sage green
-                      const targetColor = '#9EA793';
+                      // Target color (lime green) - transitions to lime green
+                      const targetColor = '#CEF17B';
                       // Starting color (darker/muted)
                       const startColor = '#888888';
                       
@@ -659,15 +663,15 @@ const MinimalCinematicHero = () => {
                       });
                     }
                     
-                    // Also transition SOFTWARE ENGINEER to sage green during animation
-                    const sageGreen = '#9EA793';
+                    // Also transition SOFTWARE ENGINEER to lime green during animation
+                    const limeGreen = '#CEF17B';
                     if (softwareRef.current && engineerRef.current) {
-                      // Transition color to sage green as progress increases
+                      // Transition color to lime green as progress increases
                       gsap.set(softwareRef.current, {
-                        color: sageGreen,
+                        color: limeGreen,
                       });
                       gsap.set(engineerRef.current, {
-                        color: sageGreen,
+                        color: limeGreen,
                       });
                     }
                   }
@@ -809,14 +813,14 @@ const MinimalCinematicHero = () => {
                     const softwareLeft = softwareEngineerLeft;
                     const engineerLeft = softwareLeft + softwareWidth + softwareEngineerSpacing;
                     
-                    // Set SOFTWARE ENGINEER to sage green when settled at bottom
-                    const sageGreen = '#9EA793';
+                    // Set SOFTWARE ENGINEER to lime green when settled at bottom
+                    const limeGreen = '#CEF17B';
                     gsap.set(softwareRef.current, {
                       left: `${softwareLeft}px`,
                       top: `${engineerTop}px`,
                       clipPath: "inset(0 0% 0 0%)",
                       opacity: 1,
-                      color: sageGreen,
+                      color: limeGreen,
                     });
                     
                     gsap.set(engineerRef.current, {
@@ -824,15 +828,15 @@ const MinimalCinematicHero = () => {
                       top: `${engineerTop}px`,
                       clipPath: "inset(0 0% 0 0%)",
                       opacity: 1,
-                      color: sageGreen,
+                      color: limeGreen,
                     });
                     }
                     
-                    // Finalize IAM color - sage green when settled at bottom
+                    // Finalize IAM color - lime green when settled at bottom
                     if (iamPartRef.current) {
-                      const sageGreen = '#9EA793';
+                      const limeGreen = '#CEF17B';
                       gsap.set(iamPartRef.current, {
-                        backgroundImage: `linear-gradient(to right, ${sageGreen} 0%, ${sageGreen} 100%)`,
+                        backgroundImage: `linear-gradient(to right, ${limeGreen} 0%, ${limeGreen} 100%)`,
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         color: 'transparent',
@@ -868,13 +872,62 @@ const MinimalCinematicHero = () => {
               }, "<"); // Start at same time as MARIAM
             }
           }
-      }, [], 9.4); // Start 0.4s after Stage 7 completes (8.0 + 1.0 + 0.4 = 9.4)
+      }, [], 9.2); // Start 0.4s after Stage 7 completes (7.8 + 1.0 + 0.4 = 9.2)
 
       // Navbar appearance is now dispatched after content settles at final bottom position (Stage 8 onComplete)
       // This ensures navbar appears only after all animations are complete and content is in final position
 
       // SOFTWARE and ENGINEER final positioning will be handled later if needed
       // For now, the animation ends with IAM and ENGINEER at bottom left
+
+      // Stage 9: Scroll exit animation - Move horizontally to the right side with stagger when scrolling to projects
+      // Wait for projects section to exist before setting up ScrollTrigger
+      const setupScrollExit = () => {
+        const projectsSection = document.querySelector('#projects');
+        if (!projectsSection) {
+          // Retry after a short delay if projects section isn't loaded yet
+          setTimeout(setupScrollExit, 100);
+          return;
+        }
+
+        // Collect all hero text elements to animate
+        const heroTextElements = [
+          mariamFullRef.current,
+          fathiRef.current,
+          softwareRef.current,
+          engineerRef.current,
+        ].filter(Boolean) as HTMLElement[]; // Filter out null refs
+
+        if (heroTextElements.length === 0) return;
+
+        // Create timeline for smooth scrubbed horizontal exit animation
+        const exitTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: projectsSection,
+            start: "top bottom-=300", // Start when projects section is 300px from entering viewport
+            end: "top bottom+=100", // End slightly after projects enters viewport
+            scrub: 3.0, // Slower scrubbing for smoother, more controlled animation
+            toggleActions: "play none reverse none", // Reverse on scroll back
+          },
+        });
+
+        // Move horizontally to the right side of screen with stagger animation (SLOW)
+        const viewportWidth = window.innerWidth;
+        exitTimeline.to(heroTextElements, {
+          x: viewportWidth, // Move to right side of screen (off-screen)
+          opacity: 0,
+          duration: 2.5, // Increased duration for slower movement
+          ease: "power1.inOut", // Slower easing for more gradual motion
+          stagger: {
+            amount: 1.5, // Increased stagger over 1.5s - creates slower cascading effect
+            from: "start", // Start from first element
+            ease: "power1.inOut",
+          },
+        });
+      };
+
+      // Setup scroll exit animation after a short delay to ensure DOM is ready
+      setTimeout(setupScrollExit, 500);
 
     },
     { scope: heroSectionRef }

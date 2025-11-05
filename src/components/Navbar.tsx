@@ -154,7 +154,7 @@ const NavBar = () => {
             {/* Vertical Left Navigation */}
             <nav 
                 ref={navRef}
-                className="fixed left-0 top-0 bottom-0 z-50 w-20 md:w-20 bg-[#FEFCE0] flex flex-col justify-center items-center py-8"
+                className="fixed left-0 top-0 bottom-0 z-50 w-20 md:w-12 bg-[#CDEDB3] flex flex-col justify-center items-center py-8"
             >
                 <div className="flex flex-col items-center justify-center">
                     {allNavLinks.map(({ link, name }, index) => {
