@@ -647,7 +647,7 @@ const MinimalCinematicHero = () => {
                     // Use a gradient mask to reveal color from left to right
                     const revealPercent = progress * 100;
                     if (iamPartRef.current) {
-                      // Target color (sage green) - transitions to sage green
+                      // Target color (lime green) - transitions to lime green
                       const targetColor = '#CEF17B';
                       // Starting color (darker/muted)
                       const startColor = '#888888';
@@ -663,15 +663,15 @@ const MinimalCinematicHero = () => {
                       });
                     }
                     
-                    // Also transition SOFTWARE ENGINEER to sage green during animation
-                    const sageGreen = '#CEF17B';
+                    // Also transition SOFTWARE ENGINEER to lime green during animation
+                    const limeGreen = '#CEF17B';
                     if (softwareRef.current && engineerRef.current) {
-                      // Transition color to sage green as progress increases
+                      // Transition color to lime green as progress increases
                       gsap.set(softwareRef.current, {
-                        color: sageGreen,
+                        color: limeGreen,
                       });
                       gsap.set(engineerRef.current, {
-                        color: sageGreen,
+                        color: limeGreen,
                       });
                     }
                   }
@@ -813,14 +813,14 @@ const MinimalCinematicHero = () => {
                     const softwareLeft = softwareEngineerLeft;
                     const engineerLeft = softwareLeft + softwareWidth + softwareEngineerSpacing;
                     
-                    // Set SOFTWARE ENGINEER to sage green when settled at bottom
-                    const sageGreen = '#CEF17B';
+                    // Set SOFTWARE ENGINEER to lime green when settled at bottom
+                    const limeGreen = '#CEF17B';
                     gsap.set(softwareRef.current, {
                       left: `${softwareLeft}px`,
                       top: `${engineerTop}px`,
                       clipPath: "inset(0 0% 0 0%)",
                       opacity: 1,
-                      color: sageGreen,
+                      color: limeGreen,
                     });
                     
                     gsap.set(engineerRef.current, {
@@ -828,15 +828,15 @@ const MinimalCinematicHero = () => {
                       top: `${engineerTop}px`,
                       clipPath: "inset(0 0% 0 0%)",
                       opacity: 1,
-                      color: sageGreen,
+                      color: limeGreen,
                     });
                     }
                     
-                    // Finalize IAM color - sage green when settled at bottom
+                    // Finalize IAM color - lime green when settled at bottom
                     if (iamPartRef.current) {
-                      const sageGreen = '#CEF17B';
+                      const limeGreen = '#CEF17B';
                       gsap.set(iamPartRef.current, {
-                        backgroundImage: `linear-gradient(to right, ${sageGreen} 0%, ${sageGreen} 100%)`,
+                        backgroundImage: `linear-gradient(to right, ${limeGreen} 0%, ${limeGreen} 100%)`,
                         backgroundClip: 'text',
                         WebkitBackgroundClip: 'text',
                         color: 'transparent',
