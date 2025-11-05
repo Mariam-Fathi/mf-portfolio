@@ -9,13 +9,45 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const mariamFathiRef = useRef<HTMLDivElement>(null);
   const portfolioRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
-  const gifRef = useRef<HTMLImageElement>(null);
-  const gifContainerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoContainerRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle video loading
+  useEffect(() => {
+    if (videoRef.current) {
+      const video = videoRef.current;
+      
+      const handleLoadedData = () => {
+        setVideoLoaded(true);
+        // Start playing the video
+        video.play().catch((err) => {
+          console.log("Video autoplay prevented:", err);
+        });
+      };
+
+      const handleCanPlay = () => {
+        setVideoLoaded(true);
+      };
+
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplay', handleCanPlay);
+      
+      // Try to load the video
+      video.load();
+
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplay', handleCanPlay);
+      };
+    }
+  }, [mounted]);
 
   useGSAP(() => {
     if (!mounted || !preloaderRef.current || !mariamFathiRef.current || !portfolioRef.current) return;
@@ -25,15 +57,18 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     // Get viewport width for positioning
     const viewportWidth = window.innerWidth;
 
-    // Set initial positions for GIF - cinematic entrance
-    if (gifRef.current && gifContainerRef.current) {
-      gsap.set(gifRef.current, {
-        scale: 0.8,
+    // Set initial positions for Video - dramatic cinematic entrance
+    if (videoRef.current && videoContainerRef.current && overlayRef.current) {
+      gsap.set(videoRef.current, {
+        scale: 1.2,
         opacity: 0,
-        filter: "blur(20px)",
+        filter: "blur(30px) brightness(0.3)",
       });
-      gsap.set(gifContainerRef.current, {
+      gsap.set(videoContainerRef.current, {
         opacity: 0,
+      });
+      gsap.set(overlayRef.current, {
+        opacity: 1, // Start with dark overlay
       });
     }
 
@@ -50,32 +85,44 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       opacity: 1,
     });
 
-    // Cinematic GIF entrance - fade in with scale and blur effect
-    if (gifRef.current && gifContainerRef.current) {
+    // Dramatic Video entrance - cinematic reveal
+    if (videoRef.current && videoContainerRef.current && overlayRef.current) {
       // Container fade in
-      tl.to(gifContainerRef.current, {
+      tl.to(videoContainerRef.current, {
         opacity: 1,
-        duration: 0.8,
+        duration: 1.0,
         ease: "power2.out",
       }, 0.2);
 
-      // GIF cinematic reveal - scale up, fade in, blur out
-      tl.to(gifRef.current, {
+      // Dramatic video reveal - zoom out, fade in, blur out, brightness up
+      tl.to(videoRef.current, {
         scale: 1,
         opacity: 1,
-        filter: "blur(0px)",
-        duration: 1.2,
+        filter: "blur(0px) brightness(0.6)",
+        duration: 2.0,
         ease: "power3.out",
-      }, 0.3);
+      }, 0.5);
 
-      // Subtle breathing effect - continuous gentle scale animation
-      tl.to(gifRef.current, {
-        scale: 1.05,
-        duration: 2,
+      // Gradually reduce overlay darkness for dramatic effect
+      tl.to(overlayRef.current, {
+        opacity: 0.7,
+        duration: 1.5,
+        ease: "power2.inOut",
+      }, 1.0);
+
+      // Further reduce overlay for more visibility
+      tl.to(overlayRef.current, {
+        opacity: 0.5,
+        duration: 2.0,
         ease: "power1.inOut",
-        yoyo: true,
-        repeat: -1,
-      }, 1.5);
+      }, 2.5);
+
+      // Subtle continuous zoom effect for cinematic feel
+      tl.to(videoRef.current, {
+        scale: 1.05,
+        duration: 4,
+        ease: "power1.inOut",
+      }, 2.0);
     }
 
     // Animate both texts moving horizontally - slow motion for readability
@@ -102,19 +149,27 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       }, 0);
     }
 
-    // GIF fade out before final preloader fade
-    if (gifRef.current && gifContainerRef.current) {
-      tl.to(gifRef.current, {
-        scale: 0.95,
+    // Dramatic video fade out before final preloader fade
+    if (videoRef.current && videoContainerRef.current && overlayRef.current) {
+      // Increase overlay darkness
+      tl.to(overlayRef.current, {
+        opacity: 1,
+        duration: 0.4,
+        ease: "power2.in",
+      }, 7.3);
+
+      // Video fade out with blur and zoom
+      tl.to(videoRef.current, {
+        scale: 1.1,
         opacity: 0,
-        filter: "blur(10px)",
-        duration: 0.5,
+        filter: "blur(20px) brightness(0.2)",
+        duration: 0.6,
         ease: "power2.in",
       }, 7.5);
 
-      tl.to(gifContainerRef.current, {
+      tl.to(videoContainerRef.current, {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.6,
         ease: "power2.in",
       }, 7.5);
     }
@@ -144,7 +199,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden"
       style={{ 
         willChange: "opacity",
-        background: "#1A281E",
+        background: "transparent",
       }}
     >
 
@@ -180,44 +235,56 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         </div>
       </div>
 
-      {/* Cinematic GIF Container - Center of screen */}
+      {/* Cinematic Video Background - Full Screen */}
       <div 
-        ref={gifContainerRef}
-        className="absolute inset-0 flex items-center justify-center z-20"
+        ref={videoContainerRef}
+        className="absolute inset-0 z-10 overflow-hidden"
         style={{
           willChange: "opacity",
         }}
       >
-        <div className="relative">
-          {/* Cinematic frame effect - letterbox bars */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#1A281E] to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#1A281E] to-transparent" />
-          </div>
+        {/* Full-screen background video */}
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            willChange: "transform, opacity, filter",
+          }}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source src="/images/gifs/preloader.mp4" type="video/mp4" />
+        </video>
 
-          {/* GIF with cinematic styling */}
-          <div className="relative">
-            <img
-              ref={gifRef}
-              src="/images/gifs/frog.jpeg"
-              alt="Loading"
-              className="w-auto h-[60vh] max-w-[90vw] md:h-[70vh] object-contain rounded-full shadow-2xl"
-              style={{
-                willChange: "transform, opacity, filter",
-                imageRendering: "auto",
-              }}
-            />
-            
-            {/* Subtle glow effect around GIF */}
-            <div 
-              className="absolute inset-0 -z-10 blur-3xl opacity-30"
-              style={{
-                background: "radial-gradient(circle, rgba(158, 167, 147, 0.4) 0%, transparent 70%)",
-                willChange: "opacity",
-              }}
-            />
-          </div>
-        </div>
+        {/* Dark overlay for dramatic effect and text readability */}
+        <div
+          ref={overlayRef}
+          className="absolute inset-0 bg-black/70"
+          style={{
+            willChange: "opacity",
+            background: "radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.7) 100%)",
+          }}
+        />
+
+        {/* Cinematic vignette effect */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.5) 100%)",
+            willChange: "opacity",
+          }}
+        />
+
+        {/* Additional dramatic gradient overlay */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "linear-gradient(to bottom, rgba(26, 40, 30, 0.3) 0%, transparent 20%, transparent 80%, rgba(26, 40, 30, 0.3) 100%)",
+          }}
+        />
       </div>
 
       {/* Progress bar at center */}
