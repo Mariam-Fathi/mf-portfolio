@@ -132,7 +132,6 @@ export default function GalleryShowcase() {
       // Each project gets 1 viewport width + 0.5 blank page (except last project)
       const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
       
-      // Store pin trigger reference for navbar ScrollTrigger to check active state
       let pinTriggerInstance: ScrollTrigger | null = null;
       
       // Initial states - Projects wrapper (no blur, position control only)
@@ -152,7 +151,6 @@ export default function GalleryShowcase() {
         }
       });
       
-      // No padding needed - navbar is hidden during projects section
       if (projectsWrapperRef.current) {
         projectsWrapperRef.current.style.paddingLeft = '0px';
         projectsWrapperRef.current.style.paddingTop = '0px';
@@ -169,10 +167,6 @@ export default function GalleryShowcase() {
           opacity: 0,
         });
       }
-
-      // Get navbar element for smooth hide/show during transitions
-      const navbarElement = document.querySelector("nav.fixed") ||
-        (document.querySelector('nav[class*="fixed"]') as HTMLElement);
 
       // Projects Title ScrollTrigger - Ad-style fade in/out, stays until first project is 90% visible
       if (titleContainerRef.current && titleRef.current && pinContainerRef.current) {
@@ -223,87 +217,9 @@ export default function GalleryShowcase() {
             ease: "power2.in",
             duration: 0.1, // 10% of timeline - fade out as first project takes over
           });
-
-        // Navbar hide/show - hides when first project enters view, stays hidden throughout horizontal scrolling
-        // Create navbar ScrollTrigger that covers entire projects section
-        ScrollTrigger.create({
-          trigger: sectionRef.current,
-          start: "top bottom-=100", // Start when section is 100px from entering (first project about to be visible)
-          end: () => {
-            // End point accounts for full section height including pinned scroll distance
-            // Add extra buffer to ensure it covers entire horizontal scroll
-            return `bottom+=${scrollDistance * 0.1} top+=100`; // Extended end to cover full scroll
-          },
-          onEnter: () => {
-            // Hide navbar when scrolling down - first project is about to enter view
-            if (navbarElement) {
-              gsap.to(navbarElement, {
-                opacity: 0,
-                x: -120,
-                duration: 0.6,
-                ease: "power2.inOut",
-                pointerEvents: "none",
-              });
-            }
-          },
-          onUpdate: (self) => {
-            // Continuously check if we're in projects section and keep navbar hidden
-            // This ensures navbar stays hidden during horizontal scrolling
-            if (navbarElement && self.isActive) {
-              // Check if pin trigger is active (horizontal scrolling) by checking progress
-              const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
-              
-              if (isPinActive || self.direction === 1) {
-                // Pin is active (horizontal scrolling) or scrolling down - keep hidden
-                gsap.set(navbarElement, {
-                  opacity: 0,
-                  x: -120,
-                  pointerEvents: "none",
-                });
-              }
-            }
-          },
-          onLeave: () => {
-            // Keep navbar hidden when scrolling further down (still in projects section, including horizontal scroll)
-            if (navbarElement) {
-              gsap.set(navbarElement, {
-                opacity: 0,
-                x: -120,
-                pointerEvents: "none",
-              });
-            }
-          },
-          onEnterBack: () => {
-            // Hide navbar again when scrolling back down into projects section
-            // This covers the case when scrolling back down after scrolling up
-            if (navbarElement) {
-              gsap.to(navbarElement, {
-                opacity: 0,
-                x: -120,
-                duration: 0.6,
-                ease: "power2.inOut",
-                pointerEvents: "none",
-              });
-            }
-          },
-          onLeaveBack: () => {
-            // Only show navbar when completely leaving projects section (scrolling back up past it)
-            // Double check that pin trigger is not active
-            const isPinActive = pinTriggerInstance && (pinTriggerInstance as any).progress > 0 && (pinTriggerInstance as any).progress < 1;
-            if (navbarElement && !isPinActive) {
-              gsap.to(navbarElement, {
-                opacity: 1,
-                x: 0,
-                duration: 0.6,
-                ease: "power2.inOut",
-                pointerEvents: "auto",
-              });
-            }
-          },
-        });
       }
 
-      // Main ScrollTrigger - Account for navbar/platform at top
+      // Main ScrollTrigger
       const pinTrigger = ScrollTrigger.create({
           trigger: pinContainerRef.current,
         start: `top-=0 top`,
@@ -428,33 +344,9 @@ export default function GalleryShowcase() {
               });
             });
         },
-        onLeave: () => {
-          // Show navbar when leaving projects section
-          if (navbarElement) {
-            gsap.to(navbarElement, {
-                  opacity: 1,
-              x: 0,
-              duration: 0.6,
-              ease: "power3.out",
-              pointerEvents: "auto",
-            });
-          }
-        },
-        onLeaveBack: () => {
-          // Show navbar when scrolling back up
-          if (navbarElement) {
-            gsap.to(navbarElement, {
-                  opacity: 1,
-              x: 0,
-              duration: 0.6,
-              ease: "power3.out",
-              pointerEvents: "auto",
-            });
-          }
-        },
       });
 
-      // Store pin trigger reference for navbar ScrollTrigger to check active state
+      // Store pin trigger reference
       pinTriggerInstance = pinTrigger;
 
       // Handle resize - recalculate for horizontal scrolling

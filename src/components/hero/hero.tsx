@@ -68,9 +68,6 @@ const MinimalCinematicHero = () => {
           !marPartRef.current || !iamPartRef.current || !apostropheSRef.current || !iamRef.current || !engineerZoomRef.current || 
           !fathiRef.current || !softwareRef.current || !engineerRef.current || !contentRef.current) return;
 
-      // Dispatch event to hide navbar
-      window.dispatchEvent(new CustomEvent('heroAnimationStart'));
-
       // Initial states - all elements hidden except MARIAM
       gsap.set([titleRef.current, iamRef.current, engineerZoomRef.current, fathiRef.current, softwareRef.current, engineerRef.current], {
         opacity: 0,
@@ -83,7 +80,7 @@ const MinimalCinematicHero = () => {
       // This creates seamless transition from preloader where MARIAM exits to the right
       // Match preloader's top position: top-20 = 5rem (80px)
       const viewportWidth = window.innerWidth;
-      const finalLeft = "7rem"; // Final position: Space from navbar (80px + 32px padding)
+      const finalLeft = "7rem"; // Final position: Space from left edge (80px + 32px padding)
       const finalTop = "5rem"; // Match preloader's top-20 position (same top position)
       
       // Set MARIAM to start from left side (off-screen) - continuing from preloader
@@ -246,9 +243,9 @@ const MinimalCinematicHero = () => {
             const iamLineHeight = iamStyle.lineHeight;
             
             // Set ENGINEER to EXACTLY same font properties as IAM initially
-            // Position it at same left as IAM (which already has proper spacing from navbar)
+            // Position it at same left as IAM
             gsap.set(engineerZoomRef.current, {
-              left: `${iamLeftRelative}px`, // Same horizontal position as IAM (already has navbar spacing)
+              left: `${iamLeftRelative}px`, // Same horizontal position as IAM
               top: `${iamBottomRelative + 20}px`, // Position below IAM with small gap
               xPercent: 0,
               yPercent: 0,
@@ -457,9 +454,9 @@ const MinimalCinematicHero = () => {
           
           // Calculate scale and final position
           const isMobile = viewportWidth < 768;
-          const navbarWidth = isMobile ? 80 : 48;
+          const leftPadding = isMobile ? 80 : 48; // Left padding for content
           const minPadding = 32;
-          const availableWidth = viewportWidth - navbarWidth - minPadding;
+          const availableWidth = viewportWidth - leftPadding - minPadding;
           const mariamWidth = mariamRect.width;
           const widthScaleFactor = (availableWidth) / mariamWidth;
           
@@ -546,10 +543,6 @@ const MinimalCinematicHero = () => {
           const storedFinalEngineerTop = finalEngineerTop;
           
           // Move MARIAM and SOFTWARE ENGINEER together to bottom position
-          // Show navbar while moving down (partway through the animation for natural feel)
-          tl.call(function() {
-            window.dispatchEvent(new CustomEvent('heroAnimationComplete'));
-          }, [], ">+=0.6"); // Show navbar 0.6s into the downward movement (40% through)
           
           tl.to(mariamFullRef.current, {
             y: deltaMariamY,
@@ -714,10 +707,10 @@ const MinimalCinematicHero = () => {
                       
                       const viewportWidth = window.innerWidth;
                       const isMobile = viewportWidth < 768;
-                      const navbarWidth = isMobile ? 80 : 48;
-                      const availableWidth = viewportWidth - navbarWidth;
+                      const leftSidePadding = isMobile ? 80 : 48; // Left padding for content
+                      const availableWidth = viewportWidth - leftSidePadding;
                       const remainingSpace = availableWidth - totalContentWidth;
-                      const leftPadding = navbarWidth + (remainingSpace / 2);
+                      const leftPadding = leftSidePadding + (remainingSpace / 2);
                       
                       const finalMariamLeft = leftPadding - finalContainerRect.left;
                       const finalFathiLeft = finalMariamLeft + mariamWidth + spacing;
@@ -886,7 +879,56 @@ const MinimalCinematicHero = () => {
   }
 }, [], ">"); // Close Stage 7 tl.call - Start immediately after SOFTWARE ENGINEER is written
 
-      // Stage 9: Scroll exit animation - Move horizontally to the right side with stagger when scrolling to projects
+      // Stage 9: Scroll exit animation - Move horizontally to the right side when scrolling to job timeline
+      // Wait for job timeline section to exist before setting up ScrollTrigger
+      const setupScrollExitToJobTimeline = () => {
+        const jobTimelineSection = document.querySelector('#job-timeline');
+        if (!jobTimelineSection) {
+          // Retry after a short delay if job timeline section isn't loaded yet
+          setTimeout(setupScrollExitToJobTimeline, 100);
+          return;
+        }
+
+        // Collect all hero text elements to animate
+        const heroTextElements = [
+          mariamFullRef.current,
+          fathiRef.current,
+          softwareRef.current,
+          engineerRef.current,
+        ].filter(Boolean) as HTMLElement[]; // Filter out null refs
+
+        if (heroTextElements.length === 0) return;
+
+        // Create timeline for smooth scrubbed horizontal exit animation - synced with job timeline entry
+        const viewportWidth = window.innerWidth;
+        const exitTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: jobTimelineSection,
+            start: "top bottom-=200", // Start 200px before job timeline enters viewport (matches job timeline entry start)
+            end: "top center", // End when job timeline reaches center (matches job timeline entry end)
+            scrub: 1.5, // Match job timeline scrub value for sync
+            toggleActions: "play none reverse none", // Reverse on scroll back
+          },
+        });
+
+        // Move horizontally to the right side of screen - synced with job timeline content entering
+        exitTimeline.to(heroTextElements, {
+          x: viewportWidth, // Move to right side of screen (off-screen)
+          opacity: 0,
+          duration: 1, // Match job timeline entry duration
+          ease: "power2.out", // Match job timeline entry ease
+          stagger: {
+            amount: 0.3, // Subtle stagger for cascading effect
+            from: "start",
+            ease: "power2.out",
+          },
+        });
+      };
+
+      // Setup scroll exit animation after a short delay to ensure DOM is ready
+      setTimeout(setupScrollExitToJobTimeline, 500);
+
+      // Stage 10: Scroll exit animation - Move horizontally to the right side with stagger when scrolling to projects
       // Wait for projects section to exist before setting up ScrollTrigger
       const setupScrollExit = () => {
         const projectsSection = document.querySelector('#projects');

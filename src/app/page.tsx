@@ -8,6 +8,7 @@ import ReadingSection from "@/components/reading-section/ReadingSection";
 import EverythingConnected from "@/components/everything-connected/EverythingConnected";
 import CuriositySection from "@/components/curiosity-section/CuriositySection";
 import ExperienceTimeline from "@/components/journey/Experience";
+import JobTimeline from "@/components/job-timeline/JobTimeline";
 import CinematicShowcase from "@/components/projects/projects";
 
 export default function Home() {
@@ -19,18 +20,18 @@ export default function Home() {
 
   return (
     <>
-      {isLoading && <Preloader onComplete={handleLoadingComplete} />}
-      {!isLoading && (
+      {/* {isLoading && <Preloader onComplete={handleLoadingComplete} />} */}
         <>
-          <Navbar />
+          {/* <Navbar /> */}
           <Hero />
           {/* <EverythingConnected />
           <ReadingSection />
           <CuriositySection /> */}
           {/* <ExperienceTimeline /> */}
+          <JobTimeline />
           <CinematicShowcase />
         </>
-      )}
+    
     </>
   );
 }
