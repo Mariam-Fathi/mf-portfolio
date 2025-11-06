@@ -165,7 +165,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       </div>
 
       {/* PORTFOLIO at bottom of screen */}
-      <div className="absolute bottom-20 left-0 right-0 overflow-visible z-[25]">
+      <div className="absolute top-64 left-0 right-0 overflow-visible z-[25]">
         {/* PORTFOLIO - moves from right to left */}
         <div
           ref={portfolioRef}
@@ -180,45 +180,6 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         </div>
       </div>
 
-      {/* Cinematic GIF Container - Center of screen */}
-      <div 
-        ref={gifContainerRef}
-        className="absolute inset-0 flex items-center justify-center z-20"
-        style={{
-          willChange: "opacity",
-        }}
-      >
-        <div className="relative">
-          {/* Cinematic frame effect - letterbox bars */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#1A281E] to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#1A281E] to-transparent" />
-          </div>
-
-          {/* GIF with cinematic styling */}
-          <div className="relative">
-            <img
-              ref={gifRef}
-              src="/images/gifs/frog.jpeg"
-              alt="Loading"
-              className="w-auto h-[60vh] max-w-[90vw] md:h-[70vh] object-contain rounded-full shadow-2xl"
-              style={{
-                willChange: "transform, opacity, filter",
-                imageRendering: "auto",
-              }}
-            />
-            
-            {/* Subtle glow effect around GIF */}
-            <div 
-              className="absolute inset-0 -z-10 blur-3xl opacity-30"
-              style={{
-                background: "radial-gradient(circle, rgba(158, 167, 147, 0.4) 0%, transparent 70%)",
-                willChange: "opacity",
-              }}
-            />
-          </div>
-        </div>
-      </div>
 
       {/* Progress bar at center */}
       <div className="relative z-30 mt-auto mb-20">
