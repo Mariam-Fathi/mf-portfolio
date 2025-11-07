@@ -1,10 +1,15 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
+
+type ProjectsProps = {
+  isActive?: boolean;
+  scrollContainer?: HTMLDivElement | null;
+};
 
 const projects = [
   {
@@ -105,8 +110,10 @@ const projects = [
   },
 ];
 
-export default function GalleryShowcase() {
-  const sectionRef = useRef<HTMLElement>(null);
+export default function GalleryShowcase({
+  isActive = true,
+  scrollContainer = null,
+}: ProjectsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
@@ -114,25 +121,31 @@ export default function GalleryShowcase() {
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const titleContainerRef = useRef<HTMLDivElement>(null);
+  const [spacerHeight, setSpacerHeight] = useState<number>(0);
 
   useGSAP(
     () => {
+      const scrollerElement = scrollContainer ?? containerRef.current;
+
+      if (!isActive) {
+        setSpacerHeight(0);
+        return;
+      }
+
       if (
-        !sectionRef.current ||
         !pinContainerRef.current ||
-        !projectsWrapperRef.current
+        !projectsWrapperRef.current ||
+        !scrollerElement
       )
         return;
 
       // Use dynamic viewport dimensions for horizontal scrolling
-      const windowHeight = window.innerHeight || window.visualViewport?.height || 800;
       const windowWidth = window.innerWidth || 1920;
-      const isMobile = windowWidth < 768;
       // Horizontal scroll: each project + half blank page between them
       // Each project gets 1 viewport width + 0.5 blank page (except last project)
       const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
-      
-      let pinTriggerInstance: ScrollTrigger | null = null;
+
+      setSpacerHeight(scrollContainer ? 0 : scrollDistance);
       
       // Initial states - Projects wrapper (no blur, position control only)
       gsap.set(projectsWrapperRef.current, {
@@ -169,18 +182,20 @@ export default function GalleryShowcase() {
       }
 
       // Projects Title ScrollTrigger - Ad-style fade in/out, stays until first project is 90% visible
+      let titleTimeline: gsap.core.Timeline | null = null;
+
       if (titleContainerRef.current && titleRef.current && pinContainerRef.current) {
         // Track section entry and calculate when first project is 90% visible
-        // Use sectionRef as trigger, calculate end point based on viewport height
-        // Title stays visible until we've scrolled 90% of viewport height into projects section
+        // Title stays visible until we've scrolled 90% of viewport height within the projects scroller
         
         const viewportHeight = window.innerHeight || 800;
         const scrollDistance90Percent = viewportHeight * 0.9; // 90% of viewport height
         
         // Create timeline that tracks scroll progress
-        const titleTimeline = gsap.timeline({
+        titleTimeline = gsap.timeline({
           scrollTrigger: {
-            trigger: sectionRef.current,
+            trigger: pinContainerRef.current,
+            scroller: scrollerElement,
             start: "top bottom-=300", // Start fading in 300px before section enters
             end: `+=${scrollDistance90Percent}`, // End when scrolled 90% of viewport height relative to start (first project 90% visible)
             scrub: 1.5, // Smooth scrubbing for ad-style effect
@@ -220,14 +235,23 @@ export default function GalleryShowcase() {
       }
 
       // Main ScrollTrigger
+      const useTransformPin =
+        typeof window !== "undefined" &&
+        scrollerElement instanceof HTMLElement &&
+        scrollerElement !== document.body &&
+        scrollerElement !== document.documentElement;
+
       const pinTrigger = ScrollTrigger.create({
-          trigger: pinContainerRef.current,
+        trigger: pinContainerRef.current,
+        scroller: scrollerElement,
         start: `top-=0 top`,
         end: `+=${scrollDistance}`,
-          pin: true,
+        pin: true,
         scrub: 6.0, // Slow motion scrolling - very smooth and cinematic
-          anticipatePin: 1,
+        anticipatePin: 1,
         pinSpacing: true,
+        pinType: useTransformPin ? "transform" : "fixed",
+        invalidateOnRefresh: true,
         onUpdate: (self) => {
           const progress = self.progress;
             
@@ -347,8 +371,6 @@ export default function GalleryShowcase() {
       });
 
       // Store pin trigger reference
-      pinTriggerInstance = pinTrigger;
-
       // Handle resize - recalculate for horizontal scrolling
       const handleResize = () => {
         const newWindowWidth = window.innerWidth || 1920;
@@ -356,6 +378,7 @@ export default function GalleryShowcase() {
           projectsWrapperRef.current.style.paddingLeft = '0px';
           projectsWrapperRef.current.style.width = `${projects.length * 150}vw`;
         }
+        setSpacerHeight(scrollContainer ? 0 : projects.length * newWindowWidth * 1.5);
         ScrollTrigger.refresh();
       };
       
@@ -364,32 +387,40 @@ export default function GalleryShowcase() {
       ScrollTrigger.refresh();
 
       return () => {
+        if (titleTimeline) {
+          titleTimeline.scrollTrigger?.kill();
+          titleTimeline.kill();
+        }
         pinTrigger?.kill();
         window.removeEventListener("resize", handleResize);
+        setSpacerHeight(0);
       };
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [isActive, scrollContainer] }
   );
+
+  const containerClassName = scrollContainer
+    ? "relative min-h-full w-full"
+    : "relative h-[100dvh] w-full overflow-y-auto overscroll-contain no-visible-scrollbar";
 
   return (
     <section
       id="projects"
-      ref={sectionRef}
-      className="w-full bg-[#9EA793] relative overflow-hidden"
+      className="relative h-full w-full overflow-x-hidden bg-[#9EA793]"
       style={{
         minHeight: "100vh",
       }}
     >
-      {/* Spacer Section - Creates space between Hero and Projects */}
-      <div className="w-full h-32 md:h-48 lg:h-64 xl:h-80 bg-[#9EA793]" />
-      
-      <div ref={containerRef} className="w-full relative">
+      <div
+        ref={containerRef}
+        className={containerClassName}
+      >
         {/* Projects Title - Ad-style fade in/out, overlapping first project */}
         <div 
           ref={titleContainerRef}
           className="absolute top-0 left-0 w-full flex items-center justify-center z-30 pointer-events-none"
           style={{
-            marginTop: '-15vh', // Overlap with first project card
+            marginTop: '-6vh', // Overlap with first project card
             transform: 'translateY(0)',
           }}
         >
@@ -414,6 +445,8 @@ export default function GalleryShowcase() {
           style={{
             height: "100dvh",
             minHeight: "100dvh",
+            paddingTop: "6vh",
+            paddingBottom: "6vh",
             overflow: "hidden",
           }}
         >
@@ -423,7 +456,8 @@ export default function GalleryShowcase() {
             className="absolute top-0 left-0 flex"
             style={{
               width: `${projects.length * 150}vw`, // Each project (100vw) + half blank page (50vw)
-              height: '100dvh',
+              height: 'calc(100dvh - 12vh)',
+              top: '6vh',
               paddingLeft: '0px',
               transformOrigin: 'center center', // For smooth scale animations
             }}
@@ -444,9 +478,9 @@ export default function GalleryShowcase() {
                   className="flex-shrink-0 w-screen flex flex-col"
                 style={{
                     width: "100vw",
-                    height: "100dvh",
-                    minHeight: "100dvh",
-                    maxHeight: "100dvh",
+                    height: "100%",
+                    minHeight: "calc(100dvh - 12vh)",
+                    maxHeight: "calc(100dvh - 12vh)",
                     overflow: "hidden",
                   }}
                 >
@@ -544,6 +578,13 @@ export default function GalleryShowcase() {
             )})}
           </div>
         </div>
+        {!scrollContainer && spacerHeight > 0 ? (
+          <div
+            aria-hidden="true"
+            style={{ height: spacerHeight }}
+            className="pointer-events-none w-full"
+          />
+        ) : null}
       </div>
     </section>
   );
