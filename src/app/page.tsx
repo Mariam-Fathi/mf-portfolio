@@ -1,39 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/hero/hero";
-import Preloader from "@/components/Preloader";
-import ReadingSection from "@/components/reading-section/ReadingSection";
-import EverythingConnected from "@/components/everything-connected/EverythingConnected";
-import CuriositySection from "@/components/curiosity-section/CuriositySection";
-import ExperienceTimeline from "@/components/journey/Experience";
-import JobTimeline from "@/components/job-timeline/JobTimeline";
 import CinematicShowcase from "@/components/projects/projects";
+import JobTimeline from "@/components/job-timeline/JobTimeline";
 import CertificatesSection from "@/components/Certificates";
+import EverythingConnected from "@/components/everything-connected/EverythingConnected";
+import Contact from "@/components/Contact";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
-
   return (
-    <>
-      {/* {isLoading && <Preloader onComplete={handleLoadingComplete} />} */}
-        <>
-          {/* <Navbar /> */}
-          <Hero />
-          {/* <EverythingConnected />
-          <ReadingSection />
-          <CuriositySection /> */}
-          {/* <ExperienceTimeline /> */}
-          <JobTimeline />
+    <div className="relative min-h-screen w-screen overflow-x-hidden bg-[#080E0B] text-[#FEFCE0]">
+      <Navbar />
+      <main className="relative flex w-full flex-col gap-24 overflow-x-hidden">
+        <Hero />
+        <section id="work" className="w-full">
           <CinematicShowcase />
+        </section>
+        <section id="experience" className="w-full">
+          <JobTimeline />
+        </section>
+        <section id="skills" className="w-full">
+          <EverythingConnected />
+        </section>
+        <section id="certificates" className="w-full">
           <CertificatesSection />
-        </>
-    
-    </>
+        </section>
+        <section id="contact" className="w-full">
+          <Contact />
+        </section>
+      </main>
+    </div>
   );
 }

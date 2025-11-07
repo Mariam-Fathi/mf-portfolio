@@ -1,1062 +1,249 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React, { useMemo } from "react";
 
-gsap.registerPlugin(ScrollTrigger);
+const primaryText = "#FEFCE0";
+const accentText = "#F97316";
 
-const MinimalCinematicHero = () => {
-  const heroSectionRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null); // Final: MARIAM FATHI
-  const mariamFullRef = useRef<HTMLHeadingElement>(null); // Stage 1: Full MARIAM at left top
-  const marPartRef = useRef<HTMLSpanElement>(null); // The "MAR" part to be erased
-  const iamPartRef = useRef<HTMLSpanElement>(null); // The "IAM" part that shifts left
-  const iamRef = useRef<HTMLHeadingElement>(null); // Stage 2: IAM only (after MAR erased)
-  const engineerZoomRef = useRef<HTMLHeadingElement>(null); // Stage 3: ENGINEER below IAM
-  const fathiRef = useRef<HTMLHeadingElement>(null); // FATHI that appears while ENGINEER erases
-  const softwareRef = useRef<HTMLHeadingElement>(null);
-  const engineerRef = useRef<HTMLHeadingElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+const stripePalette = [
+  "#0A130E",
+  "#0F1B15",
+  "#14231C",
+  "#1A2C23",
+  "#1F342A",
+  "#253C31",
+  "#2A4438",
+  "#304C3F",
+  "#355546",
+  "#3B5D4D",
+  "#416554",
+  "#466D5B",
+];
 
-  // Match GIF width to title width
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const matchWidths = () => {
-      if (titleRef.current) {
-        const titleRect = titleRef.current.getBoundingClientRect();
-        const titleStyle = window.getComputedStyle(titleRef.current);
-        const titlePaddingLeft = parseFloat(titleStyle.paddingLeft) || 0;
-        const titlePaddingRight = parseFloat(titleStyle.paddingRight) || 0;
-        
-        const titleWidth = titleRect.width + titlePaddingLeft + titlePaddingRight;
-        
-        // No image container needed for this design
-      }
-    };
+const Hero: React.FC = () => {
+  const stripeBackground = useMemo(() => {
+    const stops = stripePalette
+      .map((color, index) => {
+        const start = (index / stripePalette.length) * 100;
+        const end = ((index + 1) / stripePalette.length) * 100;
+        return `${color} ${start}% ${end}%`;
+      })
+      .join(", ");
 
-    const initialTimer = setTimeout(matchWidths, 100);
-    const animationTimer = setTimeout(matchWidths, 2500);
-    
-    let resizeTimer: NodeJS.Timeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(matchWidths, 150);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearTimeout(initialTimer);
-      clearTimeout(animationTimer);
-      clearTimeout(resizeTimer);
-    };
+    return `linear-gradient(90deg, ${stops})`;
   }, []);
 
-  useGSAP(
-    () => {
-      // Ensure we're in the browser
-      if (typeof window === 'undefined' || typeof document === 'undefined') return;
-      
-      if (!heroSectionRef.current || !titleRef.current || !mariamFullRef.current || 
-          !marPartRef.current || !iamPartRef.current || !iamRef.current || !engineerZoomRef.current || 
-          !fathiRef.current || !softwareRef.current || !engineerRef.current || !contentRef.current) return;
-
-      // Dispatch event to hide navbar
-      window.dispatchEvent(new CustomEvent('heroAnimationStart'));
-
-      // Initial states - all elements hidden except MARIAM
-      gsap.set([titleRef.current, iamRef.current, engineerZoomRef.current, fathiRef.current, softwareRef.current, engineerRef.current], {
-        opacity: 0,
-        x: 0,
-        y: 0,
-        scale: 1,
-      });
-
-      // Position MARIAM - starts from LEFT (off-screen) and slides into position
-      // This creates seamless transition from preloader where MARIAM exits to the right
-      const viewportWidth = window.innerWidth;
-      const finalLeft = "7rem"; // Final position: Space from navbar (80px + 32px padding)
-      const finalTop = "3rem"; // Final position: Space from top of viewport
-      
-      // Set MARIAM to start from left side (off-screen) - continuing from preloader
-      gsap.set(mariamFullRef.current, {
-        left: finalLeft,
-        top: finalTop,
-        x: -viewportWidth, // Start from left side (off-screen) - as if continuing from preloader
-        y: 0,
-        xPercent: 0,
-        yPercent: 0,
-        opacity: 1, // Fully visible from the start
-        clipPath: "inset(0 0% 0 0%)", // Fully visible
-      });
-
-      // Set initial states for MAR and IAM parts - visible from start
-      gsap.set(marPartRef.current, {
-        opacity: 1, // Visible from start
-        clipPath: "inset(0 0% 0 0%)", // Fully visible
-        x: 0,
-      });
-
-      gsap.set(iamPartRef.current, {
-        opacity: 1, // Visible from start
-        clipPath: "inset(0 0% 0 0%)", // Fully visible
-        x: 0, // Start at original position
-      });
-
-      // Create cinematic timeline - NO delay to ensure immediate appearance after preloader
-      const tl = gsap.timeline({ delay: 0 });
-
-      // Stage 0: Slide MARIAM in from the left (continuing from preloader animation)
-      // This creates seamless transition - MARIAM appears immediately as if coming from preloader
-      tl.to(mariamFullRef.current, {
-        x: 0, // Slide to final position
-        duration: 1.2, // Smooth slide-in animation
-        ease: "power2.out", // Smooth deceleration
-      }, 0);
-
-      // Stage 2: Erase "MAR" part - animate it out with motion (like erasing)
-      // Start after MARIAM slides into position (1.2s slide-in + 0.3s pause = 1.5s)
-      // Use clipPath to create erasing effect from right to left
-      tl.to(marPartRef.current, {
-        clipPath: "inset(0 0% 0 100%)", // Clip from right to left (erasing effect)
-        opacity: 0,
-        duration: 1,
-        ease: "power2.inOut",
-        onStart: function() {
-          // Calculate MAR width when animation starts (ensures accurate measurement)
-          if (marPartRef.current && iamPartRef.current) {
-            const marWidth = marPartRef.current.offsetWidth;
-            // Shift IAM left by MAR's width to fill the erased space
-            gsap.to(iamPartRef.current, {
-              x: -marWidth,
-              duration: 0.8,
-              ease: "power2.inOut",
-            });
-          }
-        },
-      }, 1.5); // Start 0.3s after MARIAM slide-in completes (1.2s + 0.3s pause)
-
-      // Stage 3: Shift IAM up and show ENGINEER below with same font
-      tl.to(mariamFullRef.current, {
-        y: "-4rem", // Shift up (adjust based on line height)
-        duration: 0.8,
-        ease: "power2.inOut",
-        onComplete: function() {
-          // After IAM shifts up, position ENGINEER below it (same size as IAM)
-          if (mariamFullRef.current && engineerZoomRef.current && contentRef.current) {
-            const iamRect = mariamFullRef.current.getBoundingClientRect();
-            const containerRect = contentRef.current.getBoundingClientRect();
-            
-            // Calculate position relative to container
-            const iamBottomRelative = iamRect.bottom - containerRect.top;
-            const iamLeftRelative = iamRect.left - containerRect.left;
-            
-            // Get IAM's computed font size and all font properties to match exactly
-            const iamStyle = window.getComputedStyle(mariamFullRef.current);
-            const iamFontSize = iamStyle.fontSize;
-            const iamFontWeight = iamStyle.fontWeight;
-            const iamLetterSpacing = iamStyle.letterSpacing;
-            const iamLineHeight = iamStyle.lineHeight;
-            
-            // Set ENGINEER to EXACTLY same font properties as IAM initially
-            // Position it at same left as IAM (which already has proper spacing from navbar)
-            gsap.set(engineerZoomRef.current, {
-              left: `${iamLeftRelative}px`, // Same horizontal position as IAM (already has navbar spacing)
-              top: `${iamBottomRelative + 20}px`, // Position below IAM with small gap
-              xPercent: 0,
-              yPercent: 0,
-              textAlign: "left",
-              fontSize: iamFontSize, // Same size as IAM
-              fontWeight: iamFontWeight, // Same weight
-              letterSpacing: iamLetterSpacing, // Same letter spacing
-              lineHeight: iamLineHeight, // Same line height
-              opacity: 1,
-              clipPath: "inset(0 100% 0 0%)", // Start fully clipped (hidden from left)
-            });
-
-            // Write ENGINEER slowly from left to right
-            gsap.to(engineerZoomRef.current, {
-              clipPath: "inset(0 0% 0 0%)", // Reveal from left to right
-              duration: 1.2, // Slower duration for gradual reveal
-              ease: "power2.inOut",
-            });
-          }
-        },
-      }, 2.5); // Start after Stage 2 completes (1.5 + 1.0 = 2.5)
-
-      // Stage 4: Simultaneously erase ENGINEER while rewriting "MAR"
-      // First, prepare for FATHI positioning (get ENGINEER position before erasing)
-      tl.call(function() {
-        if (engineerZoomRef.current && fathiRef.current && contentRef.current) {
-          // Get ENGINEER's current position and font properties before erasing
-          const engineerRect = engineerZoomRef.current.getBoundingClientRect();
-          const containerRect = contentRef.current.getBoundingClientRect();
-          const engineerLeft = engineerRect.left - containerRect.left;
-          const engineerTop = engineerRect.top - containerRect.top;
-          
-          // Get ENGINEER's computed font properties
-          const engineerStyle = window.getComputedStyle(engineerZoomRef.current);
-          const engineerFontSize = engineerStyle.fontSize;
-          const engineerFontWeight = engineerStyle.fontWeight;
-          const engineerLetterSpacing = engineerStyle.letterSpacing;
-          const engineerLineHeight = engineerStyle.lineHeight;
-          
-          // Position FATHI at the same location as ENGINEER with same font
-          gsap.set(fathiRef.current, {
-            left: `${engineerLeft}px`,
-            top: `${engineerTop}px`,
-            xPercent: 0,
-            yPercent: 0,
-            fontSize: engineerFontSize,
-            fontWeight: engineerFontWeight,
-            letterSpacing: engineerLetterSpacing,
-            lineHeight: engineerLineHeight,
-            textAlign: "left",
-            opacity: 0,
-            clipPath: "inset(0 100% 0 0%)", // Start fully clipped (hidden)
-          });
-          
-          // Ensure ENGINEER starts with visible clipPath for erasing
-          gsap.set(engineerZoomRef.current, {
-            clipPath: "inset(0 0% 0 0%)", // Fully visible
-          });
-        }
-      }, [], 4.5); // Start after ENGINEER typing completes (3.3 + 1.2 = 4.5)
-
-      // Stage 4a: Shift IAM back to its original position (to make room for MAR)
-      tl.to(iamPartRef.current, {
-        x: 0, // Shift back to original position (to the right of MAR)
-        duration: 0.8,
-        ease: "power2.inOut",
-      }, 4.5);
-
-      // Stage 4b: Simultaneously - Erase ENGINEER and Restore MAR visibility
-      // Erase ENGINEER from left to right (slower)
-      tl.to(engineerZoomRef.current, {
-        clipPath: "inset(0 0% 0 100%)", // Erase from left to right
-        opacity: 0,
-        duration: 1.5, // Slower erasing duration
-        ease: "power2.inOut",
-        onComplete: function() {
-          // Hide ENGINEER completely
-          if (engineerZoomRef.current) {
-            gsap.set(engineerZoomRef.current, {
-              opacity: 0,
-              visibility: "hidden",
-            });
-          }
-        }
-      }, 4.7); // Start slightly after Stage 4a
-
-      // Restore MAR visibility - happens simultaneously with ENGINEER erasing
-      tl.to(marPartRef.current, {
-        clipPath: "inset(0 0% 0 0%)", // Restore MAR visibility
-        opacity: 1,
-        duration: 1.5, // Match ENGINEER erasing duration for synchronization
-        ease: "power2.out",
-      }, 4.7); // Start at same time as ENGINEER erasing
-
-      // Stage 5: After ENGINEER is erased and MAR is rewritten, type FATHI
-      tl.to(fathiRef.current, {
-        clipPath: "inset(0 0% 0 0%)", // Reveal from left to right
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.inOut",
-      }, 6.4); // Start after both ENGINEER erasing and MAR rewriting complete (4.7 + 1.5 = 6.2, then 0.2s delay)
-
-      // Stage 6: Move FATHI up beside MARIAM - start overlapping with typing to eliminate lag
-      // Start movement slightly before typing completes for seamless transition
-      // FATHI typing completes at 6.4 + 0.8 = 7.2, so start movement at 7.0 (0.2s overlap)
-      tl.call(function() {
-        if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-          // First, clear ALL transforms to get accurate position measurements
-          gsap.set(fathiRef.current, {
-            x: 0,
-            y: 0,
-            xPercent: 0,
-            yPercent: 0,
-            clearProps: "transform",
-          });
-          
-          // Force reflow to ensure transforms are cleared
-          void fathiRef.current.offsetHeight;
-          void mariamFullRef.current.offsetHeight;
-          
-          // Get positions using getBoundingClientRect for accurate visual positions
-          const mariamRect = mariamFullRef.current.getBoundingClientRect();
-          const containerRect = contentRef.current.getBoundingClientRect();
-          
-          // Calculate final position relative to container
-          const mariamRight = mariamRect.right - containerRect.left;
-          const mariamTop = mariamRect.top - containerRect.top;
-          
-          // Get FATHI's current position (after clearing transforms, should match CSS)
-          const fathiRect = fathiRef.current.getBoundingClientRect();
-          
-          // Calculate final position: to the right of MARIAM, aligned on the same line
-          const spacing = parseFloat(window.getComputedStyle(mariamFullRef.current).fontSize) * 0.1;
-          const finalLeft = mariamRight + spacing;
-          const finalTop = mariamTop; // Align with MARIAM's top for same-line alignment
-          
-          // Animate FATHI directly to final position - start immediately without delay
-          // Use absolute time position (7.0) instead of ">" to start overlapping with typing
-          tl.to(fathiRef.current, {
-            left: `${finalLeft}px`,
-            top: `${finalTop}px`,
-            duration: 0.8,
-            ease: "power1.out",
-            onComplete: function() {
-              // Finalize position - set once, no verification loops
-              if (fathiRef.current) {
-                gsap.set(fathiRef.current, {
-                  left: `${finalLeft}px`,
-                  top: `${finalTop}px`,
-                  x: 0,
-                  y: 0,
-                  xPercent: 0,
-                  yPercent: 0,
-                  clearProps: "transform",
-                });
-              }
-            }
-          }, 7.0); // Start 0.2s before typing completes for seamless transition
-        }
-      }, [], 7.0); // Prepare and start movement 0.2s before typing completes
-
-      // Stage 7: Shift both MARIAM and FATHI down together (after FATHI is beside MARIAM)
-      // Use y transform for MARIAM, sync FATHI's top in real-time to stay on same line
-      tl.call(function() {
-        if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-          // Shift MARIAM using transform (for smooth animation)
-          tl.to(mariamFullRef.current, {
-            y: "+=4rem",
-            duration: 1,
-            ease: "power2.inOut",
-            onUpdate: function(this: any) {
-              // Sync FATHI's top with MARIAM's vertical position in real-time
-              if (mariamFullRef.current && fathiRef.current && contentRef.current) {
-                const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
-                const currentContainerRect = contentRef.current.getBoundingClientRect();
-                const mariamCurrentTop = currentMariamRect.top - currentContainerRect.top;
-                
-                // Update FATHI's top to match MARIAM's current top position exactly
-                gsap.set(fathiRef.current, {
-                  top: `${mariamCurrentTop}px`,
-                });
-              }
-            },
-            onComplete: function() {
-              // Lock FATHI's final position
-              if (fathiRef.current && mariamFullRef.current && contentRef.current) {
-                const finalMariamRect = mariamFullRef.current.getBoundingClientRect();
-                const finalContainerRect = contentRef.current.getBoundingClientRect();
-                const finalTop = finalMariamRect.top - finalContainerRect.top;
-                
-                gsap.set(fathiRef.current, {
-                  top: `${finalTop}px`,
-                  clearProps: "transform",
-                });
-              }
-            }
-          }, ">");
-        }
-      }, [], 7.8); // Start immediately after FATHI movement completes (7.0 + 0.8 = 7.8)
-
-      // Stage 8: Transition MARIAM FATHI to bottom position while writing ENGINEER and SOFTWARE
-      tl.call(function() {
-        if (mariamFullRef.current && fathiRef.current && engineerRef.current && softwareRef.current && contentRef.current && heroSectionRef.current) {
-          // Force reflow
-          void mariamFullRef.current.offsetHeight;
-          void fathiRef.current.offsetHeight;
-          
-          // Get current positions
-          // First, get the actual rendered positions (accounting for any transforms)
-          const mariamRect = mariamFullRef.current.getBoundingClientRect();
-          const fathiRect = fathiRef.current.getBoundingClientRect();
-          const containerRect = contentRef.current.getBoundingClientRect();
-          const heroRect = heroSectionRef.current.getBoundingClientRect();
-          
-          // Calculate final bottom position - full width from navbar end with equal padding
-          const heroHeight = heroRect.height;
-          const mariamHeight = mariamRect.height;
-          const finalTop = heroHeight - mariamHeight - 80; // 80px from bottom
-          
-          // Get current positions (from getBoundingClientRect which includes transforms)
-          const currentMariamTop = mariamRect.top - containerRect.top;
-          const currentMariamLeft = mariamRect.left - containerRect.left;
-          const currentFathiTop = fathiRect.top - containerRect.top;
-          const currentFathiLeft = fathiRect.left - containerRect.left;
-          
-          // Calculate spacing between MARIAM and FATHI (from actual rendered positions)
-          // Use the right edge of MARIAM and left edge of FATHI
-          const mariamRight = mariamRect.right - containerRect.left;
-          const fathiLeft = fathiRect.left - containerRect.left;
-          const currentSpacing = fathiLeft - mariamRight; // Actual visual spacing
-          
-          // Calculate total width needed (MARIAM + spacing + FATHI)
-          const totalWidth = mariamRect.width + currentSpacing + fathiRect.width;
-          
-          // Navbar width is w-20 = 80px (5rem)
-          const navbarWidth = 80;
-          const viewportWidth = window.innerWidth;
-          
-          // Calculate available width: full viewport minus navbar (padding will be calculated after)
-          const availableWidth = viewportWidth - navbarWidth;
-          
-          // Also consider available height to prevent cropping
-          const viewportHeight = window.innerHeight;
-          const availableHeight = viewportHeight - finalTop - 80; // 80px bottom padding
-          
-          // Calculate scale factors for both width and height
-          // For width, account for minimum padding (32px on each side = 64px total)
-          const widthScaleFactor = (availableWidth - 64) / totalWidth; // Reserve 64px for minimum padding
-          const heightScaleFactor = availableHeight / mariamHeight;
-          
-          // Use the smaller scale factor to ensure it fits both dimensions
-          // Also add a maximum scale limit (e.g., 1.0) to prevent it from being too large
-          const scaleFactor = Math.min(widthScaleFactor, heightScaleFactor, 1.0);
-          
-          // Calculate scaled content dimensions
-          const scaledMariamWidth = mariamRect.width * scaleFactor;
-          const scaledFathiWidth = fathiRect.width * scaleFactor;
-          const finalSpacing = currentSpacing < 0 ? 10 : currentSpacing; // Use original spacing, not scaled
-          
-          // Calculate total content width after scaling
-          const totalContentWidth = scaledMariamWidth + finalSpacing + scaledFathiWidth;
-          
-          // Calculate available space (viewport width minus navbar)
-          const availableSpace = viewportWidth - navbarWidth;
-          
-          // Calculate equal padding on both sides to center the content
-          const remainingSpace = availableSpace - totalContentWidth;
-          const equalPadding = Math.max(32, remainingSpace / 2); // Minimum 32px, or equal split
-          
-          // Calculate centered final positions
-          const finalMariamLeft = navbarWidth + equalPadding;
-          const finalMariamTop = finalTop;
-          const finalFathiLeft = finalMariamLeft + scaledMariamWidth + finalSpacing;
-          const finalFathiTop = finalTop;
-          
-          // Recalculate FATHI's position after alignment (to get accurate deltas)
-          // Force reflow and get updated position
-          void fathiRef.current.offsetHeight;
-          const updatedFathiRect = fathiRef.current.getBoundingClientRect();
-          const updatedFathiLeft = updatedFathiRect.left - containerRect.left;
-          const updatedFathiTop = updatedFathiRect.top - containerRect.top;
-          
-          // Calculate deltas from aligned position
-          const deltaMariamX = finalMariamLeft - currentMariamLeft;
-          const deltaMariamY = finalMariamTop - currentMariamTop;
-          const deltaFathiX = finalFathiLeft - updatedFathiLeft;
-          const deltaFathiY = finalFathiTop - updatedFathiTop; // Should be same as deltaMariamY now
-          
-          // Set up ENGINEER and SOFTWARE with small font, initially hidden
-          const smallFontSize = "1rem"; // Increased from 0.875rem (text-sm) to 1rem (text-base)
-          
-          // Store smallFontSize for use in onComplete callback
-          const fontSizeForFallback = parseFloat(smallFontSize);
-          
-          // Calculate scale factor FIRST (needed for position calculations) - reuse variables from above
-          // These are already calculated above, just reuse them
-          const scaleFactorForPosition = Math.min(widthScaleFactor, heightScaleFactor, 1.0);
-          
-          // Position ENGINEER aligned with "IAM" in MARIAM
-          // Calculate position based on FINAL position to avoid cropping
-          if (iamPartRef.current && marPartRef.current && typeof document !== 'undefined') {
-            // Calculate final MARIAM bottom position (after scaling and positioning)
-            const scaledMariamHeight = mariamHeight * scaleFactorForPosition;
-            const finalMariamBottom = finalTop + scaledMariamHeight;
-            
-            // Get position of "IAM" span to calculate its center (use current position for initial setup)
-            const iamRect = iamPartRef.current.getBoundingClientRect();
-            const iamCenter = iamRect.left - containerRect.left + (iamRect.width / 2);
-            
-            // Calculate ENGINEER top based on FINAL MARIAM position to prevent cropping
-            const engineerTop = finalMariamBottom - containerRect.top + 20; // 20px below final MARIAM position
-              
-              // Calculate total width of "SOFTWARE ENGINEER" for centering
-              const fontSize = parseFloat(smallFontSize);
-              const softwareEstimatedWidth = 8 * fontSize * 0.75; // Approximate width for "SOFTWARE"
-              const engineerEstimatedWidth = 8 * fontSize * 0.75; // Approximate width for "ENGINEER"
-              const softwareEngineerSpacing = 10; // Spacing between SOFTWARE and ENGINEER
-              const totalSoftwareEngineerWidth = softwareEstimatedWidth + softwareEngineerSpacing + engineerEstimatedWidth;
-              
-              // Position SOFTWARE ENGINEER centered under "IAM"
-              // Calculate left position so that the center of SOFTWARE ENGINEER aligns with center of IAM
-              const softwareEngineerLeft = iamCenter - (totalSoftwareEngineerWidth / 2);
-              const softwareLeft = softwareEngineerLeft;
-              const softwareTop = engineerTop; // Same vertical position as ENGINEER
-              
-              // Position ENGINEER right after SOFTWARE
-              const engineerLeft = softwareLeft + softwareEstimatedWidth + softwareEngineerSpacing;
-              
-              gsap.set(softwareRef.current, {
-                left: `${softwareLeft}px`,
-                top: `${softwareTop}px`,
-                fontSize: smallFontSize,
-                fontWeight: "bold",
-                letterSpacing: "0.15em",
-                textAlign: "left",
-                opacity: 0,
-                clipPath: "inset(0 100% 0 0%)", // Start hidden
-                x: 0,
-                y: 0,
-                xPercent: 0,
-                yPercent: 0,
-              });
-              
-              gsap.set(engineerRef.current, {
-                left: `${engineerLeft}px`,
-                top: `${engineerTop}px`,
-                fontSize: smallFontSize,
-                fontWeight: "bold",
-                letterSpacing: "0.15em",
-                textAlign: "left",
-                opacity: 0,
-                clipPath: "inset(0 100% 0 0%)", // Start hidden
-                x: 0,
-                y: 0,
-                xPercent: 0,
-                yPercent: 0,
-              });
-              
-              // Animate MARIAM and FATHI to bottom position with scaling
-              // scaleFactor already calculated above
-              
-              // Animate MARIAM and FATHI separately to keep FATHI's CSS positioning
-              // MARIAM uses transforms, FATHI uses left/top CSS properties
-              // Both must stay on the same line throughout the animation
-              tl.to(mariamFullRef.current, {
-                x: deltaMariamX,
-                y: deltaMariamY,
-                scale: scaleFactor,
-                duration: 1.5,
-                ease: "power2.inOut",
-                onStart: function() {
-                  // IMMEDIATELY align FATHI with MARIAM before animation begins
-                  if (mariamFullRef.current && fathiRef.current && contentRef.current) {
-                    const mariamStartRect = mariamFullRef.current.getBoundingClientRect();
-                    const containerStartRect = contentRef.current.getBoundingClientRect();
-                    const mariamStartTop = mariamStartRect.top - containerStartRect.top;
-                    
-                    // Set FATHI's top to match MARIAM's top immediately
-                    gsap.set(fathiRef.current, {
-                      top: `${mariamStartTop}px`,
-                      clearProps: "transform",
-                    });
-                    // Force immediate render
-                    void fathiRef.current.offsetHeight;
-                  }
-                },
-                onUpdate: function(this: any) {
-                  // Update positions for ENGINEER and SOFTWARE during animation
-                  const progress = this.progress();
-                  
-                  // Synchronize FATHI's top position with MARIAM's vertical position in real-time
-                  // This ensures they stay on the same line throughout the entire animation
-                  if (mariamFullRef.current && fathiRef.current && contentRef.current) {
-                    const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
-                    const currentContainerRect = contentRef.current.getBoundingClientRect();
-                    const mariamCurrentTop = currentMariamRect.top - currentContainerRect.top;
-                    
-                    // Update FATHI's top to match MARIAM's current top position exactly
-                    gsap.set(fathiRef.current, {
-                      top: `${mariamCurrentTop}px`,
-                    });
-                  }
-                  
-                  // Update SOFTWARE and ENGINEER positions (aligned with "IAM" span as MARIAM moves)
-                  // Track MARIAM's position directly in real-time for smooth movement
-                  if (softwareRef.current && engineerRef.current && iamPartRef.current && contentRef.current && mariamFullRef.current) {
-                    const currentContainerRect = contentRef.current.getBoundingClientRect();
-                    
-                    // Get MARIAM's current position in real-time (this ensures smooth tracking)
-                    const currentMariamRect = mariamFullRef.current.getBoundingClientRect();
-                    if (!currentMariamRect) return;
-                    
-                    // Calculate SOFTWARE ENGINEER top position directly from MARIAM's current bottom position
-                    // This ensures it always stays exactly 20px below MARIAM, no matter where MARIAM is
-                    const currentMariamBottom = currentMariamRect.bottom - currentContainerRect.top;
-                    const currentEngineerTop = currentMariamBottom + 20; // 20px below MARIAM's bottom
-                    
-                    // Recalculate "IAM" span position to center SOFTWARE ENGINEER under it
-                    const currentIamRect = iamPartRef.current.getBoundingClientRect();
-                    
-                    // Calculate center of IAM for centering SOFTWARE ENGINEER
-                    const currentIamCenter = currentIamRect.left - currentContainerRect.left + (currentIamRect.width / 2);
-                    
-                    // Get SOFTWARE and ENGINEER widths for centering (use cached or measure once)
-                    let softwareWidth = 0;
-                    let engineerWidth = 0;
-                    if (softwareRef.current) {
-                      try {
-                        const softwareRect = softwareRef.current.getBoundingClientRect();
-                        softwareWidth = softwareRect.width || 0;
-                      } catch (e) {
-                        // Fallback to estimated width if measurement fails
-                        softwareWidth = 8 * fontSizeForFallback * 0.75;
-                      }
-                    }
-                    if (engineerRef.current) {
-                      try {
-                        const engineerRect = engineerRef.current.getBoundingClientRect();
-                        engineerWidth = engineerRect.width || 0;
-                      } catch (e) {
-                        engineerWidth = 8 * fontSizeForFallback * 0.75;
-                      }
-                    }
-                    
-                    const softwareEngineerSpacing = 10;
-                    const totalSoftwareEngineerWidth = softwareWidth + softwareEngineerSpacing + engineerWidth;
-                    
-                    // Calculate left position so that the center of SOFTWARE ENGINEER aligns with center of IAM
-                    const currentSoftwareEngineerLeft = currentIamCenter - (totalSoftwareEngineerWidth / 2);
-                    const currentSoftwareLeft = currentSoftwareEngineerLeft;
-                    const currentEngineerLeft = currentSoftwareLeft + softwareWidth + softwareEngineerSpacing;
-                    
-                    // Update SOFTWARE position - smooth tracking using current MARIAM position
-                    gsap.set(softwareRef.current, {
-                      left: `${currentSoftwareLeft}px`,
-                      top: `${currentEngineerTop}px`,
-                    });
-                    
-                    // Update ENGINEER position - smooth tracking using current MARIAM position
-                    gsap.set(engineerRef.current, {
-                      left: `${currentEngineerLeft}px`,
-                      top: `${currentEngineerTop}px`,
-                    });
-                    
-                    // Write SOFTWARE ENGINEER from left to right as MARIAM moves
-                    // Both reveal together, synchronized
-                    gsap.set(softwareRef.current, {
-                      clipPath: `inset(0 ${100 - progress * 100}% 0 0%)`,
-                      opacity: Math.min(progress * 1.5, 1),
-                    });
-                    
-                    gsap.set(engineerRef.current, {
-                      clipPath: `inset(0 ${100 - progress * 100}% 0 0%)`,
-                      opacity: Math.min(progress * 1.5, 1),
-                    });
-                    
-                    // Animate IAM color synchronized with SOFTWARE ENGINEER reveal
-                    // Use a gradient mask to reveal color from left to right
-                    const revealPercent = progress * 100;
-                    if (iamPartRef.current) {
-                      // Target color (lime green) - transitions to lime green
-                      const targetColor = '#CEF17B';
-                      // Starting color (darker/muted)
-                      const startColor = '#888888';
-                      
-                      // Create a linear gradient that reveals the target color from left to right
-                      // This creates a "painting" effect synchronized with SOFTWARE ENGINEER reveal
-                      gsap.set(iamPartRef.current, {
-                        backgroundImage: `linear-gradient(to right, ${targetColor} 0%, ${targetColor} ${revealPercent}%, ${startColor} ${revealPercent}%, ${startColor} 100%)`,
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        color: 'transparent',
-                        WebkitTextFillColor: 'transparent',
-                      });
-                    }
-                    
-                    // Also transition SOFTWARE ENGINEER to lime green during animation
-                    const limeGreen = '#CEF17B';
-                    if (softwareRef.current && engineerRef.current) {
-                      // Transition color to lime green as progress increases
-                      gsap.set(softwareRef.current, {
-                        color: limeGreen,
-                      });
-                      gsap.set(engineerRef.current, {
-                        color: limeGreen,
-                      });
-                    }
-                  }
-                },
-                onComplete: function() {
-                  // Finalize positions
-                  if (mariamFullRef.current && fathiRef.current && contentRef.current) {
-                    // Recalculate scale and positions
-                    const navbarWidth = 80;
-                    const viewportWidth = window.innerWidth;
-                    const viewportHeight = window.innerHeight;
-                    const availableWidth = viewportWidth - navbarWidth;
-                    const availableHeight = viewportHeight - finalTop - 80;
-                    
-                    // Final scale factor - consider both width and height
-                    // Account for minimum padding (32px on each side = 64px total)
-                    const widthScale = (availableWidth - 64) / (mariamRect.width + currentSpacing + fathiRect.width);
-                    const heightScale = availableHeight / mariamHeight;
-                    const finalScaleFactor = Math.min(widthScale, heightScale, 1.0);
-                    
-                    // Set MARIAM position and scale first (temporary position for measurement)
-                    const tempMariamLeftPos = navbarWidth + 32; // Temporary position
-                    
-                    gsap.set(mariamFullRef.current, {
-                      left: `${tempMariamLeftPos}px`,
-                      top: `${finalMariamTop}px`,
-                      x: 0,
-                      y: 0,
-                      xPercent: 0,
-                      yPercent: 0,
-                      scale: finalScaleFactor,
-                      transformOrigin: "left top",
-                    });
-                    
-                    // Force reflow to get actual scaled dimensions
-                    void mariamFullRef.current.offsetHeight;
-                    
-                    // Get the ACTUAL dimensions of MARIAM after scaling is applied
-                    const actualMariamRect = mariamFullRef.current.getBoundingClientRect();
-                    const actualMariamWidth = actualMariamRect.width;
-                    
-                    // Calculate FATHI position temporarily to get its actual width after scaling
-                    const finalSpacing = currentSpacing < 0 ? 10 : currentSpacing; // Use original visual spacing, not scaled
-                    const tempFathiLeftPos = tempMariamLeftPos + actualMariamWidth + finalSpacing;
-                    
-                    // Set FATHI temporarily to get its actual width after scaling
-                    gsap.set(fathiRef.current, {
-                      left: `${tempFathiLeftPos}px`,
-                      top: `${finalFathiTop}px`,
-                      x: 0,
-                      y: 0,
-                      xPercent: 0,
-                      yPercent: 0,
-                      scale: finalScaleFactor,
-                      transformOrigin: "left top",
-                    });
-                    
-                    // Force reflow to get actual scaled FATHI dimensions
-                    void fathiRef.current.offsetHeight;
-                    
-                    // Get actual scaled dimensions of both elements
-                    const actualFathiRect = fathiRef.current.getBoundingClientRect();
-                    const actualFathiWidth = actualFathiRect.width;
-                    
-                    // Calculate total content width (MARIAM + spacing + FATHI) after scaling
-                    const totalContentWidth = actualMariamWidth + finalSpacing + actualFathiWidth;
-                    
-                    // Calculate available space (viewport width minus navbar)
-                    const availableSpace = viewportWidth - navbarWidth;
-                    
-                    // Calculate equal padding on both sides to center the content
-                    const remainingSpace = availableSpace - totalContentWidth;
-                    const equalPadding = Math.max(32, remainingSpace / 2); // Minimum 32px, or equal split
-                    
-                    // Calculate centered positions
-                    const centeredMariamLeft = navbarWidth + equalPadding;
-                    const centeredFathiLeft = centeredMariamLeft + actualMariamWidth + finalSpacing;
-                    
-                    // Update positions to be centered
-                    gsap.set(mariamFullRef.current, {
-                      left: `${centeredMariamLeft}px`,
-                      top: `${finalMariamTop}px`,
-                    x: 0,
-                    y: 0,
-                    xPercent: 0,
-                    yPercent: 0,
-                      scale: finalScaleFactor,
-                      transformOrigin: "left top",
-                    });
-                    
-                    gsap.set(fathiRef.current, {
-                      left: `${centeredFathiLeft}px`,
-                      top: `${finalFathiTop}px`,
-                      x: 0,
-                      y: 0,
-                      xPercent: 0,
-                      yPercent: 0,
-                      scale: finalScaleFactor,
-                      transformOrigin: "left top",
-                    });
-                  }
-                  
-                  // Finalize ENGINEER and SOFTWARE
-                  if (engineerRef.current && softwareRef.current && iamPartRef.current && marPartRef.current && mariamFullRef.current && contentRef.current) {
-                    const finalMariamRect = mariamFullRef.current.getBoundingClientRect();
-                    const finalContainerRect = contentRef.current.getBoundingClientRect();
-                    
-                    // Final SOFTWARE ENGINEER position - centered under "IAM"
-                    const finalIamRect = iamPartRef.current.getBoundingClientRect();
-                    const iamCenter = finalIamRect.left - finalContainerRect.left + (finalIamRect.width / 2);
-                    const engineerTop = (finalMariamRect?.bottom || 0) - finalContainerRect.top + 20;
-                    
-                    // Get SOFTWARE and ENGINEER widths for centering
-                    let softwareWidth = 0;
-                    let engineerWidth = 0;
-                    if (softwareRef.current) {
-                      try {
-                        const softwareRect = softwareRef.current.getBoundingClientRect();
-                        softwareWidth = softwareRect.width || 0;
-                      } catch (e) {
-                        // Fallback to estimated width if measurement fails
-                        softwareWidth = 8 * fontSizeForFallback * 0.75;
-                      }
-                    }
-                    if (engineerRef.current) {
-                      try {
-                        const engineerRect = engineerRef.current.getBoundingClientRect();
-                        engineerWidth = engineerRect.width || 0;
-                      } catch (e) {
-                        engineerWidth = 8 * fontSizeForFallback * 0.75;
-                      }
-                    }
-                    
-                    const softwareEngineerSpacing = 10;
-                    const totalSoftwareEngineerWidth = softwareWidth + softwareEngineerSpacing + engineerWidth;
-                    
-                    // Calculate left position so that the center of SOFTWARE ENGINEER aligns with center of IAM
-                    const softwareEngineerLeft = iamCenter - (totalSoftwareEngineerWidth / 2);
-                    const softwareLeft = softwareEngineerLeft;
-                    const engineerLeft = softwareLeft + softwareWidth + softwareEngineerSpacing;
-                    
-                    // Set SOFTWARE ENGINEER to lime green when settled at bottom
-                    const limeGreen = '#CEF17B';
-                    gsap.set(softwareRef.current, {
-                      left: `${softwareLeft}px`,
-                      top: `${engineerTop}px`,
-                      clipPath: "inset(0 0% 0 0%)",
-                      opacity: 1,
-                      color: limeGreen,
-                    });
-                    
-                    gsap.set(engineerRef.current, {
-                      left: `${engineerLeft}px`,
-                      top: `${engineerTop}px`,
-                      clipPath: "inset(0 0% 0 0%)",
-                      opacity: 1,
-                      color: limeGreen,
-                    });
-                    }
-                    
-                    // Finalize IAM color - lime green when settled at bottom
-                    if (iamPartRef.current) {
-                      const limeGreen = '#CEF17B';
-                      gsap.set(iamPartRef.current, {
-                        backgroundImage: `linear-gradient(to right, ${limeGreen} 0%, ${limeGreen} 100%)`,
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        color: 'transparent',
-                        WebkitTextFillColor: 'transparent',
-                      });
-                    }
-                    
-                    // Dispatch navbar appearance event AFTER content has settled at final bottom position
-                    window.dispatchEvent(new CustomEvent('heroAnimationComplete'));
-                }
-              }, ">");
-              
-              // FATHI uses left/top CSS properties and must stay on same line as MARIAM
-              // FATHI's top position is synchronized in MARIAM's onUpdate callback above
-              // Animate FATHI's left position and scale in parallel with MARIAM
-              tl.to(fathiRef.current, {
-                left: `${finalFathiLeft}px`,
-                scale: scaleFactor,
-                duration: 1.5,
-                ease: "power2.inOut",
-                onComplete: function() {
-                  // Lock FATHI's final position
-                  if (fathiRef.current) {
-                    gsap.set(fathiRef.current, {
-                      left: `${finalFathiLeft}px`,
-                      top: `${finalFathiTop}px`, // Final top will be set by MARIAM's onUpdate
-                      x: 0,
-                      y: 0,
-                      clearProps: "transform",
-                    });
-                  }
-                }
-              }, "<"); // Start at same time as MARIAM
-            }
-          }
-      }, [], 9.2); // Start 0.4s after Stage 7 completes (7.8 + 1.0 + 0.4 = 9.2)
-
-      // Navbar appearance is now dispatched after content settles at final bottom position (Stage 8 onComplete)
-      // This ensures navbar appears only after all animations are complete and content is in final position
-
-      // SOFTWARE and ENGINEER final positioning will be handled later if needed
-      // For now, the animation ends with IAM and ENGINEER at bottom left
-
-      // Stage 9: Scroll exit animation - Move horizontally to the right side with stagger when scrolling to projects
-      // Wait for projects section to exist before setting up ScrollTrigger
-      const setupScrollExit = () => {
-        const projectsSection = document.querySelector('#projects');
-        if (!projectsSection) {
-          // Retry after a short delay if projects section isn't loaded yet
-          setTimeout(setupScrollExit, 100);
-          return;
-        }
-
-        // Collect all hero text elements to animate
-        const heroTextElements = [
-          mariamFullRef.current,
-          fathiRef.current,
-          softwareRef.current,
-          engineerRef.current,
-        ].filter(Boolean) as HTMLElement[]; // Filter out null refs
-
-        if (heroTextElements.length === 0) return;
-
-        // Create timeline for smooth scrubbed horizontal exit animation
-        const exitTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: projectsSection,
-            start: "top bottom-=300", // Start when projects section is 300px from entering viewport
-            end: "top bottom+=100", // End slightly after projects enters viewport
-            scrub: 3.0, // Slower scrubbing for smoother, more controlled animation
-            toggleActions: "play none reverse none", // Reverse on scroll back
-          },
-        });
-
-        // Move horizontally to the right side of screen with stagger animation (SLOW)
-        const viewportWidth = window.innerWidth;
-        exitTimeline.to(heroTextElements, {
-          x: viewportWidth, // Move to right side of screen (off-screen)
-          opacity: 0,
-          duration: 2.5, // Increased duration for slower movement
-          ease: "power1.inOut", // Slower easing for more gradual motion
-          stagger: {
-            amount: 1.5, // Increased stagger over 1.5s - creates slower cascading effect
-            from: "start", // Start from first element
-            ease: "power1.inOut",
-          },
-        });
-      };
-
-      // Setup scroll exit animation after a short delay to ensure DOM is ready
-      setTimeout(setupScrollExit, 500);
-
-    },
-    { scope: heroSectionRef }
-  );
-
   return (
-    <div ref={containerRef}>
-      <section
-        ref={heroSectionRef}
-        className="relative min-h-screen flex items-start overflow-visible"
+    <section
+      id="hero"
+      className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden"
+      style={{
+        backgroundImage: stripeBackground,
+      }}
+    >
+      <div
+        className="pointer-events-none absolute inset-0"
         style={{
-          background: "#658761",
+          background:
+            "linear-gradient(180deg, rgba(8,14,11,0.1) 0%, rgba(8,14,11,0.6) 75%, rgba(8,14,11,0.85) 100%)",
         }}
-      >
-        {/* Content Container - Text on Emerald Background */}
-        <div
-          ref={contentRef}
-          className="absolute z-10"
-        >
-          <div className="w-full relative">
-            {/* Software - positioned above MARIAM, aligned with M */}
-            <h2
-              ref={softwareRef}
-              className="font-bold uppercase text-sm md:text-base lg:text-lg tracking-wider"
-              style={{
-                letterSpacing: '0.15em',
-                color: '#FEFCE0',
-                textAlign: 'left',
-                whiteSpace: 'nowrap',
-                position: 'absolute',
-              }}
-            >
-              SOFTWARE
-            </h2>
+      />
 
-            {/* Stage 1: MARIAM at left top - will erase MAR part, then shift IAM */}
-            <h1
-              ref={mariamFullRef}
-              className="font-bold uppercase text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] tracking-tight leading-none"
-              style={{
-                letterSpacing: '-0.02em',
-                textAlign: 'left',
-                lineHeight: '0.9',
-                color: '#FEFCE0',
-                position: 'absolute',
-              }}
-            >
-              <span ref={marPartRef} style={{ display: 'inline-block' }}>MAR</span>
-              <span ref={iamPartRef} style={{ display: 'inline-block' }}>IAM</span>
-            </h1>
 
-            {/* Stage 2: IAM (after MAR erased) */}
-            <h1
-              ref={iamRef}
-              className="font-bold uppercase text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] tracking-tight leading-none"
-              style={{
-                letterSpacing: '-0.02em',
-                textAlign: 'left',
-                lineHeight: '0.9',
-                color: '#FEFCE0',
-                position: 'absolute',
-              }}
-            >
-              IAM
-            </h1>
 
-            {/* Stage 3: ENGINEER below IAM (during zoom) */}
-            <h2
-              ref={engineerZoomRef}
-              className="font-bold uppercase tracking-wider"
-              style={{
-                letterSpacing: '0.15em',
-                color: '#FEFCE0',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                position: 'absolute',
-              }}
-            >
-              ENGINEER
-            </h2>
-
-            {/* FATHI - appears while ENGINEER erases */}
-            <h2
-              ref={fathiRef}
-              className="font-bold uppercase tracking-wider"
-              style={{
-                letterSpacing: '0.15em',
-                color: '#FEFCE0',
-                textAlign: 'left',
-                whiteSpace: 'nowrap',
-                position: 'absolute',
-              }}
-            >
-              FATHI
-            </h2>
-
-            {/* Final Title - MARIAM FATHI */}
-            <h1
-              ref={titleRef}
-              className="font-bold uppercase text-4xl sm:text-5xl md:text-7xl lg:text-9xl xl:text-[12rem] tracking-tight leading-none"
-              style={{
-                letterSpacing: '-0.02em',
-                textAlign: 'center',
-                lineHeight: '0.9',
-                color: '#FEFCE0',
-              }}
-            >
-              MARIAM FATHI
-            </h1>
-
-            {/* Engineer - positioned below MARIAM, aligned with I in IAM */}
-            <h2
-              ref={engineerRef}
-              className="font-bold uppercase text-sm md:text-base lg:text-lg tracking-wider"
-              style={{
-                letterSpacing: '0.15em',
-                color: '#FEFCE0',
-                textAlign: 'center',
-                whiteSpace: 'nowrap',
-                position: 'absolute',
-              }}
-            >
-              ENGINEER
-            </h2>
-          </div>
+      <div className="pointer-events-none absolute bottom-8 left-1/2 sm:bottom-12 lg:bottom-16 -translate-x-1/2">
+        <div className="scan-container">
+          <h1
+            className="text-center font-black uppercase leading-[0.9]"
+            style={{
+              color: primaryText,
+              fontSize: "clamp(4rem, 12vw, 9.5rem)",
+              letterSpacing: "0.08em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span className="scan-text">
+              <span className="word word-mariam">
+                <span className="letter">M</span>
+                <span className="letter">A</span>
+                <span className="letter">R</span>
+                <span className="iam-group">
+                  <span
+                    className="letter highlight-letter"
+                    style={{ animationDelay: "1.9s" }}
+                  >
+                    I
+                  </span>
+                  <span
+                    className="letter highlight-letter"
+                    style={{ animationDelay: "2.1s" }}
+                  >
+                    A
+                  </span>
+                  <span
+                    className="letter highlight-letter"
+                    style={{ animationDelay: "2.3s" }}
+                  >
+                    M
+                  </span>
+                  <span className="iam-overlay">
+                    <span className="iam-typewriter" aria-hidden="true">
+                      Software Engineer
+                    </span>
+                  </span>
+                </span>
+              </span>
+              <span className="word word-fathi" style={{ animationDelay: "0.35s" }}>
+                <span className="letter">F</span>
+                <span className="letter">A</span>
+                <span className="letter">T</span>
+                <span className="letter">H</span>
+                <span className="letter">I</span>
+              </span>
+            </span>
+          </h1>
         </div>
-      </section>
-    </div>
+      </div>
+      <style jsx>{`
+        .scan-container {
+          position: relative;
+          display: inline-block;
+          overflow: visible;
+          padding-bottom: 0.25rem;
+        }
+
+        .scan-text {
+          display: inline-flex;
+          gap: 1.5rem;
+          position: relative;
+        }
+
+        .scan-text {
+          display: inline-flex;
+          position: relative;
+        }
+
+        .scan-text .word {
+          display: inline-flex;
+          transform: translateY(110%);
+          opacity: 0;
+          animation: textRise 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+          position: relative;
+        }
+
+        .iam-group {
+          display: inline-flex;
+          position: relative;
+          gap: 0.05em;
+        }
+
+        .iam-overlay {
+          position: absolute;
+          left: 50%;
+          top: -0.35em;
+          transform: translate(-50%, -100%);
+          pointer-events: none;
+          display: inline-flex;
+          justify-content: center;
+          width: max-content;
+          min-width: max-content;
+          z-index: 1;
+        }
+
+        .iam-typewriter {
+          display: inline-block;
+          font-size: clamp(0.55rem, 0.9vw, 0.9rem);
+          letter-spacing: 0.42em;
+          text-transform: uppercase;
+          color: ${accentText};
+          opacity: 0;
+          white-space: nowrap;
+          width: 0;
+          animation:
+            fadeIn 0.25s ease forwards 1.75s,
+            typewriter 2.4s steps(18) forwards 1.85s;
+          overflow: hidden;
+          border-right: 1px solid ${accentText};
+          padding-right: 0.25em;
+        }
+
+        .word-mariam {
+          animation-delay: 0.2s;
+        }
+
+        .word-fathi {
+          animation-delay: 0.35s;
+        }
+
+        .letter {
+          display: inline-block;
+          color: ${primaryText};
+        }
+
+        .highlight-letter {
+          animation-name: colorSweep;
+          animation-duration: 0.8s;
+          animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+          animation-fill-mode: forwards;
+        }
+
+        @keyframes textRise {
+          0% {
+            transform: translateY(110%);
+            opacity: 0;
+          }
+          40% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes colorSweep {
+          0% {
+            color: ${primaryText};
+          }
+          100% {
+            color: ${accentText};
+          }
+        }
+
+        @keyframes fadeIn {
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes typewriter {
+          from {
+            width: 0;
+          }
+          to {
+            width: 100%;
+          }
+        }
+
+        .iam-typewriter {
+          animation:
+            fadeIn 0.25s ease forwards 3.1s,
+            typewriter 2.4s steps(18) forwards 3.2s,
+            cursorHide 0.3s linear forwards 5.7s;
+        }
+
+        @keyframes cursorHide {
+          0% {
+            border-right-color: ${accentText};
+          }
+          100% {
+            border-right-color: transparent;
+          }
+        }
+      `}</style>
+    </section>
   );
 };
 
-export default MinimalCinematicHero;
+export default Hero;
+
