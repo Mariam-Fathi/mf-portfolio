@@ -1,243 +1,217 @@
 "use client";
 
 import React, { useRef } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { useGSAP } from "@gsap/react";
-import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from "gsap";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const CertificatesSection = () => {
-  const containerRef = useRef(null);
-  const titleRef = useRef(null);
-  const cardsRef = useRef([]);
-  const dotsRef = useRef([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const certificates = [
     {
       id: 1,
       title: "Data Engineering",
-      platform: "DeepLearning.AI & AWS",
-      level: "Professional",
+      medium: "Specialization",
+      institution: "DeepLearning.AI × AWS",
+      year: "2024",
+      summary:
+        "A systems view into orchestrating resilient data pipelines, automations, and monitoring for production AI workloads.",
       image: "/images/certificates/data-engineering.jpeg",
-      skills: [
-        "Data Pipeline",
-        "ETL Processes",
-        "Data Warehousing",
-        "Apache Airflow",
-      ],
       link: "https://www.coursera.org/account/accomplishments/verify/Z57B0DTSERJK?utm_product=course",
     },
     {
       id: 2,
       title: "Time Series Analysis",
-      platform: "Kaggle",
-      level: "Intermediate",
+      medium: "Certification",
+      institution: "Kaggle",
+      year: "2023",
+      summary:
+        "Forecasting, signal decomposition, and anomaly detection learned through competition-grade notebooks and applied playbooks.",
       image: "/images/certificates/time-series.png",
-      skills: ["ARIMA Models", "Forecasting", "Anomaly Detection", "LSTNet"],
       link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     },
     {
       id: 3,
       title: "Computer Vision",
-      platform: "Kaggle",
-      level: "Intermediate",
+      medium: "Certification",
+      institution: "Kaggle",
+      year: "2023",
+      summary:
+        "From convolutional intuition to deployment nuance—training, evaluating, and tuning models to see like we do.",
       image: "/images/certificates/computer-vision.png",
-      skills: [
-        "Neural Networks",
-        "Model Evaluation",
-        "Feature Engineering",
-        "Hyperparameter Tuning",
-      ],
       link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
     },
   ];
 
   useGSAP(
     () => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
+      if (!containerRef.current || !trackRef.current) return;
 
-      tl.fromTo(
-        titleRef.current,
-        {
-          opacity: 0,
-          y: 50,
-          filter: "blur(10px)",
-        },
+      const mm = gsap.matchMedia();
+
+      const fadeIn = gsap.fromTo(
+        containerRef.current,
+        { opacity: 0, filter: "blur(10px)" },
         {
           opacity: 1,
-          y: 0,
           filter: "blur(0px)",
-          duration: 1.5,
+          duration: 1.2,
           ease: "power2.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
         }
       );
 
-      cardsRef.current.forEach((card, index) => {
-        if (!card) return;
+      mm.add("(min-width: 768px)", () => {
+        const slides = slidesRef.current.filter(Boolean) as HTMLDivElement[];
+        if (!slides.length) return;
 
-        gsap.fromTo(
-          card,
-          {
-            opacity: 0,
-            y: 60,
-            scale: 0.9,
-            rotationY: 15,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            rotationY: 0,
-            duration: 1.2,
-            delay: index * 0.2,
-            ease: "back.out(1.5)",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 85%",
-              toggleActions: "play none none reverse",
-            },
-          }
-        );
-      });
-
-      dotsRef.current.forEach((dot, index) => {
-        if (!dot) return;
-
-        gsap.fromTo(
-          dot,
-          {
-            scale: 0,
-            opacity: 0,
-          },
-          {
-            scale: 1,
-            opacity: 0.3,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: "elastic.out(1, 0.5)",
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top 70%",
-              toggleActions: "play none none reverse",
-            },
-          }
-        );
-      });
-
-      dotsRef.current.forEach((dot, index) => {
-        if (!dot) return;
-
-        gsap.to(dot, {
-          y: -20,
-          duration: 4 + index * 0.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: index * 0.2,
+        const horizontalTween = gsap.to(trackRef.current, {
+          xPercent: -100 * (slides.length - 1),
+          ease: "none",
         });
+
+        const trackTrigger = ScrollTrigger.create({
+          id: "certificates-track",
+          trigger: containerRef.current!,
+          start: "top top",
+          end: () => "+=" + containerRef.current!.offsetWidth * (slides.length - 0.3),
+          scrub: 0.75,
+          pin: true,
+          anticipatePin: 1,
+          snap: {
+            snapTo: (value) => {
+              const step = 1 / (slides.length - 1);
+              return Math.round(value / step) * step;
+            },
+            duration: { min: 0.2, max: 0.5 },
+            ease: "power1.out",
+          },
+          animation: horizontalTween,
+        });
+
+        slides.forEach((slide) => {
+          gsap.fromTo(
+            slide,
+            { opacity: 0, y: 80, scale: 0.95 },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.9,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: slide,
+                containerAnimation: horizontalTween,
+                start: "left center",
+              },
+            }
+          );
+        });
+
+        return () => {
+          horizontalTween.kill();
+          trackTrigger.kill();
+        };
       });
+
+      return () => {
+        fadeIn.kill();
+        mm.revert();
+        slidesRef.current = [];
+      };
     },
     { scope: containerRef }
   );
 
-  const addCardRef = (el, index) => {
-    if (el && !cardsRef.current.includes(el)) {
-      cardsRef.current[index] = el;
-    }
-  };
-
-  const addDotRef = (el, index) => {
-    if (el && !dotsRef.current.includes(el)) {
-      dotsRef.current[index] = el;
-    }
+  const addSlideRef = (el: HTMLDivElement | null, index: number) => {
+    if (!el) return;
+    slidesRef.current[index] = el;
   };
 
   return (
-    <div
+    <section
       id="certificates"
       ref={containerRef}
-      className="relative min-h-screen flex items-center justify-center bg-black overflow-hidden py-20"
+      className="relative min-h-screen overflow-hidden py-24 md:py-32"
+      style={{
+        backgroundImage: 'url("/images/certificates/bg.jpeg")',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
-      <div className="relative z-10 text-center px-6 max-w-7xl mx-auto w-full">
-        <h2
-          ref={titleRef}
-          className="text-4xl md:text-6xl lg:text-7xl font-light text-white mb-16 tracking-tight opacity-0"
-        >
-          CERTIFICATIONS
-        </h2>
+      <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/70 to-transparent" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-          {certificates.map((cert, index) => (
-            <div
-              key={cert.id}
-              ref={(el) => addCardRef(el, index)}
-              className="bg-black backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-400/30 hover:border-gray-400/50 transition-all duration-500 hover:shadow-2xl hover:shadow-gray-500/20 group opacity-0"
-            >
-              <div className="relative overflow-hidden h-48">
-                <img
-                  src={cert.image}
-                  alt={`${cert.title} Certificate`}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-12 px-6 md:px-12">
+        <div className="pt-6 text-left">
+          <span className="text-xs uppercase tracking-[0.55em] text-white/60">
+            Curated Proof
+          </span>
+          <h2 className="mt-4 text-4xl md:text-6xl font-light uppercase tracking-[0.3em] text-white">
+            Certificates Gallery
+          </h2>
+        </div>
+
+        <div className="relative md:h-[80vh]">
+          <div
+            ref={trackRef}
+            id="certificates-track"
+            className="flex flex-col gap-10 md:flex-row md:flex-nowrap md:gap-0"
+          >
+            {certificates.map((cert, index) => (
+              <div
+                key={cert.id}
+                ref={(el) => addSlideRef(el, index)}
+                className="certificate-slide relative flex min-h-[70vh] shrink-0 flex-col justify-center md:min-h-[80vh] md:w-screen md:flex-row md:items-center"
+              >
+                <div className="flex w-full flex-col items-center gap-10 md:flex-row md:gap-20 md:px-24">
                   <a
                     href={cert.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    className="group relative w-full max-w-md overflow-hidden rounded-[28px] border border-white/20 bg-black/50 shadow-[0_50px_120px_rgba(0,0,0,0.65)] transition-transform duration-500 hover:-translate-y-4"
                   >
-                    View Certificate
+                    <div className="pointer-events-none absolute inset-0 z-10 border-[14px] border-[#b9935d]/70" />
+                    <img
+                      src={cert.image}
+                      alt={`${cert.title} certificate`}
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                    <div className="absolute top-6 right-6 z-20 flex size-12 items-center justify-center rounded-full border border-white/40 bg-black/60 text-white transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1">
+                      <ArrowUpRight className="size-4" />
+                    </div>
                   </a>
+
+                  <div className="max-w-lg text-left">
+                    <p className="text-sm uppercase tracking-[0.45em] text-[#d4c488]">
+                      {cert.medium} • {cert.year}
+                    </p>
+                    <h3 className="mt-3 text-3xl md:text-4xl font-semibold text-white">
+                      {cert.title}
+                    </h3>
+                    <p className="mt-2 text-base text-white/70">{cert.institution}</p>
+                    <p className="mt-6 text-lg leading-relaxed text-white/75">
+                      {cert.summary}
+                    </p>
+                    <div className="mt-10 h-px w-28 bg-gradient-to-r from-[#d4c488] to-transparent" />
+                  </div>
                 </div>
               </div>
-
-              <div className="p-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-white">{cert.title}</h3>
-                  <span className="text-xs font-medium bg-green-500/20 text-gray-300 px-2 py-1 rounded border border-green-500/40">
-                    {cert.level}
-                  </span>
-                </div>
-
-                <p className="text-blue-300 text-sm font-medium text-left">
-                  {cert.platform}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .floating-dot {
-          animation: certificatesFloat 8s ease-in-out infinite;
-        }
-
-        @keyframes certificatesFloat {
-          0%,
-          100% {
-            transform: translateY(0px) translateX(0px);
-            opacity: 0.3;
-          }
-          33% {
-            transform: translateY(-20px) translateX(8px);
-            opacity: 0.6;
-          }
-          66% {
-            transform: translateY(15px) translateX(-8px);
-            opacity: 0.4;
-          }
-        }
-      `}</style>
-    </div>
+    </section>
   );
 };
 

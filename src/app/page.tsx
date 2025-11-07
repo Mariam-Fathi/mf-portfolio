@@ -10,6 +10,7 @@ import CuriositySection from "@/components/curiosity-section/CuriositySection";
 import ExperienceTimeline from "@/components/journey/Experience";
 import JobTimeline from "@/components/job-timeline/JobTimeline";
 import CinematicShowcase from "@/components/projects/projects";
+import CertificatesSection from "@/components/Certificates";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,7 @@ export default function Home() {
           {/* <ExperienceTimeline /> */}
           <JobTimeline />
           <CinematicShowcase />
+          <CertificatesSection />
         </>
     
     </>
