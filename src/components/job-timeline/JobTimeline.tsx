@@ -225,7 +225,6 @@ const JobTimeline = () => {
           xPercent: -50,
           yPercent: -50,
           x: "-65vw",
-          rotation: -4,
         });
       }
       
@@ -323,12 +322,10 @@ const JobTimeline = () => {
           {
             x: "-65vw",
             opacity: 0,
-            rotation: -4,
           },
           {
             x: "0vw",
             opacity: 1,
-            rotation: 0,
             ease: "power1.out",
             duration: titleEnterDuration,
           },
@@ -350,7 +347,6 @@ const JobTimeline = () => {
           {
             x: "-65vw",
             opacity: 0,
-            rotation: -4,
             ease: "power1.inOut",
             duration: titleExitDuration,
           },
@@ -893,16 +889,25 @@ const JobTimeline = () => {
           >
             <div
               ref={titleRef}
-              className="pointer-events-none absolute z-50 flex flex-col items-center justify-center text-center font-black uppercase tracking-[0.6em] text-[#f4ede1]"
+              className="pointer-events-none absolute z-50 flex items-center justify-center"
               style={{
-                top: "40%",
+                top: "25%",
                 left: "50%",
-                letterSpacing: "0.35rem",
-                fontSize: "min(18vw, 140px)",
-                textShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
               }}
             >
-              CAREER
+              <span
+                className="font-black uppercase"
+                style={{
+                  letterSpacing: "0.75rem",
+                  fontFamily: "var(--font-geist), sans-serif",
+                  fontSize: "min(22vw, 200px)",
+                  color: "#fdf6ec",
+                  textShadow: "0 6px 18px rgba(0, 0, 0, 0.55)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                CAREER
+              </span>
             </div>
             {jobEntries.map(renderJobCard)}
           </div>

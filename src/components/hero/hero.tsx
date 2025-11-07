@@ -939,7 +939,7 @@ const MinimalCinematicHero = () => {
         ref={heroSectionRef}
         className="relative min-h-screen flex items-start overflow-visible"
         style={{
-          background: "#1A281E",
+          background: "#658761",
         }}
       >
         {/* Content Container - Text on Emerald Background */}
