@@ -83,6 +83,39 @@ const jobEntries: JobEntryExtended[] = [
   },
 ];
 
+const cardThemes = [
+  {
+    base: "#e0d0bb",
+    textPrimary: "#2a221a",
+    textSecondary: "#4b3a2c",
+    accent: "#35271c",
+    softShadow: "rgba(36, 27, 20, 0.25)",
+    stampBorder: "#5a4636",
+    tagBg: "rgba(53, 39, 28, 0.12)",
+    tagBorder: "rgba(53, 39, 28, 0.32)",
+  },
+  {
+    base: "#9a9a6a",
+    textPrimary: "#222215",
+    textSecondary: "#35351f",
+    accent: "#2d2c18",
+    softShadow: "rgba(32, 32, 18, 0.28)",
+    stampBorder: "#505031",
+    tagBg: "rgba(45, 44, 24, 0.14)",
+    tagBorder: "rgba(45, 44, 24, 0.34)",
+  },
+  {
+    base: "#d9b59b",
+    textPrimary: "#301e18",
+    textSecondary: "#4d2e24",
+    accent: "#3f2a22",
+    softShadow: "rgba(48, 30, 20, 0.28)",
+    stampBorder: "#6a4335",
+    tagBg: "rgba(63, 42, 34, 0.14)",
+    tagBorder: "rgba(63, 42, 34, 0.34)",
+  },
+];
+
 // Generate fingerprint SVG pattern - dark, smudged appearance
 const FingerprintSVG = () => (
   <svg
@@ -123,13 +156,12 @@ const JobTimeline = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
   const documentRef = useRef<HTMLDivElement>(null);
   const dossierCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const documentContainersRef = useRef<(HTMLDivElement | null)[]>([]);
   
   // Use the first job's briefing for the main document
-  const primaryJob = jobEntries[0];
-
   // Entry animation - scroll-synced from hero to career section
   useGSAP(
     () => {
@@ -182,7 +214,20 @@ const JobTimeline = () => {
         return;
       }
 
-      const viewportHeight = window.innerHeight;
+      const viewportHeight = window.innerHeight || 800;
+      const viewportWidth = window.innerWidth || 1280;
+
+      const title = titleRef.current;
+
+      if (title) {
+        gsap.set(title, {
+          opacity: 0,
+          xPercent: -50,
+          yPercent: -50,
+          x: "-65vw",
+          rotation: -4,
+        });
+      }
       
       // Initial state: Cards start from the right side (off-screen)
       documentContainersRef.current.forEach((documentContainer, index) => {
@@ -264,6 +309,55 @@ const JobTimeline = () => {
       const firstCardProgress = firstCardDistance / totalScrollDistance;
       const subsequentCardProgress = subsequentCardDistance / totalScrollDistance;
 
+      let animationBaseOffset = Math.max(cardSlideProgress * 0.2, 0.12);
+
+      if (title) {
+        const titleEnterDuration = Math.max(cardSlideProgress * 0.5, 0.55);
+        const titleHoldDuration = Math.max(cardSlideProgress * 0.25, 0.28);
+        const titleExitDuration = Math.max(cardSlideProgress * 0.5, 0.5);
+
+        animationBaseOffset = titleEnterDuration + titleHoldDuration + titleExitDuration + 0.05;
+
+        mainTl.fromTo(
+          title,
+          {
+            x: "-65vw",
+            opacity: 0,
+            rotation: -4,
+          },
+          {
+            x: "0vw",
+            opacity: 1,
+            rotation: 0,
+            ease: "power1.out",
+            duration: titleEnterDuration,
+          },
+          0
+        );
+
+        mainTl.to(
+          title,
+          {
+            x: "0vw",
+            ease: "none",
+            duration: titleHoldDuration,
+          },
+          titleEnterDuration
+        );
+
+        mainTl.to(
+          title,
+          {
+            x: "-65vw",
+            opacity: 0,
+            rotation: -4,
+            ease: "power1.inOut",
+            duration: titleExitDuration,
+          },
+          titleEnterDuration + titleHoldDuration
+        );
+      }
+
       // Process all cards with card game logic: each card enters and goes on top
       jobEntries.forEach((job, index) => {
         const container = documentContainersRef.current[index];
@@ -273,10 +367,10 @@ const JobTimeline = () => {
         let cardStartTime = 0;
         if (index === 0) {
           // First card starts immediately
-          cardStartTime = 0;
+          cardStartTime = animationBaseOffset;
         } else {
           // Subsequent cards start after previous card's sequence
-          cardStartTime = firstCardProgress + ((index - 1) * subsequentCardProgress);
+          cardStartTime = animationBaseOffset + firstCardProgress + ((index - 1) * subsequentCardProgress);
         }
 
         // Get initial position (cards are stacked off-screen: first card on top, others behind)
@@ -496,13 +590,284 @@ const JobTimeline = () => {
     { scope: containerRef, dependencies: [jobEntries] }
   );
 
+  const renderJobCard = (job: JobEntryExtended, jobIndex: number) => {
+    const theme = cardThemes[jobIndex % cardThemes.length];
+
+    return (
+      <div
+        key={job.id}
+        ref={(el) => {
+          if (el) {
+            documentContainersRef.current[jobIndex] = el;
+            if (jobIndex === 0) {
+              documentRef.current = el;
+            }
+          }
+        }}
+        className="relative w-full mx-auto"
+        style={{
+          background: theme.base,
+          color: theme.textPrimary,
+          boxShadow: `0 24px 60px ${theme.softShadow}, 0 8px 24px rgba(0, 0, 0, 0.32)`,
+          margin: "0 auto",
+          padding: "1.25rem 1rem 1.25rem",
+          position: "absolute",
+          width: "85%",
+          maxWidth: "800px", // Limit max width for better fit
+          borderRadius: "22px",
+          border: "1px solid rgba(0, 0, 0, 0.08)",
+          backgroundImage: `
+            radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 55%),
+            radial-gradient(circle at 75% 80%, rgba(0, 0, 0, 0.08) 0%, transparent 60%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%)
+          `,
+          height: "fit-content",
+          maxHeight: "calc(100vh - 2rem)", // Fit viewport minus padding
+          overflowY: "auto",
+          overflowX: "hidden",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Document fasteners (brads) - centered at top */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-3 z-10">
+          <div className="w-3 h-3 rounded-full" style={{ background: theme.accent }}></div>
+          <div className="w-3 h-3 rounded-full" style={{ background: theme.accent }}></div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          {/* Left Column - Photo and Introduction */}
+          <div className="flex flex-col gap-4">
+            {/* Polaroid-style Photo */}
+            <div className="relative w-full max-w-[180px]">
+              <div
+                className="p-3 shadow-lg"
+                style={{
+                  background: "rgba(255, 255, 255, 0.62)",
+                  boxShadow: `0 10px 20px ${theme.softShadow}`,
+                  transform: "rotate(-2deg)",
+                  borderRadius: "14px",
+                }}
+              >
+                <div
+                  className="w-full aspect-[3/4] flex items-center justify-center border-2 relative overflow-hidden"
+                  style={{
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(230,230,230,0.9) 100%)",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <div className="relative w-full h-full flex items-center justify-center p-4">
+                    <Image
+                      src={`/images/logos/experience/${job.id}-logo.svg`}
+                      alt={`${job.company} logo`}
+                      width={120}
+                      height={120}
+                      className="object-contain"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        filter: "contrast(1.05) brightness(0.92)",
+                      }}
+                    />
+                  </div>
+                </div>
+                <div
+                  className="text-center mt-3 text-xs italic"
+                  style={{
+                    fontFamily: "cursive, serif",
+                    transform: "rotate(1deg)",
+                    color: theme.textSecondary,
+                  }}
+                >
+                  {job.title}
+                </div>
+              </div>
+            </div>
+
+            {/* Introduction */}
+            <div className="mt-2">
+              <div
+                className="text-xs font-bold uppercase tracking-[0.4em] mb-2"
+                style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  color: theme.accent,
+                }}
+              >
+                DETECTIVE INTRODUCTION
+              </div>
+              <p
+                className="text-xs leading-relaxed"
+                style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  lineHeight: "1.7",
+                  letterSpacing: "0.02em",
+                  color: theme.textSecondary,
+                }}
+              >
+                {job.introduction}
+              </p>
+            </div>
+
+            {/* Fingerprint */}
+            <div className="mt-3 opacity-80">
+              <FingerprintSVG />
+            </div>
+          </div>
+
+          {/* Right Column - Personal Details, Stamps, Main Item */}
+          <div className="flex flex-col gap-4">
+            {/* Personal Details */}
+            <div className="mt-2">
+              <div
+                className="text-xs sm:text-sm mb-3 space-y-1"
+                style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  letterSpacing: "0.1em",
+                  color: theme.accent,
+                }}
+              >
+                <div>
+                  <strong>NAME:</strong> <span style={{ color: theme.textSecondary }}>{job.company.toUpperCase()}</span>
+                </div>
+                <div>
+                  <strong>PROFESSION:</strong> <span style={{ color: theme.textSecondary }}>{job.title.toUpperCase()}</span>
+                </div>
+                <div>
+                  <strong>CHARACTER:</strong> <span style={{ color: theme.textSecondary }}>{job.characterTraits}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Stamps */}
+            <div className="relative mt-3">
+              <div
+                className="relative inline-block"
+                style={{
+                  transform: "rotate(7deg)",
+                  zIndex: 5,
+                }}
+              >
+                <div
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center p-2"
+                  style={{
+                    borderWidth: "3px",
+                    borderStyle: "solid",
+                    borderColor: theme.stampBorder,
+                    background: "rgba(0, 0, 0, 0.05)",
+                  }}
+                >
+                  <div className="text-center" style={{ color: theme.accent }}>
+                    <div className="text-xs sm:text-[10px] font-bold uppercase leading-tight px-1">
+                      TECH AGENCY
+                      <br />
+                      PLEASE CALL
+                      <br />
+                      WHEN NEEDED
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="absolute top-2 left-4 inline-block"
+                style={{
+                  transform: "rotate(-6deg)",
+                  zIndex: 4,
+                }}
+              >
+                <div
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center p-2 opacity-80"
+                  style={{
+                    borderWidth: "3px",
+                    borderStyle: "solid",
+                    borderColor: theme.stampBorder,
+                    background: "rgba(0, 0, 0, 0.04)",
+                  }}
+                >
+                  <div className="text-center" style={{ color: theme.accent }}>
+                    <div className="text-[9px] sm:text-[10px] font-bold uppercase leading-tight px-1">
+                      TECH AGENCY
+                      <br />
+                      PLEASE CALL
+                      <br />
+                      WHEN NEEDED
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Dossier Details - Hidden initially, revealed on scroll */}
+            <div
+              ref={(el) => {
+                if (jobIndex < dossierCardsRef.current.length) {
+                  dossierCardsRef.current[jobIndex] = el;
+                }
+              }}
+              className="dossier-details overflow-visible mt-6 pt-4"
+              style={{
+                borderTop: `1px dashed ${theme.accent}40`,
+              }}
+            >
+              <div
+                className="text-xs font-bold uppercase tracking-[0.35em] mb-2"
+                style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  color: theme.accent,
+                }}
+              >
+                KEY ACHIEVEMENTS
+              </div>
+              <ul className="space-y-1.5 mb-4">
+                {job.achievements.map((achievement, idx) => (
+                  <li
+                    key={idx}
+                    className="text-xs leading-relaxed"
+                    style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                      color: theme.textSecondary,
+                    }}
+                  >
+                    • {achievement}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-2">
+                {job.tags.map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-1 text-xs whitespace-nowrap"
+                    style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      border: `1px solid ${theme.tagBorder}`,
+                      background: theme.tagBg,
+                      color: theme.accent,
+                      borderRadius: "999px",
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section
       id="job-timeline"
       ref={sectionRef}
       className="relative w-full min-h-screen"
       style={{
-        background: "#e8e8e8",
+        background: "#AC5045",
         overflow: "hidden", // Prevent overflow into next section
       }}
     >
@@ -511,7 +876,7 @@ const JobTimeline = () => {
           ref={pinContainerRef}
           className="relative w-full h-screen"
           style={{
-            background: "#e8e8e8",
+            background: "#AC5045",
             padding: "1rem",
             overflow: "hidden", // Prevent scrollbars
           }}
@@ -526,250 +891,20 @@ const JobTimeline = () => {
               overflow: "hidden", // Prevent scrollbars
             }}
           >
-            {jobEntries.map((job, jobIndex) => (
-              <div
-                key={job.id}
-                ref={(el) => {
-                  if (el) {
-                    documentContainersRef.current[jobIndex] = el;
-                    if (jobIndex === 0) {
-                      documentRef.current = el;
-                    }
-                  }
-                }}
-                className="relative w-full mx-auto"
-                style={{
-                  background: "#f5f3ee",
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1)",
-                  margin: "0 auto",
-                  padding: "1rem 0.875rem 1rem",
-                  position: "absolute",
-                  width: "85%",
-                  maxWidth: "800px", // Limit max width for better fit
-                  backgroundImage: `
-                    radial-gradient(circle at 20% 50%, rgba(0,0,0,0.02) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 80%, rgba(0,0,0,0.02) 0%, transparent 50%),
-                    linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)
-                  `,
-                  height: "fit-content",
-                  maxHeight: "calc(100vh - 2rem)", // Fit viewport minus padding
-                  overflowY: "auto", // Allow scrolling if content is too tall
-                  overflowX: "hidden",
-                  boxSizing: "border-box",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                {/* Document fasteners (brads) - centered at top */}
-                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-                  <div className="w-3 h-3 bg-black rounded-full"></div>
-                  <div className="w-3 h-3 bg-black rounded-full"></div>
-                </div>
-
-                {/* Content Grid */}
-                <div className="relative grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                  {/* Left Column - Photo and Introduction */}
-                  <div className="flex flex-col gap-3">
-                    {/* Polaroid-style Photo */}
-                    <div className="relative w-full max-w-[160px]">
-                      <div
-                        className="bg-white p-3 shadow-lg"
-                        style={{
-                          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                          transform: "rotate(-2deg)",
-                        }}
-                      >
-                        <div
-                          className="w-full aspect-[3/4] bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-2 border-gray-400 relative overflow-hidden"
-                  style={{
-                            background: "linear-gradient(135deg, #e5e5e5 0%, #d4d4d4 100%)",
-                          }}
-                        >
-                          <div className="relative w-full h-full flex items-center justify-center p-4">
-                            <Image
-                              src={`/images/logos/experience/${job.id}-logo.svg`}
-                              alt={`${job.company} logo`}
-                              width={100}
-                              height={100}
-                              className="object-contain"
-                              style={{
-                                maxWidth: "100%",
-                                maxHeight: "100%",
-                                filter: "contrast(1.1) brightness(0.95)",
-                              }}
-                            />
-                          </div>
-                        </div>
-                        <div
-                          className="text-center mt-2 text-xs text-gray-700 italic"
-                    style={{
-                            fontFamily: "cursive, serif",
-                            transform: "rotate(1deg)",
-                          }}
-                        >
-                          {job.title}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Introduction */}
-                    <div className="mt-2">
-                      <div
-                        className="text-xs font-bold uppercase tracking-wider text-gray-800 mb-1.5"
-                        style={{
-                          fontFamily: "var(--font-geist-mono), monospace",
-                        }}
-                      >
-                        DETECTIVE INTRODUCTION:
-                      </div>
-                      <p
-                        className="text-xs text-gray-700 leading-relaxed"
-                      style={{
-                          fontFamily: "var(--font-geist-mono), monospace",
-                          lineHeight: "1.6",
-                          letterSpacing: "0.03em",
-                        }}
-                      >
-                        {job.introduction}
-                      </p>
-                    </div>
-
-                    {/* Fingerprint */}
-                    <div className="mt-2">
-                      <FingerprintSVG />
-                    </div>
-                  </div>
-
-                  {/* Right Column - Personal Details, Stamps, Main Item */}
-                  <div className="flex flex-col gap-3">
-                    {/* Personal Details */}
-                    <div className="mt-4">
-                      <div
-                        className="text-xs sm:text-sm text-gray-800 mb-2"
-                      style={{
-                          fontFamily: "var(--font-geist-mono), monospace",
-                          letterSpacing: "0.1em",
-                        }}
-                      >
-                        <div className="mb-1">
-                          <strong>NAME:</strong> {job.company.toUpperCase()}
-                        </div>
-                        <div className="mb-1">
-                          <strong>PROFESSION:</strong> {job.title.toUpperCase()}
-                        </div>
-                        <div>
-                          <strong>CHARACTER:</strong> {job.characterTraits}
-                        </div>
-                      </div>
-                  </div>
-
-                    {/* Stamps */}
-                    <div className="relative mt-2">
-                      <div
-                        className="relative inline-block"
-                        style={{
-                          transform: "rotate(8deg)",
-                          zIndex: 5,
-                        }}
-                      >
-                        <div
-                          className="w-24 h-24 sm:w-28 sm:h-28 border-3 border-purple-600 rounded-full flex items-center justify-center p-2"
-                          style={{
-                            borderWidth: "3px",
-                            borderColor: "#9333ea",
-                            background: "rgba(147, 51, 234, 0.1)",
-                          }}
-                        >
-                          <div className="text-center">
-                            <div className="text-xs sm:text-[10px] text-purple-800 font-bold uppercase leading-tight px-1">
-                              TECH AGENCY
-                              <br />
-                              PLEASE CALL
-                              <br />
-                              WHEN NEEDED
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="absolute top-2 left-4 inline-block"
-                        style={{
-                          transform: "rotate(-5deg)",
-                          zIndex: 4,
-                        }}
-                      >
-                        <div
-                          className="w-20 h-20 sm:w-24 sm:h-24 border-3 border-purple-600 rounded-full flex items-center justify-center p-2 opacity-80"
-                      style={{
-                            borderWidth: "3px",
-                            borderColor: "#9333ea",
-                            background: "rgba(147, 51, 234, 0.08)",
-                          }}
-                        >
-                          <div className="text-center">
-                            <div className="text-[9px] sm:text-[10px] text-purple-800 font-bold uppercase leading-tight px-1">
-                              TECH AGENCY
-                              <br />
-                              PLEASE CALL
-                              <br />
-                              WHEN NEEDED
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Dossier Details - Hidden initially, revealed on scroll */}
-                    <div
-                      ref={(el) => {
-                        if (jobIndex < dossierCardsRef.current.length) {
-                          dossierCardsRef.current[jobIndex] = el;
-                        }
-                      }}
-                      className="dossier-details overflow-visible mt-4 border-t border-gray-400 pt-3"
-                    >
-                      <div
-                        className="text-xs font-bold uppercase tracking-wider text-gray-800 mb-1.5"
-                        style={{
-                          fontFamily: "var(--font-geist-mono), monospace",
-                        }}
-                      >
-                        KEY ACHIEVEMENTS:
-                      </div>
-                      <ul className="space-y-1 mb-3">
-                        {job.achievements.map((achievement, idx) => (
-                          <li
-                            key={idx}
-                            className="text-xs text-gray-700 leading-relaxed"
-                            style={{
-                              fontFamily: "var(--font-geist-mono), monospace",
-                              wordWrap: "break-word",
-                              overflowWrap: "break-word",
-                            }}
-                          >
-                            • {achievement}
-                          </li>
-                        ))}
-                      </ul>
-
-                    <div className="flex flex-wrap gap-2">
-                      {job.tags.map((tag, idx) => (
-                        <span
-                          key={idx}
-                            className="px-2 py-1 text-xs border border-gray-400 bg-gray-50 whitespace-nowrap text-gray-800"
-                          style={{
-                              fontFamily: "var(--font-geist-mono), monospace",
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div
+              ref={titleRef}
+              className="pointer-events-none absolute z-50 flex flex-col items-center justify-center text-center font-black uppercase tracking-[0.6em] text-[#f4ede1]"
+              style={{
+                top: "40%",
+                left: "50%",
+                letterSpacing: "0.35rem",
+                fontSize: "min(18vw, 140px)",
+                textShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+              }}
+            >
+              CAREER
+            </div>
+            {jobEntries.map(renderJobCard)}
           </div>
         </div>
       </div>
