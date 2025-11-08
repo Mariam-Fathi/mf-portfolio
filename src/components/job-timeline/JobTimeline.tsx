@@ -156,7 +156,6 @@ const JobTimeline = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
   const documentRef = useRef<HTMLDivElement>(null);
   const dossierCardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const documentContainersRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -217,17 +216,6 @@ const JobTimeline = () => {
       const viewportHeight = window.innerHeight || 800;
       const viewportWidth = window.innerWidth || 1280;
 
-      const title = titleRef.current;
-
-      if (title) {
-        gsap.set(title, {
-          opacity: 0,
-          xPercent: -50,
-          yPercent: -50,
-          x: "-65vw",
-        });
-      }
-      
       // Initial state: Cards start from the right side (off-screen)
       documentContainersRef.current.forEach((documentContainer, index) => {
         if (!documentContainer) return;
@@ -309,50 +297,6 @@ const JobTimeline = () => {
       const subsequentCardProgress = subsequentCardDistance / totalScrollDistance;
 
       let animationBaseOffset = Math.max(cardSlideProgress * 0.2, 0.12);
-
-      if (title) {
-        const titleEnterDuration = Math.max(cardSlideProgress * 0.5, 0.55);
-        const titleHoldDuration = Math.max(cardSlideProgress * 0.25, 0.28);
-        const titleExitDuration = Math.max(cardSlideProgress * 0.5, 0.5);
-
-        animationBaseOffset = titleEnterDuration + titleHoldDuration + titleExitDuration + 0.05;
-
-        mainTl.fromTo(
-          title,
-          {
-            x: "-65vw",
-            opacity: 0,
-          },
-          {
-            x: "0vw",
-            opacity: 1,
-            ease: "power1.out",
-            duration: titleEnterDuration,
-          },
-          0
-        );
-
-        mainTl.to(
-          title,
-          {
-            x: "0vw",
-            ease: "none",
-            duration: titleHoldDuration,
-          },
-          titleEnterDuration
-        );
-
-        mainTl.to(
-          title,
-          {
-            x: "-65vw",
-            opacity: 0,
-            ease: "power1.inOut",
-            duration: titleExitDuration,
-          },
-          titleEnterDuration + titleHoldDuration
-        );
-      }
 
       // Process all cards with card game logic: each card enters and goes on top
       jobEntries.forEach((job, index) => {
@@ -865,6 +809,8 @@ const JobTimeline = () => {
       style={{
         background: "#AC5045",
         overflow: "hidden", // Prevent overflow into next section
+        width: "100%",
+        maxWidth: "100%",
       }}
     >
       <div ref={containerRef} className="relative z-10 overflow-visible">
@@ -875,6 +821,8 @@ const JobTimeline = () => {
             background: "#AC5045",
             padding: "1rem",
             overflow: "hidden", // Prevent scrollbars
+          boxSizing: "border-box",
+          maxWidth: "100%",
           }}
         >
           {/* Dossier Documents Container - Cards will stack here */}
@@ -883,32 +831,11 @@ const JobTimeline = () => {
             style={{ 
               height: "100%",
               width: "100%",
+              maxWidth: "100%",
               position: "relative",
               overflow: "hidden", // Prevent scrollbars
             }}
           >
-            <div
-              ref={titleRef}
-              className="pointer-events-none absolute z-50 flex items-center justify-center"
-              style={{
-                top: "25%",
-                left: "50%",
-              }}
-            >
-              <span
-                className="font-black uppercase"
-                style={{
-                  letterSpacing: "0.75rem",
-                  fontFamily: "var(--font-geist), sans-serif",
-                  fontSize: "min(22vw, 200px)",
-                  color: "#fdf6ec",
-                  textShadow: "0 6px 18px rgba(0, 0, 0, 0.55)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                CAREER
-              </span>
-            </div>
             {jobEntries.map(renderJobCard)}
           </div>
         </div>

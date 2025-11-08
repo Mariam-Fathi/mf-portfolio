@@ -119,8 +119,6 @@ export default function GalleryShowcase({
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
   const previousProjectIndexRef = useRef<number>(0);
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const titleContainerRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState<number>(0);
 
   useGSAP(
@@ -167,71 +165,6 @@ export default function GalleryShowcase({
       if (projectsWrapperRef.current) {
         projectsWrapperRef.current.style.paddingLeft = '0px';
         projectsWrapperRef.current.style.paddingTop = '0px';
-      }
-
-      // Initialize Projects title - hidden initially
-      if (titleRef.current && titleContainerRef.current) {
-        gsap.set(titleRef.current, {
-          opacity: 0,
-          y: 30,
-          scale: 0.95,
-        });
-        gsap.set(titleContainerRef.current, {
-          opacity: 0,
-        });
-      }
-
-      // Projects Title ScrollTrigger - Ad-style fade in/out, stays until first project is 90% visible
-      let titleTimeline: gsap.core.Timeline | null = null;
-
-      if (titleContainerRef.current && titleRef.current && pinContainerRef.current) {
-        // Track section entry and calculate when first project is 90% visible
-        // Title stays visible until we've scrolled 90% of viewport height within the projects scroller
-        
-        const viewportHeight = window.innerHeight || 800;
-        const scrollDistance90Percent = viewportHeight * 0.9; // 90% of viewport height
-        
-        // Create timeline that tracks scroll progress
-        titleTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: pinContainerRef.current,
-            scroller: scrollerElement,
-            start: "top bottom-=300", // Start fading in 300px before section enters
-            end: `+=${scrollDistance90Percent}`, // End when scrolled 90% of viewport height relative to start (first project 90% visible)
-            scrub: 1.5, // Smooth scrubbing for ad-style effect
-            toggleActions: "play none reverse none", // Reverse on scroll back
-          },
-        });
-
-        // Timeline: Fade in (10%) → Stay visible (80%) → Fade out (10%)
-        titleTimeline
-          // Fade in quickly - first 10% of scroll
-          .fromTo(titleRef.current, {
-            opacity: 0,
-            y: 50,
-            scale: 0.8,
-          }, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            ease: "power2.out",
-            duration: 0.1, // 10% of timeline - quick fade in
-          })
-          .to(titleContainerRef.current, {
-            opacity: 1,
-            ease: "power2.out",
-            duration: 0.1,
-          }, "<") // Start at same time
-          // Stay fully visible - 80% of scroll (until 90% total - when first project is 90% visible)
-          .to({}, { duration: 0.8 }) // Hold at full visibility until first project is 90% visible
-          // Fade out - last 10% of scroll (when first project reaches 90% visible)
-          .to([titleRef.current, titleContainerRef.current], {
-            opacity: 0,
-            y: -30,
-            scale: 0.95,
-            ease: "power2.in",
-            duration: 0.1, // 10% of timeline - fade out as first project takes over
-          });
       }
 
       // Main ScrollTrigger
@@ -387,10 +320,6 @@ export default function GalleryShowcase({
       ScrollTrigger.refresh();
 
       return () => {
-        if (titleTimeline) {
-          titleTimeline.scrollTrigger?.kill();
-          titleTimeline.kill();
-        }
         pinTrigger?.kill();
         window.removeEventListener("resize", handleResize);
         setSpacerHeight(0);
@@ -415,29 +344,6 @@ export default function GalleryShowcase({
         ref={containerRef}
         className={containerClassName}
       >
-        {/* Projects Title - Ad-style fade in/out, overlapping first project */}
-        <div 
-          ref={titleContainerRef}
-          className="absolute top-0 left-0 w-full flex items-center justify-center z-30 pointer-events-none"
-          style={{
-            marginTop: '-6vh', // Overlap with first project card
-            transform: 'translateY(0)',
-          }}
-        >
-          <h2
-            ref={titleRef}
-            className="font-bold uppercase text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] xl:text-[16rem] 2xl:text-[20rem] tracking-tight leading-none text-[#F1BE49]"
-            style={{
-              letterSpacing: '-0.02em',
-              textAlign: 'center',
-              textShadow: '0 0 40px rgba(241, 190, 73, 0.3)',
-              WebkitTextStroke: '2px rgba(241, 190, 73, 0.1)',
-              WebkitTextFillColor: '#F1BE49',
-            } as React.CSSProperties}
-          >
-            PROJECTS
-          </h2>
-        </div>
         {/* Pinned Container - Full Viewport Fixed */}
         <div
           ref={pinContainerRef}
