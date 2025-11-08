@@ -110,6 +110,8 @@ const projects = [
   },
 ];
 
+const cardColors = ["#508A8C", "#295740", "#AE6455", "#D2431B", "#E0BB46", "#0E2815"];
+
 export default function GalleryShowcase({
   isActive = true,
   scrollContainer = null,
@@ -117,7 +119,6 @@ export default function GalleryShowcase({
   const containerRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
-  const previousProjectIndexRef = useRef<number>(0);
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [spacerHeight, setSpacerHeight] = useState<number>(0);
 
@@ -137,37 +138,43 @@ export default function GalleryShowcase({
       )
         return;
 
-      // Use dynamic viewport dimensions for horizontal scrolling
-      const windowWidth = window.innerWidth || 1920;
-      // Horizontal scroll: each project + half blank page between them
-      // Each project gets 1 viewport width + 0.5 blank page (except last project)
-      const scrollDistance = projects.length * windowWidth * 1.5; // Each project has 1.5 viewport widths (project + half blank)
+      const cards = projectRefsRef.current.filter(
+        (card): card is HTMLDivElement => Boolean(card)
+      );
 
-      setSpacerHeight(scrollContainer ? 0 : scrollDistance);
-      
-      // Initial states - Projects wrapper (no blur, position control only)
-      gsap.set(projectsWrapperRef.current, {
-        x: 0, // Start at x:0 for horizontal
-        y: 0,
-      });
-      
-      // Initialize individual projects - first one visible, others hidden
-      projects.forEach((_, index) => {
-        const projectRef = projectRefsRef.current[index];
-        if (projectRef) {
-          gsap.set(projectRef, {
-            opacity: index === 0 ? 1 : 0, // First project visible, others hidden
-            filter: "blur(0px)", // No blur for blink effect
-          });
-        }
-      });
-      
-      if (projectsWrapperRef.current) {
-        projectsWrapperRef.current.style.paddingLeft = '0px';
-        projectsWrapperRef.current.style.paddingTop = '0px';
+      if (!cards.length) {
+        setSpacerHeight(0);
+        return;
       }
 
-      // Main ScrollTrigger
+      const baseHeight =
+        pinContainerRef.current.offsetHeight || window.innerHeight || 1080;
+      const totalTransitions = Math.max(cards.length - 1, 0);
+
+      setSpacerHeight(scrollContainer ? 0 : totalTransitions * baseHeight);
+
+      gsap.set(projectsWrapperRef.current, {
+        width: "100%",
+        height: `${baseHeight}px`,
+      });
+
+      cards.forEach((card, index) => {
+        gsap.set(card, {
+          yPercent: index === 0 ? 0 : 110,
+          zIndex: index + 1,
+          autoAlpha: 1,
+        });
+      });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: "power2.inOut", duration: 1 },
+      });
+
+      cards.forEach((card, index) => {
+        if (index === 0) return;
+        timeline.to(card, { yPercent: 0, zIndex: cards.length + index }, index - 1);
+      });
+
       const useTransformPin =
         typeof window !== "undefined" &&
         scrollerElement instanceof HTMLElement &&
@@ -177,150 +184,48 @@ export default function GalleryShowcase({
       const pinTrigger = ScrollTrigger.create({
         trigger: pinContainerRef.current,
         scroller: scrollerElement,
-        start: `top-=0 top`,
-        end: `+=${scrollDistance}`,
+        start: `top top`,
+        end: `+=${totalTransitions * baseHeight}`,
         pin: true,
-        scrub: 6.0, // Slow motion scrolling - very smooth and cinematic
+        scrub: 1,
         anticipatePin: 1,
+        snap: totalTransitions > 0 ? 1 / totalTransitions : undefined,
         pinSpacing: true,
         pinType: useTransformPin ? "transform" : "fixed",
         invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          const progress = self.progress;
-            
-          // Calculate project navigation - synchronized timing with half blank pages
-          // Each project occupies 1.5 viewport widths (1 project + 0.5 blank)
-          const projectScrollStart = progress;
-            // Each project occupies 1.5 units (1 project + 0.5 blank)
-            // We'll use a scale where 1 project = 2 units, half blank = 1 unit (total 3 units per project)
-            const totalProjectUnits = projectScrollStart * (projects.length * 3);
-            const currentUnitIndex = Math.floor(totalProjectUnits);
-            // Determine if we're in a project or blank page
-            // Pattern: Project (units 0-1), Blank (unit 2), Project (units 3-4), Blank (unit 5), etc.
-            const unitInProjectCycle = currentUnitIndex % 3;
-            const isInBlankPage = unitInProjectCycle === 2; // Unit 2 in each cycle is blank page
-            const currentProjectIndex = Math.min(
-              Math.floor(currentUnitIndex / 3),
-              projects.length - 1
-            );
-            
-            // Calculate progress within current unit (project or blank)
-            // Normalize unitLocalProgress: for projects it's 0-1, for blanks it's also 0-1
-            const unitLocalProgress = totalProjectUnits - currentUnitIndex;
-            
-            // Detect project change for transition effects
-            const projectChanged = currentProjectIndex !== previousProjectIndexRef.current;
-            previousProjectIndexRef.current = currentProjectIndex;
-            
-            
-            // Calculate smooth horizontal offset - synced with transitions
-            // Each project cycle = 1.5 viewport widths (1 project + 0.5 blank)
-            const projectCycleWidth = windowWidth * 1.5;
-            
-            // Calculate offset based on current position
-            let rawProjectOffset = 0;
-            
-            if (isInBlankPage) {
-              // In blank page: completed projects + full current project + progress through blank
-              rawProjectOffset = -(currentProjectIndex * projectCycleWidth + windowWidth + (unitLocalProgress * windowWidth * 0.5));
-            } else {
-              // In project: completed cycles + progress through current project
-              // Project spans 2 units, so calculate actual project progress
-              const projectProgress = (unitInProjectCycle + unitLocalProgress) / 2; // 0-1
-              rawProjectOffset = -(currentProjectIndex * projectCycleWidth + (projectProgress * windowWidth));
-            }
-            
-            const nextProjectIndex = Math.min(currentProjectIndex + 1, projects.length - 1);
-            const isLastProject = currentProjectIndex === projects.length - 1;
-            const isFirstProject = currentProjectIndex === 0;
-            
-            // Blink effect: projects instantly disappear/appear during blank page
-            // Blank page is half viewport (50vw) between projects
-            let smoothOffset = rawProjectOffset;
-            
-            // Apply blink effect: wrapper position + individual project opacity
-            // First, move the wrapper horizontally
-            gsap.set(projectsWrapperRef.current, {
-              x: smoothOffset,
-              y: 0,
-            });
-            
-            // Then, apply fade-in/out to individual projects as they enter/leave viewport
-            projects.forEach((project, index) => {
-              const projectRef = projectRefsRef.current[index];
-              if (!projectRef) return;
-              
-              // Calculate if this project is current, previous, or next
-              const isCurrentProject = index === currentProjectIndex;
-              const isPreviousProject = index === currentProjectIndex - 1;
-              const isNextProject = index === currentProjectIndex + 1;
-              
-              let projectOpacity = 1;
-              
-              if (isCurrentProject && !isInBlankPage) {
-                // Current project: fully visible while scrolling through it
-                projectOpacity = 1;
-              } else if (isCurrentProject && isInBlankPage) {
-                // Current project in blank page - fade out
-                projectOpacity = 1 - Math.pow(unitLocalProgress, 1.5); // Fade out smoothly
-              } else if (isNextProject) {
-                // Next project: calculate how much is visible in viewport and fade in accordingly
-                // The next project is positioned at (currentProjectIndex + 1) * projectCycleWidth from wrapper start
-                // Current wrapper offset is rawProjectOffset (negative)
-                // Next project's left edge in viewport space = (currentProjectIndex + 1) * projectCycleWidth + rawProjectOffset
-                
-                const nextProjectLeftEdge = (currentProjectIndex + 1) * projectCycleWidth + rawProjectOffset;
-                
-                // If next project's left edge is > windowWidth, it's not visible yet (opacity 0)
-                // As it enters (left edge moves from windowWidth to 0), fade in from 0 to 1
-                if (nextProjectLeftEdge >= windowWidth) {
-                  // Not yet entered viewport
-                  projectOpacity = 0;
-                } else if (nextProjectLeftEdge <= 0) {
-                  // Fully entered viewport
-                  projectOpacity = 1;
-                } else {
-                  // Partially visible - calculate fade based on how much is visible
-                  // When leftEdge = windowWidth, opacity = 0
-                  // When leftEdge = 0, opacity = 1
-                  const visibleRatio = 1 - (nextProjectLeftEdge / windowWidth); // 0 to 1
-                  projectOpacity = Math.pow(visibleRatio, 1.5); // Smooth fade in
-                }
-                
-              } else if (isPreviousProject) {
-                // Previous project: hidden
-                projectOpacity = 0;
-              } else {
-                // Other projects - hidden
-                projectOpacity = 0;
-              }
-              
-              gsap.set(projectRef, {
-                opacity: projectOpacity,
-                filter: "blur(0px)", // No blur
-              });
-            });
-        },
+        animation: timeline,
       });
 
-      // Store pin trigger reference
-      // Handle resize - recalculate for horizontal scrolling
       const handleResize = () => {
-        const newWindowWidth = window.innerWidth || 1920;
-        if (projectsWrapperRef.current) {
-          projectsWrapperRef.current.style.paddingLeft = '0px';
-          projectsWrapperRef.current.style.width = `${projects.length * 150}vw`;
-        }
-        setSpacerHeight(scrollContainer ? 0 : projects.length * newWindowWidth * 1.5);
+        const nextHeight =
+          pinContainerRef.current?.offsetHeight || window.innerHeight || baseHeight;
+
+        setSpacerHeight(
+          scrollContainer ? 0 : Math.max((cards.length - 1) * nextHeight, 0)
+        );
+
+        gsap.set(projectsWrapperRef.current, {
+          height: `${nextHeight}px`,
+        });
+
+        cards.forEach((card, index) => {
+          gsap.set(card, {
+            yPercent: index === 0 ? 0 : 110,
+            zIndex: index + 1,
+          });
+        });
+
+        timeline.invalidate().restart();
         ScrollTrigger.refresh();
       };
-      
+
       window.addEventListener("resize", handleResize);
 
       ScrollTrigger.refresh();
 
       return () => {
         pinTrigger?.kill();
+        timeline.kill();
         window.removeEventListener("resize", handleResize);
         setSpacerHeight(0);
       };
@@ -359,13 +264,9 @@ export default function GalleryShowcase({
           {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
           <div
             ref={projectsWrapperRef}
-            className="absolute top-0 left-0 flex"
+            className="absolute inset-0 w-full h-full flex items-center justify-center"
             style={{
-              width: `${projects.length * 150}vw`, // Each project (100vw) + half blank page (50vw)
-              height: 'calc(100dvh - 12vh)',
-              top: '6vh',
-              paddingLeft: '0px',
-              transformOrigin: 'center center', // For smooth scale animations
+              transformOrigin: "center center",
             }}
           >
             {projects.map((project, index) => {
@@ -378,24 +279,23 @@ export default function GalleryShowcase({
               <React.Fragment key={project.id}>
                 {/* Project */}
                 <div
-                ref={(el) => {
+                  ref={(el) => {
                     projectRefsRef.current[index] = el;
-                }}
-                  className="flex-shrink-0 w-screen flex flex-col"
-                style={{
-                    width: "100vw",
+                  }}
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{
+                    width: "100%",
                     height: "100%",
-                    minHeight: "calc(100dvh - 12vh)",
-                    maxHeight: "calc(100dvh - 12vh)",
                     overflow: "hidden",
+                    marginTop: `${index * 12}px`,
                   }}
                 >
-                  <div className="w-full h-full mx-auto px-4 md:px-8 lg:px-12 xl:px-16 max-w-[1600px] flex flex-col relative">
+                  <div className="w-full max-w-[1200px] h-[70vh] md:h-[72vh] lg:h-[75vh] mx-auto px-4 md:px-8 lg:px-12 xl:px-16 flex flex-col relative">
                     {/* Rounded Card Container with Hero Background */}
                     <div 
                       className="w-full h-full rounded-3xl md:rounded-[2rem] lg:rounded-[3rem] p-6 md:p-8 lg:p-12 relative overflow-hidden"
                       style={{
-                        background: "#1A281E",
+                        background: cardColors[index % cardColors.length],
                       }}
                     >
                       {/* Main Content */}
@@ -449,18 +349,6 @@ export default function GalleryShowcase({
                     </div>
                   </div>
                 </div>
-                
-                {/* Blank Page - half width, except after last project */}
-                {index < projects.length - 1 && (
-                  <div
-                    key={`blank-${project.id}`}
-                    className="flex-shrink-0 relative  bg-[#9EA793] overflow-hidden"
-                    style={{
-                      width: "50vw",
-                      height: "100dvh",
-                    }}
-                  />
-                )}
               </React.Fragment>
             )})}
           </div>
