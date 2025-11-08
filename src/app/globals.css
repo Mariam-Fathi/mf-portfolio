@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Mona+Sans:ital,wght@0,200..900;1,200..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -12,7 +12,7 @@ body {
     background-color: black;
     color: white;
     scroll-behavior: smooth;
-    font-family: "Mona Sans", sans-serif;
+    font-family: "Dosis", sans-serif;
 }
 
 section {
@@ -31,7 +31,7 @@ section {
 
 
 @theme {
-    --font-sans: "Mona Sans", sans-serif;
+    --font-sans: "Dosis", sans-serif;
     --color-white-50: #d9ecff;
     --color-black-50: #1c1c21;
     --color-black-100: #0e0e10;
@@ -273,10 +273,6 @@ section {
     }
 
 
-    .card-border {
-        @apply border border-black-50 bg-black-100;
-    }
-
     .marquee-item {
         @apply md:w-40 w-32;
     }
@@ -362,6 +358,82 @@ section {
                 @apply inline-block;
             }
         }
+    }
+}
+
+@keyframes nav-link-primary {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    45% {
+        transform: translateY(-110%);
+        opacity: 0;
+    }
+    55% {
+        transform: translateY(110%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+}
+
+@keyframes nav-link-secondary {
+    0% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    45% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    55% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+}
+
+@keyframes nav-link-primary-reverse {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    45% {
+        transform: translateY(110%);
+        opacity: 0;
+    }
+    55% {
+        transform: translateY(-110%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+}
+
+@keyframes nav-link-secondary-reverse {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    45% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    55% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.4;
     }
 }
 

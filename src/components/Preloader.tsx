@@ -156,7 +156,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           className="text-7xl md:text-9xl lg:text-[12rem] font-bold uppercase tracking-tight whitespace-nowrap"
           style={{
             color: "#FEFCE0",
-            fontFamily: "Mona Sans, sans-serif",
+            fontFamily: "Dosis, sans-serif",
             textShadow: "0 0 30px rgba(158, 167, 147, 0.3)",
           }}
         >
@@ -172,7 +172,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           className="text-7xl md:text-9xl lg:text-[12rem] font-bold uppercase tracking-tight whitespace-nowrap"
           style={{
             color: "#FEFCE0",
-            fontFamily: "Mona Sans, sans-serif",
+            fontFamily: "Dosis, sans-serif",
             textShadow: "0 0 30px rgba(158, 167, 147, 0.3)",
           }}
         >

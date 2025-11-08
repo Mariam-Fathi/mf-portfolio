@@ -134,14 +134,14 @@ const Hero: React.FC = () => {
         .iam-group {
           display: inline-flex;
           position: relative;
-          gap: 0.05em;
+          gap: 0.025em;
         }
 
         .iam-overlay {
           position: absolute;
           left: 50%;
-          top: -0.35em;
-          transform: translate(-50%, -100%);
+          top: -0.2em;
+          transform: translate(-50%, -95%);
           pointer-events: none;
           display: inline-flex;
           justify-content: center;
@@ -151,20 +151,39 @@ const Hero: React.FC = () => {
         }
 
         .iam-typewriter {
+          position: relative;
           display: inline-block;
-          font-size: clamp(0.55rem, 0.9vw, 0.9rem);
-          letter-spacing: 0.42em;
+          font-size: clamp(0.58rem, 1vw, 1.05rem);
+          letter-spacing: 0.18em;
           text-transform: uppercase;
           color: ${accentText};
+          font-weight: 500;
+          font-style: italic;
           opacity: 0;
           white-space: nowrap;
-          width: 0;
-          animation:
-            fadeIn 0.25s ease forwards 1.75s,
-            typewriter 2.4s steps(18) forwards 1.85s;
+          padding-right: 0.45em;
           overflow: hidden;
-          border-right: 1px solid ${accentText};
-          padding-right: 0.25em;
+          clip-path: inset(0 100% 0 0);
+          animation:
+            fadeIn 0.3s ease forwards 1.9s,
+            handwriting 2.6s steps(22) forwards 2.2s,
+            cursorHide 0.3s linear forwards 5.4s;
+        }
+
+        .iam-typewriter::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          right: 0.12em;
+          width: 1px;
+          height: 100%;
+          background: ${accentText};
+          opacity: 0;
+          animation:
+            fadeIn 0.1s linear forwards 2.2s,
+            cursorTrail 2.6s steps(22) forwards 2.2s,
+            cursorBlink 0.4s steps(2) 4 forwards 4.8s,
+            cursorHide 0.3s linear forwards 5.4s;
         }
 
         .word-mariam {
@@ -216,30 +235,35 @@ const Hero: React.FC = () => {
           }
         }
 
-        @keyframes typewriter {
-          from {
-            width: 0;
-          }
+        @keyframes handwriting {
           to {
-            width: 100%;
+            clip-path: inset(0 0 0 0);
           }
         }
 
-        .iam-typewriter {
-          animation:
-            fadeIn 0.25s ease forwards 3.1s,
-            typewriter 2.4s steps(18) forwards 3.2s,
-            cursorHide 0.3s linear forwards 5.7s;
+        @keyframes cursorTrail {
+          to {
+            transform: translateX(100%);
+            opacity: 1;
+          }
+        }
+
+        @keyframes cursorBlink {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.2;
+          }
         }
 
         @keyframes cursorHide {
-          0% {
-            border-right-color: ${accentText};
-          }
-          100% {
-            border-right-color: transparent;
+          to {
+            opacity: 0;
           }
         }
+
       `}</style>
     </section>
   );

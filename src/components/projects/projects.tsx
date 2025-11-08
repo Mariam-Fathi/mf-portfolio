@@ -398,71 +398,52 @@ export default function GalleryShowcase({
                         background: "#1A281E",
                       }}
                     >
-                      {/* Project Number - Magazine Style */}
-                      <div className="absolute top-6 left-6 md:top-8 md:left-8 lg:top-12 lg:left-12 z-10">
-                        <div className="text-[200px] md:text-[300px] lg:text-[400px] xl:text-[500px] font-bold text-white/5 leading-none tracking-tight select-none"
-                          style={{
-                            fontFamily: "system-ui, -apple-system, sans-serif",
-                            fontWeight: 900,
-                            WebkitTextStroke: "1px rgba(255,255,255,0.1)",
-                          } as React.CSSProperties}
-                        >
-                          {String(index + 1).padStart(2, '0')}
+                      {/* Main Content */}
+                      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 items-stretch relative z-20 h-full">
+                        {/* Left - Number & Description */}
+                        <div className="flex flex-col justify-end items-start gap-8">
+                          <div
+                            className="text-[140px] md:text-[200px] lg:text-[260px] xl:text-[320px] font-bold text-orange-500 leading-none tracking-tight select-none"
+                            style={{
+                              fontFamily: "Dosis, sans-serif",
+                              fontWeight: 900,
+                              WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                            } as React.CSSProperties}
+                          >
+                            {String(index + 1).padStart(2, "0")}
+                          </div>
+                          <div className="max-w-md text-left">
+                            <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal">
+                              {project.description}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Main Content - 3 Column Grid */}
-                      <div className="flex-1 min-h-0 grid grid-cols-3 gap-4 md:gap-6 lg:gap-8 items-center relative z-20 h-full">
-                        {/* Left - Links */}
-                        <div className="col-span-1 flex flex-col gap-3 md:gap-4 lg:gap-6 justify-center items-start">
+                        {/* Right - Image & Links */}
+                        <div className="relative flex flex-col justify-end items-center h-full">
+                          <div className="w-full flex-1 flex items-end justify-center overflow-hidden pr-16 lg:pr-24">
+                            <img
+                              src={project.image}
+                              alt={project.title}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
                           {project.links.length > 0 && (
-                            <div className="flex flex-col gap-3 md:gap-4">
+                            <div className="absolute top-1/2 right-4 lg:right-10 -translate-y-1/2 flex flex-col gap-6">
                               {project.links.map((link, i) => (
                                 <a
                                   key={i}
                                   href={link.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm md:text-base font-normal tracking-wide transition-all duration-300 group w-fit"
+                                  className="text-white/70 hover:text-white tracking-[0.4em] text-sm md:text-base font-light transition-all duration-300 origin-center"
+                                  style={{ writingMode: "vertical-rl" }}
                                 >
-                                  <span className="border-b border-white/40 group-hover:border-white/60 transition-colors pb-0.5">
-                                    {link.name}
-                                  </span>
-                                  <svg
-                                    className="w-4 h-4 md:w-5 md:h-5 opacity-60 group-hover:opacity-100 transition-opacity duration-300 flex-shrink-0"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={1.5}
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                    />
-                                  </svg>
+                                  {link.name}
                                 </a>
                               ))}
                             </div>
                           )}
-                        </div>
-
-                        {/* Center - Image */}
-                        <div className="col-span-1 h-full flex items-center justify-center overflow-hidden">
-                          <img
-                            src={project.image}
-                            alt={project.title}
-                            className="w-full h-full object-contain max-h-[80vh]"
-                          />
-                        </div>
-
-                        {/* Right - Description at Bottom */}
-                        <div className="col-span-1 flex flex-col justify-end items-end">
-                          <div className="flex flex-col text-right">
-                            <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal max-w-md">
-                              {project.description}
-                            </p>
-                          </div>
                         </div>
                       </div>
                     </div>
