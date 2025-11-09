@@ -211,23 +211,23 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
           className="text-7xl md:text-9xl lg:text-[12rem] font-bold uppercase tracking-tight whitespace-nowrap"
           style={{
             color: "#FEFCE0",
-            fontFamily: "Mona Sans, sans-serif",
+            fontFamily: "Dosis, sans-serif",
             textShadow: "0 0 30px rgba(158, 167, 147, 0.3)",
           }}
         >
-          MARIAM
+          MARIAM'S
         </div>
       </div>
 
       {/* PORTFOLIO at bottom of screen */}
-      <div className="absolute bottom-20 left-0 right-0 overflow-visible z-[25]">
+      <div className="absolute top-64 left-0 right-0 overflow-visible z-[25]">
         {/* PORTFOLIO - moves from right to left */}
         <div
           ref={portfolioRef}
           className="text-7xl md:text-9xl lg:text-[12rem] font-bold uppercase tracking-tight whitespace-nowrap"
           style={{
             color: "#FEFCE0",
-            fontFamily: "Mona Sans, sans-serif",
+            fontFamily: "Dosis, sans-serif",
             textShadow: "0 0 30px rgba(158, 167, 147, 0.3)",
           }}
         >

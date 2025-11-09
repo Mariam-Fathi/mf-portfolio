@@ -202,7 +202,7 @@ const ProjectCard = ({
   return (
     <div
       ref={cardRef}
-      className={`group relative bg-black-900/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700 transition-all duration-1000 grid md:grid-cols-5 mx-0  hover:shadow-3xl hover:border-gray-700/60 ${
+      className={`group relative bg-black-900/90 backdrop-blur-md rounded-3xl shadow-2xl border border-gray-700 transition-all duration-1000 grid md:grid-cols-5 items-stretch md:min-h-[400px] mx-0 hover:shadow-3xl hover:border-gray-700/60 ${
         isActive ? "scale-100 opacity-100" : "scale-95 opacity-20 blur-sm"
       }`}
     >
@@ -230,9 +230,9 @@ const ProjectCard = ({
 
       <div
         ref={contentRef}
-        className="md:col-span-3 p-6 lg:p-8 flex flex-col opacity-0 relative z-10"
+        className="md:col-span-3 p-6 lg:p-8 flex flex-col h-full opacity-0 relative z-10 gap-8"
       >
-        <div className="flex-1">
+        <div className="flex flex-col gap-8 flex-1">
           <div className="mb-6">
             <div className="flex items-center gap-3 text-sm mb-3">
               <span className={`text-blue-400 font-semibold tracking-wider`}>
@@ -249,11 +249,11 @@ const ProjectCard = ({
             </h3>
           </div>
 
-          <p className="text-gray-300 text-lg leading-relaxed mb-8 font-light tracking-wide border-l-2 border-gray-600/30 pl-4">
+          <p className="text-gray-300 text-lg leading-relaxed font-light tracking-wide border-l-2 border-gray-600/30 pl-4">
             {project.summary}
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div>
               <h4 className="text-white text-base font-semibold uppercase tracking-wider mb-3 flex items-center gap-2">
                 Role
@@ -280,7 +280,7 @@ const ProjectCard = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-6 border-t border-gray-700/50">
+        <div className="flex items-center justify-between pt-6 border-t border-gray-700/50 mt-auto">
           <div className="flex items-center gap-3">
             {project.githubUrl && (
               <a
@@ -445,7 +445,9 @@ const Tabs = ({
           {tabs.map((tab, index) => (
             <button
               key={tab.value}
-              ref={(el) => (tabRefs.current[index] = el)}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
               onClick={() => onTabChange(tab.value)}
               className={`px-6 py-4 rounded-2xl border border-gray-700/30 transition-all duration-500 text-base font-light backdrop-blur-sm ${
                 activeTab === tab.value
