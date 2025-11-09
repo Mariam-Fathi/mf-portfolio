@@ -406,8 +406,98 @@ const Hero: React.FC = () => {
           }
         }, null, "-=0.3");
 
-        // Clean up
+        // Clean up first dot
         dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
+
+        // STEP 9: FINAL STAGE - NEW DOT DROPS FROM TOP ONTO THE CENTER OF "r"
+        dotTimeline.call(() => {
+          // Create a new dot for the final stage
+          const finalDot = document.createElement("div");
+          finalDot.className = "final-i-dot";
+          
+          if (heroSection) {
+            heroSection.appendChild(finalDot);
+          }
+
+          // Calculate the exact center of the "r" letter
+          const rRightEdge = rRect.right - heroRect.left;
+          const rCenterX = rRightEdge - Math.max(Math.min(dotSize * 0.3, rRect.width * 0.25), dotSize * 0.15);
+          const rCenterY = rRect.top - heroRect.top + Math.max(Math.min(rRect.height * 0.18, dotSize * 0.35), 6);
+
+           const finalDotSize = dotSize +7; // Match the original dot size
+
+          // Position the final dot at the top center of the screen
+          gsap.set(finalDot, {
+            width: `${finalDotSize}px`,
+            height: `${finalDotSize}px`,
+            borderRadius: "50%",
+            backgroundColor: "#ff6b6b", // Red color
+            position: "absolute",
+            zIndex: 1000,
+            opacity: 1,
+            left: 0,
+            top: 0,
+            x: rCenterX - (finalDotSize / 2), // Start above the center of "r"
+            y: -50, // Start above the viewport
+            rotation: 0,
+            scale: 1
+          });
+
+          // Final dot animation timeline
+          const finalDotTimeline = gsap.timeline();
+
+          // Drop from top to the center of "r"
+          finalDotTimeline.to(finalDot, {
+            keyframes: [
+              {
+                // Fast drop from top to just above the "r"
+                y: rCenterY + 40,
+                duration: 0.4,
+                ease: "power2.in"
+              },
+              {
+                // Small bounce up
+                y: rCenterY - 10,
+                duration: 0.15,
+                ease: "power2.out"
+              },
+              {
+                // Settle exactly in the center of "r"
+                y: rCenterY,
+                duration: 0.1,
+                ease: "bounce.out",
+                onComplete: function() {
+                  // Ensure "i" maintains its leaning position on "r"
+                  if (iRef.current) {
+                    gsap.to(iRef.current, {
+                      rotation: -16,
+                      x: -8,
+                      y: -6,
+                      color: "#ff6b6b",
+                      duration: 0.2
+                    });
+                  }
+                }
+              }
+            ]
+          });
+
+          // Small celebratory pulse when landed
+          finalDotTimeline.to(finalDot, {
+            scale: 1.3,
+            duration: 0.1,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut"
+          });
+
+          // Final dot stays in place on the "r"
+          finalDotTimeline.to(finalDot, {
+            duration: 1
+          });
+
+          return finalDotTimeline;
+        });
 
         return dotTimeline;
       }, "+=1"); // Wait 1 second after text entrance
@@ -416,7 +506,9 @@ const Hero: React.FC = () => {
 
     return () => {
       ctx.revert();
+      // Remove any created dots
       document.querySelectorAll('.original-i-dot').forEach(dot => dot.remove());
+      document.querySelectorAll('.final-i-dot').forEach(dot => dot.remove());
     };
   }, []);
 
@@ -434,7 +526,7 @@ const Hero: React.FC = () => {
     >
       {/* Add the font link */}
       <link
-        href="https://fonts.googleapis.com/css2?family=Nothing+You+Could+Do&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playwrite+HU:wght@400&display=swap"
         rel="stylesheet"
       />
       
@@ -491,7 +583,7 @@ const Hero: React.FC = () => {
         ref={softwareEngineerRef}
         className="software-engineer-text absolute text-center"
         style={{
-          fontFamily: '"Nothing You Could Do", cursive, sans-serif',
+          fontFamily: '"Playwrite HU", sans-serif',
           fontSize: 'clamp(1rem, 2vw, 1.8rem)',
           color: '#ff6b6b',
           fontWeight: '400',
@@ -558,12 +650,18 @@ const Hero: React.FC = () => {
         }
 
         /* Original i-dot styles - BIGGER */
-        :global(.original-i-dot) {
+        :global(.original-i-dot),
+        :global(.final-i-dot) {
           border-radius: 50%;
           background-color: #ffffff;
           position: absolute;
           zIndex: 1000;
           pointer-events: none;
+        }
+
+        /* Final dot specific style */
+        :global(.final-i-dot) {
+          background-color: #ff6b6b;
         }
 
         /* Software Engineer text styles */
