@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/hero/hero";
 import CinematicShowcase from "@/components/projects/projects";
 import JobTimeline from "@/components/job-timeline/JobTimeline";
-import CertificatesSection from "@/components/Certificates";
 import EverythingConnected from "@/components/everything-connected/EverythingConnected";
 import Contact from "@/components/Contact";
 import { navLinks } from "@/constants";
@@ -14,15 +13,22 @@ import { gsap } from "gsap";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type SectionId =
-  | "hero"
-  | "work"
-  | "experience"
-  | "skills"
-  | "certificates"
-  | "contact";
+type SectionId = "hero" | "work" | "experience" | "skills" | "contact";
 
 const transitionDuration = 600;
+
+const sectionOverlayBackgrounds: Record<SectionId, string> = {
+  hero:
+    "linear-gradient(140deg, rgba(10,16,14,0.94) 0%, rgba(18,28,26,0.85) 45%, rgba(24,35,30,0.82) 100%)",
+  work:
+    "linear-gradient(135deg, rgba(158,167,147,0.94) 0%, rgba(138,146,128,0.88) 45%, rgba(116,126,107,0.84) 100%)",
+  experience:
+    "linear-gradient(135deg, rgba(248,250,244,0.96) 0%, rgba(222,234,214,0.9) 55%, rgba(200,214,192,0.86) 100%)",
+  skills:
+    "linear-gradient(130deg, rgba(253,235,127,0.94) 0%, rgba(255,217,104,0.9) 48%, rgba(240,190,84,0.85) 100%)",
+  contact:
+    "linear-gradient(140deg, rgba(8,8,10,0.94) 0%, rgba(15,12,24,0.91) 52%, rgba(22,16,32,0.88) 100%)",
+};
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
@@ -65,8 +71,6 @@ export default function Home() {
         return <JobTimeline />;
       case "skills":
         return <EverythingConnected />;
-      case "certificates":
-        return <CertificatesSection />;
       case "contact":
         return <Contact />;
       default:
@@ -140,6 +144,11 @@ export default function Home() {
     return "-100%";
   }, [transitionState]);
 
+  const overlayBackground =
+    pendingSection && transitionState !== "exit"
+      ? sectionOverlayBackgrounds[pendingSection]
+      : sectionOverlayBackgrounds[activeSection];
+
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-[#080E0B] text-[#FEFCE0]">
       <Navbar
@@ -171,8 +180,9 @@ export default function Home() {
         </div>
 
         <div
-          className="pointer-events-none absolute inset-0 z-40 bg-[#C7F284]"
+          className="pointer-events-none absolute inset-0 z-40"
           style={{
+            background: overlayBackground,
             transform: `translateY(${overlayTranslateY})`,
             transition: `transform ${transitionDuration}ms ease-in-out`,
           }}

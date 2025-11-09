@@ -1,8 +1,13 @@
-@import url("https://fonts.googleapis.com/css2?family=Dosis:wght@200;300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
+    --font-default: "Stack Sans Notch", "Stack Sans", sans-serif;
+    --font-headline: var(--font-default);
+    --font-body: "Libertinus Keyboard", "Libertinus", "Georgia", serif;
+    --font-accent: "Caveat", "Patrick Hand", cursive;
+    --font-script: "Indie Flower", "Patrick Hand", cursive;
+    --font-display: "Momo Trust Display", "Stack Sans", sans-serif;
 }
 
 html,
@@ -12,11 +17,13 @@ body {
     background-color: black;
     color: white;
     scroll-behavior: smooth;
-    font-family: "Dosis", sans-serif;
+    font-family: var(--font-default);
 }
 
 section {
-    width: 100dvw;
+    width: 100%;
+    max-width: 100dvw;
+    margin: 0 auto;
 }
 
 .no-visible-scrollbar {
@@ -31,7 +38,7 @@ section {
 
 
 @theme {
-    --font-sans: "Dosis", sans-serif;
+    --font-sans: var(--font-default);
     --color-white-50: #d9ecff;
     --color-black-50: #1c1c21;
     --color-black-100: #0e0e10;
@@ -46,6 +53,15 @@ section {
     }
     .flex-col-center {
         @apply flex flex-col justify-center items-center;
+    }
+    .font-headline {
+        font-family: var(--font-headline);
+    }
+    .font-body {
+        font-family: var(--font-body);
+    }
+    .font-accent {
+        font-family: var(--font-accent);
     }
 }
 

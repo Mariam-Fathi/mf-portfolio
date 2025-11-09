@@ -92,10 +92,6 @@ export const navLinks = [
         name: "Skills",
         link: "#skills",
     },
-    {
-        name: "Certificates",
-        link: "#certificates",
-    },
 ];
 
 export const counterItems = [
