@@ -110,7 +110,43 @@ const projects = [
   },
 ];
 
-const cardColors = ["#508A8C", "#295740", "#AE6455", "#D2431B", "#E0BB46", "#0E2815"];
+const cardPalette = [
+  {
+    background: "#251B28", // Perfect Plum
+    headline: "#FFFFFF",
+    headlineStroke: "rgba(255, 255, 255, 0.12)",
+    body: "rgba(255, 255, 255, 0.74)",
+    link: "rgba(255, 255, 255, 0.82)",
+  },
+  {
+    background: "#01332B", // Minty Emerald
+    headline: "#FFFFFF",
+    headlineStroke: "rgba(255, 255, 255, 0.1)",
+    body: "rgba(255, 255, 255, 0.76)",
+    link: "rgba(255, 255, 255, 0.88)",
+  },
+  {
+    background: "#8ABFB2", // Sea Foam
+    headline: "#01332B",
+    headlineStroke: "rgba(1, 51, 43, 0.18)",
+    body: "rgba(1, 51, 43, 0.78)",
+    link: "rgba(1, 51, 43, 0.82)",
+  },
+  {
+    background: "#C4C4DB", // Lilac
+    headline: "#01332B",
+    headlineStroke: "rgba(1, 51, 43, 0.16)",
+    body: "rgba(1, 51, 43, 0.8)",
+    link: "#01332B",
+  },
+  {
+    background: "#FFFFFF", // Ivory
+    headline: "#251B28",
+    headlineStroke: "rgba(37, 27, 40, 0.18)",
+    body: "rgba(37, 27, 40, 0.78)",
+    link: "#251B28",
+  },
+];
 
 export default function GalleryShowcase({
   isActive = true,
@@ -240,9 +276,10 @@ export default function GalleryShowcase({
   return (
     <section
       id="projects"
-      className="relative h-full w-full overflow-x-hidden bg-[#9EA793]"
+      className="relative h-full w-full overflow-x-hidden"
       style={{
         minHeight: "100vh",
+        background: cardPalette[4]?.background ?? "#FFFFFF",
       }}
     >
       <div
@@ -252,13 +289,14 @@ export default function GalleryShowcase({
         {/* Pinned Container - Full Viewport Fixed */}
         <div
           ref={pinContainerRef}
-          className="relative w-full bg-[#9EA793]"
+          className="relative w-full"
           style={{
             height: "100dvh",
             minHeight: "100dvh",
             paddingTop: "6vh",
             paddingBottom: "6vh",
             overflow: "hidden",
+            background: cardPalette[4]?.background ?? "#FFFFFF",
           }}
         >
           {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
@@ -275,6 +313,8 @@ export default function GalleryShowcase({
                 projectRefsRef.current[index] = null;
               }
               
+              const colors = cardPalette[index % cardPalette.length];
+
               return (
               <React.Fragment key={project.id}>
                 {/* Project */}
@@ -295,7 +335,7 @@ export default function GalleryShowcase({
                     <div 
                       className="w-full h-full rounded-3xl md:rounded-[2rem] lg:rounded-[3rem] p-6 md:p-8 lg:p-12 relative overflow-hidden"
                       style={{
-                        background: cardColors[index % cardColors.length],
+                        background: colors.background,
                       }}
                     >
                       {/* Main Content */}
@@ -303,17 +343,21 @@ export default function GalleryShowcase({
                         {/* Left - Number & Description */}
                         <div className="flex flex-col justify-end items-start gap-8">
                           <div
-                            className="text-[140px] md:text-[200px] lg:text-[260px] xl:text-[320px] font-bold text-orange-500 leading-none tracking-tight select-none"
+                            className="text-[140px] md:text-[200px] lg:text-[260px] xl:text-[320px] font-bold leading-none tracking-tight select-none"
                             style={{
                               fontFamily: "Dosis, sans-serif",
                               fontWeight: 900,
-                              WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                              WebkitTextStroke: `1px ${colors.headlineStroke}`,
+                              color: colors.headline,
                             } as React.CSSProperties}
                           >
                             {String(index + 1).padStart(2, "0")}
                           </div>
                           <div className="max-w-md text-left">
-                            <p className="text-sm md:text-base lg:text-lg text-gray-300 font-light leading-relaxed tracking-normal">
+                            <p
+                              className="text-sm md:text-base lg:text-lg font-light leading-relaxed tracking-normal"
+                              style={{ color: colors.body }}
+                            >
                               {project.description}
                             </p>
                           </div>
@@ -336,8 +380,11 @@ export default function GalleryShowcase({
                                   href={link.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-white/70 hover:text-white tracking-[0.4em] text-sm md:text-base font-light transition-all duration-300 origin-center"
-                                  style={{ writingMode: "vertical-rl" }}
+                                  className="tracking-[0.4em] text-sm md:text-base font-light transition-opacity duration-300 origin-center opacity-80 hover:opacity-100"
+                                  style={{
+                                    writingMode: "vertical-rl",
+                                    color: colors.link,
+                                  }}
                                 >
                                   {link.name}
                                 </a>
