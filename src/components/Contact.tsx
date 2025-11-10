@@ -35,8 +35,8 @@ const contactTiles: ContactTile[] = [
     accent: "#20BEFF",
     icon: IconLetterK,
     position: {
-      top: "18%",
-      left: "6%",
+      top: "28%",
+      left: "18%",
     },
   },
   {
@@ -48,8 +48,8 @@ const contactTiles: ContactTile[] = [
     accent: "#8B5CF6",
     icon: IconBrandGithub,
     position: {
-      top: "14%",
-      right: "6%",
+      top: "26%",
+      right: "18%",
     },
   },
   {
@@ -61,8 +61,8 @@ const contactTiles: ContactTile[] = [
     accent: "#10B981",
     icon: IconBrandLinkedin,
     position: {
-      bottom: "18%",
-      left: "7%",
+      bottom: "28%",
+      left: "20%",
     },
   },
   {
@@ -74,8 +74,8 @@ const contactTiles: ContactTile[] = [
     accent: "#F97316",
     icon: IconMail,
     position: {
-      bottom: "14%",
-      right: "5%",
+      bottom: "26%",
+      right: "18%",
     },
   },
 ];
@@ -151,6 +151,7 @@ const Contact: React.FC = () => {
     // Desktop tiles - playful entrance and continuous animation
     if (tilesRef.current) {
       const tiles = tilesRef.current.children;
+      const floatTimelines = new Map<Element, gsap.core.Timeline>();
       
       // Random entrance from different directions
       Array.from(tiles).forEach((tile, index) => {
@@ -187,92 +188,76 @@ const Contact: React.FC = () => {
       // Continuous playful floating with different patterns
       Array.from(tiles).forEach((tile, index) => {
         const floatTimeline = gsap.timeline({ repeat: -1, yoyo: true });
-        
+
         // Each tile has unique floating pattern
         const floatHeight = 15 + (index * 3);
-        const floatDuration = 2 + (index * 0.5);
-        const rotationAmount = 5 + (index * 2);
-        
-        floatTimeline.to(tile, {
-          y: `-=${floatHeight}`,
-          rotation: rotationAmount,
-          duration: floatDuration,
-          ease: "sine.inOut",
-        }).to(tile, {
-          y: `+=${floatHeight}`,
-          rotation: -rotationAmount,
-          duration: floatDuration,
-          ease: "sine.inOut",
-        });
+        const floatDuration = 2.5 + (index * 0.5);
+
+        floatTimeline
+          .to(tile, {
+            y: `-=${floatHeight}`,
+            duration: floatDuration,
+            ease: "sine.inOut",
+          })
+          .to(tile, {
+            y: `+=${floatHeight}`,
+            duration: floatDuration,
+            ease: "sine.inOut",
+          });
+
+        floatTimelines.set(tile, floatTimeline);
       });
 
       // Playful hover effects
       Array.from(tiles).forEach((tile) => {
         tile.addEventListener("mouseenter", () => {
-          // Stop the continuous animation
-          gsap.killTweensOf(tile);
-          
-          // Springy hover effect
+          const timeline = floatTimelines.get(tile);
+          timeline?.pause();
+
+          // Gentle hover lift
           gsap.to(tile, {
-            y: -20,
-            scale: 1.1,
-            rotationY: 15,
-            rotationX: 10,
-            duration: 0.4,
-            ease: "back.out(2)",
+            y: -18,
+            scale: 1.08,
+            duration: 0.45,
+            ease: "sine.out",
           });
-          
+
           // Icon jump effect
-          const icon = tile.querySelector('span:first-child');
+          const icon = tile.querySelector("span:first-child");
           if (icon) {
             gsap.to(icon, {
-              y: -10,
-              scale: 1.2,
-              rotation: 360,
-              duration: 0.6,
-              ease: "back.out(2)",
+              y: -8,
+              scale: 1.12,
+              duration: 0.45,
+              ease: "sine.out",
             });
           }
         });
 
         tile.addEventListener("mouseleave", () => {
+          const timeline = floatTimelines.get(tile);
+
           // Spring back to original position
           gsap.to(tile, {
             y: 0,
             scale: 1,
-            rotationY: 0,
-            rotationX: 0,
-            duration: 0.6,
-            ease: "elastic.out(1, 0.5)",
+            duration: 0.5,
+            ease: "power2.out",
+            onComplete: () => {
+              timeline?.restart();
+            },
           });
-          
+
           // Icon spring back
-          const icon = tile.querySelector('span:first-child');
+          const icon = tile.querySelector("span:first-child");
           if (icon) {
             gsap.to(icon, {
               y: 0,
               scale: 1,
-              rotation: 0,
               duration: 0.4,
-              ease: "back.out(2)",
+              ease: "power2.out",
             });
           }
-          
-          // Restart continuous floating after a delay
-          setTimeout(() => {
-            const floatTimeline = gsap.timeline({ repeat: -1, yoyo: true });
-            floatTimeline.to(tile, {
-              y: -15,
-              rotation: 5,
-              duration: 2,
-              ease: "sine.inOut",
-            }).to(tile, {
-              y: 0,
-              rotation: -5,
-              duration: 2,
-              ease: "sine.inOut",
-            });
-          }, 1000);
         });
       });
     }
