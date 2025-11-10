@@ -84,11 +84,7 @@ const JobTimeline = () => {
       />
 
       <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-6 lg:min-h-[80vh]">
-        <header className="pt-10 text-center">
-          <h2 className="mx-auto text-[clamp(3.5rem,9vw,8rem)] font-light uppercase tracking-[0.4em] text-[#1B2D22]">
-            Experience
-          </h2>
-        </header>
+      
 
         <div className="relative w-full grow">
           <svg
