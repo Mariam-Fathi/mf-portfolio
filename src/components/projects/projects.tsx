@@ -7,7 +7,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 type ProjectsProps = {
-  isActive?: boolean;
   scrollContainer?: HTMLDivElement | null;
 };
 
@@ -149,7 +148,6 @@ const cardPalette = [
 ];
 
 export default function GalleryShowcase({
-  isActive = true,
   scrollContainer = null,
 }: ProjectsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -161,18 +159,10 @@ export default function GalleryShowcase({
 
   useGSAP(
     () => {
-      const scrollerElement = scrollContainer ?? containerRef.current;
-
-      if (!isActive) {
-        setSpacerHeight(0);
-        spacerValueRef.current = 0;
-        return;
-      }
-
       if (
         !pinContainerRef.current ||
         !projectsWrapperRef.current ||
-        !scrollerElement
+        (typeof window === "undefined" && !scrollContainer)
       )
         return;
 
@@ -227,13 +217,12 @@ export default function GalleryShowcase({
 
       const useTransformPin =
         typeof window !== "undefined" &&
-        scrollerElement instanceof HTMLElement &&
-        scrollerElement !== document.body &&
-        scrollerElement !== document.documentElement;
+        scrollContainer instanceof HTMLElement &&
+        scrollContainer !== document.body &&
+        scrollContainer !== document.documentElement;
 
-      const pinTrigger = ScrollTrigger.create({
+      const triggerConfig: ScrollTrigger.Vars = {
         trigger: pinContainerRef.current,
-        scroller: scrollerElement,
         start: `top top`,
         end: `+=${totalTransitions * baseHeight}`,
         pin: true,
@@ -241,7 +230,6 @@ export default function GalleryShowcase({
         anticipatePin: 1,
         snap: totalTransitions > 0 ? 1 / totalTransitions : undefined,
         pinSpacing: true,
-        pinType: useTransformPin ? "transform" : "fixed",
         invalidateOnRefresh: true,
         animation: timeline,
         onLeave: () => {
@@ -254,7 +242,14 @@ export default function GalleryShowcase({
             setSpacerHeight(spacerValueRef.current);
           }
         },
-      });
+      };
+
+      if (scrollContainer) {
+        triggerConfig.scroller = scrollContainer;
+        triggerConfig.pinType = useTransformPin ? "transform" : "fixed";
+      }
+
+      const pinTrigger = ScrollTrigger.create(triggerConfig);
 
       const handleResize = () => {
         const nextHeight =
@@ -294,12 +289,12 @@ export default function GalleryShowcase({
         spacerValueRef.current = 0;
       };
     },
-    { scope: containerRef, dependencies: [isActive, scrollContainer] }
+    { scope: containerRef, dependencies: [scrollContainer] }
   );
 
   const containerClassName = scrollContainer
     ? "relative min-h-full w-full"
-    : "relative h-[100dvh] w-full overflow-y-auto overscroll-contain no-visible-scrollbar";
+    : "relative min-h-full w-full";
 
   return (
     <section
