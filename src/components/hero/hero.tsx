@@ -7,10 +7,7 @@ const Hero: React.FC = () => {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const iRef = useRef<HTMLSpanElement | null>(null);
   const rRef = useRef<HTMLSpanElement | null>(null);
-  const iFathiRef = useRef<HTMLSpanElement | null>(null);
   const a1Ref = useRef<HTMLSpanElement | null>(null);
-  const a2Ref = useRef<HTMLSpanElement | null>(null);
-  const hRef = useRef<HTMLSpanElement | null>(null);
   const a2mRef = useRef<HTMLSpanElement | null>(null);
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
@@ -62,7 +59,7 @@ const Hero: React.FC = () => {
         onComplete: () => setIsAnimationComplete(true)
       });
 
-      // STEP 1: Playful text entrance animation for "Mariam Fathi"
+      // STEP 1: Playful text entrance animation for "Mariam"
       const textEntrance = gsap.timeline();
       
       // Animate "Mar" letters with stagger
@@ -84,30 +81,6 @@ const Hero: React.FC = () => {
         stagger: 0.08,
         ease: "elastic.out(1.2, 0.8)"
       }, "-=0.3");
-
-      // Animate "Fathi" letters with wave effect
-      textEntrance.to('.hero-fathi .hero-letter', {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.7,
-        stagger: {
-          each: 0.1,
-          from: "start",
-          ease: "power2.out"
-        },
-        onComplete: () => {
-          // Small celebratory bounce when all letters are in place
-          gsap.to('.hero-letter', {
-            y: -10,
-            duration: 0.3,
-            yoyo: true,
-            repeat: 1,
-            ease: "power2.inOut",
-            stagger: 0.05
-          });
-        }
-      }, "-=0.2");
 
       // Add to master timeline
       masterTimeline.add(textEntrance);
@@ -515,13 +488,9 @@ const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="flex min-h-screen w-full flex-col items-center justify-center px-6 py-12 text-center text-neutral-50 sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
+      className="flex min-h-screen w-full flex-col items-center justify-end px-6 py-12 text-center text-neutral-50 sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
       style={{
-        backgroundImage:
-          'linear-gradient(rgba(10, 16, 14, 0.82), rgba(10, 16, 14, 0.9)), url("/images/BG.jpeg")',
-        backgroundSize: "cover",
-        backgroundPosition: "center bottom",
-        backgroundRepeat: "no-repeat",
+        backgroundColor: "#294E44",
       }}
     >
       {/* Add the font link */}
@@ -546,7 +515,7 @@ const Hero: React.FC = () => {
 
       <h1
         ref={headingRef}
-        className="hero-heading w-full font-black leading-[0.85] text-[clamp(4.5rem,14vw,18rem)] text-center"
+        className="hero-heading w-full font-black leading-[0.85] text-[clamp(4.5rem,14vw,18rem)] text-center mb-16"
       >
         <span className="hero-name">
           <span className="hero-mar">
@@ -566,14 +535,6 @@ const Hero: React.FC = () => {
               <span ref={a2mRef} className="hero-letter">a</span>
               <span ref={mMariamRef} className="hero-letter">m</span>
             </span>
-          </span>
-          <span className="hero-fathi">
-            {" "}
-            <span className="hero-letter">F</span>
-            <span className="hero-letter">a</span>
-            <span className="hero-letter">t</span>
-            <span ref={hRef} className="hero-letter">h</span>
-            <span ref={iFathiRef} className="hero-letter">i</span>
           </span>
         </span>
       </h1>
@@ -603,6 +564,9 @@ const Hero: React.FC = () => {
           position: relative;
           font-family: "Momo Trust Display", sans-serif;
           letter-spacing: normal;
+          width: 100vw;
+          margin-left: calc(-50vw + 50%);
+          margin-right: calc(-50vw + 50%);
         }
 
         .hero-name {
@@ -616,8 +580,7 @@ const Hero: React.FC = () => {
         }
 
         .hero-mar,
-        .hero-iam,
-        .hero-fathi {
+        .hero-iam {
           display: inline-flex;
           align-items: flex-end;
           position: relative;
