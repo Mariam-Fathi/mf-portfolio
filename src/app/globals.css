@@ -2,12 +2,12 @@
 
 :root {
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
-    --font-default: "Stack Sans Notch", "Stack Sans", sans-serif;
+    --font-default: "Momo Trust Display", "Stack Sans", sans-serif;
     --font-headline: var(--font-default);
-    --font-body: "Libertinus Keyboard", "Libertinus", "Georgia", serif;
-    --font-accent: "Caveat", "Patrick Hand", cursive;
-    --font-script: "Indie Flower", "Patrick Hand", cursive;
-    --font-display: "Momo Trust Display", "Stack Sans", sans-serif;
+    --font-body: var(--font-default);
+    --font-accent: var(--font-default);
+    --font-script: var(--font-default);
+    --font-display: var(--font-default);
 }
 
 html,
@@ -17,7 +17,7 @@ body {
     background-color: black;
     color: white;
     scroll-behavior: smooth;
-    font-family: var(--font-default);
+    font-family: "Momo Trust Display", "Stack Sans", sans-serif;
 }
 
 section {

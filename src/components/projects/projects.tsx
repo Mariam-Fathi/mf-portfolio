@@ -140,7 +140,7 @@ const cardPalette = [
     link: "#01332B",
   },
   {
-    background: "#FFFFFF", // Ivory
+    background: "#CCD982", 
     headline: "#251B28",
     headlineStroke: "rgba(37, 27, 40, 0.18)",
     body: "rgba(37, 27, 40, 0.78)",
@@ -157,6 +157,7 @@ export default function GalleryShowcase({
   const projectsWrapperRef = useRef<HTMLDivElement>(null);
   const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [spacerHeight, setSpacerHeight] = useState<number>(0);
+  const spacerValueRef = useRef<number>(0);
 
   useGSAP(
     () => {
@@ -164,6 +165,7 @@ export default function GalleryShowcase({
 
       if (!isActive) {
         setSpacerHeight(0);
+        spacerValueRef.current = 0;
         return;
       }
 
@@ -180,6 +182,7 @@ export default function GalleryShowcase({
 
       if (!cards.length) {
         setSpacerHeight(0);
+        spacerValueRef.current = 0;
         return;
       }
 
@@ -187,17 +190,24 @@ export default function GalleryShowcase({
         pinContainerRef.current.offsetHeight || window.innerHeight || 1080;
       const totalTransitions = Math.max(cards.length - 1, 0);
 
-      setSpacerHeight(scrollContainer ? 0 : totalTransitions * baseHeight);
+      const computedSpacerHeight = scrollContainer
+        ? 0
+        : totalTransitions * baseHeight;
+
+      spacerValueRef.current = computedSpacerHeight;
+      setSpacerHeight(computedSpacerHeight);
 
       gsap.set(projectsWrapperRef.current, {
         width: "100%",
         height: `${baseHeight}px`,
       });
 
+      const topZIndex = cards.length * 2;
+
       cards.forEach((card, index) => {
         gsap.set(card, {
           yPercent: index === 0 ? 0 : 110,
-          zIndex: index + 1,
+          zIndex: index === 0 ? topZIndex : index + 1,
           autoAlpha: 1,
         });
       });
@@ -208,7 +218,11 @@ export default function GalleryShowcase({
 
       cards.forEach((card, index) => {
         if (index === 0) return;
-        timeline.to(card, { yPercent: 0, zIndex: cards.length + index }, index - 1);
+        timeline
+          .add(() => {
+            gsap.set(card, { zIndex: topZIndex + index });
+          }, index - 1)
+          .to(card, { yPercent: 0 }, index - 1);
       });
 
       const useTransformPin =
@@ -230,15 +244,28 @@ export default function GalleryShowcase({
         pinType: useTransformPin ? "transform" : "fixed",
         invalidateOnRefresh: true,
         animation: timeline,
+        onLeave: () => {
+          if (!scrollContainer) {
+            setSpacerHeight(0);
+          }
+        },
+        onEnterBack: () => {
+          if (!scrollContainer) {
+            setSpacerHeight(spacerValueRef.current);
+          }
+        },
       });
 
       const handleResize = () => {
         const nextHeight =
           pinContainerRef.current?.offsetHeight || window.innerHeight || baseHeight;
 
-        setSpacerHeight(
-          scrollContainer ? 0 : Math.max((cards.length - 1) * nextHeight, 0)
-        );
+        const updatedSpacerHeight = scrollContainer
+          ? 0
+          : Math.max((cards.length - 1) * nextHeight, 0);
+
+        spacerValueRef.current = updatedSpacerHeight;
+        setSpacerHeight(updatedSpacerHeight);
 
         gsap.set(projectsWrapperRef.current, {
           height: `${nextHeight}px`,
@@ -247,7 +274,7 @@ export default function GalleryShowcase({
         cards.forEach((card, index) => {
           gsap.set(card, {
             yPercent: index === 0 ? 0 : 110,
-            zIndex: index + 1,
+            zIndex: index === 0 ? topZIndex : index + 1,
           });
         });
 
@@ -255,7 +282,7 @@ export default function GalleryShowcase({
         ScrollTrigger.refresh();
       };
 
-      window.addEventListener("resize", handleResize);
+        window.addEventListener("resize", handleResize);
 
       ScrollTrigger.refresh();
 
@@ -264,6 +291,7 @@ export default function GalleryShowcase({
         timeline.kill();
         window.removeEventListener("resize", handleResize);
         setSpacerHeight(0);
+        spacerValueRef.current = 0;
       };
     },
     { scope: containerRef, dependencies: [isActive, scrollContainer] }
@@ -279,7 +307,7 @@ export default function GalleryShowcase({
       className="relative h-full w-full overflow-x-hidden"
       style={{
         minHeight: "100vh",
-        background: cardPalette[4]?.background ?? "#FFFFFF",
+        background: "#FFFFFF",
       }}
     >
       <div
@@ -296,7 +324,7 @@ export default function GalleryShowcase({
             paddingTop: "6vh",
             paddingBottom: "6vh",
             overflow: "hidden",
-            background: cardPalette[4]?.background ?? "#FFFFFF",
+            background: "#FFFFFF",
           }}
         >
           {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
@@ -345,7 +373,7 @@ export default function GalleryShowcase({
                           <div
                             className="text-[140px] md:text-[200px] lg:text-[260px] xl:text-[320px] font-bold leading-none tracking-tight select-none"
                             style={{
-                              fontFamily: "Dosis, sans-serif",
+                              fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
                               WebkitTextStroke: `1px ${colors.headlineStroke}`,
                               color: colors.headline,
