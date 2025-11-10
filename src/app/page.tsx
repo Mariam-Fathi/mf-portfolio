@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/hero/hero";
 import CinematicShowcase from "@/components/projects/projects";
@@ -14,8 +20,6 @@ import { gsap } from "gsap";
 gsap.registerPlugin(ScrollTrigger);
 
 type SectionId = "hero" | "work" | "experience" | "skills" | "contact";
-
-const transitionDuration = 600;
 
 const sectionOverlayBackgrounds: Record<SectionId, string> = {
   hero:
@@ -32,14 +36,15 @@ const sectionOverlayBackgrounds: Record<SectionId, string> = {
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
-  const [pendingSection, setPendingSection] = useState<SectionId | null>(null);
-  const [transitionState, setTransitionState] = useState<
-    "idle" | "enter" | "exit"
-  >("idle");
-  const sectionScrollRef = useRef<HTMLDivElement | null>(null);
-  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
-    null
-  );
+  const [sectionsReady, setSectionsReady] = useState(false);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const sectionRefs = useRef<Record<SectionId, HTMLDivElement | null>>({
+    hero: null,
+    work: null,
+    experience: null,
+    skills: null,
+    contact: null,
+  });
 
   const navItems = useMemo<{ id: SectionId; label: string }[]>(
     () => [
@@ -53,141 +58,134 @@ export default function Home() {
     []
   );
 
-  const renderSection = (
-    id: SectionId,
-    scrollEl: HTMLDivElement | null
-  ): React.ReactNode => {
-    switch (id) {
-      case "hero":
-        return <Hero />;
-      case "work":
-        return (
-          <CinematicShowcase
-            isActive={id === "work"}
-            scrollContainer={null}
-          />
-        );
-      case "experience":
-        return <JobTimeline />;
-      case "skills":
-        return <EverythingConnected />;
-      case "contact":
-        return <Contact />;
-      default:
-        return null;
-    }
-  };
+  const applyOverlayBackground = useCallback((section: SectionId) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    gsap.to(overlay, {
+      background: sectionOverlayBackgrounds[section],
+      duration: 0.8,
+      ease: "power2.inOut",
+    });
   }, []);
 
-  useEffect(() => {
-    if (!scrollContainer || activeSection === "work") return;
-    scrollContainer.scrollTo({ top: 0 });
-  }, [activeSection, scrollContainer]);
+  const activateSection = useCallback(
+    (section: SectionId) => {
+      setActiveSection((prev) => {
+        if (prev === section) return prev;
+        applyOverlayBackground(section);
+        return section;
+      });
+    },
+    [applyOverlayBackground]
+  );
 
-  useEffect(() => {
-    if (!scrollContainer || activeSection === "work") {
-      ScrollTrigger.defaults({ scroller: window });
-      return;
-    }
-    ScrollTrigger.defaults({ scroller: scrollContainer });
+  const setSectionRef = useCallback(
+    (id: SectionId) => (node: HTMLDivElement | null) => {
+      sectionRefs.current[id] = node;
+      if (!node) return;
+
+      const areAllSectionsMounted = (
+        Object.values(sectionRefs.current) as (HTMLDivElement | null)[]
+      ).every(Boolean);
+
+      if (areAllSectionsMounted) {
+        setSectionsReady(true);
+        applyOverlayBackground("hero");
+      }
+    },
+    [applyOverlayBackground]
+  );
+
+  useLayoutEffect(() => {
+    if (!sectionsReady) return;
+
+    const triggers = (Object.keys(sectionRefs.current) as SectionId[])
+      .map((sectionId) => {
+        const node = sectionRefs.current[sectionId];
+        if (!node) return null;
+
+        return ScrollTrigger.create({
+          trigger: node,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => activateSection(sectionId),
+          onEnterBack: () => activateSection(sectionId),
+        });
+      })
+      .filter((trigger): trigger is ScrollTrigger => Boolean(trigger));
+
     ScrollTrigger.refresh();
-    return () => {
-      ScrollTrigger.defaults({ scroller: window });
-    };
-  }, [scrollContainer, activeSection]);
-
-  useEffect(() => {
-    if (transitionState !== "idle") return;
-    ScrollTrigger.refresh();
-  }, [activeSection, transitionState]);
-
-  useEffect(() => {
-    let enterTimer: ReturnType<typeof setTimeout>;
-    let exitTimer: ReturnType<typeof setTimeout>;
-
-    if (transitionState === "enter" && pendingSection) {
-      enterTimer = setTimeout(() => {
-        setActiveSection(pendingSection);
-        setTransitionState("exit");
-      }, transitionDuration);
-    }
-
-    if (transitionState === "exit") {
-      exitTimer = setTimeout(() => {
-        setTransitionState("idle");
-        setPendingSection(null);
-      }, transitionDuration);
-    }
 
     return () => {
-      clearTimeout(enterTimer);
-      clearTimeout(exitTimer);
+      triggers.forEach((trigger) => trigger.kill());
     };
-  }, [pendingSection, transitionState]);
+  }, [activateSection, sectionsReady]);
 
-  const handleNavigate = (section: SectionId) => {
-    if (section === activeSection || transitionState !== "idle") return;
+  const handleNavigate = useCallback((section: SectionId) => {
+    const node = sectionRefs.current[section];
+    if (!node) return;
 
-    setPendingSection(section);
-    setTransitionState("enter");
-  };
-
-  const overlayTranslateY = useMemo(() => {
-    if (transitionState === "enter") return "0%";
-    if (transitionState === "exit") return "100%";
-    return "-100%";
-  }, [transitionState]);
-
-  const overlayBackground =
-    pendingSection && transitionState !== "exit"
-      ? sectionOverlayBackgrounds[pendingSection]
-      : sectionOverlayBackgrounds[activeSection];
+    node.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-[#080E0B] text-[#FEFCE0]">
+    <div className="relative min-h-screen w-full bg-[#080E0B] text-[#FEFCE0]">
       <Navbar
         items={navItems}
         homeId="hero"
         activeId={activeSection}
         onNavigate={handleNavigate}
-        disabled={transitionState !== "idle"}
       />
 
-      <main className="relative flex h-full w-full overflow-hidden">
-        <div className="flex h-full w-full items-stretch justify-center">
-          <div
-            ref={(node) => {
-              sectionScrollRef.current = node;
-              setScrollContainer(node);
-            }}
-            className={`h-full w-full ${
-              activeSection === "work"
-                ? "overflow-hidden"
-                : "overflow-y-auto overscroll-contain"
-            }`}
-            style={{
-              pointerEvents: transitionState === "idle" ? "auto" : "none",
-            }}
-          >
-            {renderSection(activeSection, scrollContainer)}
-          </div>
-        </div>
+      <main className="relative flex w-full flex-col">
+        <section
+          id="hero"
+          ref={setSectionRef("hero")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
+        >
+          <Hero />
+        </section>
 
-        <div
-          className="pointer-events-none absolute inset-0 z-40"
-          style={{
-            background: overlayBackground,
-            transform: `translateY(${overlayTranslateY})`,
-            transition: `transform ${transitionDuration}ms ease-in-out`,
-          }}
-        />
+        <section
+          id="work"
+          ref={setSectionRef("work")}
+          className="relative flex min-h-[100vh] w-full bg-white text-[#080E0B]"
+        >
+          <CinematicShowcase />
+        </section>
+
+        <section
+          id="experience"
+          ref={setSectionRef("experience")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#F8FAF4] text-[#080E0B]"
+        >
+          <JobTimeline />
+        </section>
+
+        <section
+          id="skills"
+          ref={setSectionRef("skills")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#FDEB7F] text-[#080E0B]"
+        >
+          <EverythingConnected />
+        </section>
+
+        <section
+          id="contact"
+          ref={setSectionRef("contact")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#080E0B] text-[#FEFCE0]"
+        >
+          <Contact />
+        </section>
       </main>
+      <div
+        ref={overlayRef}
+        className="pointer-events-none fixed inset-0 z-[-1]"
+        style={{
+          background: sectionOverlayBackgrounds[activeSection],
+        }}
+      />
     </div>
   );
 }
