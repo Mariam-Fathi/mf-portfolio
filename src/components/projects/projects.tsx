@@ -353,7 +353,7 @@ export default function GalleryShowcase({
                     marginTop: `${index * 12}px`,
                   }}
                 >
-                  <div className="w-full max-w-[1200px] h-[70vh] md:h-[72vh] lg:h-[75vh] mx-auto px-4 md:px-8 lg:px-12 xl:px-16 flex flex-col relative">
+                  <div className="w-full max-w-[1400px] h-[70vh] md:h-[72vh] lg:h-[75vh] mx-auto px-4 md:px-8 lg:px-12 xl:px-16 flex flex-col relative">
                     {/* Rounded Card Container with Hero Background */}
                     <div 
                       className="w-full h-full rounded-3xl md:rounded-[2rem] lg:rounded-[3rem] p-6 md:p-8 lg:p-12 relative overflow-hidden"
