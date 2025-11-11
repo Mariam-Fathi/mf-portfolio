@@ -343,7 +343,7 @@ export default function GalleryShowcase({
                           className="absolute flex items-end gap-8"
                           style={{
                             bottom: `${verticalOffset}px`,
-                            left: "6%",
+                            // left: "6%",
                           }}
                         >
                           {/* Hero Number */}
@@ -367,7 +367,7 @@ export default function GalleryShowcase({
                           <div
                             className="flex flex-col gap-4 text-left"
                             style={{
-                              maxWidth: "min(700px, 70vw)",
+                              // maxWidth: "min(700px, 70vw)",
                             }}
                           >
                             <div className="w-full flex justify-center">
