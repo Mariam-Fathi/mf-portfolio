@@ -16,18 +16,11 @@ const projects = [
     title: "Smart Key Hospitality Platform",
     role: "Lead Mobile Engineer",
     description:
-      "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain.",
+      "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/sk.png",
-    tags: ["IoT", "Mobile", "React Native"],
+    tags: [],
     links: [
-      {
-        name: "Long Beach App",
-        url: "https://play.google.com/store/apps/details?id=com.smartkeylb",
-      },
-      {
-        name: "Almadiafa App",
-        url: "https://play.google.com/store/apps/details?id=com.madiafaaa",
-      },
+      
     ],
   },
   {
@@ -35,18 +28,11 @@ const projects = [
     title: "Real Estate Data Quality & Analytics",
     role: "Data Engineer & Analyst",
     description:
-      "Analyzed 2.2M+ records with comprehensive data quality auditing, achieving 87.4% memory reduction. Identified 38.19% suspicious records and developed pattern recognition algorithms for regulatory review.",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/kaggle.png",
-    tags: ["Data Engineering", "Python", "Analytics"],
+    tags: [],
     links: [
-      {
-        name: "Memory Analysis",
-        url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns",
-      },
-      {
-        name: "Quality Audit",
-        url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records",
-      },
+   
     ],
   },
   {
@@ -54,18 +40,11 @@ const projects = [
     title: "Multimodal Personality Analysis System",
     role: "AI Research Lead",
     description:
-      "Engineered automated system predicting Big Five personality traits through multimodal video analysis using LSTNet, PyAudioAnalysis, and BERT with XGBoost late fusion strategy.",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/graduation.png",
-    tags: ["AI", "Computer Vision", "Research"],
+    tags: [],
     links: [
-      {
-        name: "GitHub",
-        url: "https://github.com/Mariam-Fathi/multimodal-personality-analysis",
-      },
-      {
-        name: "Research Book",
-        url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view?usp=drive_link",
-      },
+   
     ],
   },
   {
@@ -73,9 +52,9 @@ const projects = [
     title: "Sales Estimation Automation Tool",
     role: "Full-Stack Developer",
     description:
-      "Internal tool leveraging Hugging Face models to analyze project descriptions and generate instant cost estimations, achieving 85% confidence and reducing estimation time from days to minutes.",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/ai.png",
-    tags: ["AI", "Automation", "CRM"],
+    tags: [],
     links: [],
   },
   {
@@ -83,15 +62,11 @@ const projects = [
     title: "Homi Real Estate App",
     role: "Full-Stack Developer",
     description:
-      "Production-ready PropTech solution with Google OAuth, advanced property search, real-time notifications, and Stripe payment integration. Features personalized tracking and intelligent preference analysis.",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/homi.png",
-    tags: ["React Native", "Appwrite", "Stripe"],
+    tags: [],
     links: [
-      { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-app" },
-      {
-        name: "Live Preview",
-        url: "https://expo.dev/accounts/mariamfathi/projects/homi/builds/4c066908-834c-46f5-a581-bb60afcf80f2",
-      },
+ 
     ],
   },
   {
@@ -99,12 +74,11 @@ const projects = [
     title: "Homi Real Estate Dashboard",
     role: "Full-Stack Developer",
     description:
-      "Comprehensive analytics dashboard tracking revenue metrics, user engagement, property performance, and platform health. Implements smart caching and transforms raw data into actionable business intelligence.",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
     image: "/images/homi-dashboard.png",
-    tags: ["Analytics", "Next.js", "Dashboard"],
+    tags: [],
     links: [
-      { name: "GitHub", url: "https://github.com/Mariam-Fathi/homi-analytics" },
-      { name: "Live Demo", url: "https://homi-analytics.vercel.app/" },
+    
     ],
   },
 ];
@@ -221,7 +195,9 @@ export default function GalleryShowcase({
         scrollContainer !== document.body &&
         scrollContainer !== document.documentElement;
 
-      const triggerConfig: ScrollTrigger.Vars = {
+      const triggerConfig: ScrollTrigger.Vars & {
+        animation?: gsap.core.Animation;
+      } = {
         trigger: pinContainerRef.current,
         start: `top top`,
         end: `+=${totalTransitions * baseHeight}`,
@@ -337,6 +313,7 @@ export default function GalleryShowcase({
               }
               
               const colors = cardPalette[index % cardPalette.length];
+              const verticalOffset = index * 12;
 
               return (
               <React.Fragment key={project.id}>
@@ -353,67 +330,107 @@ export default function GalleryShowcase({
                     marginTop: `${index * 12}px`,
                   }}
                 >
-                  <div className="w-full max-w-[1400px] h-[70vh] md:h-[72vh] lg:h-[75vh] mx-auto px-4 md:px-8 lg:px-12 xl:px-16 flex flex-col relative">
+                  <div className="w-full w-[100vw] h-[100vh] mx-auto  flex flex-col relative">
                     {/* Rounded Card Container with Hero Background */}
                     <div 
-                      className="w-full h-full rounded-3xl md:rounded-[2rem] lg:rounded-[3rem] p-6 md:p-8 lg:p-12 relative overflow-hidden"
+                      className="w-full h-full px-6 md:px-8 lg:px-12 pt-6 md:pt-8 lg:pt-12 pb-3 md:pb-4 lg:pb-6 relative overflow-hidden"
                       style={{
                         background: colors.background,
                       }}
                     >
-                      {/* Main Content */}
-                      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 items-stretch relative z-20 h-full">
-                        {/* Left - Number & Description */}
-                        <div className="flex flex-col justify-end items-start gap-8">
+                      <div className="relative flex h-full w-full">
+                        <div
+                          className="absolute flex items-end gap-8"
+                          style={{
+                            bottom: `${verticalOffset}px`,
+                            // left: "6%",
+                          }}
+                        >
+                          {/* Hero Number */}
                           <div
-                            className="text-[140px] md:text-[200px] lg:text-[260px] xl:text-[320px] font-bold leading-none tracking-tight select-none"
+                            className="select-none leading-none tracking-tight"
                             style={{
-                              fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
+                              fontFamily:
+                                '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
                               WebkitTextStroke: `1px ${colors.headlineStroke}`,
                               color: colors.headline,
+                              fontSize: "clamp(12rem, 38vw, 28rem)",
+                              lineHeight: 1,
+                              transform: "translateY(14%)",
                             } as React.CSSProperties}
                           >
                             {String(index + 1).padStart(2, "0")}
                           </div>
-                          <div className="max-w-md text-left">
+
+                          {/* Detail Block */}
+                          <div
+                            className="flex flex-col gap-4 text-left"
+                            style={{
+                              // maxWidth: "min(700px, 70vw)",
+                            }}
+                          >
+                            <div className="w-full flex justify-center">
+                              <div
+                                className="relative w-full max-w-[520px] aspect-[4/3] overflow-hidden"
+                              >
+                                <img
+                                  src={project.image}
+                                  alt={project.title}
+                                  className="absolute inset-0 h-full w-full object-contain"
+                                  style={{ mixBlendMode: "normal" }}
+                                />
+                              </div>
+                            </div>
+                            <div
+                              className="h-px w-full"
+                              style={{ backgroundColor: colors.link, opacity: 0.4 }}
+                            />
                             <p
-                              className="text-sm md:text-base lg:text-lg font-light leading-relaxed tracking-normal"
+                              className="text-[10px] md:text-xs tracking-[0.35em] uppercase"
+                              style={{ color: colors.link }}
+                            >
+                              {project.role}
+                            </p>
+                            <h3
+                              className="text-sm md:text-base font-semibold uppercase tracking-[0.2em]"
+                              style={{ color: colors.headline }}
+                            >
+                              {project.title}
+                            </h3>
+                            <p
+                              className="text-xs md:text-sm leading-relaxed font-light"
                               style={{ color: colors.body }}
                             >
                               {project.description}
                             </p>
+                            {project.tags.length > 0 && (
+                              <div
+                                className="flex flex-wrap gap-2 text-[10px] md:text-xs uppercase tracking-[0.25em] font-medium opacity-80"
+                                style={{ color: colors.link }}
+                              >
+                                {project.tags.map((tag) => (
+                                  <span key={tag}>{tag}</span>
+                                ))}
+                              </div>
+                            )}
+                            {project.links.length > 0 && (
+                              <div className="flex flex-wrap gap-3 text-[10px] md:text-xs tracking-[0.25em] uppercase">
+                                {project.links.map((link, i) => (
+                                  <a
+                                    key={i}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="opacity-80 transition-opacity hover:opacity-100"
+                                    style={{ color: colors.link }}
+                                  >
+                                    {link.name}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        </div>
-
-                        {/* Right - Image & Links */}
-                        <div className="relative flex flex-col justify-end items-center h-full">
-                          <div className="w-full flex-1 flex items-end justify-center overflow-hidden pr-16 lg:pr-24">
-                            <img
-                              src={project.image}
-                              alt={project.title}
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                          {project.links.length > 0 && (
-                            <div className="absolute top-1/2 right-4 lg:right-10 -translate-y-1/2 flex flex-col gap-6">
-                              {project.links.map((link, i) => (
-                                <a
-                                  key={i}
-                                  href={link.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="tracking-[0.4em] text-sm md:text-base font-light transition-opacity duration-300 origin-center opacity-80 hover:opacity-100"
-                                  style={{
-                                    writingMode: "vertical-rl",
-                                    color: colors.link,
-                                  }}
-                                >
-                                  {link.name}
-                                </a>
-                              ))}
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
