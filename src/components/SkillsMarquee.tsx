@@ -35,9 +35,24 @@ const skillRows: string[][] = [
   ],
 ];
 
+const palette = {
+  background: "#EDBBEC",
+  foreground: "#0B8658",
+  accent: "#0B8658",
+  accentSoft: "rgba(11, 134, 88, 0.12)",
+  accentSoftEnd: "rgba(11, 134, 88, 0)",
+  pillTextOnAccent: "#EDBBEC",
+};
+
 const SkillsMarquee = () => {
   return (
-    <div className="relative flex h-full w-full flex-col justify-center gap-12 px-4 py-12 text-[#0D0D0D] sm:px-10 lg:px-16">
+    <div
+      className="relative flex h-full w-full flex-col justify-center gap-12 px-4 py-12 sm:px-10 lg:px-16"
+      style={{
+        background: palette.background,
+        color: palette.foreground,
+      }}
+    >
       {skillRows.map((skills, rowIndex) => {
         const repeatedSkills = [...skills, ...skills];
         const duration = 18 + rowIndex * 4;
@@ -47,8 +62,8 @@ const SkillsMarquee = () => {
             key={`row-${rowIndex}`}
             className="skill-marquee-row group relative flex h-24 w-full items-center overflow-hidden"
           >
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#FDEB7F] via-[#FDEB7F]/70 to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#FDEB7F] via-[#FDEB7F]/70 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-gradient-to-r" style={{ backgroundImage: `linear-gradient(to right, ${palette.background}, ${palette.background}D9, transparent)` }} />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-gradient-to-l" style={{ backgroundImage: `linear-gradient(to left, ${palette.background}, ${palette.background}D9, transparent)` }} />
 
             <div
               className={`skill-marquee-track flex min-w-max items-center gap-5 px-6 ${rowIndex % 2 === 1 ? "skill-marquee-track--reverse" : ""}`}
@@ -57,10 +72,16 @@ const SkillsMarquee = () => {
               {repeatedSkills.map((skill, skillIndex) => (
                 <span
                   key={`${skill}-${skillIndex}`}
-                  className="skill-pill inline-flex items-center justify-center rounded-full px-10 py-3 text-lg font-semibold uppercase tracking-[0.3em] transition-transform duration-200"
+                  className="skill-pill inline-flex items-center justify-center rounded-full px-10 py-3 text-lg font-semibold uppercase tracking-[0.3em] transition-transform duration-200 border border-transparent"
                   style={{
-                    backgroundColor: skillIndex % 2 === 0 ? "#0D0D0D" : "#F9F4C7",
-                    color: skillIndex % 2 === 0 ? "#F8F5CF" : "#0D0D0D",
+                    backgroundColor:
+                      skillIndex % 2 === 0 ? palette.accent : palette.accentSoft,
+                    color:
+                      skillIndex % 2 === 0 ? palette.pillTextOnAccent : palette.accent,
+                    boxShadow:
+                      skillIndex % 2 === 0
+                        ? "0 12px 24px rgba(11, 134, 88, 0.25)"
+                        : "inset 0 0 0 1px rgba(11, 134, 88, 0.18)",
                   }}
                 >
                   {skill}

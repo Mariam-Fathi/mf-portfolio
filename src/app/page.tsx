@@ -154,7 +154,6 @@ export default function Home() {
         >
           <CinematicShowcase />
         </section>
-
         <section
           id="experience"
           ref={setSectionRef("experience")}
@@ -170,6 +169,8 @@ export default function Home() {
         >
           <EverythingConnected />
         </section>
+
+  
 
         <section
           id="contact"

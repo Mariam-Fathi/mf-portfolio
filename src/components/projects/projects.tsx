@@ -25,7 +25,7 @@ const projects = [
   },
   {
     id: "real-estate",
-    title: "Real Estate Data Quality & Analytics",
+    title: "Data Quality & Analytics",
     role: "Data Engineer & Analyst",
     description:
     "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
@@ -37,7 +37,7 @@ const projects = [
   },
   {
     id: "personality-ai",
-    title: "Multimodal Personality Analysis System",
+    title: "Multimodal Personality Analysis",
     role: "AI Research Lead",
     description:
     "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
@@ -81,29 +81,30 @@ const projects = [
     
     ],
   },
+ 
 ];
 
 const cardPalette = [
   {
-    background: "#251B28", // Perfect Plum
-    headline: "#FFFFFF",
-    headlineStroke: "rgba(255, 255, 255, 0.12)",
-    body: "rgba(255, 255, 255, 0.74)",
-    link: "rgba(255, 255, 255, 0.82)",
+    background: "#E2E6E7", // Perfect Plum
+    headline: "#0B8658",
+    headlineStroke: "#0B8658",
+    body: "#251C00",
+    link: "#0B8658",
   },
   {
     background: "#01332B", // Minty Emerald
-    headline: "#FFFFFF",
-    headlineStroke: "rgba(255, 255, 255, 0.1)",
-    body: "rgba(255, 255, 255, 0.76)",
-    link: "rgba(255, 255, 255, 0.88)",
+    headline: "#E74C3C",
+  headlineStroke: "#E74C3C",
+    body: "#E3E6E5",
+    link: "#E74C3C",
   },
   {
-    background: "#8ABFB2", // Sea Foam
-    headline: "#01332B",
-    headlineStroke: "rgba(1, 51, 43, 0.18)",
-    body: "rgba(1, 51, 43, 0.78)",
-    link: "rgba(1, 51, 43, 0.82)",
+    background: "#CCD982", 
+    headline: "#251B28",
+    headlineStroke: "rgba(37, 27, 40, 0.18)",
+    body: "rgba(37, 27, 40, 0.78)",
+    link: "#251B28",
   },
   {
     background: "#C4C4DB", // Lilac
@@ -113,12 +114,21 @@ const cardPalette = [
     link: "#01332B",
   },
   {
-    background: "#CCD982", 
+    background: "#8ABFB2", // Sea Foam
+    headline: "#01332B",
+    headlineStroke: "rgba(1, 51, 43, 0.18)",
+    body: "rgba(1, 51, 43, 0.78)",
+    link: "rgba(1, 51, 43, 0.82)",
+  },
+
+  {
+    background: "#F4FED9", 
     headline: "#251B28",
     headlineStroke: "rgba(37, 27, 40, 0.18)",
     body: "rgba(37, 27, 40, 0.78)",
     link: "#251B28",
   },
+
 ];
 
 export default function GalleryShowcase({
@@ -393,7 +403,7 @@ export default function GalleryShowcase({
                               {project.role}
                             </p>
                             <h3
-                              className="text-sm md:text-base font-semibold uppercase tracking-[0.2em]"
+                              className="text-sm md:text-3xl font-semibold uppercase tracking-[0.2em]"
                               style={{ color: colors.headline }}
                             >
                               {project.title}

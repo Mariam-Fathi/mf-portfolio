@@ -71,7 +71,7 @@ const JobTimeline = () => {
   return (
     <section
       id="job-timeline"
-      className="relative w-full overflow-hidden bg-[#F8FAF4] py-20 text-[#0F1B17]"
+      className="relative w-full overflow-hidden bg-[#E2E6E7] py-20 text-[#0F1B17]"
     >
       <div
         aria-hidden
