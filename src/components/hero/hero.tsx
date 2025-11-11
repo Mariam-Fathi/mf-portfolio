@@ -116,10 +116,14 @@ const Hero: React.FC = () => {
         const mCenterX = mMariamRect.left - heroRect.left + mMariamRect.width / 2;
         const mCenterY = mMariamRect.top - heroRect.top + mMariamRect.height / 2;
 
-        // Calculate position for software engineer text above "am" - CLOSER
-        const amLeft = amContainerRect.left - heroRect.left;
-        const amTop = amContainerRect.top - heroRect.top;
-        const amWidth = amContainerRect.width;
+        // Calculate position for software engineer text BELOW the "iam" subsection
+        const iamSubsection = document.querySelector('.hero-iam');
+        const iamRect = iamSubsection?.getBoundingClientRect();
+        if (!iamRect) return;
+
+        const iamLeft = iamRect.left - heroRect.left;
+        const iamWidth = iamRect.width;
+        const offsetBelowIam = Math.max(Math.min(iamRect.height * 0.25, 48), 16);
 
         // CREATE THE DOT AS THE ACTUAL DOT FROM THE "i" - BIGGER SIZE
         const originalDot = document.createElement("div");
@@ -135,7 +139,7 @@ const Hero: React.FC = () => {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#ffffff", // START WHITE
+          backgroundColor: "#ECF5F7", // START WHITE
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -151,7 +155,8 @@ const Hero: React.FC = () => {
 
         // Step 1: REMOVE THE VISUAL DOT FROM THE "i" BUT KEEP OUR DOT VISIBLE
         dotTimeline.set(iRef.current, {
-          textContent: "ı" // i without dot
+          textContent: "ı", // i without dot
+          transformOrigin: "bottom center"
         });
 
         // Step 2: SOMEONE HOLDING IT - slight wobble as if being held
@@ -225,13 +230,13 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           y: a2CenterY,
           scaleY: 0.8,
-          backgroundColor: "#ff6b6b",
+          backgroundColor: "#ABCD9B",
           duration: 0.15,
           ease: "bounce.out",
           onComplete: function() {
             if (a2mRef.current) {
               gsap.to(a2mRef.current, {
-                color: "#ff6b6b",
+                color: "#ABCD9B",
                 duration: 0.3,
                 ease: "power2.out"
               });
@@ -264,8 +269,9 @@ const Hero: React.FC = () => {
                   gsap.to(iRef.current, {
                     rotation: -16,
                     x: -8,
-                    y: -6,
-                    color: "#ff6b6b",
+                    y: 0,
+                    transformOrigin: "bottom center",
+                    color: "#ABCD9B",
                     duration: 0.8,
                     ease: "elastic.out(1.2, 0.6)"
                   });
@@ -309,7 +315,7 @@ const Hero: React.FC = () => {
               onComplete: function() {
                 if (mMariamRef.current) {
                   gsap.to(mMariamRef.current, {
-                    color: "#ff6b6b",
+                    color: "#ABCD9B",
                     duration: 0.3,
                     ease: "power2.out"
                   });
@@ -327,7 +333,7 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           keyframes: [
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#ECF5F7",
               y: mCenterY - 40,
               scaleY: 0.75,
               duration: 0.2,
@@ -343,39 +349,74 @@ const Hero: React.FC = () => {
           ]
         }, "+=0.3");
 
-        // Step 8: SLOWER HANDWRITING ANIMATION FOR "SOFTWARE ENGINEER"
+        // Step 8: SLOWER HANDWRITING ANIMATION FOR "SOFTWARE ENGINEER" - POSITIONED BELOW "iam"
         dotTimeline.call(() => {
-          if (softwareEngineerRef.current) {
+          if (softwareEngineerRef.current && iamRect) {
+            // Position exactly below the "iam" subsection
             gsap.set(softwareEngineerRef.current, {
-              left: amLeft,
-              top: amTop - 15,
-              width: amWidth,
+              left: iamLeft,
+              top: iamRect.bottom - heroRect.top + offsetBelowIam,
+              bottom: "auto",
+              width: iamWidth,
               opacity: 1
             });
 
-            const text = "software engineer";
-            softwareEngineerRef.current.textContent = "";
+            const softwareText = "software";
+            const engineerText = "Engineer";
             
-            const chars = text.split("");
-            let currentText = "";
-            
-            chars.forEach((char, index) => {
+            // Clear and set up the HTML structure
+            softwareEngineerRef.current.innerHTML = `
+              <div class="software-line">${softwareText}</div>
+              <div class="engineer-line">${engineerText}</div>
+            `;
+
+            // Get the line elements
+            const softwareLine = softwareEngineerRef.current.querySelector('.software-line');
+            const engineerLine = softwareEngineerRef.current.querySelector('.engineer-line');
+
+            if (softwareLine && engineerLine) {
+              // Animate "software" text
+              const softwareChars = softwareText.split("");
+              let currentSoftwareText = "";
+              
+              softwareChars.forEach((char, index) => {
+                setTimeout(() => {
+                  currentSoftwareText += char;
+                  softwareLine.textContent = currentSoftwareText;
+                  
+                  if (index % 2 === 0) {
+                    gsap.to(softwareLine, {
+                      y: -1,
+                      duration: 0.08,
+                      yoyo: true,
+                      repeat: 1
+                    });
+                  }
+                }, index * 120);
+              });
+
+              // Animate "Engineer" text after a short delay
               setTimeout(() => {
-                currentText += char;
-                if (softwareEngineerRef.current) {
-                  softwareEngineerRef.current.textContent = currentText;
-                }
+                const engineerChars = engineerText.split("");
+                let currentEngineerText = "";
                 
-                if (index % 2 === 0 && softwareEngineerRef.current) {
-                  gsap.to(softwareEngineerRef.current, {
-                    y: -1,
-                    duration: 0.08,
-                    yoyo: true,
-                    repeat: 1
-                  });
-                }
-              }, index * 120);
-            });
+                engineerChars.forEach((char, index) => {
+                  setTimeout(() => {
+                    currentEngineerText += char;
+                    engineerLine.textContent = currentEngineerText;
+                    
+                    if (index % 2 === 0) {
+                      gsap.to(engineerLine, {
+                        y: -1,
+                        duration: 0.08,
+                        yoyo: true,
+                        repeat: 1
+                      });
+                    }
+                  }, index * 120);
+                });
+              }, softwareText.length * 120 + 300); // Wait for software to finish + pause
+            }
           }
         }, null, "-=0.3");
 
@@ -404,7 +445,7 @@ const Hero: React.FC = () => {
             width: `${finalDotSize}px`,
             height: `${finalDotSize}px`,
             borderRadius: "50%",
-            backgroundColor: "#ff6b6b", // Red color
+            backgroundColor: "#ABCD9B", // Red color
             position: "absolute",
             zIndex: 1000,
             opacity: 1,
@@ -445,8 +486,9 @@ const Hero: React.FC = () => {
                     gsap.to(iRef.current, {
                       rotation: -16,
                       x: -8,
-                      y: -6,
-                      color: "#ff6b6b",
+                      y: 0,
+                      transformOrigin: "bottom center",
+                      color: "#ABCD9B",
                       duration: 0.2
                     });
                   }
@@ -488,9 +530,11 @@ const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="flex min-h-screen w-full flex-col items-center justify-end px-6 py-12 text-center text-neutral-50 sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
+      className="flex min-h-screen w-full flex-col items-center justify-start px-6 py-12 text-center text-[#ECF5F7] sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
       style={{
-        backgroundColor: "#294E44",
+        backgroundColor: "#01332B",
+        paddingTop: "clamp(48px, 10vh, 160px)",
+        paddingBottom: "clamp(80px, 14vh, 200px)",
       }}
     >
       {/* Add the font link */}
@@ -504,7 +548,7 @@ const Hero: React.FC = () => {
         ref={cursorRef}
         className="fixed w-6 h-6 pointer-events-none z-50 opacity-0 scale-0"
         style={{
-          background: "radial-gradient(circle, #ff6b6b 0%, transparent 70%)",
+          background: "radial-gradient(circle, #ABCD9B 0%, transparent 70%)",
           borderRadius: "50%",
           filter: "blur(1px)",
           mixBlendMode: "difference",
@@ -513,9 +557,13 @@ const Hero: React.FC = () => {
         }}
       />
 
+      {/* Mariam Text - Positioned Left Center */}
       <h1
         ref={headingRef}
-        className="hero-heading w-full font-black leading-[0.85] text-[clamp(4.5rem,14vw,18rem)] text-center mb-16"
+        className="hero-heading absolute left-10 font-black leading-[0.85] text-[clamp(4.5rem,14vw,18rem)] text-left"
+        style={{
+          top: "clamp(6vh, 14vw, 22vh)"
+        }}
       >
         <span className="hero-name">
           <span className="hero-mar">
@@ -539,17 +587,11 @@ const Hero: React.FC = () => {
         </span>
       </h1>
 
-      {/* Software Engineer Text */}
+      {/* Software Engineer Text - Positioned below "iam" subsection */}
       <div 
         ref={softwareEngineerRef}
-        className="software-engineer-text absolute text-center"
+        className="software-engineer-text absolute"
         style={{
-          fontFamily: '"Playwrite HU", sans-serif',
-          fontSize: 'clamp(1rem, 2vw, 1.8rem)',
-          color: '#ff6b6b',
-          fontWeight: '400',
-          letterSpacing: '0.05em',
-          whiteSpace: 'nowrap',
           pointerEvents: 'none',
           zIndex: 1001,
           lineHeight: 1,
@@ -561,12 +603,9 @@ const Hero: React.FC = () => {
 
       <style jsx>{`
         .hero-heading {
-          position: relative;
+          position: absolute;
           font-family: "Momo Trust Display", sans-serif;
           letter-spacing: normal;
-          width: 100vw;
-          margin-left: calc(-50vw + 50%);
-          margin-right: calc(-50vw + 50%);
         }
 
         .hero-name {
@@ -574,9 +613,6 @@ const Hero: React.FC = () => {
           align-items: flex-end;
           gap: 0.1em;
           position: relative;
-          width: 100%;
-          flex-wrap: wrap;
-          justify-content: center;
         }
 
         .hero-mar,
@@ -612,11 +648,45 @@ const Hero: React.FC = () => {
           transform-origin: bottom left;
         }
 
+        /* Software Engineer text styles */
+        .software-engineer-text {
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          text-align: left;
+          gap: clamp(4px, 0.8vw, 16px);
+        }
+
+        /* Software line - Playwrite HU font but BIGGER to match "iam" space */
+        :global(.software-line) {
+          font-family: "Playwrite HU", sans-serif;
+          font-size: clamp(3rem, 8vw, 10rem);
+          color: #E6A9C8;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
+          margin-bottom: 0.1em;
+          line-height: 0.9;
+        }
+
+        /* Engineer line - Momo Trust Display font (same as Mariam) */
+        :global(.engineer-line) {
+          font-family: "Momo Trust Display", sans-serif;
+          font-size: clamp(4.5rem, 14vw, 18rem);
+          color: #ABCD9B;
+          font-weight: 900;
+          letter-spacing: normal;
+          white-space: nowrap;
+          line-height: 1.05;
+        }
+
         /* Original i-dot styles - BIGGER */
         :global(.original-i-dot),
         :global(.final-i-dot) {
           border-radius: 50%;
-          background-color: #ffffff;
+          background-color: #ECF5F7;
           position: absolute;
           zIndex: 1000;
           pointer-events: none;
@@ -624,12 +694,7 @@ const Hero: React.FC = () => {
 
         /* Final dot specific style */
         :global(.final-i-dot) {
-          background-color: #ff6b6b;
-        }
-
-        /* Software Engineer text styles */
-        .software-engineer-text {
-          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+          background-color: #ABCD9B;
         }
 
         /* Hide default cursor when custom cursor is active */
