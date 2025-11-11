@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 
 const Hero: React.FC = () => {
@@ -11,6 +12,7 @@ const Hero: React.FC = () => {
   const a2mRef = useRef<HTMLSpanElement | null>(null);
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
+  const peaceImageRef = useRef<HTMLDivElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
@@ -54,39 +56,162 @@ const Hero: React.FC = () => {
       const letters = document.querySelectorAll('.hero-letter');
       gsap.set(letters, { opacity: 0, y: 100, rotationX: 90 });
 
-      // Create main timeline
-      const masterTimeline = gsap.timeline({
-        onComplete: () => setIsAnimationComplete(true)
-      });
+      const nameEntrance = gsap.timeline();
 
-      // STEP 1: Playful text entrance animation for "Mariam"
-      const textEntrance = gsap.timeline();
-      
-      // Animate "Mar" letters with stagger
-      textEntrance.to('.hero-mar .hero-letter', {
+      nameEntrance.fromTo('.hero-mar .hero-letter', {
+        opacity: 0,
+        y: 100,
+        rotationX: 90
+      }, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         duration: 0.8,
         stagger: 0.1,
-        ease: "back.out(1.7)"
+        ease: "back.out(1.7)",
+        immediateRender: false
       });
 
-      // Animate "iam" letters with different easing
-      textEntrance.to('.hero-iam .hero-letter', {
+      nameEntrance.fromTo('.hero-iam .hero-letter', {
+        opacity: 0,
+        y: 100,
+        rotationX: 90
+      }, {
         opacity: 1,
         y: 0,
         rotationX: 0,
         duration: 0.6,
         stagger: 0.08,
-        ease: "elastic.out(1.2, 0.8)"
+        ease: "elastic.out(1.2, 0.8)",
+        immediateRender: false
       }, "-=0.3");
 
-      // Add to master timeline
-      masterTimeline.add(textEntrance);
+      const masterTimeline = gsap.timeline({
+        onComplete: () => setIsAnimationComplete(true)
+      });
 
-      // STEP 2: Dot animation (existing code)
-      masterTimeline.add(() => {
+      const softwareText = "software";
+      const engineerText = "Engineer";
+
+      const playSoftwareEngineerWriting = () => {
+        if (!softwareEngineerRef.current) return;
+
+        const heroSection = document.getElementById("hero");
+        const iamSubsection = document.querySelector('.hero-iam');
+
+        if (!heroSection || !iamSubsection) return;
+
+        const heroRect = heroSection.getBoundingClientRect();
+        const iamRect = iamSubsection.getBoundingClientRect();
+
+        const iamLeft = iamRect.left - heroRect.left;
+        const iamWidth = iamRect.width;
+        const offsetBelowIam = Math.max(Math.min(iamRect.height * 0.25, 48), 16);
+
+        gsap.set(softwareEngineerRef.current, {
+          left: iamLeft,
+          top: iamRect.bottom - heroRect.top + offsetBelowIam,
+          bottom: "auto",
+          width: iamWidth,
+          opacity: 1
+        });
+
+        softwareEngineerRef.current.innerHTML = `
+          <div class="software-line">${softwareText}</div>
+          <div class="engineer-line">${engineerText}</div>
+        `;
+
+        if (peaceImageRef.current) {
+          gsap.set(peaceImageRef.current, { opacity: 0, display: "none" });
+        }
+
+        const softwareLine = softwareEngineerRef.current.querySelector('.software-line');
+        const engineerLine = softwareEngineerRef.current.querySelector('.engineer-line');
+
+        if (!softwareLine || !engineerLine) return;
+
+        const placePeaceIllustration = () => {
+          const heroSectionEl = document.getElementById("hero");
+          const peaceWrapper = peaceImageRef.current;
+          if (!heroSectionEl || !peaceWrapper) return;
+
+          const heroRectLocal = heroSectionEl.getBoundingClientRect();
+          const softwareRect = softwareLine.getBoundingClientRect();
+
+          const targetWidth = Math.min(Math.max(softwareRect.width * 0.28, 110), 220);
+          const verticalOffset = Math.max(softwareRect.height * 0.85, 54);
+          const leftPosition = softwareRect.right - heroRectLocal.left - targetWidth * 0.78;
+          const topPosition = softwareRect.top - heroRectLocal.top - verticalOffset;
+
+          gsap.set(peaceWrapper, {
+            width: targetWidth,
+            left: leftPosition,
+            top: topPosition,
+            rotation: 30,
+            display: "block"
+          });
+
+          if (peaceImageRef.current) {
+            gsap.to(peaceImageRef.current, {
+              opacity: 1,
+              duration: 0.45,
+              ease: "power2.out"
+            });
+          }
+        };
+
+        const softwareChars = softwareText.split("");
+        let currentSoftwareText = "";
+
+        softwareChars.forEach((char, index) => {
+          setTimeout(() => {
+            currentSoftwareText += char;
+            softwareLine.textContent = currentSoftwareText;
+
+            if (index % 2 === 0) {
+              gsap.to(softwareLine, {
+                y: -1,
+                duration: 0.08,
+                yoyo: true,
+                repeat: 1
+              });
+            }
+
+            if (index === softwareChars.length - 1) {
+              placePeaceIllustration();
+            }
+          }, index * 120);
+        });
+
+        setTimeout(() => {
+          const engineerChars = engineerText.split("");
+          let currentEngineerText = "";
+
+          engineerChars.forEach((char, index) => {
+            setTimeout(() => {
+              currentEngineerText += char;
+              engineerLine.textContent = currentEngineerText;
+
+              if (index % 2 === 0) {
+                gsap.to(engineerLine, {
+                  y: -1,
+                  duration: 0.08,
+                  yoyo: true,
+                  repeat: 1
+                });
+              }
+            }, index * 120);
+          });
+        }, softwareText.length * 120 + 300);
+      };
+
+      const softwareWritingDurationSec = ((softwareText.length + engineerText.length) * 120 + 300) / 1000;
+
+      masterTimeline.add(nameEntrance);
+      masterTimeline.call(playSoftwareEngineerWriting, undefined, "+=0.1");
+      masterTimeline.to({}, { duration: softwareWritingDurationSec });
+
+      const buildDotTimeline = () => {
         // Get the elements for dot animation
         const iMariam = iRef.current;
         const rLetter = rRef.current;
@@ -94,52 +219,36 @@ const Hero: React.FC = () => {
         const mMariam = mMariamRef.current;
         const amContainer = amContainerRef.current;
 
-        if (!iMariam || !rLetter || !a2Letter || !mMariam || !amContainer) return;
+        if (!iMariam || !rLetter || !a2Letter || !mMariam || !amContainer) return undefined;
 
         const iMariamRect = iMariam.getBoundingClientRect();
         const rRect = rLetter.getBoundingClientRect();
         const a2Rect = a2Letter.getBoundingClientRect();
         const mMariamRect = mMariam.getBoundingClientRect();
-        const amContainerRect = amContainer.getBoundingClientRect();
 
-        // Get hero section position for relative positioning
         const heroSection = document.getElementById("hero");
-        const heroRect = heroSection?.getBoundingClientRect() || { left: 0, top: 0 };
+        if (!heroSection) return undefined;
+        const heroRect = heroSection.getBoundingClientRect();
 
-        // Calculate positions
         const iMariamCenterX = iMariamRect.left - heroRect.left + iMariamRect.width / 2;
         const iMariamCenterY = iMariamRect.top - heroRect.top + (iMariamRect.height * 0.25);
-        
         const a2CenterX = a2Rect.left - heroRect.left + a2Rect.width / 2;
         const a2CenterY = a2Rect.top - heroRect.top + a2Rect.height / 2;
-        
         const mCenterX = mMariamRect.left - heroRect.left + mMariamRect.width / 2;
         const mCenterY = mMariamRect.top - heroRect.top + mMariamRect.height / 2;
 
-        // Calculate position for software engineer text BELOW the "iam" subsection
-        const iamSubsection = document.querySelector('.hero-iam');
-        const iamRect = iamSubsection?.getBoundingClientRect();
-        if (!iamRect) return;
-
-        const iamLeft = iamRect.left - heroRect.left;
-        const iamWidth = iamRect.width;
-        const offsetBelowIam = Math.max(Math.min(iamRect.height * 0.25, 48), 16);
-
-        // CREATE THE DOT AS THE ACTUAL DOT FROM THE "i" - BIGGER SIZE
         const originalDot = document.createElement("div");
         originalDot.className = "original-i-dot";
-        
-        if (heroSection) {
-          heroSection.appendChild(originalDot);
-        }
+
+        heroSection.appendChild(originalDot);
 
         const dotSize = Math.max(iMariamRect.width * 0.25, 35);
-        
+
         gsap.set(originalDot, {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#E9F4E3", // START WHITE
+          backgroundColor: "#E9F4E3",
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -153,60 +262,27 @@ const Hero: React.FC = () => {
 
         const dotTimeline = gsap.timeline();
 
-        // Step 1: REMOVE THE VISUAL DOT FROM THE "i" BUT KEEP OUR DOT VISIBLE
         dotTimeline.set(iRef.current, {
-          textContent: "ı", // i without dot
+          textContent: "ı",
           transformOrigin: "bottom center"
         });
 
-        // Step 2: SOMEONE HOLDING IT - slight wobble as if being held
         dotTimeline.to(originalDot, {
           keyframes: [
-            {
-              x: iMariamCenterX - (dotSize / 2) - 5,
-              duration: 0.2,
-              ease: "power1.inOut"
-            },
-            {
-              x: iMariamCenterX - (dotSize / 2) + 5,
-              duration: 0.2,
-              ease: "power1.inOut"
-            },
-            {
-              x: iMariamCenterX - (dotSize / 2),
-              duration: 0.2,
-              ease: "power1.inOut"
-            }
+            { x: iMariamCenterX - (dotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
+            { x: iMariamCenterX - (dotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
+            { x: iMariamCenterX - (dotSize / 2), duration: 0.2, ease: "power1.inOut" }
           ]
         });
 
-        // Step 3: RELEASE IT - starts falling and BEGIN COLOR CHANGE
         dotTimeline.to(originalDot, {
           keyframes: [
-            {
-              y: iMariamCenterY + 60,
-              backgroundColor: "#DCEFD0",
-              duration: 0.4,
-              ease: "power2.in"
-            },
-            {
-              y: iMariamCenterY + 30,
-              scaleY: 0.7,
-              backgroundColor: "#CBE6BB",
-              duration: 0.15,
-              ease: "power2.out"
-            },
-            {
-              y: iMariamCenterY - 15,
-              scaleY: 1,
-              backgroundColor: "#BADDA6",
-              duration: 0.2,
-              ease: "bounce.out"
-            }
+            { y: iMariamCenterY + 60, backgroundColor: "#DCEFD0", duration: 0.4, ease: "power2.in" },
+            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#CBE6BB", duration: 0.15, ease: "power2.out" },
+            { y: iMariamCenterY - 15, scaleY: 1, backgroundColor: "#BADDA6", duration: 0.2, ease: "bounce.out" }
           ]
         });
 
-        // Step 4: JUMP OUT TO THE RIGHT ON "a" AND CHANGE "a" COLOR
         dotTimeline.to(originalDot, {
           y: a2CenterY - 50,
           x: a2CenterX - (dotSize / 2),
@@ -215,11 +291,7 @@ const Hero: React.FC = () => {
           duration: 0.3,
           ease: "power2.out"
         });
-        dotTimeline.to(originalDot, {
-          y: a2CenterY - 70,
-          duration: 0.2,
-          ease: "sine.inOut"
-        });
+        dotTimeline.to(originalDot, { y: a2CenterY - 70, duration: 0.2, ease: "sine.inOut" });
         dotTimeline.to(originalDot, {
           y: a2CenterY + 10,
           scaleY: 1.2,
@@ -233,7 +305,7 @@ const Hero: React.FC = () => {
           backgroundColor: "#ABCD9B",
           duration: 0.15,
           ease: "bounce.out",
-          onComplete: function() {
+          onComplete: () => {
             if (a2mRef.current) {
               gsap.to(a2mRef.current, {
                 color: "#ABCD9B",
@@ -243,28 +315,18 @@ const Hero: React.FC = () => {
             }
           }
         });
-        dotTimeline.to(originalDot, {
-          scaleY: 1,
-          duration: 0.1
-        });
+        dotTimeline.to(originalDot, { scaleY: 1, duration: 0.1 });
 
-        // Step 5: HIT "i" FROM THE RIGHT SIDE
         dotTimeline.to(originalDot, {
           keyframes: [
-            {
-              x: iMariamCenterX - (dotSize / 2) + 40,
-              y: iMariamCenterY - (dotSize / 2) - 10,
-              scale: 1.1,
-              duration: 0.2,
-              ease: "power2.in"
-            },
+            { x: iMariamCenterX - (dotSize / 2) + 40, y: iMariamCenterY - (dotSize / 2) - 10, scale: 1.1, duration: 0.2, ease: "power2.in" },
             {
               x: iMariamCenterX - (dotSize / 2),
               y: iMariamCenterY - (dotSize / 2),
               scale: 0.6,
               duration: 0.08,
               ease: "power2.out",
-              onComplete: function() {
+              onComplete: () => {
                 if (iRef.current) {
                   gsap.to(iRef.current, {
                     rotation: -16,
@@ -278,41 +340,21 @@ const Hero: React.FC = () => {
                 }
               }
             },
-            {
-              scale: 1,
-              duration: 0.15,
-              ease: "bounce.out"
-            }
+            { scale: 1, duration: 0.15, ease: "bounce.out" }
           ]
         }, "+=0.3");
 
-        // Step 6: DIRECT JUMP TO "m"
         dotTimeline.to(originalDot, {
           keyframes: [
-            {
-              x: mCenterX - (dotSize / 2),
-              y: mCenterY - 100,
-              scaleY: 0.75,
-              duration: 0.3,
-              ease: "power2.out"
-            },
-            {
-              y: mCenterY - 120,
-              duration: 0.2,
-              ease: "sine.inOut"
-            },
-            {
-              y: mCenterY + 20,
-              scaleY: 1.2,
-              duration: 0.25,
-              ease: "power2.in"
-            },
+            { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, duration: 0.3, ease: "power2.out" },
+            { y: mCenterY - 120, duration: 0.2, ease: "sine.inOut" },
+            { y: mCenterY + 20, scaleY: 1.2, duration: 0.25, ease: "power2.in" },
             {
               y: mCenterY,
               scaleY: 0.8,
               duration: 0.15,
               ease: "bounce.out",
-              onComplete: function() {
+              onComplete: () => {
                 if (mMariamRef.current) {
                   gsap.to(mMariamRef.current, {
                     color: "#ABCD9B",
@@ -322,200 +364,93 @@ const Hero: React.FC = () => {
                 }
               }
             },
-            {
-              scaleY: 1,
-              duration: 0.1
-            }
+            { scaleY: 1, duration: 0.1 }
           ]
         }, "+=0.3");
 
-        // Step 7: TURN DOT WHITE AND JUMP DOWN FROM "m" POSITION
         dotTimeline.to(originalDot, {
           keyframes: [
-            {
-              backgroundColor: "#E9F4E3",
-              y: mCenterY - 40,
-              scaleY: 0.75,
-              duration: 0.2,
-              ease: "power2.out"
-            },
-            {
-              y: heroRect.height + 100,
-              scaleY: 1.2,
-              opacity: 0,
-              duration: 0.5,
-              ease: "power2.in"
-            }
+            { backgroundColor: "#E9F4E3", y: mCenterY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+            { y: heroRect.height + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
           ]
         }, "+=0.3");
 
-        // Step 8: SLOWER HANDWRITING ANIMATION FOR "SOFTWARE ENGINEER" - POSITIONED BELOW "iam"
-        dotTimeline.call(() => {
-          if (softwareEngineerRef.current && iamRect) {
-            // Position exactly below the "iam" subsection
-            gsap.set(softwareEngineerRef.current, {
-              left: iamLeft,
-              top: iamRect.bottom - heroRect.top + offsetBelowIam,
-              bottom: "auto",
-              width: iamWidth,
-              opacity: 1
-            });
-
-            const softwareText = "software";
-            const engineerText = "Engineer";
-            
-            // Clear and set up the HTML structure
-            softwareEngineerRef.current.innerHTML = `
-              <div class="software-line">${softwareText}</div>
-              <div class="engineer-line">${engineerText}</div>
-            `;
-
-            // Get the line elements
-            const softwareLine = softwareEngineerRef.current.querySelector('.software-line');
-            const engineerLine = softwareEngineerRef.current.querySelector('.engineer-line');
-
-            if (softwareLine && engineerLine) {
-              // Animate "software" text
-              const softwareChars = softwareText.split("");
-              let currentSoftwareText = "";
-              
-              softwareChars.forEach((char, index) => {
-                setTimeout(() => {
-                  currentSoftwareText += char;
-                  softwareLine.textContent = currentSoftwareText;
-                  
-                  if (index % 2 === 0) {
-                    gsap.to(softwareLine, {
-                      y: -1,
-                      duration: 0.08,
-                      yoyo: true,
-                      repeat: 1
-                    });
-                  }
-                }, index * 120);
-              });
-
-              // Animate "Engineer" text after a short delay
-              setTimeout(() => {
-                const engineerChars = engineerText.split("");
-                let currentEngineerText = "";
-                
-                engineerChars.forEach((char, index) => {
-                  setTimeout(() => {
-                    currentEngineerText += char;
-                    engineerLine.textContent = currentEngineerText;
-                    
-                    if (index % 2 === 0) {
-                      gsap.to(engineerLine, {
-                        y: -1,
-                        duration: 0.08,
-                        yoyo: true,
-                        repeat: 1
-                      });
-                    }
-                  }, index * 120);
-                });
-              }, softwareText.length * 120 + 300); // Wait for software to finish + pause
-            }
-          }
-        }, null, "-=0.3");
-
-        // Clean up first dot
         dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
 
-        // STEP 9: FINAL STAGE - NEW DOT DROPS FROM TOP ONTO THE CENTER OF "r"
-        dotTimeline.call(() => {
-          // Create a new dot for the final stage
-          const finalDot = document.createElement("div");
-          finalDot.className = "final-i-dot";
-          
-          if (heroSection) {
-            heroSection.appendChild(finalDot);
-          }
+        const finalDot = document.createElement("div");
+        finalDot.className = "final-i-dot";
 
-          // Calculate the exact center of the "r" letter
-          const rRightEdge = rRect.right - heroRect.left;
-          const rCenterX = rRightEdge - Math.max(Math.min(dotSize * 0.3, rRect.width * 0.25), dotSize * 0.15);
-          const rCenterY = rRect.top - heroRect.top + Math.max(Math.min(rRect.height * 0.18, dotSize * 0.35), 6);
+        heroSection.appendChild(finalDot);
 
-           const finalDotSize = dotSize +7; // Match the original dot size
+        const rRightEdge = rRect.right - heroRect.left;
+        const rCenterX = rRightEdge - Math.max(Math.min(dotSize * 0.3, rRect.width * 0.25), dotSize * 0.15);
+        const rCenterY = rRect.top - heroRect.top + Math.max(Math.min(rRect.height * 0.18, dotSize * 0.35), 6);
 
-          // Position the final dot at the top center of the screen
-          gsap.set(finalDot, {
-            width: `${finalDotSize}px`,
-            height: `${finalDotSize}px`,
-            borderRadius: "50%",
-            backgroundColor: "#ABCD9B", // Red color
-            position: "absolute",
-            zIndex: 1000,
-            opacity: 1,
-            left: 0,
-            top: 0,
-            x: rCenterX - (finalDotSize / 2), // Start above the center of "r"
-            y: -50, // Start above the viewport
-            rotation: 0,
-            scale: 1
-          });
+        const finalDotSize = dotSize + 7;
 
-          // Final dot animation timeline
-          const finalDotTimeline = gsap.timeline();
-
-          // Drop from top to the center of "r"
-          finalDotTimeline.to(finalDot, {
-            keyframes: [
-              {
-                // Fast drop from top to just above the "r"
-                y: rCenterY + 40,
-                duration: 0.4,
-                ease: "power2.in"
-              },
-              {
-                // Small bounce up
-                y: rCenterY - 10,
-                duration: 0.15,
-                ease: "power2.out"
-              },
-              {
-                // Settle exactly in the center of "r"
-                y: rCenterY,
-                duration: 0.1,
-                ease: "bounce.out",
-                onComplete: function() {
-                  // Ensure "i" maintains its leaning position on "r"
-                  if (iRef.current) {
-                    gsap.to(iRef.current, {
-                      rotation: -16,
-                      x: -8,
-                      y: 0,
-                      transformOrigin: "bottom center",
-                      color: "#ABCD9B",
-                      duration: 0.2
-                    });
-                  }
-                }
-              }
-            ]
-          });
-
-          // Small celebratory pulse when landed
-          finalDotTimeline.to(finalDot, {
-            scale: 1.3,
-            duration: 0.1,
-            yoyo: true,
-            repeat: 1,
-            ease: "power2.inOut"
-          });
-
-          // Final dot stays in place on the "r"
-          finalDotTimeline.to(finalDot, {
-            duration: 1
-          });
-
-          return finalDotTimeline;
+        gsap.set(finalDot, {
+          width: `${finalDotSize}px`,
+          height: `${finalDotSize}px`,
+          borderRadius: "50%",
+          backgroundColor: "#ABCD9B",
+          position: "absolute",
+          zIndex: 1000,
+          opacity: 1,
+          left: 0,
+          top: 0,
+          x: rCenterX - (finalDotSize / 2),
+          y: -50,
+          rotation: 0,
+          scale: 1
         });
 
+        const finalDotTimeline = gsap.timeline();
+
+        finalDotTimeline.to(finalDot, {
+          keyframes: [
+            { y: rCenterY + 40, duration: 0.4, ease: "power2.in" },
+            { y: rCenterY - 10, duration: 0.15, ease: "power2.out" },
+            {
+              y: rCenterY,
+              duration: 0.1,
+              ease: "bounce.out",
+              onComplete: () => {
+                if (iRef.current) {
+                  gsap.to(iRef.current, {
+                    rotation: -16,
+                    x: -8,
+                    y: 0,
+                    transformOrigin: "bottom center",
+                    color: "#ABCD9B",
+                    duration: 0.2
+                  });
+                }
+              }
+            }
+          ]
+        });
+
+        finalDotTimeline.to(finalDot, {
+          scale: 1.3,
+          duration: 0.1,
+          yoyo: true,
+          repeat: 1,
+          ease: "power2.inOut"
+        });
+
+        finalDotTimeline.to(finalDot, { duration: 1 });
+
+        dotTimeline.add(finalDotTimeline);
+
         return dotTimeline;
-      }, "+=1"); // Wait 1 second after text entrance
+      };
+
+      masterTimeline.add(() => {
+        const dotTimeline = buildDotTimeline();
+        if (dotTimeline) {
+          masterTimeline.add(dotTimeline, "+=0");
+        }
+      }, "+=0.15");
 
     }, headingRef);
 
@@ -524,6 +459,10 @@ const Hero: React.FC = () => {
       // Remove any created dots
       document.querySelectorAll('.original-i-dot').forEach(dot => dot.remove());
       document.querySelectorAll('.final-i-dot').forEach(dot => dot.remove());
+      if (peaceImageRef.current) {
+        peaceImageRef.current.style.opacity = "0";
+        peaceImageRef.current.style.display = "none";
+      }
     };
   }, []);
 
@@ -600,6 +539,15 @@ const Hero: React.FC = () => {
       >
         {/* Text will be populated by animation */}
       </div>
+      <div ref={peaceImageRef} className="software-peace-wrapper">
+        <Image
+          src="/images/peace.png"
+          alt="Peace illustration"
+          width={240}
+          height={240}
+          priority
+        />
+      </div>
 
       <style jsx>{`
         .hero-heading {
@@ -646,6 +594,20 @@ const Hero: React.FC = () => {
 
         .hero-letter-i {
           transform-origin: bottom left;
+        }
+
+        .software-peace-wrapper {
+          position: absolute;
+          pointer-events: none;
+          z-index: 1002;
+          opacity: 0;
+          display: none;
+        }
+
+        .software-peace-wrapper :global(img) {
+          width: 100%;
+          height: auto;
+          display: block;
         }
 
         /* Software Engineer text styles */
