@@ -36,12 +36,12 @@ const skillRows: string[][] = [
 ];
 
 const palette = {
-  background: "#E2E6E7",
+  background: "#EDBBEC",
   foreground: "#0B8658",
   accent: "#0B8658",
   accentSoft: "rgba(11, 134, 88, 0.12)",
   accentSoftEnd: "rgba(11, 134, 88, 0)",
-  pillTextOnAccent: "#E2E6E7",
+  pillTextOnAccent: "#EDBBEC",
 };
 
 const SkillsMarquee = () => {

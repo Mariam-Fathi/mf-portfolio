@@ -81,6 +81,7 @@ const projects = [
     
     ],
   },
+ 
 ];
 
 const cardPalette = [
@@ -99,11 +100,11 @@ const cardPalette = [
     link: "#E74C3C",
   },
   {
-    background: "#8ABFB2", // Sea Foam
-    headline: "#01332B",
-    headlineStroke: "rgba(1, 51, 43, 0.18)",
-    body: "rgba(1, 51, 43, 0.78)",
-    link: "rgba(1, 51, 43, 0.82)",
+    background: "#CCD982", 
+    headline: "#251B28",
+    headlineStroke: "rgba(37, 27, 40, 0.18)",
+    body: "rgba(37, 27, 40, 0.78)",
+    link: "#251B28",
   },
   {
     background: "#C4C4DB", // Lilac
@@ -113,12 +114,21 @@ const cardPalette = [
     link: "#01332B",
   },
   {
-    background: "#CCD982", 
+    background: "#8ABFB2", // Sea Foam
+    headline: "#01332B",
+    headlineStroke: "rgba(1, 51, 43, 0.18)",
+    body: "rgba(1, 51, 43, 0.78)",
+    link: "rgba(1, 51, 43, 0.82)",
+  },
+
+  {
+    background: "#F4FED9", 
     headline: "#251B28",
     headlineStroke: "rgba(37, 27, 40, 0.18)",
     body: "rgba(37, 27, 40, 0.78)",
     link: "#251B28",
   },
+
 ];
 
 export default function GalleryShowcase({
