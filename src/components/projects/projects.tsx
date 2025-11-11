@@ -12,15 +12,15 @@ type ProjectsProps = {
 
 const projects = [
   {
-    id: "smart-key",
-    title: "Smart Key Hospitality Platform",
-    role: "Lead Mobile Engineer",
+    id: "personality-ai",
+    title: "Multimodal Personality Analysis",
+    role: "AI Research Lead",
     description:
-      "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/sk.png",
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
+    image: "/images/graduation.png",
     tags: [],
     links: [
-      
+   
     ],
   },
   {
@@ -36,26 +36,16 @@ const projects = [
     ],
   },
   {
-    id: "personality-ai",
-    title: "Multimodal Personality Analysis",
-    role: "AI Research Lead",
+    id: "smart-key",
+    title: "Smart Key Hospitality Platform",
+    role: "Lead Mobile Engineer",
     description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/graduation.png",
+      "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
+    image: "/images/sk.png",
     tags: [],
     links: [
-   
+      
     ],
-  },
-  {
-    id: "sales-ai",
-    title: "Sales Estimation Automation Tool",
-    role: "Full-Stack Developer",
-    description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/ai.png",
-    tags: [],
-    links: [],
   },
   {
     id: "homi-app",
@@ -81,6 +71,18 @@ const projects = [
     
     ],
   },
+  {
+    id: "sales-ai",
+    title: "Sales Estimation Automation Tool",
+    role: "Full-Stack Developer",
+    description:
+    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
+    image: "/images/ai.png",
+    tags: [],
+    links: [],
+  },
+
+
  
 ];
 
