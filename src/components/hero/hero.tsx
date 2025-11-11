@@ -139,7 +139,7 @@ const Hero: React.FC = () => {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#ECF5F7", // START WHITE
+          backgroundColor: "#E9F4E3", // START WHITE
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -185,21 +185,21 @@ const Hero: React.FC = () => {
           keyframes: [
             {
               y: iMariamCenterY + 60,
-              backgroundColor: "#ffd1d1",
+              backgroundColor: "#DCEFD0",
               duration: 0.4,
               ease: "power2.in"
             },
             {
               y: iMariamCenterY + 30,
               scaleY: 0.7,
-              backgroundColor: "#ffb8b8",
+              backgroundColor: "#CBE6BB",
               duration: 0.15,
               ease: "power2.out"
             },
             {
               y: iMariamCenterY - 15,
               scaleY: 1,
-              backgroundColor: "#ff9d9d",
+              backgroundColor: "#BADDA6",
               duration: 0.2,
               ease: "bounce.out"
             }
@@ -211,7 +211,7 @@ const Hero: React.FC = () => {
           y: a2CenterY - 50,
           x: a2CenterX - (dotSize / 2),
           scaleY: 0.75,
-          backgroundColor: "#ff8585",
+          backgroundColor: "#AAD491",
           duration: 0.3,
           ease: "power2.out"
         });
@@ -223,7 +223,7 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           y: a2CenterY + 10,
           scaleY: 1.2,
-          backgroundColor: "#ff7070",
+          backgroundColor: "#9BCB7D",
           duration: 0.25,
           ease: "power2.in"
         });
@@ -333,7 +333,7 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           keyframes: [
             {
-              backgroundColor: "#ECF5F7",
+              backgroundColor: "#E9F4E3",
               y: mCenterY - 40,
               scaleY: 0.75,
               duration: 0.2,
@@ -686,7 +686,7 @@ const Hero: React.FC = () => {
         :global(.original-i-dot),
         :global(.final-i-dot) {
           border-radius: 50%;
-          background-color: #ECF5F7;
+          background-color: #E9F4E3;
           position: absolute;
           zIndex: 1000;
           pointer-events: none;
