@@ -161,20 +161,46 @@ const Hero: React.FC = () => {
               y: iMariamCenterY - 20 ,
               scaleX: 1.4,
               scaleY: 1,              
-              duration: .6,
+              duration: .4,
+              backgroundColor: "#ffff", // Darker variant
+              ease: "power2.inOut"
+            },
+            { 
+              // Try to jump but get stuck - small upward movement
+              y: iMariamCenterY - 20 ,
+              scaleX: 1.4,
+              scaleY: 1.2,              
+              duration: .4,
               backgroundColor: "#E6B7AC", // Darker variant
-              ease: "power1.inOut"
+              ease: "bounce.out"
+            },
+            { 
+              // Try to jump but get stuck - small upward movement
+              y: iMariamCenterY - 20 ,
+              scaleX: 1.4,
+              scaleY: 1,              
+              duration: .3,
+              backgroundColor: "#E6B7AC", // Darker variant
+              ease: "bounce.in"
             },
         
-      
             { 
               // Get pulled back down - stuck effect
               y: iMariamCenterY - 20 ,
               scaleX: 1.4,
-              scaleY: 1.6,              
-              duration: .6,
+              scaleY: .8,              
+              duration: .5,
               backgroundColor: "#E55A3A", // Darker variant
-              ease: "power1.inOut"
+              ease: "bounce.in"
+            },
+            { 
+              // Get pulled back down - stuck effect
+              y: iMariamCenterY - 20 ,
+              scaleX: 1.4,
+              scaleY: 1.4,              
+              duration: .5,
+              backgroundColor: "#E55A3A", // Darker variant
+              ease: "bounce.out"
             },
             { 
               // Struggle - small vibration while stuck
