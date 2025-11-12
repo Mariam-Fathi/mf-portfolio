@@ -349,6 +349,7 @@ export default function GalleryShowcase({
             minHeight: "100dvh",
             paddingTop: "6vh",
             paddingBottom: "6vh",
+            boxSizing: "border-box",
             overflow: "hidden",
             background: "#F5ECE1",
           }}
