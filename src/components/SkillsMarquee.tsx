@@ -19,7 +19,8 @@ type SkillRow = {
 const skillRows: SkillRow[] = [
   {
     id: "ai-delivery",
-    background: "#CBE9FF",
+    background: "#DAD6FF",
+
     textColor: "#0F1C24",
     shadow: "0 40px 80px rgba(16, 43, 62, 0.18)",
     tilt: -6,
@@ -31,7 +32,7 @@ const skillRows: SkillRow[] = [
   },
   {
     id: "data-engineering",
-    background: "#DAD6FF",
+    background: "#CBE9FF",
     textColor: "#1B1334",
     shadow: "0 40px 80px rgba(33, 24, 69, 0.18)",
     tilt: 5,

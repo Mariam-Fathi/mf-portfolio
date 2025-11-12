@@ -103,18 +103,26 @@ const projects: Project[] = [
 
 const cardPalette = [
   {
-    background: "#F4FED9", 
+    background: "#E2E6E7", // Perfect Plum
+    headline: "#0B8658",
+    headlineStroke: "#0B8658",
+    body: "#251C00",
+    link: "#0B8658",
+  },
+
+  {
+    background: "#CCD982", 
     headline: "#251B28",
     headlineStroke: "rgba(37, 27, 40, 0.18)",
     body: "rgba(37, 27, 40, 0.78)",
     link: "#251B28",
   },
   {
-    background: "#E2E6E7", // Perfect Plum
-    headline: "#0B8658",
-    headlineStroke: "#0B8658",
-    body: "#251C00",
-    link: "#0B8658",
+    background: "#F4FED9", 
+    headline: "#251B28",
+    headlineStroke: "rgba(37, 27, 40, 0.18)",
+    body: "rgba(37, 27, 40, 0.78)",
+    link: "#251B28",
   },
   {
     background: "#01332B", // Minty Emerald
@@ -123,12 +131,13 @@ const cardPalette = [
     body: "#F48019",
     link: "#E74C3C",
   },
+
   {
-    background: "#CCD982", 
-    headline: "#251B28",
-    headlineStroke: "rgba(37, 27, 40, 0.18)",
-    body: "rgba(37, 27, 40, 0.78)",
-    link: "#251B28",
+    background: "#8ABFB2", // Sea Foam
+    headline: "#01332B",
+    headlineStroke: "rgba(1, 51, 43, 0.18)",
+    body: "rgba(1, 51, 43, 0.78)",
+    link: "rgba(1, 51, 43, 0.82)",
   },
   {
     background: "#C4C4DB", // Lilac
@@ -138,20 +147,14 @@ const cardPalette = [
     link: "#01332B",
   },
   {
-    background: "#8ABFB2", // Sea Foam
-    headline: "#01332B",
-    headlineStroke: "rgba(1, 51, 43, 0.18)",
-    body: "rgba(1, 51, 43, 0.78)",
-    link: "rgba(1, 51, 43, 0.82)",
-  },
-
-  {
     background: "#F4FED9", 
     headline: "#251B28",
     headlineStroke: "rgba(37, 27, 40, 0.18)",
     body: "rgba(37, 27, 40, 0.78)",
     link: "#251B28",
   },
+  
+
 
 ];
 
