@@ -98,7 +98,7 @@ const cardPalette = [
     background: "#01332B", // Minty Emerald
     headline: "#E74C3C",
   headlineStroke: "#E74C3C",
-    body: "#E3E6E5",
+    body: "#F48019",
     link: "#E74C3C",
   },
   {
@@ -379,6 +379,7 @@ export default function GalleryShowcase({
                           <div
                             className="flex flex-col gap-4 text-left"
                             style={{
+                              fontFamily: '"Inter", sans-serif',
                               // maxWidth: "min(700px, 70vw)",
                             }}
                           >

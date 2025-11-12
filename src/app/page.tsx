@@ -131,12 +131,12 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full bg-[#080E0B] text-[#FEFCE0]">
-      <Navbar
+      {/* <Navbar
         items={navItems}
         homeId="hero"
         activeId={activeSection}
         onNavigate={handleNavigate}
-      />
+      /> */}
 
       <main className="relative flex w-full flex-col">
         <section
