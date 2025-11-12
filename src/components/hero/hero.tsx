@@ -218,32 +218,32 @@ const Hero: React.FC = () => {
         const a2Letter = a2mRef.current;
         const mMariam = mMariamRef.current;
         const amContainer = amContainerRef.current;
-
+      
         if (!iMariam || !rLetter || !a2Letter || !mMariam || !amContainer) return undefined;
-
+      
         const iMariamRect = iMariam.getBoundingClientRect();
         const rRect = rLetter.getBoundingClientRect();
         const a2Rect = a2Letter.getBoundingClientRect();
         const mMariamRect = mMariam.getBoundingClientRect();
-
+      
         const heroSection = document.getElementById("hero");
         if (!heroSection) return undefined;
         const heroRect = heroSection.getBoundingClientRect();
-
+      
         const iMariamCenterX = iMariamRect.left - heroRect.left + iMariamRect.width / 2;
         const iMariamCenterY = iMariamRect.top - heroRect.top + (iMariamRect.height * 0.25);
         const a2CenterX = a2Rect.left - heroRect.left + a2Rect.width / 2;
         const a2CenterY = a2Rect.top - heroRect.top + a2Rect.height / 2;
         const mCenterX = mMariamRect.left - heroRect.left + mMariamRect.width / 2;
         const mCenterY = mMariamRect.top - heroRect.top + mMariamRect.height / 2;
-
+      
         const originalDot = document.createElement("div");
         originalDot.className = "original-i-dot";
-
+      
         heroSection.appendChild(originalDot);
-
+      
         const dotSize = Math.max(iMariamRect.width * 0.25, 35);
-
+      
         gsap.set(originalDot, {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
@@ -259,14 +259,14 @@ const Hero: React.FC = () => {
           rotation: 0,
           scale: 1
         });
-
+      
         const dotTimeline = gsap.timeline();
-
+      
         dotTimeline.set(iRef.current, {
           textContent: "ı",
           transformOrigin: "bottom center"
         });
-
+      
         dotTimeline.to(originalDot, {
           keyframes: [
             { x: iMariamCenterX - (dotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
@@ -274,7 +274,7 @@ const Hero: React.FC = () => {
             { x: iMariamCenterX - (dotSize / 2), duration: 0.2, ease: "power1.inOut" }
           ]
         });
-
+      
         dotTimeline.to(originalDot, {
           keyframes: [
             { y: iMariamCenterY + 60, backgroundColor: "#DCEFD0", duration: 0.4, ease: "power2.in" },
@@ -282,7 +282,7 @@ const Hero: React.FC = () => {
             { y: iMariamCenterY - 15, scaleY: 1, backgroundColor: "#BADDA6", duration: 0.2, ease: "bounce.out" }
           ]
         });
-
+      
         dotTimeline.to(originalDot, {
           y: a2CenterY - 50,
           x: a2CenterX - (dotSize / 2),
@@ -316,34 +316,7 @@ const Hero: React.FC = () => {
           }
         });
         dotTimeline.to(originalDot, { scaleY: 1, duration: 0.1 });
-
-        dotTimeline.to(originalDot, {
-          keyframes: [
-            { x: iMariamCenterX - (dotSize / 2) + 40, y: iMariamCenterY - (dotSize / 2) - 10, scale: 1.1, duration: 0.2, ease: "power2.in" },
-            {
-              x: iMariamCenterX - (dotSize / 2),
-              y: iMariamCenterY - (dotSize / 2),
-              scale: 0.6,
-              duration: 0.08,
-              ease: "power2.out",
-              onComplete: () => {
-                if (iRef.current) {
-                  gsap.to(iRef.current, {
-                    rotation: -16,
-                    x: -8,
-                    y: 0,
-                    transformOrigin: "bottom center",
-                    color: "#ABCD9B",
-                    duration: 0.8,
-                    ease: "elastic.out(1.2, 0.6)"
-                  });
-                }
-              }
-            },
-            { scale: 1, duration: 0.15, ease: "bounce.out" }
-          ]
-        }, "+=0.3");
-
+      
         dotTimeline.to(originalDot, {
           keyframes: [
             { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, duration: 0.3, ease: "power2.out" },
@@ -367,27 +340,23 @@ const Hero: React.FC = () => {
             { scaleY: 1, duration: 0.1 }
           ]
         }, "+=0.3");
-
+      
         dotTimeline.to(originalDot, {
           keyframes: [
             { backgroundColor: "#E9F4E3", y: mCenterY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
             { y: heroRect.height + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
           ]
         }, "+=0.3");
-
+      
         dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
-
+      
         const finalDot = document.createElement("div");
         finalDot.className = "final-i-dot";
-
+      
         heroSection.appendChild(finalDot);
-
-        const rRightEdge = rRect.right - heroRect.left;
-        const rCenterX = rRightEdge - Math.max(Math.min(dotSize * 0.3, rRect.width * 0.25), dotSize * 0.15);
-        const rCenterY = rRect.top - heroRect.top + Math.max(Math.min(rRect.height * 0.18, dotSize * 0.35), 6);
-
-        const finalDotSize = dotSize + 7;
-
+      
+        const finalDotSize = dotSize ;
+      
         gsap.set(finalDot, {
           width: `${finalDotSize}px`,
           height: `${finalDotSize}px`,
@@ -398,50 +367,54 @@ const Hero: React.FC = () => {
           opacity: 1,
           left: 0,
           top: 0,
-          x: rCenterX - (finalDotSize / 2),
+          x: iMariamCenterX - (finalDotSize / 2),
           y: -50,
           rotation: 0,
           scale: 1
         });
-
+      
         const finalDotTimeline = gsap.timeline();
-
+      
+        // EXACT SAME MOTION as the original dot's first movement on "i"
         finalDotTimeline.to(finalDot, {
           keyframes: [
-            { y: rCenterY + 40, duration: 0.4, ease: "power2.in" },
-            { y: rCenterY - 10, duration: 0.15, ease: "power2.out" },
-            {
-              y: rCenterY,
-              duration: 0.1,
+            { x: iMariamCenterX - (finalDotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
+            { x: iMariamCenterX - (finalDotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
+            { x: iMariamCenterX - (finalDotSize / 2), duration: 0.2, ease: "power1.inOut" }
+          ]
+        });
+      
+        finalDotTimeline.to(finalDot, {
+          keyframes: [
+            { y: iMariamCenterY + 60, backgroundColor: "#DCEFD0", duration: 0.4, ease: "power2.in" },
+            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#CBE6BB", duration: 0.15, ease: "power2.out" },
+            { 
+              y: iMariamCenterY , 
+              scaleY: 1, 
+              backgroundColor: "#ABCD9B", 
+              duration: 0.2, 
               ease: "bounce.out",
               onComplete: () => {
+                // Land permanently on "i" - change the "i" color and make it stay
                 if (iRef.current) {
                   gsap.to(iRef.current, {
-                    rotation: -16,
-                    x: -8,
-                    y: 0,
-                    transformOrigin: "bottom center",
                     color: "#ABCD9B",
-                    duration: 0.2
+                    duration: 0.3,
+                    ease: "power2.out"
                   });
                 }
               }
             }
           ]
         });
-
+      
+        // Keep the dot visible permanently (no fade out)
         finalDotTimeline.to(finalDot, {
-          scale: 1.3,
-          duration: 0.1,
-          yoyo: true,
-          repeat: 1,
-          ease: "power2.inOut"
+          duration: 1 // Just wait, don't animate anything
         });
-
-        finalDotTimeline.to(finalDot, { duration: 1 });
-
+      
         dotTimeline.add(finalDotTimeline);
-
+      
         return dotTimeline;
       };
 
