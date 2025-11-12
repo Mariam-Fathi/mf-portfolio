@@ -144,6 +144,7 @@ const Hero: React.FC = () => {
           transformOrigin: "bottom center"
         });
       
+        // Wiggle animation on the "i" position
         dotTimeline.to(originalDot, {
           keyframes: [
             { x: iMariamCenterX - (dotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
@@ -152,23 +153,80 @@ const Hero: React.FC = () => {
           ]
         });
       
+        // STUCK JUMP from "i" to "a" - gets stuck, struggles, then jumps
         dotTimeline.to(originalDot, {
           keyframes: [
-            { y: iMariamCenterY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" }, // Lighter variant
-            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#F4BAA8", duration: 0.15, ease: "power2.out" }, // Medium-light variant
-            { y: iMariamCenterY - 15, scaleY: 1, backgroundColor: "#E86A4A", duration: 0.2, ease: "bounce.out" } // Medium-dark variant
+            { 
+              // Try to jump but get stuck - small upward movement
+              y: iMariamCenterY - 20 ,
+              scaleX: 1.4,
+              scaleY: 1,              
+              duration: .6,
+              backgroundColor: "#E6B7AC", // Darker variant
+              ease: "power1.inOut"
+            },
+        
+      
+            { 
+              // Get pulled back down - stuck effect
+              y: iMariamCenterY - 20 ,
+              scaleX: 1.4,
+              scaleY: 1.6,              
+              duration: .6,
+              backgroundColor: "#E55A3A", // Darker variant
+              ease: "power1.inOut"
+            },
+            { 
+              // Struggle - small vibration while stuck
+              x: iMariamCenterX - (dotSize / 2) - 2,
+              duration: 0.1,
+              ease: "power1.inOut"
+            },
+            { 
+              x: iMariamCenterX - (dotSize / 2) + 2,
+              duration: 0.1,
+              ease: "power1.inOut"
+            },
+            { 
+              x: iMariamCenterX - (dotSize / 2),
+              duration: 0.1,
+              ease: "power1.inOut"
+            },
+            { 
+              // Build up energy for the real jump - compression
+              scaleX: 1.2,
+              scaleY: 0.7,
+              duration: 0.15,
+              ease: "power2.out"
+            },
+            { 
+              // EXPLOSIVE BREAK FREE JUMP!
+              y: iMariamCenterY - 80,
+              scaleY: 0.9,
+              scaleX: 1.1,
+              duration: 0.2,
+              ease: "power4.out"
+            },
+            { 
+              // Arc smoothly to "a" position
+              x: a2CenterX - (dotSize / 2),
+              y: a2CenterY - 50,
+              scaleY: 0.75,
+              scaleX: 1,
+              backgroundColor: "#E55A3A", // Darker variant
+              duration: 0.4,
+              ease: "sine.inOut"
+            }
           ]
         });
       
-        dotTimeline.to(originalDot, {
-          y: a2CenterY - 50,
-          x: a2CenterX - (dotSize / 2),
-          scaleY: 0.75,
-          backgroundColor: "#E55A3A", // Darker variant
-          duration: 0.3,
-          ease: "power2.out"
+        // Continue with the existing "a" landing animation
+        dotTimeline.to(originalDot, { 
+          y: a2CenterY - 70, 
+          duration: 0.2, 
+          ease: "sine.inOut" 
         });
-        dotTimeline.to(originalDot, { y: a2CenterY - 70, duration: 0.2, ease: "sine.inOut" });
+        
         dotTimeline.to(originalDot, {
           y: a2CenterY + 10,
           scaleY: 1.2,
@@ -176,6 +234,7 @@ const Hero: React.FC = () => {
           duration: 0.25,
           ease: "power2.in"
         });
+        
         dotTimeline.to(originalDot, {
           y: a2CenterY,
           scaleY: 0.8,
@@ -192,8 +251,13 @@ const Hero: React.FC = () => {
             }
           }
         });
-        dotTimeline.to(originalDot, { scaleY: 1, duration: 0.1 });
+        
+        dotTimeline.to(originalDot, { 
+          scaleY: 1, 
+          duration: 0.1 
+        });
       
+        // Continue with the rest of the animation to "m"
         dotTimeline.to(originalDot, {
           keyframes: [
             { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.3, ease: "power2.out" }, // Darker variant
