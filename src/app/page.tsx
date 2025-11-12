@@ -155,14 +155,6 @@ export default function Home() {
           <CinematicShowcase />
         </section>
         <section
-          id="experience"
-          ref={setSectionRef("experience")}
-          className="relative flex min-h-[100vh] w-full items-center justify-center"
-        >
-          <JobTimeline />
-        </section>
-
-        <section
           id="skills"
           ref={setSectionRef("skills")}
           className="relative flex min-h-[100vh] w-full items-center justify-center"
@@ -170,7 +162,13 @@ export default function Home() {
           <EverythingConnected />
         </section>
 
-  
+        <section
+          id="experience"
+          ref={setSectionRef("experience")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
+        >
+          <JobTimeline />
+        </section>
 
         <section
           id="contact"
