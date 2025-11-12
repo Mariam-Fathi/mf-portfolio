@@ -71,14 +71,14 @@ const JobTimeline = () => {
   return (
     <section
       id="job-timeline"
-      className="relative w-full overflow-hidden bg-[#E2E6E7] py-20 text-[#0F1B17]"
+      className="relative w-full overflow-hidden py-20 text-[#0F1B17] bg-[#F5ECE1]"
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-80"
         style={{
           backgroundImage:
-            "linear-gradient(90deg, rgba(13,25,21,0.08) 1px, transparent 1px), linear-gradient(0deg, rgba(13,25,21,0.08) 1px, transparent 1px)",
+            "linear-gradient(90deg, rgba(1, 51, 43, 0.8) 1px, transparent 1px), linear-gradient(0deg, rgba(1, 51, 43, 0.8) 1px, transparent 1px)",
           backgroundSize: "120px 120px",
         }}
       />

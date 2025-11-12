@@ -130,7 +130,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen w-full bg-[#080E0B] text-[#FEFCE0]">
+    <div className="relative min-h-screen w-full bg-[#F5ECE1] text-[#FEFCE0]">
       {/* <Navbar
         items={navItems}
         homeId="hero"
@@ -150,14 +150,14 @@ export default function Home() {
         <section
           id="work"
           ref={setSectionRef("work")}
-          className="relative flex min-h-[100vh] w-full bg-white text-[#080E0B]"
+          className="relative flex min-h-[100vh] w-full  text-[#080E0B]"
         >
           <CinematicShowcase />
         </section>
         <section
           id="experience"
           ref={setSectionRef("experience")}
-          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#F8FAF4] text-[#080E0B]"
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
         >
           <JobTimeline />
         </section>
@@ -165,7 +165,7 @@ export default function Home() {
         <section
           id="skills"
           ref={setSectionRef("skills")}
-          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#FDEB7F] text-[#080E0B]"
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
         >
           <EverythingConnected />
         </section>
@@ -175,7 +175,7 @@ export default function Home() {
         <section
           id="contact"
           ref={setSectionRef("contact")}
-          className="relative flex min-h-[100vh] w-full items-center justify-center bg-[#080E0B] text-[#FEFCE0]"
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
         >
           <Contact />
         </section>

@@ -471,7 +471,7 @@ const Hero: React.FC = () => {
       id="hero"
       className="flex min-h-screen w-full flex-col items-center justify-start px-6 py-12 text-center text-[#E2E6E7] sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
       style={{
-        backgroundColor: "#01332B",
+        backgroundColor: "#F5ECE1",
         paddingTop: "clamp(48px, 10vh, 160px)",
         paddingBottom: "clamp(80px, 14vh, 200px)",
       }}

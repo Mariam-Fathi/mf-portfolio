@@ -36,7 +36,7 @@ const skillRows: string[][] = [
 ];
 
 const palette = {
-  background: "#EDBBEC",
+  background: "#F5ECE1",
   foreground: "#0B8658",
   accent: "#0B8658",
   accentSoft: "rgba(11, 134, 88, 0.12)",
