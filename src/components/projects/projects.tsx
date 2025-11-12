@@ -6,11 +6,26 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+type ProjectLink = {
+  name: string;
+  url: string;
+};
+
+type Project = {
+  id: string;
+  title: string;
+  role: string;
+  description: string;
+  image: string;
+  tags: string[];
+  links: ProjectLink[];
+};
+
 type ProjectsProps = {
   scrollContainer?: HTMLDivElement | null;
 };
 
-const projects = [
+const projects: Project[] = [
   {
     id: "personality-ai",
     title: "Multimodal Personality Analysis",
@@ -88,6 +103,13 @@ const projects = [
 
 const cardPalette = [
   {
+    background: "#F4FED9", 
+    headline: "#251B28",
+    headlineStroke: "rgba(37, 27, 40, 0.18)",
+    body: "rgba(37, 27, 40, 0.78)",
+    link: "#251B28",
+  },
+  {
     background: "#E2E6E7", // Perfect Plum
     headline: "#0B8658",
     headlineStroke: "#0B8658",
@@ -98,7 +120,7 @@ const cardPalette = [
     background: "#01332B", // Minty Emerald
     headline: "#E74C3C",
   headlineStroke: "#E74C3C",
-    body: "#E3E6E5",
+    body: "#F48019",
     link: "#E74C3C",
   },
   {
@@ -185,6 +207,7 @@ export default function GalleryShowcase({
           yPercent: index === 0 ? 0 : 110,
           zIndex: index === 0 ? topZIndex : index + 1,
           autoAlpha: 1,
+          filter: index === 0 ? "blur(0px)" : "blur(16px)",
         });
       });
 
@@ -194,11 +217,27 @@ export default function GalleryShowcase({
 
       cards.forEach((card, index) => {
         if (index === 0) return;
-        timeline
-          .add(() => {
-            gsap.set(card, { zIndex: topZIndex + index });
-          }, index - 1)
-          .to(card, { yPercent: 0 }, index - 1);
+
+        const transitionStart = index - 1;
+        const previousCard = cards[index - 1];
+
+        timeline.add(() => {
+          gsap.set(card, { zIndex: topZIndex + index });
+        }, transitionStart);
+
+        timeline.to(
+          card,
+          { yPercent: 0, filter: "blur(0px)" },
+          transitionStart
+        );
+
+        if (previousCard) {
+          timeline.to(
+            previousCard,
+            { filter: "blur(16px)" },
+            transitionStart
+          );
+        }
       });
 
       const useTransformPin =
@@ -258,6 +297,7 @@ export default function GalleryShowcase({
           gsap.set(card, {
             yPercent: index === 0 ? 0 : 110,
             zIndex: index === 0 ? topZIndex : index + 1,
+            filter: index === 0 ? "blur(0px)" : "blur(16px)",
           });
         });
 
@@ -290,7 +330,7 @@ export default function GalleryShowcase({
       className="relative h-full w-full overflow-x-hidden"
       style={{
         minHeight: "100vh",
-        background: "#FFFFFF",
+        background: "#F5ECE1",
       }}
     >
       <div
@@ -307,7 +347,7 @@ export default function GalleryShowcase({
             paddingTop: "6vh",
             paddingBottom: "6vh",
             overflow: "hidden",
-            background: "#FFFFFF",
+            background: "#F5ECE1",
           }}
         >
           {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
@@ -325,7 +365,6 @@ export default function GalleryShowcase({
               }
               
               const colors = cardPalette[index % cardPalette.length];
-              const verticalOffset = index * 12;
 
               return (
               <React.Fragment key={project.id}>
@@ -334,30 +373,18 @@ export default function GalleryShowcase({
                   ref={(el) => {
                     projectRefsRef.current[index] = el;
                   }}
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    overflow: "hidden",
-                    marginTop: `${index * 12}px`,
-                  }}
+                  className="absolute inset-0 flex items-center justify-center overflow-hidden"
                 >
-                  <div className="w-full w-[100vw] h-[100vh] mx-auto  flex flex-col relative">
+                  <div className="w-[90vw]  max-h-[85vh] aspect-[16/10] mx-auto flex flex-col relative">
                     {/* Rounded Card Container with Hero Background */}
                     <div 
-                      className="w-full h-full px-6 md:px-8 lg:px-12 pt-6 md:pt-8 lg:pt-12 pb-3 md:pb-4 lg:pb-6 relative overflow-hidden"
+                      className="rounded-4xl w-full h-full px-6 md:px-8 lg:px-12 pt-6 md:pt-8 lg:pt-12 pb-3 md:pb-4 lg:pb-6 relative overflow-hidden"
                       style={{
                         background: colors.background,
                       }}
                     >
                       <div className="relative flex h-full w-full">
-                        <div
-                          className="absolute flex items-end gap-8"
-                          style={{
-                            bottom: `${verticalOffset}px`,
-                            // left: "6%",
-                          }}
-                        >
+                        <div className="absolute inset-0 flex items-end gap-8">
                           {/* Hero Number */}
                           <div
                             className="select-none leading-none tracking-tight"
@@ -379,6 +406,7 @@ export default function GalleryShowcase({
                           <div
                             className="flex flex-col gap-4 text-left"
                             style={{
+                              fontFamily: '"Inter", sans-serif',
                               // maxWidth: "min(700px, 70vw)",
                             }}
                           >
@@ -386,12 +414,12 @@ export default function GalleryShowcase({
                               <div
                                 className="relative w-full max-w-[520px] aspect-[4/3] overflow-hidden"
                               >
-                                <img
+                                {/* <img
                                   src={project.image}
                                   alt={project.title}
                                   className="absolute inset-0 h-full w-full object-contain"
                                   style={{ mixBlendMode: "normal" }}
-                                />
+                                /> */}
                               </div>
                             </div>
                             <div

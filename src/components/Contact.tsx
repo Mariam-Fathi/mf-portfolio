@@ -301,7 +301,7 @@ const Contact: React.FC = () => {
   return (
     <section
       id="contact"
-      className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F7F8F5] text-[#111827]"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F5ECE1] text-[#111827]"
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_top_left,_rgba(255,246,223,0.65),_transparent_55%)]" />
