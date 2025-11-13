@@ -80,18 +80,22 @@ export const projects = [
 ];
 
 export const navLinks = [
-    {
-        name: "Work",
-        link: "#work",
-    },
-    {
-        name: "Experience",
-        link: "#experience",
-    },
-    {
-        name: "Skills",
-        link: "#skills",
-    },
+  {
+    name: "Work",
+    link: "#work",
+  },
+  {
+    name: "Certificates",
+    link: "#certificates",
+  },
+  {
+    name: "Skills",
+    link: "#skills",
+  },
+  {
+    name: "Experience",
+    link: "#experience",
+  },
 ];
 
 export const counterItems = [
