@@ -12,6 +12,7 @@ const Hero: React.FC = () => {
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
   const cursorRef = useRef<HTMLDivElement | null>(null);
+  const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
   // Cursor follower effect
@@ -53,6 +54,17 @@ const Hero: React.FC = () => {
       const letters = document.querySelectorAll('.hero-letter');
       gsap.set(letters, { opacity: 0, y: 100, rotationX: 90 });
 
+      // Initial hide software engineer text characters
+      if (softwareEngineerRef.current) {
+        const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
+        gsap.set(chars, { 
+          opacity: 0, 
+          y: 20,
+          scale: 0.5,
+          rotation: -5
+        });
+      }
+
       const nameEntrance = gsap.timeline();
 
       nameEntrance.fromTo('.hero-mar .hero-letter', {
@@ -83,12 +95,31 @@ const Hero: React.FC = () => {
         immediateRender: false
       }, "-=0.3");
 
+      // Animate software engineer text with handwriting effect
+      if (softwareEngineerRef.current) {
+        const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
+        nameEntrance.to(chars, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          rotation: 0,
+          duration: 0.3,
+          stagger: {
+            amount: 1.5,
+            from: "start",
+            ease: "power2.out"
+          },
+          ease: "back.out(1.2)",
+          immediateRender: false
+        }, "-=0.3");
+      }
+
       const masterTimeline = gsap.timeline({
         onComplete: () => setIsAnimationComplete(true)
       });
 
       masterTimeline.add(nameEntrance);
-
+      
       const buildDotTimeline = () => {
         // Get the elements for dot animation
         const iMariam = iRef.current;
@@ -125,7 +156,7 @@ const Hero: React.FC = () => {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#FEF0EB", // Light variant of #DA451F
+          backgroundColor: "#DA451F", // Light variant of #DA451F
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -134,7 +165,7 @@ const Hero: React.FC = () => {
           x: iMariamCenterX - (dotSize / 2),
           y: iMariamCenterY - (dotSize / 2),
           rotation: 0,
-          scale: 1
+          scale: 1.3,
         });
       
         const dotTimeline = gsap.timeline();
@@ -152,7 +183,7 @@ const Hero: React.FC = () => {
             { x: iMariamCenterX - (dotSize / 2), duration: 0.2, ease: "power1.inOut" }
           ]
         });
-      
+    
         // STUCK JUMP from "i" to "a" - gets stuck, struggles, then jumps
         dotTimeline.to(originalDot, {
           keyframes: [
@@ -162,7 +193,7 @@ const Hero: React.FC = () => {
               scaleX: 1.4,
               scaleY: 1,              
               duration: .2,
-              backgroundColor: "#E9D8D4", // Darker variant
+              backgroundColor: "#DA451F", // Darker variant
               ease: "power2.inOut"
             },
 
@@ -172,7 +203,7 @@ const Hero: React.FC = () => {
               scaleX: 1.4,
               scaleY: 1.3,              
               duration: .2,
-              backgroundColor: "#E9D8D4", // Darker variant
+              backgroundColor: "#DA451F", // Darker variant
               ease: "power2.inOut"
             },
         
@@ -219,6 +250,11 @@ const Hero: React.FC = () => {
             }
           ]
         });
+        dotTimeline.to(iRef.current, {
+          color: "#DA451F",
+          duration: 0.4,
+          ease: "power2.out"
+        }, "-=0.7");
       
         // Continue with the existing "a" landing animation
         dotTimeline.to(originalDot, { 
@@ -360,12 +396,18 @@ const Hero: React.FC = () => {
         return dotTimeline;
       };
 
+      // Add dot animation to start in parallel with software engineer typing
+      // Calculate the start time: nameEntrance starts at 0, software engineer starts at (duration - 0.3)
       masterTimeline.add(() => {
         const dotTimeline = buildDotTimeline();
         if (dotTimeline) {
-          masterTimeline.add(dotTimeline, "+=0");
+          // Calculate when software engineer starts: nameEntrance duration - 0.3
+          // Since nameEntrance is added at position 0, the absolute time is just (duration - 0.3)
+          const nameEntranceDuration = nameEntrance.duration();
+          const softwareEngineerStartTime = Math.max(0, nameEntranceDuration - 0.3);
+          masterTimeline.add(dotTimeline, softwareEngineerStartTime);
         }
-      }, "+=0.15");
+      });
 
     }, headingRef);
 
@@ -412,16 +454,25 @@ const Hero: React.FC = () => {
               r
             </span>
           </span>
-          <span className="hero-iam">
-            <span className="hero-i-wrapper">
-              <span ref={iRef} className="hero-letter hero-letter-i">
-                i
+          <span className="hero-iam-wrapper">
+            <span className="hero-iam">
+              <span className="hero-i-wrapper">
+                <span ref={iRef} className="hero-letter hero-letter-i">
+                  i
+                </span>
+              </span>
+              <span ref={amContainerRef} className="hero-am">
+                <span ref={a2mRef} className="hero-letter">a</span>
+                <span ref={mMariamRef} className="hero-letter">m</span>
               </span>
             </span>
-            <span ref={amContainerRef} className="hero-am">
-              <span ref={a2mRef} className="hero-letter">a</span>
-              <span ref={mMariamRef} className="hero-letter">m</span>
-            </span>
+            <div ref={softwareEngineerRef} className="hero-software-engineer">
+              {"software engineer".split("").map((char, index) => (
+                <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
+                  {char === " " ? "\u00A0" : char}
+                </span>
+              ))}
+            </div>
           </span>
         </span>
       </h1>
@@ -444,6 +495,32 @@ const Hero: React.FC = () => {
           display: inline-flex;
           align-items: flex-end;
           position: relative;
+        }
+
+
+        .hero-iam-wrapper {
+          display: inline-flex;
+          align-items: flex-end;
+          position: relative;
+        }
+
+        .hero-software-engineer {
+          font-family: "Rock Salt", cursive;
+          font-size: clamp(1.5rem, 4vw, 3rem);
+          color: #DA451F;
+          text-align: center;
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+          z-index: 10;
+          line-height: 1.2;
+        }
+
+        .hero-software-engineer .hero-char {
+          display: inline-block;
+          transform-origin: bottom center;
         }
 
         .hero-am {

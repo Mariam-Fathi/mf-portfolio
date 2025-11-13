@@ -169,7 +169,7 @@ export function StickyScroll({
           : undefined
       }
       className={cn(
-        "relative flex h-[30rem] justify-center space-x-10 overflow-y-auto rounded-md p-10 focus:outline-none",
+        "relative flex h-[30rem] justify-center space-x-10 overflow-y-auto rounded-3xl p-10 focus:outline-none",
         containerClassName,
         hideScrollbar ? HIDE_SCROLLBAR_CLASS : undefined,
       )}
