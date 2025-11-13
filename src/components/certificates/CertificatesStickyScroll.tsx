@@ -95,7 +95,7 @@ export const CertificatesStickyScroll = () => {
       id="certificates"
       className="w-full py-16"
     >
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="mx-auto  px-6">
         <StickyScroll
           content={certificateContent}
           contentClassName="h-64 w-96"
