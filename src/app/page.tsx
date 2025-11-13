@@ -10,6 +10,7 @@ import React, {
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/hero/hero";
 import CinematicShowcase from "@/components/projects/projects";
+import CertificatesStickyScroll from "@/components/certificates/CertificatesStickyScroll";
 import JobTimeline from "@/components/job-timeline/JobTimeline";
 import EverythingConnected from "@/components/everything-connected/EverythingConnected";
 import Contact from "@/components/Contact";
@@ -19,13 +20,21 @@ import { gsap } from "gsap";
 
 gsap.registerPlugin(ScrollTrigger);
 
-type SectionId = "hero" | "work" | "experience" | "skills" | "contact";
+type SectionId =
+  | "hero"
+  | "work"
+  | "certificates"
+  | "experience"
+  | "skills"
+  | "contact";
 
 const sectionOverlayBackgrounds: Record<SectionId, string> = {
   hero:
     "linear-gradient(140deg, rgba(10,16,14,0.94) 0%, rgba(18,28,26,0.85) 45%, rgba(24,35,30,0.82) 100%)",
   work:
     "linear-gradient(135deg, rgba(158,167,147,0.94) 0%, rgba(138,146,128,0.88) 45%, rgba(116,126,107,0.84) 100%)",
+  certificates:
+    "linear-gradient(135deg, rgba(15,23,42,0.94) 0%, rgba(30,41,59,0.88) 45%, rgba(12,26,46,0.84) 100%)",
   experience:
     "linear-gradient(135deg, rgba(248,250,244,0.96) 0%, rgba(222,234,214,0.9) 55%, rgba(200,214,192,0.86) 100%)",
   skills:
@@ -41,8 +50,9 @@ export default function Home() {
   const sectionRefs = useRef<Record<SectionId, HTMLDivElement | null>>({
     hero: null,
     work: null,
-    experience: null,
+    certificates: null,
     skills: null,
+    experience: null,
     contact: null,
   });
 
@@ -146,14 +156,23 @@ export default function Home() {
         >
           <Hero />
         </section>
-
+        <section
+          id="experience"
+          ref={setSectionRef("experience")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center"
+        >
+          <JobTimeline />
+        </section>
         <section
           id="work"
           ref={setSectionRef("work")}
-          className="relative flex min-h-[100vh] w-full  text-[#080E0B]"
+          className="relative flex min-h-[100vh] w-full text-[#080E0B]"
         >
           <CinematicShowcase />
         </section>
+
+     
+
         <section
           id="skills"
           ref={setSectionRef("skills")}
@@ -162,14 +181,14 @@ export default function Home() {
           <EverythingConnected />
         </section>
 
+     
         <section
-          id="experience"
-          ref={setSectionRef("experience")}
-          className="relative flex min-h-[100vh] w-full items-center justify-center"
+          id="certificates"
+          ref={setSectionRef("certificates")}
+          className="relative flex min-h-[100vh] w-full items-center justify-center text-[#F8FAFC]"
         >
-          <JobTimeline />
+          <CertificatesStickyScroll />
         </section>
-
         <section
           id="contact"
           ref={setSectionRef("contact")}
