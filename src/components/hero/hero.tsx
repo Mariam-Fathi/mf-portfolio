@@ -18,7 +18,7 @@ const Hero: React.FC = () => {
     { number: "01", label: "Experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
     { number: "02", label: "Projects", badgeColor: "#E45CA5", badgeText: "#2C2116" },
     { number: "03", label: "Certificaties", badgeColor: "#8ED457", badgeText: "#2C2116" },
-    { number: "04", label: "Contact Me", badgeColor: "#1E72EF", badgeText: "#2C2116GIT " },
+    { number: "04", label: "Contact Me", badgeColor: "#1E72EF", badgeText: "#2C2116" },
 
   ];
 
