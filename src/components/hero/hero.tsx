@@ -14,6 +14,11 @@ const Hero: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const coverSections = [
+    { number: "01", label: "Experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
+    { number: "02", label: "Projects", badgeColor: "#E45CA5", badgeText: "#fff" },
+    { number: "03", label: "Certificaties", badgeColor: "#8ED457", badgeText: "#1F2B12" },
+  ];
 
   // Cursor follower effect
   useEffect(() => {
@@ -404,46 +409,154 @@ const Hero: React.FC = () => {
         }}
       />
 
-      {/* Mariam Text - Centered and Bigger */}
-      <h1
-        ref={headingRef}
-        className="hero-heading font-black leading-[0.85] text-[clamp(8rem,20vw,24rem)] text-center"
-      >
-        <span className="hero-name">
-          <span className="hero-mar">
-            <span className="hero-letter">M</span>
-            <span ref={a1Ref} className="hero-letter">a</span>
-            <span ref={rRef} className="hero-letter hero-letter-r">
-              r
-            </span>
-          </span>
-          <span className="hero-iam-wrapper">
-            <span className="hero-iam">
-              <span className="hero-i-wrapper">
-                <span ref={iRef} className="hero-letter hero-letter-i">
-                  i
+      <div className="hero-cover">
+        <div className="hero-cover-header">
+          <p className="hero-cover-title">Portfolio</p>
+          <div className="hero-cover-line" />
+        </div>
+
+        <div className="hero-heading-wrapper">
+          {/* Mariam Text */}
+          <h1
+            ref={headingRef}
+            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+          >
+            <span className="hero-name">
+              <span className="hero-mar">
+                <span className="hero-letter">M</span>
+                <span ref={a1Ref} className="hero-letter">a</span>
+                <span ref={rRef} className="hero-letter hero-letter-r">
+                  r
                 </span>
               </span>
-              <span ref={amContainerRef} className="hero-am">
-                <span ref={a2mRef} className="hero-letter">a</span>
-                <span ref={mMariamRef} className="hero-letter">m</span>
+              <span className="hero-iam-wrapper">
+                <span className="hero-iam">
+                  <span className="hero-i-wrapper">
+                    <span ref={iRef} className="hero-letter hero-letter-i">
+                      i
+                    </span>
+                  </span>
+                  <span ref={amContainerRef} className="hero-am">
+                    <span ref={a2mRef} className="hero-letter">a</span>
+                    <span ref={mMariamRef} className="hero-letter">m</span>
+                  </span>
+                </span>
+                <div ref={softwareEngineerRef} className="hero-software-engineer">
+                  {"software engineer".split("").map((char, index) => (
+                    <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
+                      {char === " " ? "\u00A0" : char}
+                    </span>
+                  ))}
+                </div>
               </span>
             </span>
-            <div ref={softwareEngineerRef} className="hero-software-engineer">
-              {"software engineer".split("").map((char, index) => (
-                <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
-                  {char === " " ? "\u00A0" : char}
-                </span>
-              ))}
+          </h1>
+        </div>
+
+        <div className="hero-cover-list" role="list">
+          {coverSections.map((section) => (
+            <div key={section.number} className="hero-cover-item" role="listitem">
+              <span
+                className="hero-cover-badge"
+                style={{ backgroundColor: section.badgeColor, color: section.badgeText }}
+              >
+                {section.number}
+              </span>
+              <span className="hero-cover-text">{section.label}</span>
             </div>
-          </span>
-        </span>
-      </h1>
+          ))}
+        </div>
+      </div>
 
       <style jsx>{`
         .hero-heading {
           font-family: "Momo Trust Display", sans-serif;
           letter-spacing: normal;
+          text-align: right;
+        }
+
+        .hero-cover {
+          width: 100%;
+          max-width: 1100px;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .hero-cover-header {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+        }
+
+        .hero-cover-title {
+          font-size: clamp(1rem, 2vw, 1.25rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #1e140b;
+          margin: 0;
+        }
+
+        .hero-cover-line {
+          width: 100%;
+          height: 4px;
+          background-color: #DA451F;
+        }
+
+        .hero-heading-wrapper {
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+        }
+
+        .hero-cover-list {
+          border-top: 2px solid #E2D5C5;
+          border-bottom: 2px solid #E2D5C5;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .hero-cover-item {
+          display: flex;
+          align-items: center;
+          gap: 1.5rem;
+          padding: 1rem 0;
+          border-bottom: 1px solid #E2D5C5;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+        }
+
+        .hero-cover-item:last-child {
+          border-bottom: none;
+        }
+
+        .hero-cover-badge {
+          width: 52px;
+          height: 52px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 1rem;
+          flex-shrink: 0;
+        }
+
+        .hero-cover-text {
+          font-size: clamp(1.25rem, 3vw, 2.5rem);
+          font-weight: 600;
+          color: #14110F;
+        }
+
+        @media (max-width: 768px) {
+          .hero-heading-wrapper {
+            justify-content: center;
+          }
+
+          .hero-heading {
+            text-align: center;
+          }
         }
 
         .hero-name {
