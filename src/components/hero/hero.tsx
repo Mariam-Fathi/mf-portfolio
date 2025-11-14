@@ -16,8 +16,10 @@ const Hero: React.FC = () => {
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const coverSections = [
     { number: "01", label: "Experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
-    { number: "02", label: "Projects", badgeColor: "#E45CA5", badgeText: "#fff" },
-    { number: "03", label: "Certificaties", badgeColor: "#8ED457", badgeText: "#1F2B12" },
+    { number: "02", label: "Projects", badgeColor: "#E45CA5", badgeText: "#2C2116" },
+    { number: "03", label: "Certificaties", badgeColor: "#8ED457", badgeText: "#2C2116" },
+    { number: "04", label: "Contact Me", badgeColor: "#1E72EF", badgeText: "#2C2116" },
+
   ];
 
   // Cursor follower effect
@@ -453,7 +455,7 @@ const Hero: React.FC = () => {
           </h1>
         </div>
 
-        <div className="hero-cover-list" role="list">
+        <div className="hero-cover-list mt-10" role="list">
           {coverSections.map((section) => (
             <div key={section.number} className="hero-cover-item" role="listitem">
               <span
