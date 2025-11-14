@@ -150,7 +150,7 @@ const Hero: React.FC = () => {
       
         heroSection.appendChild(originalDot);
       
-        const dotSize = Math.max(iMariamRect.width * 0.25, 35) + 7;
+        const dotSize = Math.max(iMariamRect.width * 0.25, 35);
       
         gsap.set(originalDot, {
           width: `${dotSize}px`,
@@ -165,7 +165,7 @@ const Hero: React.FC = () => {
           x: iMariamCenterX - (dotSize / 2),
           y: iMariamCenterY - (dotSize / 2),
           rotation: 0,
-          scale: 1.3,
+          
         });
       
         const dotTimeline = gsap.timeline();
@@ -178,56 +178,19 @@ const Hero: React.FC = () => {
         // Wiggle animation on the "i" position
         dotTimeline.to(originalDot, {
           keyframes: [
-            { x: iMariamCenterX - (dotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
-            { x: iMariamCenterX - (dotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
-            { x: iMariamCenterX - (dotSize / 2), duration: 0.2, ease: "power1.inOut" }
+            { x: iMariamCenterX - (dotSize / 2), duration: .15, ease: "elastic" },
           ]
         });
     
         // STUCK JUMP from "i" to "a" - gets stuck, struggles, then jumps
         dotTimeline.to(originalDot, {
           keyframes: [
-            { 
-              // Try to jump but get stuck - small upward movement
-              y: iMariamCenterY - 20 ,
-              scaleX: 1.4,
-              scaleY: 1,              
-              duration: .2,
-              backgroundColor: "#DA451F", // Darker variant
-              ease: "power2.inOut"
-            },
-
-            { 
-              // Try to jump but get stuck - small upward movement
-              y: iMariamCenterY - 20 ,
-              scaleX: 1.4,
-              scaleY: 1.3,              
-              duration: .2,
-              backgroundColor: "#DA451F", // Darker variant
-              ease: "power2.inOut"
-            },
-        
-            { 
-              // Struggle - small vibration while stuck
-              x: iMariamCenterX - (dotSize / 2) - 2,
-              duration: 0.1,
-              ease: "power1.inOut"
-            },
-            { 
-              x: iMariamCenterX - (dotSize / 2) + 2,
-              duration: 0.1,
-              ease: "power1.inOut"
-            },
-            { 
-              x: iMariamCenterX - (dotSize / 2),
-              duration: 0.1,
-              ease: "power1.inOut"
-            },
+  
             { 
               // Build up energy for the real jump - compression
               scaleX: 1.2,
               scaleY: 0.7,
-              duration: 0.15,
+              duration: 0.2,
               ease: "power2.out"
             },
             { 
@@ -235,7 +198,7 @@ const Hero: React.FC = () => {
               y: iMariamCenterY - 80,
               scaleY: 0.9,
               scaleX: 1.1,
-              duration: 0.2,
+              duration: 0.7,
               ease: "power4.out"
             },
             { 
