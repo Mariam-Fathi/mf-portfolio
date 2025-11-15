@@ -458,10 +458,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         {/* Navigation List - CLICKABLE */}
         <div className="hero-cover-list mt-10" role="list">
-          {coverSections.map((section) => (
+          {coverSections.map((section, index) => (
             <div 
               key={section.number} 
-              className="hero-cover-item nav-link" 
+              className={`hero-cover-item nav-link ${index === coverSections.length - 1 ? 'last-item' : ''}`}
               role="listitem"
               onClick={() => onNavigate(section.id)}
               style={{ cursor: 'pointer' }}
@@ -563,8 +563,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           transform: translateX(10px);
         }
 
-        .hero-cover-item:last-child {
-          border-bottom: none;
+        .hero-cover-item:last-child,
+        .hero-cover-item.last-item {
+          border-bottom: none !important;
           margin-bottom: 0;
         }
 
