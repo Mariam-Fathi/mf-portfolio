@@ -7,12 +7,12 @@ import { gsap } from "gsap";
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
 const sectionConfig = {
-  hero: { title: "HOME", color: "#DA451F", number: "00", badgeColor: "#DA451F", badgeText: "#2C2116" },
-  experience: { title: "EXPERIENCE", color: "#F7C945", number: "01", badgeColor: "#F7C945", badgeText: "#2C2116" },
-  work: { title: "WORK", color: "#E45CA5", number: "02", badgeColor: "#E45CA5", badgeText: "#2C2116" },
-  skills: { title: "SKILLS", color: "#8ED457", number: "03", badgeColor: "#8ED457", badgeText: "#2C2116" },
-  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "04", badgeColor: "#1E72EF", badgeText: "#2C2116" },
-  contact: { title: "CONTACT", color: "#006f49", number: "05", badgeColor: "#1E72EF", badgeText: "#2C2116" }
+  hero: { title: "HOME", color: "#DA451F", number: "00", badgeColor: "#DA451F", badgeText: "#282828" },
+  experience: { title: "EXPERIENCE", color: "#F7C945", number: "01", badgeColor: "#F7C945", badgeText: "#282828" },
+  work: { title: "PROJECTS", color: "#E45CA5", number: "02", badgeColor: "#E45CA5", badgeText: "#282828" },
+  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "03", badgeColor: "#8ED457", badgeText: "#282828" },
+  skills: { title: "SKILLS", color: "#8ED457", number: "04", badgeColor: "#7B61FF", badgeText: "#282828" },
+  contact: { title: "CONTACT", color: "#006f49", number: "05", badgeColor: "#1283EB", badgeText: "#282828" }
 };
 
 export default function Home() {
