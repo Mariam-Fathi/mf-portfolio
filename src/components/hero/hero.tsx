@@ -3,7 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onNavigate: (section: string) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const iRef = useRef<HTMLSpanElement | null>(null);
   const rRef = useRef<HTMLSpanElement | null>(null);
@@ -14,12 +18,14 @@ const Hero: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  
+  // Navigation sections - these will become the navbar
   const coverSections = [
-    { number: "01", label: "Experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
-    { number: "02", label: "Projects", badgeColor: "#E45CA5", badgeText: "#2C2116" },
-    { number: "03", label: "Certificaties", badgeColor: "#8ED457", badgeText: "#2C2116" },
-    { number: "04", label: "Contact Me", badgeColor: "#1E72EF", badgeText: "#2C2116" },
-
+    { number: "01", label: "Experience", id: "experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
+    { number: "02", label: "Projects", id: "work", badgeColor: "#E45CA5", badgeText: "#2C2116" },
+    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#8ED457", badgeText: "#2C2116" },
+    { number: "04", label: "Skills", id: "certificates", badgeColor: "#8ED457", badgeText: "#2C2116" },
+    { number: "05", label: "Contact", id: "contact", badgeColor: "#1E72EF", badgeText: "#2C2116" },
   ];
 
   // Cursor follower effect
@@ -163,7 +169,7 @@ const Hero: React.FC = () => {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#DA451F", // Light variant of #DA451F
+          backgroundColor: "#DA451F",
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -172,7 +178,6 @@ const Hero: React.FC = () => {
           x: iMariamCenterX - (dotSize / 2),
           y: iMariamCenterY - (dotSize / 2),
           rotation: 0,
-          
         });
       
         const dotTimeline = gsap.timeline();
@@ -192,7 +197,6 @@ const Hero: React.FC = () => {
         // STUCK JUMP from "i" to "a" - gets stuck, struggles, then jumps
         dotTimeline.to(originalDot, {
           keyframes: [
-  
             { 
               // Build up energy for the real jump - compression
               scaleX: 1.2,
@@ -214,7 +218,7 @@ const Hero: React.FC = () => {
               y: a2CenterY - 50,
               scaleY: 0.75,
               scaleX: 1,
-              backgroundColor: "#E55A3A", // Darker variant
+              backgroundColor: "#E55A3A",
               duration: 0.4,
               ease: "sine.inOut"
             }
@@ -236,7 +240,7 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           y: a2CenterY + 10,
           scaleY: 1.2,
-          backgroundColor: "#DF4A2A", // Even darker variant
+          backgroundColor: "#DF4A2A",
           duration: 0.25,
           ease: "power2.in"
         });
@@ -244,7 +248,7 @@ const Hero: React.FC = () => {
         dotTimeline.to(originalDot, {
           y: a2CenterY,
           scaleY: 0.8,
-          backgroundColor: "#DA451F", // Target color
+          backgroundColor: "#DA451F",
           duration: 0.15,
           ease: "bounce.out",
           onComplete: () => {
@@ -266,13 +270,13 @@ const Hero: React.FC = () => {
         // Continue with the rest of the animation to "m"
         dotTimeline.to(originalDot, {
           keyframes: [
-            { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.3, ease: "power2.out" }, // Darker variant
+            { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.3, ease: "power2.out" },
             { y: mCenterY - 120, duration: 0.2, ease: "sine.inOut" },
-            { y: mCenterY + 20, scaleY: 1.2, backgroundColor: "#DF4A2A", duration: 0.25, ease: "power2.in" }, // Even darker variant
+            { y: mCenterY + 20, scaleY: 1.2, backgroundColor: "#DF4A2A", duration: 0.25, ease: "power2.in" },
             {
               y: mCenterY,
               scaleY: 0.8,
-              backgroundColor: "#DA451F", // Target color
+              backgroundColor: "#DA451F",
               duration: 0.15,
               ease: "bounce.out",
               onComplete: () => {
@@ -291,7 +295,7 @@ const Hero: React.FC = () => {
       
         dotTimeline.to(originalDot, {
           keyframes: [
-            { backgroundColor: "#FEF0EB", y: mCenterY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" }, // Light variant
+            { backgroundColor: "#FEF0EB", y: mCenterY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
             { y: heroRect.height + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
           ]
         }, "+=0.3");
@@ -309,7 +313,7 @@ const Hero: React.FC = () => {
           width: `${finalDotSize}px`,
           height: `${finalDotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#DA451F", // Target color
+          backgroundColor: "#DA451F",
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -334,12 +338,12 @@ const Hero: React.FC = () => {
       
         finalDotTimeline.to(finalDot, {
           keyframes: [
-            { y: iMariamCenterY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" }, // Lighter variant
-            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#F4BAA8", duration: 0.15, ease: "power2.out" }, // Medium-light variant
+            { y: iMariamCenterY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" },
+            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#F4BAA8", duration: 0.15, ease: "power2.out" },
             { 
               y: iMariamCenterY, 
               scaleY: 1, 
-              backgroundColor: "#DA451F", // Target color
+              backgroundColor: "#DA451F",
               duration: 0.2, 
               ease: "power2.out",
               onComplete: () => {
@@ -358,7 +362,7 @@ const Hero: React.FC = () => {
       
         // Keep the dot visible permanently (no fade out)
         finalDotTimeline.to(finalDot, {
-          duration: 1 // Just wait, don't animate anything
+          duration: 1
         });
       
         dotTimeline.add(finalDotTimeline);
@@ -367,12 +371,9 @@ const Hero: React.FC = () => {
       };
 
       // Add dot animation to start in parallel with software engineer typing
-      // Calculate the start time: nameEntrance starts at 0, software engineer starts at (duration - 0.3)
       masterTimeline.add(() => {
         const dotTimeline = buildDotTimeline();
         if (dotTimeline) {
-          // Calculate when software engineer starts: nameEntrance duration - 0.3
-          // Since nameEntrance is added at position 0, the absolute time is just (duration - 0.3)
           const nameEntranceDuration = nameEntrance.duration();
           const softwareEngineerStartTime = Math.max(0, nameEntranceDuration - 0.3);
           masterTimeline.add(dotTimeline, softwareEngineerStartTime);
@@ -392,7 +393,7 @@ const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="flex min-h-screen w-full flex-col items-center justify-center px-6 py-12 text-center text-[#006f49] sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
+      className="flex h-screen w-full flex-col items-center justify-center px-2 py-2 text-center text-[#006f49] sm:px-3 sm:py-3 lg:px-3 lg:py-4 xl:px-4 xl:py-5 relative overflow-hidden cursor-none"
       style={{
         backgroundColor: "#F5ECE1",
       }}
@@ -455,9 +456,16 @@ const Hero: React.FC = () => {
           </h1>
         </div>
 
+        {/* Navigation List - CLICKABLE */}
         <div className="hero-cover-list mt-10" role="list">
           {coverSections.map((section) => (
-            <div key={section.number} className="hero-cover-item" role="listitem">
+            <div 
+              key={section.number} 
+              className="hero-cover-item nav-link" 
+              role="listitem"
+              onClick={() => onNavigate(section.id)}
+              style={{ cursor: 'pointer' }}
+            >
               <span
                 className="hero-cover-badge"
                 style={{ backgroundColor: section.badgeColor, color: section.badgeText }}
@@ -479,10 +487,20 @@ const Hero: React.FC = () => {
 
         .hero-cover {
           width: 100%;
-          max-width: 1100px;
+          max-width: 100%;
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
+          height: 100%;
+          justify-content: space-between;
+          padding-bottom: 1rem;
+        }
+
+        @media (min-width: 1024px) {
+          .hero-cover {
+            gap: 2rem;
+            padding-bottom: 1.5rem;
+          }
         }
 
         .hero-cover-header {
@@ -511,6 +529,8 @@ const Hero: React.FC = () => {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
+          flex: 1;
+          width: 100%;
         }
 
         .hero-cover-list {
@@ -518,6 +538,14 @@ const Hero: React.FC = () => {
           border-bottom: 2px solid #E2D5C5;
           display: flex;
           flex-direction: column;
+          width: 100%;
+          padding-bottom: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+          .hero-cover-list {
+            padding-bottom: 2rem;
+          }
         }
 
         .hero-cover-item {
@@ -527,10 +555,17 @@ const Hero: React.FC = () => {
           padding: 1rem 0;
           border-bottom: 1px solid #E2D5C5;
           font-family: "Space Grotesk", "Inter", sans-serif;
+          transition: all 0.3s ease;
+        }
+
+        .hero-cover-item:hover {
+          background-color: rgba(218, 69, 31, 0.05);
+          transform: translateX(10px);
         }
 
         .hero-cover-item:last-child {
           border-bottom: none;
+          margin-bottom: 0;
         }
 
         .hero-cover-badge {
@@ -543,12 +578,22 @@ const Hero: React.FC = () => {
           font-weight: 700;
           font-size: 1rem;
           flex-shrink: 0;
+          transition: all 0.3s ease;
+        }
+
+        .hero-cover-item:hover .hero-cover-badge {
+          transform: scale(1.1);
         }
 
         .hero-cover-text {
-          font-size: clamp(1.25rem, 3vw, 2.5rem);
+          font-size: clamp(1.1rem, 2.5vw, 2rem);
           font-weight: 600;
           color: #14110F;
+          transition: all 0.3s ease;
+        }
+
+        .hero-cover-item:hover .hero-cover-text {
+          color: #DA451F;
         }
 
         @media (max-width: 768px) {
@@ -558,6 +603,13 @@ const Hero: React.FC = () => {
 
           .hero-heading {
             text-align: center;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          #hero {
+            height: 100vh;
+            height: 100dvh;
           }
         }
 
@@ -575,7 +627,6 @@ const Hero: React.FC = () => {
           position: relative;
         }
 
-
         .hero-iam-wrapper {
           display: inline-flex;
           align-items: flex-end;
@@ -584,7 +635,7 @@ const Hero: React.FC = () => {
 
         .hero-software-engineer {
           font-family: "Rock Salt", cursive;
-          font-size: clamp(1.5rem, 4vw, 3rem);
+          font-size: clamp(1.3rem, 3.5vw, 2.7rem);
           color: #DA451F;
           text-align: center;
           position: absolute;

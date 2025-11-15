@@ -10,6 +10,16 @@
     --font-display: var(--font-default);
 }
 
+html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
 html,
 body {
     width: 100dvw;
