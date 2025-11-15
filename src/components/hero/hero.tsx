@@ -18,6 +18,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const cursorRef = useRef<HTMLDivElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const finalDotRef = useRef<HTMLDivElement | null>(null);
   
   // Navigation sections - these will become the navbar
   const coverSections = [
@@ -27,6 +28,44 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     { number: "04", label: "Skills", id: "certificates", badgeColor: "#7B61FF", badgeText: "#282828" },
     { number: "05", label: "Contact", id: "contact", badgeColor: "#1283EB", badgeText: "#282828" },
   ];
+
+  // Handler to hide dot before navigation
+  const handleNavigate = (section: string) => {
+    // Hide the final dot if it exists
+    if (finalDotRef.current && finalDotRef.current.style.display !== "none") {
+      gsap.to(finalDotRef.current, {
+        opacity: 0,
+        scale: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          if (finalDotRef.current) {
+            finalDotRef.current.style.display = "none";
+          }
+        }
+      });
+    }
+    // Also hide any original dots that might still be visible
+    const heroSection = document.getElementById("hero");
+    if (heroSection) {
+      const dots = heroSection.querySelectorAll('.original-i-dot, .final-i-dot');
+      dots.forEach((dot) => {
+        const htmlDot = dot as HTMLElement;
+        if (htmlDot.style.display !== "none") {
+          gsap.to(htmlDot, {
+            opacity: 0,
+            scale: 0,
+            duration: 0.3,
+            ease: "power2.in",
+            onComplete: () => {
+              htmlDot.style.display = "none";
+            }
+          });
+        }
+      });
+    }
+    onNavigate(section);
+  };
 
   // Cursor follower effect
   useEffect(() => {
@@ -304,7 +343,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       
         const finalDot = document.createElement("div");
         finalDot.className = "final-i-dot";
-      
+        finalDotRef.current = finalDot;
+
         heroSection.appendChild(finalDot);
       
         const finalDotSize = dotSize;
@@ -387,6 +427,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       // Remove any created dots
       document.querySelectorAll('.original-i-dot').forEach(dot => dot.remove());
       document.querySelectorAll('.final-i-dot').forEach(dot => dot.remove());
+      finalDotRef.current = null;
     };
   }, []);
 
@@ -463,7 +504,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               key={section.number} 
               className={`hero-cover-item nav-link ${index === coverSections.length - 1 ? 'last-item' : ''}`}
               role="listitem"
-              onClick={() => onNavigate(section.id)}
+              onClick={() => handleNavigate(section.id)}
               style={{ cursor: 'pointer' }}
             >
               <span
