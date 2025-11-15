@@ -21,11 +21,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   
   // Navigation sections - these will become the navbar
   const coverSections = [
-    { number: "01", label: "Experience", id: "experience", badgeColor: "#F7C945", badgeText: "#2C2116" },
-    { number: "02", label: "Projects", id: "work", badgeColor: "#E45CA5", badgeText: "#2C2116" },
-    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#8ED457", badgeText: "#2C2116" },
-    { number: "04", label: "Skills", id: "certificates", badgeColor: "#8ED457", badgeText: "#2C2116" },
-    { number: "05", label: "Contact", id: "contact", badgeColor: "#1E72EF", badgeText: "#2C2116" },
+    { number: "01", label: "Experience", id: "experience", badgeColor: "#F7C945", badgeText: "#282828" },
+    { number: "02", label: "Projects", id: "work", badgeColor: "#E45CA5", badgeText: "#282828" },
+    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#8ED457", badgeText: "#282828" },
+    { number: "04", label: "Skills", id: "certificates", badgeColor: "#7B61FF", badgeText: "#282828" },
+    { number: "05", label: "Contact", id: "contact", badgeColor: "#1283EB", badgeText: "#282828" },
   ];
 
   // Cursor follower effect
