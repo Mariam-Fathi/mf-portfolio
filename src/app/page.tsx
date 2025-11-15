@@ -11,8 +11,8 @@ const sectionConfig = {
   experience: { title: "EXPERIENCE", color: "#F7C945", number: "01", badgeColor: "#F7C945", badgeText: "#2C2116" },
   work: { title: "WORK", color: "#E45CA5", number: "02", badgeColor: "#E45CA5", badgeText: "#2C2116" },
   skills: { title: "SKILLS", color: "#8ED457", number: "03", badgeColor: "#8ED457", badgeText: "#2C2116" },
-  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "03", badgeColor: "#1E72EF", badgeText: "#2C2116" },
-  contact: { title: "CONTACT", color: "#006f49", number: "04", badgeColor: "#1E72EF", badgeText: "#2C2116" }
+  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "04", badgeColor: "#1E72EF", badgeText: "#2C2116" },
+  contact: { title: "CONTACT", color: "#006f49", number: "05", badgeColor: "#1E72EF", badgeText: "#2C2116" }
 };
 
 export default function Home() {

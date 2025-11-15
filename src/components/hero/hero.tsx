@@ -493,11 +493,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           gap: 1.5rem;
           height: 100%;
           justify-content: space-between;
+          padding-bottom: 1rem;
         }
 
         @media (min-width: 1024px) {
           .hero-cover {
             gap: 2rem;
+            padding-bottom: 1.5rem;
           }
         }
 
@@ -537,6 +539,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           flex-direction: column;
           width: 100%;
+          padding-bottom: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+          .hero-cover-list {
+            padding-bottom: 2rem;
+          }
         }
 
         .hero-cover-item {
@@ -556,6 +565,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-cover-item:last-child {
           border-bottom: none;
+          margin-bottom: 0;
         }
 
         .hero-cover-badge {
@@ -576,7 +586,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
 
         .hero-cover-text {
-          font-size: clamp(1.25rem, 3vw, 2.5rem);
+          font-size: clamp(1.1rem, 2.5vw, 2rem);
           font-weight: 600;
           color: #14110F;
           transition: all 0.3s ease;
