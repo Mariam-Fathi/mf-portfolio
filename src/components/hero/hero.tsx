@@ -392,7 +392,7 @@ const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="flex min-h-screen w-full flex-col items-center justify-center px-6 py-12 text-center text-[#006f49] sm:px-12 lg:px-24 relative overflow-hidden cursor-none"
+      className="flex h-screen w-full flex-col items-center justify-center px-2 py-2 text-center text-[#006f49] sm:px-3 sm:py-3 lg:px-3 lg:py-4 xl:px-4 xl:py-5 relative overflow-hidden cursor-none"
       style={{
         backgroundColor: "#F5ECE1",
       }}
@@ -479,10 +479,18 @@ const Hero: React.FC = () => {
 
         .hero-cover {
           width: 100%;
-          max-width: 1100px;
+          max-width: 100%;
           display: flex;
           flex-direction: column;
           gap: 1.5rem;
+          height: 100%;
+          justify-content: space-between;
+        }
+
+        @media (min-width: 1024px) {
+          .hero-cover {
+            gap: 2rem;
+          }
         }
 
         .hero-cover-header {
@@ -511,6 +519,8 @@ const Hero: React.FC = () => {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
+          flex: 1;
+          width: 100%;
         }
 
         .hero-cover-list {
@@ -518,6 +528,7 @@ const Hero: React.FC = () => {
           border-bottom: 2px solid #E2D5C5;
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
 
         .hero-cover-item {
@@ -561,6 +572,13 @@ const Hero: React.FC = () => {
           }
         }
 
+        @media (min-width: 1024px) {
+          #hero {
+            height: 100vh;
+            height: 100dvh;
+          }
+        }
+
         .hero-name {
           display: inline-flex;
           align-items: flex-end;
@@ -584,7 +602,7 @@ const Hero: React.FC = () => {
 
         .hero-software-engineer {
           font-family: "Rock Salt", cursive;
-          font-size: clamp(1.5rem, 4vw, 3rem);
+          font-size: clamp(1.3rem, 3.5vw, 2.7rem);
           color: #DA451F;
           text-align: center;
           position: absolute;
