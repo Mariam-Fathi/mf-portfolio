@@ -587,6 +587,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-cover-text {
           font-size: clamp(1.1rem, 2.5vw, 2rem);
+          text-transform: uppercase;
           font-weight: 600;
           color: #14110F;
           transition: all 0.3s ease;
