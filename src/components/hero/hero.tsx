@@ -22,12 +22,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   
   // Navigation sections - these will become the navbar
   const coverSections = [
-    { number: "01", label: "Experience", id: "experience", badgeColor: "#F7C945", badgeText: "#282828" },
-    { number: "02", label: "Projects", id: "work", badgeColor: "#E45CA5", badgeText: "#282828" },
-    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#8ED457", badgeText: "#282828" },
-    { number: "04", label: "Skills", id: "certificates", badgeColor: "#7B61FF", badgeText: "#282828" },
-    { number: "05", label: "Contact", id: "contact", badgeColor: "#1283EB", badgeText: "#282828" },
+    { number: "01", label: "About", id: "about", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "02", label: "Experience", id: "experience", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "03", label: "Projects", id: "work", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "04", label: "Certificates", id: "certificates", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "05", label: "Skills", id: "skills", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "06", label: "Contact", id: "contact", badgeColor: "#282828", badgeText: "#F8F3EC" },
   ];
+
+  // Default active panel is "About"
+  const [activePanelId, setActivePanelId] = useState<string>("about");
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -445,63 +449,75 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           <div className="hero-cover-line" />
         </div>
 
-        <div className="hero-heading-wrapper">
-          {/* Mariam Text */}
-          <h1
-            ref={headingRef}
-            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
-          >
-            <span className="hero-name">
-              <span className="hero-mar">
-                <span className="hero-letter">M</span>
-                <span ref={a1Ref} className="hero-letter">a</span>
-                <span ref={rRef} className="hero-letter hero-letter-r">
-                  r
-                </span>
-              </span>
-              <span className="hero-iam-wrapper">
-                <span className="hero-iam">
-                  <span className="hero-i-wrapper">
-                    <span ref={iRef} className="hero-letter hero-letter-i">
-                      i
+        <div className="title-frame">
+          <div className="title-frame-inner">
+            <div className="hero-heading-wrapper">
+              {/* Mariam Text */}
+              <h1
+                ref={headingRef}
+                className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+              >
+                <span className="hero-name">
+                  <span className="hero-mar">
+                    <span className="hero-letter">M</span>
+                    <span ref={a1Ref} className="hero-letter">a</span>
+                    <span ref={rRef} className="hero-letter hero-letter-r">
+                      r
                     </span>
                   </span>
-                  <span ref={amContainerRef} className="hero-am">
-                    <span ref={a2mRef} className="hero-letter">a</span>
-                    <span ref={mMariamRef} className="hero-letter">m</span>
+                  <span className="hero-iam-wrapper">
+                    <span className="hero-iam">
+                      <span className="hero-i-wrapper">
+                        <span ref={iRef} className="hero-letter hero-letter-i">
+                          i
+                        </span>
+                      </span>
+                      <span ref={amContainerRef} className="hero-am">
+                        <span ref={a2mRef} className="hero-letter">a</span>
+                        <span ref={mMariamRef} className="hero-letter">m</span>
+                      </span>
+                    </span>
+                    <div ref={softwareEngineerRef} className="hero-software-engineer">
+                      {"software engineer".split("").map((char, index) => (
+                        <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
+                          {char === " " ? "\u00A0" : char}
+                        </span>
+                      ))}
+                    </div>
                   </span>
                 </span>
-                <div ref={softwareEngineerRef} className="hero-software-engineer">
-                  {"software engineer".split("").map((char, index) => (
-                    <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
-                      {char === " " ? "\u00A0" : char}
-                    </span>
-                  ))}
-                </div>
-              </span>
-            </span>
-          </h1>
+              </h1>
+            </div>
+            
+          </div>
         </div>
 
-        {/* Navigation List - CLICKABLE */}
-        <div className="hero-cover-list mt-10" role="list">
-          {coverSections.map((section, index) => (
-            <div 
-              key={section.number} 
-              className={`hero-cover-item nav-link ${index === coverSections.length - 1 ? 'last-item' : ''}`}
-              role="listitem"
-              onClick={() => handleNavigate(section.id)}
-              style={{ cursor: 'pointer' }}
-            >
-              <span
-                className="hero-cover-badge"
-                style={{ backgroundColor: section.badgeColor, color: section.badgeText }}
+        {/* Navigation Panels - Hover Expand, Full-Width, Remaining Height */}
+        <div className="hero-panel-strip" role="list">
+          {coverSections.map((section) => {
+            const isActive = activePanelId === section.id;
+            return (
+              <div
+                key={section.id}
+                role="listitem"
+                className={`hero-panel ${isActive ? "active" : "collapsed"}`}
+                style={{ backgroundColor: section.badgeColor }}
+                onMouseEnter={() => setActivePanelId(section.id)}
+                onFocus={() => setActivePanelId(section.id)}
+                onClick={() => handleNavigate(section.id)}
+                tabIndex={0}
               >
-                {section.number}
-              </span>
-              <span className="hero-cover-text">{section.label}</span>
-            </div>
-          ))}
+                <div className="hero-panel-inner">
+                  <span
+                    className={`hero-panel-text ${isActive ? "horizontal" : "vertical"}`}
+                    style={{ color: section.badgeText }}
+                  >
+                    {section.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -542,77 +558,133 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           background-color: #DA451F;
         }
 
+        /* Framed title like the reference design */
+        .title-frame {
+          position: relative;
+          width: 100%;
+        }
+
+        .title-frame-inner {
+          position: relative;
+          width: 100%;
+          padding: 1.5rem 0 1.5rem;
+          border-bottom: 0; /* remove bottom line */
+          margin-bottom: 0.5rem; /* subtle spacing before panels */
+        }
+
+        /* second bold line below the first */
+        .title-frame-inner::after {
+          content: none; /* remove second line */
+        }
+
+        .title-badge {
+          position: absolute;
+          right: 0.75rem;
+          top: 50%;
+          transform: translateY(-50%);
+          background: #14110F;
+          color: #F5ECE1;
+          width: 72px;
+          height: 72px;
+          border-radius: 9999px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: 0.8rem;
+          letter-spacing: 0.06em;
+          box-shadow: 0 0 0 2px #14110F inset;
+        }
+
         .hero-heading-wrapper {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
+          margin-bottom: 0; /* spacing handled by frame */
+          width: 100%;
+        }
+
+        /* Panel Strip replaces list: full width and fills remaining height */
+        .hero-panel-strip {
+          display: flex;
+          flex-direction: row;
+          width: 100vw;
+          margin-left: calc(50% - 50vw); /* stretch full-bleed */
+          gap: 0.25rem;
           flex: 1;
-          width: 100%;
+          min-height: 12rem;
+          height: 100%;
+          overflow: hidden;
         }
 
-        .hero-cover-list {
-          border-top: 2px solid #E2D5C5;
-          border-bottom: 2px solid #E2D5C5;
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          // padding-bottom: 1.5rem;
-        }
-
-        @media (min-width: 1024px) {
-          .hero-cover-list {
-            // padding-bottom: 2rem;
-          }
-        }
-
-        .hero-cover-item {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          // padding: 1rem 0;
-          border-bottom: 1px solid #E2D5C5;
-          font-family: "Space Grotesk", "Inter", sans-serif;
+        .hero-panel {
+          position: relative;
+          cursor: pointer;
+          border-radius: 0rem;
+          overflow: hidden;
           transition: all 0.3s ease;
-        }
-
-        .hero-cover-item:hover {
-          background-color: rgba(218, 69, 31, 0.05);
-          transform: translateX(10px);
-        }
-
-        .hero-cover-item:last-child,
-        .hero-cover-item.last-item {
-          border-bottom: none !important;
-          margin-bottom: 0;
-        }
-
-        .hero-cover-badge {
-          width: 52px;
-          height: 52px;
-          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
+          height: auto;
+          flex: 0 0 auto;
+        }
+
+        /* collapsed (narrow) vs active (expanded) widths */
+        .hero-panel.collapsed {
+          width: 5rem;
+          flex: 0 0 5rem;
+        }
+        .hero-panel.active {
+          width: auto;
+          flex: 1 1 auto;
+        }
+
+        .hero-panel-inner {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          gap: 0.75rem;
+        }
+
+        .hero-panel-code {
+          position: absolute;
+          top: 0.75rem;
+          left: 0.75rem;
+          font-weight: 800;
+          font-size: 0.9rem;
+          color: rgba(20, 17, 15, 0.7);
+          background: rgba(255,255,255,0.3);
+          border-radius: 999px;
+          padding: 0.25rem 0.6rem;
+        }
+
+        .hero-panel-text {
+          font-family: "Space Grotesk", "Inter", sans-serif;
           font-weight: 700;
-          font-size: 1rem;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
-        }
-
-        .hero-cover-item:hover .hero-cover-badge {
-          transform: scale(1.1);
-        }
-
-        .hero-cover-text {
-          font-size: clamp(1.1rem, 2.5vw, 2rem);
+          letter-spacing: 0.06em;
           text-transform: uppercase;
-          font-weight: 600;
           color: #14110F;
-          transition: all 0.3s ease;
+          transition: transform 0.3s ease, writing-mode 0.3s ease, opacity 0.3s ease;
+          white-space: nowrap;
         }
 
-        .hero-cover-item:hover .hero-cover-text {
-          color: #DA451F;
+        .hero-panel-text.vertical {
+          writing-mode: vertical-rl;
+          transform: rotate(180deg);
+          opacity: 0.9;
+          font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+        }
+
+        .hero-panel-text.horizontal {
+          writing-mode: horizontal-tb;
+          transform: rotate(0deg);
+          opacity: 1;
+          font-size: clamp(1.25rem, 2.2vw, 2rem);
         }
 
         @media (max-width: 768px) {
@@ -635,7 +707,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-name {
           display: inline-flex;
           align-items: flex-end;
-          margin-top: 1.5rem;
           position: relative;
         }
 
