@@ -3,6 +3,7 @@
 import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
+import { Skiper19 } from "@/components/Skiper19";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
@@ -158,12 +159,7 @@ export default function Home() {
             id="experience-content" 
             className={`content-section ${activeSection === "experience" ? "active" : ""}`}
           >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>Professional Journey</h2>
-                <p>Experience content will appear here</p>
-              </div>
-            </div>
+            <Skiper19/>
           </section>
 
           {/* Work Section */}
@@ -222,42 +218,9 @@ export default function Home() {
 
       {/* NAVIGATION LAYER - Always present but transforms */}
       <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"}`}>
-        <div className="nav-top-section">
-          <div className="hero-cover-header">
-            <div className="hero-cover-header-top">
-              <p className="hero-cover-title">Portfolio</p>
-              <nav className="section-nav">
-                {(Object.keys(sectionConfig) as SectionId[]).map((sectionId) => (
-                  <button
-                    key={sectionId}
-                    className={`nav-link ${activeSection === sectionId ? 'active' : ''}`}
-                    onClick={() => handleNavigate(sectionId)}
-                    style={{ 
-                      ['--accent-color' as any]: sectionConfig[sectionId].color,
-                    } as React.CSSProperties}
-                    disabled={isTransitioning}
-                  >
-                    <span
-                      className="nav-link-badge"
-                      style={{ 
-                        backgroundColor: sectionConfig[sectionId].badgeColor, 
-                        color: sectionConfig[sectionId].badgeText 
-                      }}
-                    >
-                      {sectionConfig[sectionId].number}
-                    </span>
-                    <span className="nav-link-text">{sectionConfig[sectionId].title}</span>
-                  </button>
-                ))}
-              </nav>
-            </div>
-            <div className="hero-cover-line" />
-          </div>
-        </div>
-        
-        {/* Current section title - Only show when not on hero, below the line */}
-        <div className={`current-section-title ${activeSection !== 'hero' ? 'active' : ''}`}>
-          {activeSection !== 'hero' && sectionConfig[activeSection].title}
+        <div className="hero-cover-header">
+          <p className="hero-cover-title">Portfolio</p>
+          <div className="hero-cover-line" />
         </div>
       </div>
 
@@ -267,6 +230,8 @@ export default function Home() {
           position: relative;
           overflow: hidden;
           background: #F5ECE1;
+          margin: 0;
+          padding: 0;
         }
 
         /* Content Container */
@@ -278,19 +243,33 @@ export default function Home() {
 
         /* Content Sections */
         .content-section {
-        background-color: #1e140b;
+        background-color: #F5ECE1;
           position: absolute;
           inset: 0;
           opacity: 0;
           transform: translateX(100px);
           display: none;
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
+        }
+        .content-section::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
         }
 
         .content-section.active {
           opacity: 1;
           transform: translateX(0);
           display: block;
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: none; /* Firefox */
+          -ms-overflow-style: none; /* IE and Edge */
           // background-color: #1e140b;
+        }
+        .content-section.active::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
         }
 
         .section-content {
@@ -329,37 +308,42 @@ export default function Home() {
           left: 0;
           right: 0;
           z-index: 3;
-          // padding: 0.5rem 0.5rem;
+          padding: 0;
           transition: all 0.4s ease;
-        }
-
-        @media (min-width: 640px) {
-          .navigation-layer {
-            // padding: 0.75rem 0.75rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .navigation-layer {
-            // padding: 1rem 0.75rem;
-          }
         }
 
         @media (min-width: 1280px) {
           .navigation-layer {
-            padding: 0rem 1rem;
+            padding: 0 1rem;
           }
         }
 
         .navigation-layer.hero-mode {
           /* In hero mode, navigation is part of the hero design */
-          position: relative;
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
           background: transparent;
+          padding: 0;
+        }
+
+        @media (min-width: 1280px) {
+          .navigation-layer.hero-mode {
+            padding: 0 1rem;
+          }
         }
 
         .navigation-layer.nav-mode {
           /* In nav mode, becomes top navbar */
           background: #F5ECE1;
+          padding: 0;
+        }
+
+        @media (min-width: 1280px) {
+          .navigation-layer.nav-mode {
+            padding: 0 1rem;
+          }
         }
 
         .nav-top-section {
@@ -373,6 +357,8 @@ export default function Home() {
           gap: 0.5rem;
           font-family: "Space Grotesk", "Inter", sans-serif;
           width: 100%;
+          padding: 0.7rem 0;
+          margin: 0;
         }
 
         .hero-cover-header-top {

@@ -24,11 +24,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   
   // Navigation sections - these will become the navbar
   const coverSections = [
-    { number: "01", label: "Experience", id: "experience", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "02", label: "Projects", id: "work", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "04", label: "Skills", id: "skills", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "05", label: "Contact", id: "contact", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "01", label: "Experience", id: "experience", badgeColor: "#F5ECE1", badgeText: "#014421" },
+    { number: "02", label: "Projects", id: "work", badgeColor: "#F5ECE1", badgeText: "#014421" },
+    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#F5ECE1", badgeText: "#014421" },
+    { number: "04", label: "Skills", id: "skills", badgeColor: "#F5ECE1", badgeText: "#014421" },
+    { number: "05", label: "Contact", id: "contact", badgeColor: "#F5ECE1", badgeText: "#014421" },
   ];
 
   // Handler to hide dot before navigation
@@ -448,64 +448,22 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center px-2 text-center text-[#006f49] relative overflow-hidden cursor-none"
+      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#0C5446] relative overflow-hidden cursor-none"
       style={{
         backgroundColor: "#F5ECE1",
       }}
     >
       <div className="hero-cover">
-        <div className="hero-cover-header pt-2">
-          <p className="hero-cover-title">Portfolio</p>
-          <div className="hero-cover-line mt-2" />
-        </div>
-
         {/* Mariam at Top */}
-        <div className="hero-heading-wrapper">
-          {/* Mariam Text */}
-          <h1
-            ref={headingRef}
-            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
-          >
-            <span className="hero-name">
-              <span className="hero-mar">
-                <span className="hero-letter">M</span>
-                <span ref={a1Ref} className="hero-letter">a</span>
-                <span ref={rRef} className="hero-letter hero-letter-r">
-                  r
-                </span>
-              </span>
-              <span className="hero-iam-wrapper">
-                <span className="hero-iam">
-                  <span className="hero-i-wrapper">
-                    <span ref={iRef} className="hero-letter hero-letter-i">
-                      i
-                    </span>
-                  </span>
-                  <span ref={amContainerRef} className="hero-am">
-                    <span ref={a2mRef} className="hero-letter">a</span>
-                    <span ref={mMariamRef} className="hero-letter">m</span>
-                  </span>
-                </span>
-                <div ref={softwareEngineerRef} className="hero-software-engineer">
-                  {"software engineer".split("").map((char, index) => (
-                    <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
-                      {char === " " ? "\u00A0" : char}
-                    </span>
-                  ))}
-                </div>
-              </span>
-            </span>
-          </h1>
-        </div>
-
+        
         {/* Navigation Panels - horizontal at bottom */}
-        <div className="hero-panel-strip" role="list">
+        <div className="hero-panel-strip px-4" role="list">
           {coverSections.map((section) => {
             return (
               <div
                 key={section.id}
                 role="listitem"
-                className="hero-panel collapsed"
+                className="hero-panel border-t-2 border-[#D0D8C3] collapsed"
                 style={{ backgroundColor: section.badgeColor }}
                 onClick={() => handleNavigate(section.id)}
                 tabIndex={0}
@@ -541,13 +499,25 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           flex-direction: column;
           height: 100%;
           justify-content: space-between; /* Mariam at top, panels at bottom */
+          margin: 0;
+          padding: 0;
+        }
+
+        @media (min-width: 1280px) {
+          .hero-cover {
+            padding: 0 1rem;
+          }
         }
 
         .hero-cover-header {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
+          gap: 0.5rem;
           font-family: "Space Grotesk", "Inter", sans-serif;
+          width: 100%;
+          padding-top: 0;
+          margin: 0;
         }
 
         .hero-cover-title {
@@ -586,7 +556,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-panel {
           position: relative;
           cursor: pointer;
-          border-radius: 0rem;
+          border-radius: 2rem;
           overflow: hidden;
           transition: all 0.3s ease;
           display: flex;
@@ -605,7 +575,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: center;
           justify-content: space-between; /* text left, icon right */
           padding: 0 2rem;
-          gap: 1rem;
+          // gap: 1rem;
         }
 
         .hero-panel-code {
@@ -642,7 +612,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           writing-mode: horizontal-tb;
           transform: none;
           opacity: 1;
-          font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+          font-size: clamp(1.5rem, 2vw, 2rem);
         }
 
         .hero-panel-arrow {
@@ -662,6 +632,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           .hero-heading {
             text-align: center;
           }
+        }
+
+        #hero {
+          margin: 0;
+          padding: 0;
         }
 
         @media (min-width: 1024px) {
@@ -693,7 +668,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-software-engineer {
           font-family: "Rock Salt", cursive;
-          font-size: clamp(1.3rem, 3.5vw, 2.7rem);
+          font-size: clamp(1.3rem, 3.6vw, 2.8rem);
           color: #DA451F;
           text-align: center;
           position: absolute;
