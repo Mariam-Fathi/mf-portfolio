@@ -278,6 +278,7 @@ export default function Home() {
 
         /* Content Sections */
         .content-section {
+        background-color: #1e140b;
           position: absolute;
           inset: 0;
           opacity: 0;
@@ -289,6 +290,7 @@ export default function Home() {
           opacity: 1;
           transform: translateX(0);
           display: block;
+          // background-color: #1e140b;
         }
 
         .section-content {
@@ -327,25 +329,25 @@ export default function Home() {
           left: 0;
           right: 0;
           z-index: 3;
-          padding: 0.5rem 0.5rem;
+          // padding: 0.5rem 0.5rem;
           transition: all 0.4s ease;
         }
 
         @media (min-width: 640px) {
           .navigation-layer {
-            padding: 0.75rem 0.75rem;
+            // padding: 0.75rem 0.75rem;
           }
         }
 
         @media (min-width: 1024px) {
           .navigation-layer {
-            padding: 1rem 0.75rem;
+            // padding: 1rem 0.75rem;
           }
         }
 
         @media (min-width: 1280px) {
           .navigation-layer {
-            padding: 1.25rem 1rem;
+            padding: 0rem 1rem;
           }
         }
 
@@ -387,14 +389,11 @@ export default function Home() {
         }
 
         .hero-cover-title {
-          font-size: clamp(1rem, 2vw, 1.25rem);
+            font-size: clamp(1rem, 2vw, 1.25rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #1e140b;
           margin: 0;
-          line-height: 1;
-          display: inline-block;
-          font-weight: 600;
         }
 
         .navigation-layer.hero-mode .hero-cover-title,

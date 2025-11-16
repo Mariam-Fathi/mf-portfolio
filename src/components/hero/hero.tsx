@@ -434,25 +434,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center px-2 py-2 text-center text-[#006f49] sm:px-3 sm:py-3 lg:px-3 lg:py-4 xl:px-4 xl:py-5 relative overflow-hidden cursor-none"
+      className="flex h-screen w-full flex-col items-center justify-center px-2 text-center text-[#006f49] relative overflow-hidden cursor-none"
       style={{
         backgroundColor: "#F5ECE1",
       }}
     >
-      {/* Cursor Follower */}
-      <div
-        ref={cursorRef}
-        className="fixed w-6 h-6 pointer-events-none z-50 opacity-0 scale-0"
-        style={{
-          background: "radial-gradient(circle, #DA451F 0%, transparent 70%)",
-          borderRadius: "50%",
-          filter: "blur(1px)",
-          mixBlendMode: "difference",
-          left: -12,
-          top: -12,
-        }}
-      />
-
       <div className="hero-cover">
         <div className="hero-cover-header">
           <p className="hero-cover-title">Portfolio</p>
@@ -531,24 +517,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           max-width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
           height: 100%;
           justify-content: space-between;
-          padding-bottom: 1rem;
-        }
-
-        @media (min-width: 1024px) {
-          .hero-cover {
-            gap: 2rem;
-            padding-bottom: 1.5rem;
-          }
         }
 
         .hero-cover-header {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          gap: 0.5rem;
           font-family: "Space Grotesk", "Inter", sans-serif;
         }
 
@@ -580,12 +556,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           flex-direction: column;
           width: 100%;
-          padding-bottom: 1.5rem;
+          // padding-bottom: 1.5rem;
         }
 
         @media (min-width: 1024px) {
           .hero-cover-list {
-            padding-bottom: 2rem;
+            // padding-bottom: 2rem;
           }
         }
 
@@ -593,7 +569,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           align-items: center;
           gap: 1.5rem;
-          padding: 1rem 0;
+          // padding: 1rem 0;
           border-bottom: 1px solid #E2D5C5;
           font-family: "Space Grotesk", "Inter", sans-serif;
           transition: all 0.3s ease;
@@ -659,7 +635,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-name {
           display: inline-flex;
           align-items: flex-end;
-          gap: 0.1em;
+          margin-top: 1.5rem;
           position: relative;
         }
 
