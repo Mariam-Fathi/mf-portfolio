@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { ArrowUpRight } from "lucide-react";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
@@ -19,19 +20,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
+
   
   // Navigation sections - these will become the navbar
   const coverSections = [
-    { number: "01", label: "About", id: "about", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "02", label: "Experience", id: "experience", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "03", label: "Projects", id: "work", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "04", label: "Certificates", id: "certificates", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "05", label: "Skills", id: "skills", badgeColor: "#282828", badgeText: "#F8F3EC" },
-    { number: "06", label: "Contact", id: "contact", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "01", label: "Experience", id: "experience", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "02", label: "Projects", id: "work", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "04", label: "Skills", id: "skills", badgeColor: "#282828", badgeText: "#F8F3EC" },
+    { number: "05", label: "Contact", id: "contact", badgeColor: "#282828", badgeText: "#F8F3EC" },
   ];
-
-  // Default active panel is "About"
-  const [activePanelId, setActivePanelId] = useState<string>("about");
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -104,6 +102,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     };
   }, []);
 
+  // (reverted) no auto-fit logic
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Initial hide all letters
@@ -150,25 +150,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         ease: "elastic.out(1.2, 0.8)",
         immediateRender: false
       }, "-=0.3");
-
-      // Animate software engineer text with handwriting effect
-      if (softwareEngineerRef.current) {
-        const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
-        nameEntrance.to(chars, {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          rotation: 0,
-          duration: 0.3,
-          stagger: {
-            amount: 1.5,
-            from: "start",
-            ease: "power2.out"
-          },
-          ease: "back.out(1.2)",
-          immediateRender: false
-        }, "-=0.3");
-      }
 
       const masterTimeline = gsap.timeline({
         onComplete: () => setIsAnimationComplete(true)
@@ -404,23 +385,52 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           ]
         });
       
-        // Keep the dot visible permanently (no fade out)
+        // Fade out the final dot before showing software engineer text
         finalDotTimeline.to(finalDot, {
-          duration: 1
+          opacity: 0,
+          scale: 0,
+          duration: 0.4,
+          ease: "power2.in",
+          onComplete: () => {
+            if (finalDot && finalDot.parentNode) {
+              finalDot.style.display = "none";
+            }
+          }
         });
-      
+        
         dotTimeline.add(finalDotTimeline);
-      
-        return dotTimeline;
+        
+        return { timeline: dotTimeline, finalDot: finalDot };
       };
 
-      // Add dot animation to start in parallel with software engineer typing
+      // Add dot animation
       masterTimeline.add(() => {
-        const dotTimeline = buildDotTimeline();
-        if (dotTimeline) {
+        const result = buildDotTimeline();
+        if (result && result.timeline) {
+          const dotTimeline = result.timeline;
           const nameEntranceDuration = nameEntrance.duration();
           const softwareEngineerStartTime = Math.max(0, nameEntranceDuration - 0.3);
           masterTimeline.add(dotTimeline, softwareEngineerStartTime);
+          
+          // Animate software engineer text AFTER final dot disappears
+          if (softwareEngineerRef.current) {
+            const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
+            const dotEndTime = softwareEngineerStartTime + dotTimeline.duration();
+            masterTimeline.to(chars, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              rotation: 0,
+              duration: 0.3,
+              stagger: {
+                amount: 1.5,
+                from: "start",
+                ease: "power2.out"
+              },
+              ease: "back.out(1.2)",
+              immediateRender: false
+            }, dotEndTime);
+          }
         }
       });
 
@@ -444,75 +454,68 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       }}
     >
       <div className="hero-cover">
-        <div className="hero-cover-header">
+        <div className="hero-cover-header pt-2">
           <p className="hero-cover-title">Portfolio</p>
-          <div className="hero-cover-line" />
+          <div className="hero-cover-line mt-2" />
         </div>
 
-        <div className="title-frame">
-          <div className="title-frame-inner">
-            <div className="hero-heading-wrapper">
-              {/* Mariam Text */}
-              <h1
-                ref={headingRef}
-                className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
-              >
-                <span className="hero-name">
-                  <span className="hero-mar">
-                    <span className="hero-letter">M</span>
-                    <span ref={a1Ref} className="hero-letter">a</span>
-                    <span ref={rRef} className="hero-letter hero-letter-r">
-                      r
+        {/* Mariam at Top */}
+        <div className="hero-heading-wrapper">
+          {/* Mariam Text */}
+          <h1
+            ref={headingRef}
+            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+          >
+            <span className="hero-name">
+              <span className="hero-mar">
+                <span className="hero-letter">M</span>
+                <span ref={a1Ref} className="hero-letter">a</span>
+                <span ref={rRef} className="hero-letter hero-letter-r">
+                  r
+                </span>
+              </span>
+              <span className="hero-iam-wrapper">
+                <span className="hero-iam">
+                  <span className="hero-i-wrapper">
+                    <span ref={iRef} className="hero-letter hero-letter-i">
+                      i
                     </span>
                   </span>
-                  <span className="hero-iam-wrapper">
-                    <span className="hero-iam">
-                      <span className="hero-i-wrapper">
-                        <span ref={iRef} className="hero-letter hero-letter-i">
-                          i
-                        </span>
-                      </span>
-                      <span ref={amContainerRef} className="hero-am">
-                        <span ref={a2mRef} className="hero-letter">a</span>
-                        <span ref={mMariamRef} className="hero-letter">m</span>
-                      </span>
-                    </span>
-                    <div ref={softwareEngineerRef} className="hero-software-engineer">
-                      {"software engineer".split("").map((char, index) => (
-                        <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
-                          {char === " " ? "\u00A0" : char}
-                        </span>
-                      ))}
-                    </div>
+                  <span ref={amContainerRef} className="hero-am">
+                    <span ref={a2mRef} className="hero-letter">a</span>
+                    <span ref={mMariamRef} className="hero-letter">m</span>
                   </span>
                 </span>
-              </h1>
-            </div>
-            
-          </div>
+                <div ref={softwareEngineerRef} className="hero-software-engineer">
+                  {"software engineer".split("").map((char, index) => (
+                    <span key={index} className="hero-char" style={{ display: char === " " ? "inline" : "inline-block" }}>
+                      {char === " " ? "\u00A0" : char}
+                    </span>
+                  ))}
+                </div>
+              </span>
+            </span>
+          </h1>
         </div>
 
-        {/* Navigation Panels - Hover Expand, Full-Width, Remaining Height */}
+        {/* Navigation Panels - horizontal at bottom */}
         <div className="hero-panel-strip" role="list">
           {coverSections.map((section) => {
-            const isActive = activePanelId === section.id;
             return (
               <div
                 key={section.id}
                 role="listitem"
-                className={`hero-panel ${isActive ? "active" : "collapsed"}`}
+                className="hero-panel collapsed"
                 style={{ backgroundColor: section.badgeColor }}
-                onMouseEnter={() => setActivePanelId(section.id)}
-                onFocus={() => setActivePanelId(section.id)}
                 onClick={() => handleNavigate(section.id)}
                 tabIndex={0}
               >
                 <div className="hero-panel-inner">
-                  <span
-                    className={`hero-panel-text ${isActive ? "horizontal" : "vertical"}`}
-                    style={{ color: section.badgeText }}
-                  >
+                  <span className="hero-panel-text horizontal" style={{ color: section.badgeText }}>
                     {section.label}
+                  </span>
+                  <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
+                    <ArrowUpRight size={60} strokeWidth={1} />
                   </span>
                 </div>
               </div>
@@ -520,6 +523,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           })}
         </div>
       </div>
+
+      {/* Custom Cursor */}
+      <div ref={cursorRef} className="custom-cursor" aria-hidden="true" />
 
       <style jsx>{`
         .hero-heading {
@@ -534,7 +540,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           flex-direction: column;
           height: 100%;
-          justify-content: space-between;
+          justify-content: space-between; /* Mariam at top, panels at bottom */
         }
 
         .hero-cover-header {
@@ -558,63 +564,23 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           background-color: #DA451F;
         }
 
-        /* Framed title like the reference design */
-        .title-frame {
-          position: relative;
-          width: 100%;
-        }
-
-        .title-frame-inner {
-          position: relative;
-          width: 100%;
-          padding: 1.5rem 0 1.5rem;
-          border-bottom: 0; /* remove bottom line */
-          margin-bottom: 0.5rem; /* subtle spacing before panels */
-        }
-
-        /* second bold line below the first */
-        .title-frame-inner::after {
-          content: none; /* remove second line */
-        }
-
-        .title-badge {
-          position: absolute;
-          right: 0.75rem;
-          top: 50%;
-          transform: translateY(-50%);
-          background: #14110F;
-          color: #F5ECE1;
-          width: 72px;
-          height: 72px;
-          border-radius: 9999px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-family: "Space Grotesk", "Inter", sans-serif;
-          font-size: 0.8rem;
-          letter-spacing: 0.06em;
-          box-shadow: 0 0 0 2px #14110F inset;
-        }
-
         .hero-heading-wrapper {
           display: flex;
           justify-content: flex-end;
           align-items: flex-start;
-          margin-bottom: 0; /* spacing handled by frame */
           width: 100%;
+          margin-top: 1rem;
         }
 
-        /* Panel Strip replaces list: full width and fills remaining height */
+        /* Panel Strip - vertical stack, full width panels */
         .hero-panel-strip {
           display: flex;
-          flex-direction: row;
+          flex-direction: column;
           width: 100vw;
-          margin-left: calc(50% - 50vw); /* stretch full-bleed */
+          margin-left: calc(50% - 50vw); /* full-bleed from edge to edge */
           gap: 0.25rem;
-          flex: 1;
-          min-height: 12rem;
-          height: 100%;
-          overflow: hidden;
+          margin-top: auto; /* push to bottom */
+          padding-bottom: 0;
         }
 
         .hero-panel {
@@ -626,18 +592,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          height: auto;
-          flex: 0 0 auto;
-        }
-
-        /* collapsed (narrow) vs active (expanded) widths */
-        .hero-panel.collapsed {
-          width: 5rem;
-          flex: 0 0 5rem;
-        }
-        .hero-panel.active {
-          width: auto;
-          flex: 1 1 auto;
+          height: 6rem; /* fixed height for horizontal panels */
+          width: 100%;
         }
 
         .hero-panel-inner {
@@ -645,10 +601,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           width: 100%;
           height: 100%;
           display: flex;
+          flex-direction: row;
           align-items: center;
-          justify-content: center;
-          padding: 1rem;
-          gap: 0.75rem;
+          justify-content: space-between; /* text left, icon right */
+          padding: 0 2rem;
+          gap: 1rem;
         }
 
         .hero-panel-code {
@@ -675,16 +632,26 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-panel-text.vertical {
           writing-mode: vertical-rl;
-          transform: rotate(180deg);
+          transform: none; /* start from the top, natural order */
           opacity: 0.9;
-          font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+          font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+          line-height: 1.1;
         }
 
         .hero-panel-text.horizontal {
           writing-mode: horizontal-tb;
-          transform: rotate(0deg);
+          transform: none;
           opacity: 1;
-          font-size: clamp(1.25rem, 2.2vw, 2rem);
+          font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+        }
+
+        .hero-panel-arrow {
+          /* color inherits from inline style matching text color */
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.85;
+          flex-shrink: 0;
         }
 
         @media (max-width: 768px) {
@@ -705,9 +672,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
 
         .hero-name {
-          display: inline-flex;
+          display: inline-block; /* allow precise scaling */
           align-items: flex-end;
           position: relative;
+          transform-origin: left bottom;
         }
 
         .hero-mar,
@@ -729,7 +697,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           color: #DA451F;
           text-align: center;
           position: absolute;
-          top: 100%;
+          top: 0%;
           left: 50%;
           transform: translateX(-50%);
           white-space: nowrap;
@@ -785,6 +753,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         /* Hide default cursor when custom cursor is active */
         .cursor-none {
           cursor: none;
+        }
+
+        /* visible custom cursor that follows the mouse */
+        .custom-cursor {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 18px;
+          height: 18px;
+          border: 2px solid #DA451F;
+          border-radius: 9999px;
+          pointer-events: none;
+          z-index: 10000;
+          transform: translate(-50%, -50%);
+          opacity: 0; /* will be revealed by gsap on mouseenter */
         }
       `}</style>
     </section>

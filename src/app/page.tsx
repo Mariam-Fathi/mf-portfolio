@@ -4,16 +4,15 @@ import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 
-type SectionId = "hero" | "about" | "work" | "certificates" | "experience" | "skills" | "contact";
+type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
 const sectionConfig = {
   hero: { title: "HOME", color: "#DA451F", number: "00", badgeColor: "#DA451F", badgeText: "#282828" },
-  about: { title: "ABOUT", color: "#FF8A00", number: "01", badgeColor: "#FF8A00", badgeText: "#282828" },
-  experience: { title: "EXPERIENCE", color: "#F7C945", number: "02", badgeColor: "#F7C945", badgeText: "#282828" },
-  work: { title: "PROJECTS", color: "#E45CA5", number: "03", badgeColor: "#E45CA5", badgeText: "#282828" },
-  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "04", badgeColor: "#8ED457", badgeText: "#282828" },
-  skills: { title: "SKILLS", color: "#8ED457", number: "05", badgeColor: "#7B61FF", badgeText: "#282828" },
-  contact: { title: "CONTACT", color: "#006f49", number: "06", badgeColor: "#1283EB", badgeText: "#282828" }
+  experience: { title: "EXPERIENCE", color: "#F7C945", number: "01", badgeColor: "#F7C945", badgeText: "#282828" },
+  work: { title: "PROJECTS", color: "#E45CA5", number: "02", badgeColor: "#E45CA5", badgeText: "#282828" },
+  certificates: { title: "CERTIFICATES", color: "#1E72EF", number: "03", badgeColor: "#8ED457", badgeText: "#282828" },
+  skills: { title: "SKILLS", color: "#8ED457", number: "04", badgeColor: "#7B61FF", badgeText: "#282828" },
+  contact: { title: "CONTACT", color: "#006f49", number: "05", badgeColor: "#1283EB", badgeText: "#282828" }
 };
 
 export default function Home() {
@@ -154,19 +153,6 @@ export default function Home() {
       {/* CONTENT SECTIONS - Only show when not on hero */}
       {activeSection !== "hero" && (
         <div className="content-container" ref={contentRef}>
-          {/* About Section */}
-          <section 
-            id="about-content" 
-            className={`content-section ${activeSection === "about" ? "active" : ""}`}
-          >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>About Me</h2>
-                <p>About content will appear here</p>
-              </div>
-            </div>
-          </section>
-
           {/* Experience Section */}
           <section 
             id="experience-content" 
