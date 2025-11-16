@@ -30,13 +30,12 @@ const Skiper19 = () => {
   return (
     <section
       ref={ref}
-      className="mx-auto flex h-[350vh] w-screen flex-col items-center overflow-hidden bg-[#F5ECE1] px-4 text-[#1F3A4B]"
+      className="mx-auto flex h-[350vh] w-screen flex-col items-center overflow-hidden bg-[#F5ECE1] px-4 text-[#1F3A4B] relative"
     >
       <div className="mt-42 relative flex w-fit flex-col items-center justify-center gap-5 text-center">
         <h1 className="font-jakarta-sans relative z-10 text-7xl font-medium tracking-[-0.08em] lg:text-9xl">
           EXPERIENCE <br /> 
         </h1>
-     
 
         <LinePath
           className="absolute -right-[40%] top-0 z-0"
@@ -44,9 +43,33 @@ const Skiper19 = () => {
         />
       </div>
 
-      <div className="rounded-4xl font-jakarta-sans w-full translate-y-[200vh] bg-[#1F3A4B] pb-10 text-[#FAFDEE]">
+      {/* TARQIA Card */}
+      <div className="rounded-4xl font-jakarta-sans w-full mt-[50vh] bg-[#1F3A4B] pb-10 text-[#FAFDEE] relative z-20">
         <h1 className="mt-10 text-center text-[15.5vw] font-bold leading-[0.9] tracking-tighter lg:text-[16.6vw]">
           TARQIA
+        </h1>
+        <div className="mt-80 flex w-full flex-col items-start gap-5 px-4 font-medium lg:mt-0 lg:flex-row lg:justify-between">
+          <div className="flex w-full items-center justify-between gap-12 uppercase lg:w-fit lg:justify-center">
+            <p className="w-fit text-sm">
+              Full-Time
+            </p>
+            <p className="w-fit text-right text-lg lg:text-left">
+              jan 1, 2024 <br />  Present
+            </p>
+          </div>
+          <div className="flex w-full flex-wrap items-center justify-between gap-12 uppercase lg:w-fit lg:justify-center">
+           
+            <p className="w-fit text-right text-2xl lg:text-left">
+              Lead Mobile Engineer
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Dracode Card */}
+      <div className="rounded-4xl font-jakarta-sans w-full mt-[50vh] bg-[#1F3A4B] pb-10 text-[#FAFDEE] relative z-20">
+        <h1 className="mt-10 text-center text-[15.5vw] font-bold leading-[0.9] tracking-tighter lg:text-[16.6vw]">
+          DRACODE
         </h1>
         <div className="mt-80 flex w-full flex-col items-start gap-5 px-4 font-medium lg:mt-0 lg:flex-row lg:justify-between">
           <div className="flex w-full items-center justify-between gap-12 uppercase lg:w-fit lg:justify-center">
