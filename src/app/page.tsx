@@ -5,6 +5,7 @@ import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
 import GalleryShowcase from "@/components/projects/projects";
+import { Skiper52 } from "@/components/Skiper52";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
@@ -369,12 +370,7 @@ export default function Home() {
             id="certificates-content" 
             className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
           >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>Certifications</h2>
-                <p>Certificates content will appear here</p>
-              </div>
-            </div>
+            <Skiper52/>
           </section>
 
           {/* Contact Section */}
@@ -393,7 +389,7 @@ export default function Home() {
       )}
 
       {/* NAVIGATION LAYER - Always present but transforms */}
-      <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"}`}>
+      <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"} ${activeSection === "certificates" ? "hidden" : ""}`}>
         <div className="hero-cover-header">
           <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
             <span className="hero-cover-title-full">PORTFOLIO</span>
