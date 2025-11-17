@@ -396,7 +396,7 @@ export default function Home() {
             <span className="hero-cover-title-portfol" style={{ display: "none" }}>PORTFOL</span>
             <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }}>I</span>
             <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }}>O</span>
-            <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 8px", alignSelf: "center" }}></div>
+            <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 64px 0px 8px", alignSelf: "center" }}></div>
             
             {/* Navigation Menu that replaces O */}
             <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
