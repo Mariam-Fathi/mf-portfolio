@@ -137,12 +137,14 @@ export default function GalleryShowcase({
         scrollableParent = scrollableParent.parentElement;
       }
 
-      // Set initial positions
-      gsap.set(cardElements[0], { y: "0%", scale: 1, rotation: 0 });
-
-      for (let i = 1; i < cardElements.length; i++) {
+      // Set initial positions - all cards start from top with same top position
+      for (let i = 0; i < cardElements.length; i++) {
         if (!cardElements[i]) continue;
-        gsap.set(cardElements[i], { y: "100%", scale: 1, rotation: 0 });
+        gsap.set(cardElements[i], { 
+          scale: 1, 
+          rotation: 0,
+          y: i === 0 ? "0%" : "-100%"
+        });
       }
 
       const totalCards = cardElements.length;
@@ -220,8 +222,8 @@ export default function GalleryShowcase({
       }}
     >
       <div ref={container} className="relative w-full" style={{ height: "100vh" }}>
-        <div className="sticky-cards relative flex h-full w-full items-center justify-center overflow-hidden p-3 lg:p-8">
-          <div className="relative h-[90%] w-[85vw] max-w-[90vw] overflow-hidden rounded-lg">
+        <div className="sticky-cards relative flex h-full w-full items-start justify-center overflow-hidden px-0">
+          <div className="relative h-full w-full overflow-hidden">
             {projects.map((project, index) => {
               const colors = cardPalette[index % cardPalette.length];
 
@@ -232,7 +234,7 @@ export default function GalleryShowcase({
                     cardRefs.current[index] = el;
                   }}
                   className={cn(
-                    "absolute inset-0 h-full w-full rounded-4xl p-6 md:p-8 lg:p-12 flex flex-col",
+                    "absolute top-0 left-0 right-0 h-full w-full p-6 md:p-8 lg:p-12 flex flex-col",
                     "overflow-hidden"
                   )}
                       style={{

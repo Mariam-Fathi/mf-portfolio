@@ -389,7 +389,7 @@ export default function Home() {
       )}
 
       {/* NAVIGATION LAYER - Always present but transforms */}
-      <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"} ${activeSection === "certificates" ? "hidden" : ""}`}>
+      <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"} ${activeSection === "certificates" ? "hidden" : ""} ${activeSection === "work" ? "hidden" : ""}`}>
         <div className="hero-cover-header">
           <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
             <span className="hero-cover-title-full">PORTFOLIO</span>
@@ -466,6 +466,8 @@ export default function Home() {
           overflow-x: hidden;
           scrollbar-width: none;
           -ms-overflow-style: none;
+          padding: 0;
+          margin: 0;
         }
         .content-section::-webkit-scrollbar {
           display: none;
@@ -479,9 +481,17 @@ export default function Home() {
           overflow-x: hidden;
           scrollbar-width: none;
           -ms-overflow-style: none;
+          padding: 0;
+          margin: 0;
         }
         .content-section.active::-webkit-scrollbar {
           display: none;
+        }
+        
+        /* Projects section - full viewport */
+        #work-content {
+          padding: 0 !important;
+          margin: 0 !important;
         }
 
         .section-content {
@@ -536,6 +546,10 @@ export default function Home() {
         .navigation-layer.nav-mode {
           background: #F5ECE1;
           padding: 0 1rem;
+        }
+
+        .navigation-layer.hidden {
+          display: none;
         }
 
         .nav-top-section {

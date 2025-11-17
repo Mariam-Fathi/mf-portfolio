@@ -2,7 +2,7 @@
 
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 
 const Skiper19 = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,6 +31,14 @@ const Skiper19 = () => {
     }
   };
 
+  // TODO: Scroll progress calculation - needs testing
+  // This calculates how far through the section the user has scrolled
+  // Progress goes from 0 (section entering viewport) to 1 (section leaving viewport)
+  // ISSUE: Line animation not syncing with scroll - may need to adjust calculation
+  // Possible fixes:
+  // 1. Check if scrolling happens on window or container
+  // 2. Adjust scrollableRange calculation
+  // 3. Verify section height matches actual rendered height
   useEffect(() => {
     const container = containerRef.current;
     const target = ref.current;
@@ -38,13 +46,25 @@ const Skiper19 = () => {
     if (!container || !target) return;
 
     const updateScrollProgress = () => {
-      const scrollTop = container.scrollTop;
-      const scrollHeight = container.scrollHeight;
-      const clientHeight = container.clientHeight;
-      const maxScroll = scrollHeight - clientHeight;
+      // Get the section's position relative to the viewport
+      const rect = target.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
       
-      // Calculate progress from 0 to 1 based on scroll position
-      const progress = maxScroll > 0 ? scrollTop / maxScroll : 0;
+      // Section height is 350vh (3.5 * viewport height)
+      const sectionHeight = viewportHeight * 3.5;
+      
+      // Calculate progress: 0 when section top is at viewport bottom, 1 when section bottom is at viewport top
+      // When rect.top = viewportHeight: progress = 0 (section just entering)
+      // When rect.bottom = 0: progress = 1 (section just leaving)
+      const scrollableRange = sectionHeight;
+      const scrolled = viewportHeight - rect.top;
+      
+      // Calculate progress from 0 to 1
+      const progress = Math.max(0, Math.min(1, scrolled / scrollableRange));
+      
+      // Debug: Uncomment to see progress values
+      // console.log('Scroll progress:', progress, 'scrolled:', scrolled, 'range:', scrollableRange);
+      
       scrollProgress.set(progress);
     };
 
@@ -55,16 +75,19 @@ const Skiper19 = () => {
       rafId = requestAnimationFrame(updateScrollProgress);
     };
 
+    // Listen to both container scroll and window scroll
     container.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
     updateScrollProgress(); // Initial calculation
 
     return () => {
       container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [scrollProgress]);
 
-  const scrollYProgress = useSpring(scrollProgress, { stiffness: 100, damping: 30 });
+  const scrollYProgress = useSpring(scrollProgress, { stiffness: 200, damping: 25 });
 
   // Calculate all circle center positions for LinePath
   useEffect(() => {
@@ -141,7 +164,7 @@ const Skiper19 = () => {
         ref={startCircleRef}
         className="fixed top-[100px] sm:top-[120px] right-[5vw] sm:right-[8vw] w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[180px] md:h-[180px] rounded-full bg-[#F5C2D1] z-20 flex items-center justify-center">
         <div className="text-[#1F3A4B] text-xs sm:text-sm md:text-base font-bold text-center px-2">
-          START
+          
         </div>
       </div>
 
@@ -301,10 +324,166 @@ const LinePath = ({
   dracodeX?: number;
   dracodeY?: number;
 }) => {
-  const pathLength = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const pathRef = useRef<SVGPathElement>(null);
+  const [totalLength, setTotalLength] = useState(0);
+  
+  // Calculate the path dynamically using useMemo to recalculate when coordinates change
+  const pathData = useMemo(() => {
+    // Only build path if we have valid coordinates
+    if ((tarqiaX === 0 && tarqiaY === 0) || (dracodeX === 0 && dracodeY === 0)) {
+      // Fallback to default path if coordinates not ready
+      return `M${startX} ${startY} L${startX} ${startY}`;
+    }
 
-  // Build path starting from the START circle center
-  const pathData = `M${startX} ${startY}C${startX - 50} ${startY + 50}, ${startX - 250} ${startY + 150}, 876.605 394.131C788.982 335.917 696.198 358.139 691.836 416.303C685.453 501.424 853.722 498.43 941.95 409.714C1016.1 335.156 1008.64 186.907 906.167 142.846C807.014 100.212 712.699 198.494 789.049 245.127C889.053 306.207 986.062 116.979 840.548 43.3233C743.932 -5.58141 678.027 57.1682 672.279 112.188C666.53 167.208 712.538 172.943 736.353 163.088C760.167 153.234 764.14 120.924 746.651 93.3868C717.461 47.4252 638.894 77.8642 601.018 116.979C568.164 150.908 557 201.079 576.467 246.924C593.342 286.664 630.24 310.55 671.68 302.614C756.114 286.446 729.747 206.546 681.86 186.442C630.54 164.898 492 209.318 495.026 287.644C496.837 334.494 518.402 366.466 582.455 367.287C680.013 368.538 771.538 299.456 898.634 292.434C1007.02 286.446 1192.67 309.384 1242.36 382.258C1266.99 418.39 1273.65 443.108 1247.75 474.477C1217.32 511.33 1149.4 511.259 1096.84 466.093C1044.29 420.928 1029.14 380.576 1033.97 324.172C1038.31 273.428 1069.55 228.986 1117.2 216.384C1152.2 207.128 1188.29 213.629 1194.45 245.127C1201.49 281.062 1132.22 280.104 1100.44 272.673C1065.32 264.464 1044.22 234.837 1032.77 201.413C1019.29 162.061 1029.71 131.126 1056.44 100.965C1086.19 67.4032 1143.96 54.5526 1175.78 86.1513C1207.02 117.17 1186.81 143.379 1156.22 166.691C1112.57 199.959 1052.57 186.238 999.784 155.164C957.312 130.164 899.171 63.7054 931.284 26.3214C952.068 2.12513 996.288 3.87363 1007.22 43.58C1018.15 83.2749 1003.56 122.644 975.969 163.376C948.377 204.107 907.272 255.122 913.558 321.045C919.727 385.734 990.968 497.068 1063.84 503.35C1111.46 507.456 1166.79 511.984 1175.68 464.527C1191.52 379.956 1101.26 334.985 1030.29 377.017C971.109 412.064 956.297 483.647 953.797 561.655C947.587 755.413 1197.56 941.828 936.039 1140.66C745.771 1285.32 321.926 950.737 134.536 1202.19C-6.68295 1391.68 -53.4837 1655.38 131.935 1760.5C478.381 1956.91 1124.19 1515 1201.28 1997.83C1273.66 2451.23 100.805 1864.7 303.794 2668.89`;
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1278;
+
+    // Calculate START circle radius in viewBox coordinates
+    // START circle sizes: w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[180px] md:h-[180px]
+    let startRadiusPx: number;
+    if (viewportWidth >= 768) {
+      // md and above: 180px / 2 = 90px radius
+      startRadiusPx = 90;
+    } else if (viewportWidth >= 640) {
+      // sm: 150px / 2 = 75px radius
+      startRadiusPx = 75;
+    } else {
+      // mobile: 120px / 2 = 60px radius
+      startRadiusPx = 60;
+    }
+    const startRadius = (startRadiusPx / viewportWidth) * 1278;
+
+    // Calculate Tarqia circle radius in viewBox coordinates
+    // Tarqia circle sizes: w-[80vw] h-[80vw] sm:w-[550px] sm:h-[550px] md:w-[650px] md:h-[650px]
+    let tarqiaRadiusPx: number;
+    if (viewportWidth >= 768) {
+      // md and above: 650px / 2 = 325px radius
+      tarqiaRadiusPx = 325;
+    } else if (viewportWidth >= 640) {
+      // sm: 550px / 2 = 275px radius
+      tarqiaRadiusPx = 275;
+    } else {
+      // mobile: 80vw / 2
+      tarqiaRadiusPx = viewportWidth * 0.4;
+    }
+    // Convert to viewBox coordinates
+    const tarqiaRadius = (tarqiaRadiusPx / viewportWidth) * 1278;
+
+    // Calculate Dracode circle radius (same size as Tarqia)
+    const dracodeRadius = tarqiaRadius;
+
+    // Calculate direction vector from START to Tarqia
+    const startToTarqiaDx = tarqiaX - startX;
+    const startToTarqiaDy = tarqiaY - startY;
+    const startToTarqiaDistance = Math.sqrt(startToTarqiaDx * startToTarqiaDx + startToTarqiaDy * startToTarqiaDy);
+
+    // Calculate direction vector from Tarqia to Dracode
+    const tarqiaToDracodeDx = dracodeX - tarqiaX;
+    const tarqiaToDracodeDy = dracodeY - tarqiaY;
+    const tarqiaToDracodeDistance = Math.sqrt(tarqiaToDracodeDx * tarqiaToDracodeDx + tarqiaToDracodeDy * tarqiaToDracodeDy);
+
+    // Avoid division by zero
+    if (startToTarqiaDistance === 0 || tarqiaToDracodeDistance === 0) {
+      return `M${startX} ${startY} L${startX} ${startY}`;
+    }
+
+    // Calculate exit point from START circle (on the edge, towards Tarqia)
+    const startExitX = startX + (startToTarqiaDx / startToTarqiaDistance) * startRadius;
+    const startExitY = startY + (startToTarqiaDy / startToTarqiaDistance) * startRadius;
+
+    // Calculate entry point to Tarqia circle (on the edge, from START direction)
+    const tarqiaEntryX = tarqiaX - (startToTarqiaDx / startToTarqiaDistance) * tarqiaRadius;
+    const tarqiaEntryY = tarqiaY - (startToTarqiaDy / startToTarqiaDistance) * tarqiaRadius;
+
+    // Calculate exit point from Tarqia circle (on the edge, towards Dracode)
+    const tarqiaExitX = tarqiaX + (tarqiaToDracodeDx / tarqiaToDracodeDistance) * tarqiaRadius;
+    const tarqiaExitY = tarqiaY + (tarqiaToDracodeDy / tarqiaToDracodeDistance) * tarqiaRadius;
+
+    // Calculate entry point to Dracode circle (on the edge, from Tarqia direction)
+    const dracodeEntryX = dracodeX - (tarqiaToDracodeDx / tarqiaToDracodeDistance) * dracodeRadius;
+    const dracodeEntryY = dracodeY - (tarqiaToDracodeDy / tarqiaToDracodeDistance) * dracodeRadius;
+
+    // Build the path:
+    // 1. Start from START circle exit point (on edge)
+    // 2. Curve smoothly to Tarqia circle entry point (on edge)
+    // 3. Go to Tarqia circle center
+    // 4. Exit from Tarqia circle edge (straight line from center to edge)
+    // 5. Curve to Dracode circle entry point
+    // 6. Go to Dracode circle center
+
+    // Control points for smooth curves
+    const startExitToTarqiaEntryControl1X = startExitX + (tarqiaEntryX - startExitX) * 0.4;
+    const startExitToTarqiaEntryControl1Y = startExitY + (tarqiaEntryY - startExitY) * 0.4;
+    const startExitToTarqiaEntryControl2X = tarqiaEntryX - (tarqiaEntryX - startExitX) * 0.4;
+    const startExitToTarqiaEntryControl2Y = tarqiaEntryY - (tarqiaEntryY - startExitY) * 0.4;
+
+    const tarqiaExitToDracodeEntryControl1X = tarqiaExitX + (dracodeEntryX - tarqiaExitX) * 0.5;
+    const tarqiaExitToDracodeEntryControl1Y = tarqiaExitY + (dracodeEntryY - tarqiaExitY) * 0.5;
+    const tarqiaExitToDracodeEntryControl2X = dracodeEntryX - (dracodeEntryX - tarqiaExitX) * 0.5;
+    const tarqiaExitToDracodeEntryControl2Y = dracodeEntryY - (dracodeEntryY - tarqiaExitY) * 0.5;
+
+    const dracodeEntryToCenterControl1X = dracodeEntryX + (dracodeX - dracodeEntryX) * 0.3;
+    const dracodeEntryToCenterControl1Y = dracodeEntryY + (dracodeY - dracodeEntryY) * 0.3;
+    const dracodeEntryToCenterControl2X = dracodeX - (dracodeX - dracodeEntryX) * 0.3;
+    const dracodeEntryToCenterControl2Y = dracodeY - (dracodeY - dracodeEntryY) * 0.3;
+
+    // FIXED: Path direction - ensure it goes START → Tarqia → Dracode
+    // If line appears backwards, the coordinates might be swapped
+    // Building path from START circle exit point
+    const pathString = `M${startExitX} ${startExitY} C${startExitToTarqiaEntryControl1X} ${startExitToTarqiaEntryControl1Y}, ${startExitToTarqiaEntryControl2X} ${startExitToTarqiaEntryControl2Y}, ${tarqiaEntryX} ${tarqiaEntryY} L${tarqiaX} ${tarqiaY} L${tarqiaExitX} ${tarqiaExitY} C${tarqiaExitToDracodeEntryControl1X} ${tarqiaExitToDracodeEntryControl1Y}, ${tarqiaExitToDracodeEntryControl2X} ${tarqiaExitToDracodeEntryControl2Y}, ${dracodeEntryX} ${dracodeEntryY} C${dracodeEntryToCenterControl1X} ${dracodeEntryToCenterControl1Y}, ${dracodeEntryToCenterControl2X} ${dracodeEntryToCenterControl2Y}, ${dracodeX} ${dracodeY}`;
+    
+    // Debug: Log path to verify direction
+    // console.log('Path from START to Tarqia:', { startExitX, startExitY, tarqiaEntryX, tarqiaEntryY });
+    
+    return pathString;
+  }, [startX, startY, tarqiaX, tarqiaY, dracodeX, dracodeY]);
+
+  // TODO: Path length calculation - working but may need optimization
+  // Gets the actual SVG path length after rendering
+  // This is needed to calculate strokeDashoffset for the drawing animation
+  // ISSUE: If totalLength stays 0, the line won't animate
+  // Debug: Check if pathData is valid and pathRef.current exists
+  useEffect(() => {
+    const updateLength = () => {
+      if (pathRef.current) {
+        const length = pathRef.current.getTotalLength();
+        if (length > 0) {
+          setTotalLength(length);
+          // Debug: Uncomment to see path length
+          // console.log('Path length calculated:', length);
+        }
+      }
+    };
+    
+    // Use requestAnimationFrame to ensure the path is rendered
+    const rafId = requestAnimationFrame(() => {
+      updateLength();
+    });
+    
+    // Also try after a small delay as backup
+    const timeoutId = setTimeout(updateLength, 50);
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeoutId);
+    };
+  }, [pathData]); // Recalculate when path changes
+
+  // TODO: Path animation - strokeDashoffset calculation
+  // This controls how much of the path is visible based on scroll progress
+  // When scrollProgress = 0: strokeDashoffset = totalLength (path hidden)
+  // When scrollProgress = 1: strokeDashoffset = 0 (path fully visible)
+  // ISSUE: Animation not working - verify scrollYProgress is updating
+  // Debug: Add console.log to see if strokeDashoffset is changing
+  const strokeDashoffset = useTransform(
+    scrollYProgress,
+    (value: number) => {
+      if (totalLength === 0) return totalLength;
+      const offset = totalLength * (1 - value);
+      // Debug: Uncomment to see offset values
+      // console.log('strokeDashoffset:', offset, 'progress:', value, 'totalLength:', totalLength);
+      return offset;
+    }
+  );
 
   return (
     <svg
@@ -315,15 +494,27 @@ const LinePath = ({
       className="w-full h-full"
       style={{ position: 'absolute', inset: 0 }}
     >
+      {/* TODO: Path rendering - verify animation is working */}
+      {/* Path starts from START circle edge, curves to Tarqia, then to Dracode */}
+      {/* strokeDasharray: total path length */}
+      {/* strokeDashoffset: controls how much of path is visible (animated by scroll) */}
+      {/* ISSUE: If line not animating, check:
+          1. Is totalLength > 0?
+          2. Is strokeDashoffset changing?
+          3. Is scrollYProgress updating?
+          4. Are scroll event listeners firing?
+      */}
+      {/* FIXED: Path should go from START (top-right) to Tarqia (bottom-left) to Dracode */}
+      {/* If line appears backwards, check coordinate calculation in updateCircleCenters */}
       <motion.path
+        ref={pathRef}
         d={pathData}
         stroke="#1F3A4B"
         strokeWidth="20"
         fill="none"
-        strokeDasharray="1"
+        strokeDasharray={totalLength > 0 ? totalLength : undefined}
         style={{
-          pathLength,
-          strokeDashoffset: useTransform(pathLength, (value) => 1 - value),
+          strokeDashoffset: totalLength > 0 ? strokeDashoffset : totalLength,
         }}
       />
     </svg>
