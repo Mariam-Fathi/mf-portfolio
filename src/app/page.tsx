@@ -165,7 +165,7 @@ export default function Home() {
     // Create smooth motion graphics timeline
     const tl = gsap.timeline({ delay: 0.8 });
 
-    // Step 1: Hide full text and show split text
+    // Step 1: Hide full text and show split text with O in its original position
     tl.to(fullTextElement, {
       opacity: 0,
       duration: 0.3,
@@ -175,17 +175,20 @@ export default function Home() {
         portfolElement.style.display = "inline";
         iElement.style.display = "inline";
         oElement.style.display = "inline";
-        lineElement.style.display = "block";
+        lineElement.style.display = "none"; // Keep line hidden initially
         
-        // Set initial positions for animation
-        gsap.set(lineElement, { scaleX: 0, transformOrigin: "left center" });
-        gsap.set(oElement, { position: "relative", left: 0 });
+        // Set initial positions for animation - O should be right after I
+        gsap.set([portfolElement, iElement, oElement], { 
+          display: "inline",
+          opacity: 1 
+        });
+        gsap.set(lineElement, { display: "none", scaleX: 0, transformOrigin: "left center" });
+        gsap.set(oElement, { position: "static", x: 0 }); // O starts in normal text flow
       },
     });
 
-    // Step 2: Show and animate I falling down and rotating 90 degrees
+    // Step 2: Animate I falling down and rotating 90 degrees
     tl.to(iElement, {
-      opacity: 1,
       y: 0,
       rotation: 90,
       duration: 0.8,
@@ -193,41 +196,42 @@ export default function Home() {
       transformOrigin: "center center",
     }, "-=0.2");
 
-    // Step 3: Hide I and show the line in its place
+    // Step 3: Replace I with line and move O to create PORTFOI_O effect
     tl.to(iElement, {
       opacity: 0,
       duration: 0.3,
       ease: "power2.in",
       onComplete: () => {
         iElement.style.display = "none";
+        lineElement.style.display = "block";
+        gsap.set(lineElement, { opacity: 1 });
+        
+        // Calculate the space needed - measure the width difference between I and the line
+        const iWidth = iElement.offsetWidth;
+        const lineInitialWidth = iWidth; // Start line at same width as I
+        gsap.set(lineElement, { scaleX: lineInitialWidth / lineElement.offsetWidth });
       }
     });
 
-    // Step 4: Simultaneously expand the line AND move the O to the right
-    // Calculate how far the O needs to move (full width minus O's width and some padding)
+    // Step 4: Expand line while pushing O to the right
     const headerWidth = portfolioHeaderRef.current.offsetWidth;
-    const oWidth = (oElement as HTMLElement).offsetWidth;
     const portfolWidth = (portfolElement as HTMLElement).offsetWidth;
-    const availableSpace = headerWidth - portfolWidth - oWidth - 20; // 20px padding
+    const oWidth = (oElement as HTMLElement).offsetWidth;
+    const navMenuWidth = (navMenuElement as HTMLElement).offsetWidth;
     
-    tl.to([lineElement, oElement], {
-      duration: 1.2,
-      ease: "power2.out",
-      onUpdate: function() {
-        // This ensures both animations stay synchronized
-      }
-    });
-
-    // Line expands
+    // Calculate final position for O (far right with proper spacing)
+    const spacing = 8; // 8px spacing same as margin between line and L
+    const finalOPosition = headerWidth - navMenuWidth - spacing; // Leave space between line and menu
+    
+    // Animate line expansion and O movement simultaneously
     tl.to(lineElement, {
       scaleX: 1,
       duration: 1.2,
       ease: "power2.out",
-    }, "-=1.2");
+    }, "-=0.2");
 
-    // O moves to the right as the line expands
     tl.to(oElement, {
-      x: availableSpace,
+      x: finalOPosition,
       duration: 1.2,
       ease: "power2.out",
     }, "-=1.2");
@@ -249,10 +253,10 @@ export default function Home() {
         navMenuElement.style.display = "flex";
         gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
         
-        // Position the nav menu where the O ended up
+        // Position the nav menu where the O ended up with proper spacing from the line
         gsap.set(navMenuElement, { 
           position: "absolute", 
-          right: 0,
+          right: `${spacing}px`, // Same spacing as between line and L
           top: "50%",
           transform: "translateY(-50%)"
         });
@@ -360,9 +364,9 @@ export default function Home() {
           <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
             <span className="hero-cover-title-full">PORTFOLIO</span>
             <span className="hero-cover-title-portfol" style={{ display: "none" }}>PORTFOL</span>
-            <span className="hero-cover-title-i" style={{ display: "none", opacity: 0, transform: "translateY(-10px)" }}>I</span>
+            <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }}>I</span>
+            <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }}>O</span>
             <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 8px", alignSelf: "center" }}></div>
-            <span className="hero-cover-title-o" style={{ display: "none" }}>O</span>
             
             {/* Navigation Menu that replaces O */}
             <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
@@ -567,12 +571,12 @@ export default function Home() {
 
         .hero-cover-title-o {
           will-change: transform;
-          position: relative;
         }
 
         .hero-cover-title-line {
           will-change: transform;
           transform-origin: left center;
+          margin-right: 8px; /* Add space between line and menu */
         }
 
         .hero-cover-header-top {
@@ -608,7 +612,7 @@ export default function Home() {
           align-items: center;
           gap: 0.5rem;
           position: absolute;
-          right: 0;
+          right: 8px; /* Same spacing as between line and L */
           top: 50%;
           transform: translateY(-50%);
         }
@@ -618,14 +622,15 @@ export default function Home() {
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          width: 40px;
-          height: 40px;
+          width: 32px;
+          height: 32px;
           border: none;
           background: #1e140b;
           border-radius: 50%;
           cursor: pointer;
-          padding: 8px;
+          padding: 6px;
           transition: all 0.3s ease;
+          margin-left: 8px; /* Add space between line and menu icon */
         }
 
         .o-nav-toggle:hover {
@@ -637,16 +642,16 @@ export default function Home() {
         }
 
         .hamburger-line {
-          width: 20px;
-          height: 2px;
+          width: 16px;
+          height: 1.5px;
           background: #F5ECE1;
-          margin: 2px 0;
+          margin: 1.5px 0;
           transition: all 0.3s ease;
           border-radius: 1px;
         }
 
         .o-nav-toggle.open .hamburger-line:nth-child(1) {
-          transform: rotate(45deg) translate(5px, 5px);
+          transform: rotate(45deg) translate(4px, 4px);
         }
 
         .o-nav-toggle.open .hamburger-line:nth-child(2) {
@@ -654,20 +659,21 @@ export default function Home() {
         }
 
         .o-nav-toggle.open .hamburger-line:nth-child(3) {
-          transform: rotate(-45deg) translate(5px, -5px);
+          transform: rotate(-45deg) translate(4px, -4px);
         }
 
         .o-nav-menu {
           display: none;
-          gap: 0.5rem;
+          gap: 0.4rem;
           align-items: center;
-          padding: 0.5rem;
+          padding: 0.4rem;
           background: #F5ECE1;
-          border-radius: 2rem;
+          border-radius: 1.5rem;
           border: 1px solid rgba(30, 20, 11, 0.1);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           flex-wrap: wrap;
           max-width: fit-content;
+          margin-left: 8px; /* Add space between line and menu */
         }
 
         .o-nav-menu.open {
@@ -677,14 +683,14 @@ export default function Home() {
         .nav-menu-item {
           display: flex;
           align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 0.9rem;
-          border-radius: 1.5rem;
+          gap: 0.3rem;
+          padding: 0.4rem 0.7rem;
+          border-radius: 1.2rem;
           border: none;
           cursor: pointer;
           font-family: "Space Grotesk", sans-serif;
           font-weight: 600;
-          font-size: 0.75rem;
+          font-size: 0.65rem;
           text-transform: uppercase;
           letter-spacing: 0.08em;
           transition: all 0.3s ease;
@@ -706,32 +712,32 @@ export default function Home() {
         }
 
         .nav-menu-number {
-          font-size: 0.65rem;
+          font-size: 0.55rem;
           font-weight: 700;
           opacity: 0.7;
         }
 
         .nav-menu-text {
-          font-size: 0.75rem;
+          font-size: 0.65rem;
         }
 
         @media (max-width: 768px) {
           .o-nav-menu {
-            padding: 0.4rem;
-            gap: 0.4rem;
+            padding: 0.3rem;
+            gap: 0.3rem;
           }
 
           .nav-menu-item {
-            padding: 0.4rem 0.7rem;
-            font-size: 0.65rem;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.55rem;
           }
 
           .nav-menu-number {
-            font-size: 0.6rem;
+            font-size: 0.5rem;
           }
 
           .nav-menu-text {
-            font-size: 0.65rem;
+            font-size: 0.55rem;
           }
         }
       `}</style>
