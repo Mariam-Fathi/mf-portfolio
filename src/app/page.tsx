@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
@@ -20,9 +20,11 @@ const sectionConfig = {
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const portfolioHeaderRef = useRef<HTMLDivElement>(null);
 
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
@@ -80,9 +82,6 @@ export default function Home() {
         duration: 0.4,
         ease: "power2.in"
       });
-
-      // Keep nav links at their original size and position
-      // Removed scale and y transforms to maintain alignment
 
       tl.to(".current-section-title", {
         opacity: 1,
@@ -142,6 +141,128 @@ export default function Home() {
     }
 
   }, [activeSection, isTransitioning]);
+
+  // Animate portfolio header on mount
+  useEffect(() => {
+    if (!portfolioHeaderRef.current) return;
+
+    const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full");
+    const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol");
+    const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i");
+    const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o");
+    const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line");
+    const navMenuEl = portfolioHeaderRef.current.querySelector(".o-nav-menu-wrapper");
+
+    if (!fullTextEl || !portfolEl || !iEl || !oEl || !lineEl || !navMenuEl) return;
+
+    const fullTextElement = fullTextEl as HTMLElement;
+    const portfolElement = portfolEl as HTMLElement;
+    const iElement = iEl as HTMLElement;
+    const oElement = oEl as HTMLElement;
+    const lineElement = lineEl as HTMLElement;
+    const navMenuElement = navMenuEl as HTMLElement;
+
+    // Create smooth motion graphics timeline
+    const tl = gsap.timeline({ delay: 0.8 });
+
+    // Step 1: Hide full text and show split text
+    tl.to(fullTextElement, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        fullTextElement.style.display = "none";
+        portfolElement.style.display = "inline";
+        iElement.style.display = "inline";
+        oElement.style.display = "inline";
+        lineElement.style.display = "block";
+      },
+    });
+
+    // Step 2: Show and animate I falling down and rotating 90 degrees
+    tl.to(iElement, {
+      opacity: 1,
+      y: 0,
+      rotation: 90,
+      duration: 0.8,
+      ease: "power2.inOut",
+      transformOrigin: "center center",
+    }, "-=0.2");
+
+    // Step 3: Hide I and show the line in its place
+    tl.to(iElement, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        iElement.style.display = "none";
+      }
+    });
+
+    // Step 4: Expand the line from 0 to full width
+    tl.fromTo(lineElement, 
+      {
+        scaleX: 0,
+        transformOrigin: "left center"
+      },
+      {
+        scaleX: 1,
+        duration: 1.2,
+        ease: "power2.out"
+      }
+    );
+
+    // Step 5: Push O to the end with the expanding line
+    tl.to(oElement, {
+      x: "100%",
+      duration: 1.2,
+      ease: "power2.out",
+    }, "-=1.2");
+
+    // Step 6: Transform O into navigation menu
+    tl.to(oElement, {
+      scale: 1.3,
+      duration: 0.3,
+      ease: "power2.inOut",
+    }, "+=0.5");
+
+    tl.to(oElement, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        oElement.style.display = "none";
+        navMenuElement.style.display = "flex";
+        gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
+      },
+    });
+
+    // Step 7: Reveal navigation menu with smooth expansion
+    tl.to(navMenuElement, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+    });
+
+    // Step 8: Animate menu items appearing
+    tl.to(".nav-menu-item", {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      stagger: 0.08,
+      ease: "power2.out",
+    }, "-=0.3");
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  const toggleNavMenu = () => {
+    setIsNavMenuOpen(!isNavMenuOpen);
+  };
 
   return (
     <div className="portfolio-frame">
@@ -215,8 +336,49 @@ export default function Home() {
       {/* NAVIGATION LAYER - Always present but transforms */}
       <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"}`}>
         <div className="hero-cover-header">
-          <p className="hero-cover-title">Portfolio</p>
-          <div className="hero-cover-line" />
+          <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
+            <span className="hero-cover-title-full">PORTFOLIO</span>
+            <span className="hero-cover-title-portfol" style={{ display: "none" }}>PORTFOL</span>
+            <span className="hero-cover-title-i" style={{ display: "none", opacity: 0, transform: "translateY(-10px)" }}>I</span>
+            <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 8px", alignSelf: "center" }}></div>
+            <span className="hero-cover-title-o" style={{ display: "none" }}>O</span>
+            
+            {/* Navigation Menu that replaces O */}
+            <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
+              <button 
+                className={`o-nav-toggle ${isNavMenuOpen ? 'open' : ''}`}
+                onClick={toggleNavMenu}
+              >
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+              </button>
+              
+              <div className={`o-nav-menu ${isNavMenuOpen ? 'open' : ''}`}>
+                {Object.entries(sectionConfig).map(([key, config]) => {
+                  if (key === "hero") return null;
+                  return (
+                    <button
+                      key={key}
+                      className="nav-menu-item"
+                      onClick={() => {
+                        handleNavigate(key as SectionId);
+                        setIsNavMenuOpen(false);
+                      }}
+                      disabled={isTransitioning || activeSection === key}
+                      style={{
+                        backgroundColor: config.badgeColor,
+                        color: config.badgeText,
+                      }}
+                    >
+                      <span className="nav-menu-number">{config.number}</span>
+                      <span className="nav-menu-text">{config.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -239,7 +401,7 @@ export default function Home() {
 
         /* Content Sections */
         .content-section {
-        background-color: #F5ECE1;
+          background-color: #F5ECE1;
           position: absolute;
           inset: 0;
           opacity: 0;
@@ -247,11 +409,11 @@ export default function Home() {
           display: none;
           overflow-y: auto;
           overflow-x: hidden;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         .content-section::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
 
         .content-section.active {
@@ -260,12 +422,11 @@ export default function Home() {
           display: block;
           overflow-y: auto;
           overflow-x: hidden;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE and Edge */
-          // background-color: #1e140b;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         .content-section.active::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
 
         .section-content {
@@ -315,7 +476,6 @@ export default function Home() {
         }
 
         .navigation-layer.hero-mode {
-          /* In hero mode, navigation is part of the hero design */
           position: absolute;
           top: 0;
           left: 0;
@@ -331,7 +491,6 @@ export default function Home() {
         }
 
         .navigation-layer.nav-mode {
-          /* In nav mode, becomes top navbar */
           background: #F5ECE1;
           padding: 0;
         }
@@ -357,6 +516,39 @@ export default function Home() {
           margin: 0;
         }
 
+        .hero-cover-header-line {
+          display: flex;
+          align-items: baseline;
+          width: 100%;
+          gap: 0;
+          position: relative;
+        }
+
+        .hero-cover-title-full,
+        .hero-cover-title-portfol,
+        .hero-cover-title-i,
+        .hero-cover-title-o {
+          font-size: clamp(1rem, 2vw, 1.25rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          line-height: 1;
+          display: inline;
+          white-space: nowrap;
+        }
+
+        .hero-cover-title-i {
+          display: inline;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        .hero-cover-title-line {
+          will-change: transform;
+          transform-origin: left center;
+        }
+
         .hero-cover-header-top {
           display: flex;
           align-items: flex-end;
@@ -371,7 +563,7 @@ export default function Home() {
         }
 
         .hero-cover-title {
-            font-size: clamp(1rem, 2vw, 1.25rem);
+          font-size: clamp(1rem, 2vw, 1.25rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #1e140b;
@@ -382,12 +574,6 @@ export default function Home() {
         .navigation-layer.nav-mode .hero-cover-title {
           line-height: 1;
           vertical-align: baseline;
-        }
-
-        .hero-cover-line {
-          width: 100%;
-          height: 4px;
-          background-color: #DA451F;
         }
 
         /* Navigation Links */
@@ -529,6 +715,135 @@ export default function Home() {
         .current-section-title.active {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        /* O Navigation Menu Styles */
+        .o-nav-menu-wrapper {
+          display: none;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .o-nav-toggle {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 40px;
+          height: 40px;
+          border: none;
+          background: #1e140b;
+          border-radius: 50%;
+          cursor: pointer;
+          padding: 8px;
+          transition: all 0.3s ease;
+        }
+
+        .o-nav-toggle:hover {
+          transform: scale(1.1);
+        }
+
+        .o-nav-toggle.open {
+          background: #DA451F;
+        }
+
+        .hamburger-line {
+          width: 20px;
+          height: 2px;
+          background: #F5ECE1;
+          margin: 2px 0;
+          transition: all 0.3s ease;
+          border-radius: 1px;
+        }
+
+        .o-nav-toggle.open .hamburger-line:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .o-nav-toggle.open .hamburger-line:nth-child(2) {
+          opacity: 0;
+        }
+
+        .o-nav-toggle.open .hamburger-line:nth-child(3) {
+          transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        .o-nav-menu {
+          display: none;
+          gap: 0.5rem;
+          align-items: center;
+          padding: 0.5rem;
+          background: #F5ECE1;
+          border-radius: 2rem;
+          border: 1px solid rgba(30, 20, 11, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          flex-wrap: wrap;
+          max-width: fit-content;
+        }
+
+        .o-nav-menu.open {
+          display: flex;
+        }
+
+        .nav-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 0.9rem;
+          border-radius: 1.5rem;
+          border: none;
+          cursor: pointer;
+          font-family: "Space Grotesk", sans-serif;
+          font-weight: 600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          transition: all 0.3s ease;
+          opacity: 0;
+          transform: translateX(20px);
+          white-space: nowrap;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-menu-item:hover:not(:disabled) {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .nav-menu-item:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .nav-menu-number {
+          font-size: 0.65rem;
+          font-weight: 700;
+          opacity: 0.7;
+        }
+
+        .nav-menu-text {
+          font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+          .o-nav-menu {
+            padding: 0.4rem;
+            gap: 0.4rem;
+          }
+
+          .nav-menu-item {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.65rem;
+          }
+
+          .nav-menu-number {
+            font-size: 0.6rem;
+          }
+
+          .nav-menu-text {
+            font-size: 0.65rem;
+          }
         }
       `}</style>
     </div>
