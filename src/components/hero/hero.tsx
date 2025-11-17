@@ -473,7 +473,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                     {section.label}
                   </span>
                   <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
-                    <ArrowUpRight size={60} strokeWidth={1} />
+                    <ArrowUpRight size={35} strokeWidth={1.5} />
                   </span>
                 </div>
               </div>
@@ -562,7 +562,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           align-items: center;
           justify-content: center;
-          height: 6rem; /* fixed height for horizontal panels */
+          height: 4rem; /* fixed height for horizontal panels */
           width: 100%;
         }
 
@@ -612,7 +612,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           writing-mode: horizontal-tb;
           transform: none;
           opacity: 1;
-          font-size: clamp(1.5rem, 2vw, 2rem);
+          font-size: clamp(1rem, 1.3vw, 1.3rem);
         }
 
         .hero-panel-arrow {
