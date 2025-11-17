@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
@@ -20,9 +20,11 @@ const sectionConfig = {
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
   
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const portfolioHeaderRef = useRef<HTMLDivElement>(null);
 
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
@@ -80,9 +82,6 @@ export default function Home() {
         duration: 0.4,
         ease: "power2.in"
       });
-
-      // Keep nav links at their original size and position
-      // Removed scale and y transforms to maintain alignment
 
       tl.to(".current-section-title", {
         opacity: 1,
@@ -142,6 +141,149 @@ export default function Home() {
     }
 
   }, [activeSection, isTransitioning]);
+
+  // Animate portfolio header on mount
+  useEffect(() => {
+    if (!portfolioHeaderRef.current) return;
+
+    const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full");
+    const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol");
+    const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i");
+    const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o");
+    const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line");
+    const navMenuEl = portfolioHeaderRef.current.querySelector(".o-nav-menu-wrapper");
+
+    if (!fullTextEl || !portfolEl || !iEl || !oEl || !lineEl || !navMenuEl) return;
+
+    const fullTextElement = fullTextEl as HTMLElement;
+    const portfolElement = portfolEl as HTMLElement;
+    const iElement = iEl as HTMLElement;
+    const oElement = oEl as HTMLElement;
+    const lineElement = lineEl as HTMLElement;
+    const navMenuElement = navMenuEl as HTMLElement;
+
+    // Create smooth motion graphics timeline
+    const tl = gsap.timeline({ delay: 0.8 });
+
+    // Step 1: Hide full text and show split text
+    tl.to(fullTextElement, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        fullTextElement.style.display = "none";
+        portfolElement.style.display = "inline";
+        iElement.style.display = "inline";
+        oElement.style.display = "inline";
+        lineElement.style.display = "block";
+        
+        // Set initial positions for animation
+        gsap.set(lineElement, { scaleX: 0, transformOrigin: "left center" });
+        gsap.set(oElement, { position: "relative", left: 0 });
+      },
+    });
+
+    // Step 2: Show and animate I falling down and rotating 90 degrees
+    tl.to(iElement, {
+      opacity: 1,
+      y: 0,
+      rotation: 90,
+      duration: 0.8,
+      ease: "power2.inOut",
+      transformOrigin: "center center",
+    }, "-=0.2");
+
+    // Step 3: Hide I and show the line in its place
+    tl.to(iElement, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power2.in",
+      onComplete: () => {
+        iElement.style.display = "none";
+      }
+    });
+
+    // Step 4: Simultaneously expand the line AND move the O to the right
+    // Calculate how far the O needs to move (full width minus O's width and some padding)
+    const headerWidth = portfolioHeaderRef.current.offsetWidth;
+    const oWidth = (oElement as HTMLElement).offsetWidth;
+    const portfolWidth = (portfolElement as HTMLElement).offsetWidth;
+    const availableSpace = headerWidth - portfolWidth - oWidth - 20; // 20px padding
+    
+    tl.to([lineElement, oElement], {
+      duration: 1.2,
+      ease: "power2.out",
+      onUpdate: function() {
+        // This ensures both animations stay synchronized
+      }
+    });
+
+    // Line expands
+    tl.to(lineElement, {
+      scaleX: 1,
+      duration: 1.2,
+      ease: "power2.out",
+    }, "-=1.2");
+
+    // O moves to the right as the line expands
+    tl.to(oElement, {
+      x: availableSpace,
+      duration: 1.2,
+      ease: "power2.out",
+    }, "-=1.2");
+
+    // Step 5: Transform O into navigation menu
+    tl.to(oElement, {
+      scale: 1.3,
+      duration: 0.3,
+      ease: "power2.inOut",
+    }, "+=0.3");
+
+    tl.to(oElement, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        oElement.style.display = "none";
+        navMenuElement.style.display = "flex";
+        gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
+        
+        // Position the nav menu where the O ended up
+        gsap.set(navMenuElement, { 
+          position: "absolute", 
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)"
+        });
+      },
+    });
+
+    // Step 6: Reveal navigation menu with smooth expansion
+    tl.to(navMenuElement, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+    });
+
+    // Step 7: Animate menu items appearing
+    tl.to(".nav-menu-item", {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      stagger: 0.08,
+      ease: "power2.out",
+    }, "-=0.3");
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  const toggleNavMenu = () => {
+    setIsNavMenuOpen(!isNavMenuOpen);
+  };
 
   return (
     <div className="portfolio-frame">
@@ -215,8 +357,49 @@ export default function Home() {
       {/* NAVIGATION LAYER - Always present but transforms */}
       <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"}`}>
         <div className="hero-cover-header">
-          <p className="hero-cover-title">Portfolio</p>
-          <div className="hero-cover-line" />
+          <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
+            <span className="hero-cover-title-full">PORTFOLIO</span>
+            <span className="hero-cover-title-portfol" style={{ display: "none" }}>PORTFOL</span>
+            <span className="hero-cover-title-i" style={{ display: "none", opacity: 0, transform: "translateY(-10px)" }}>I</span>
+            <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 8px", alignSelf: "center" }}></div>
+            <span className="hero-cover-title-o" style={{ display: "none" }}>O</span>
+            
+            {/* Navigation Menu that replaces O */}
+            <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
+              <button 
+                className={`o-nav-toggle ${isNavMenuOpen ? 'open' : ''}`}
+                onClick={toggleNavMenu}
+              >
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+                <span className="hamburger-line"></span>
+              </button>
+              
+              <div className={`o-nav-menu ${isNavMenuOpen ? 'open' : ''}`}>
+                {Object.entries(sectionConfig).map(([key, config]) => {
+                  if (key === "hero") return null;
+                  return (
+                    <button
+                      key={key}
+                      className="nav-menu-item"
+                      onClick={() => {
+                        handleNavigate(key as SectionId);
+                        setIsNavMenuOpen(false);
+                      }}
+                      disabled={isTransitioning || activeSection === key}
+                      style={{
+                        backgroundColor: config.badgeColor,
+                        color: config.badgeText,
+                      }}
+                    >
+                      <span className="nav-menu-number">{config.number}</span>
+                      <span className="nav-menu-text">{config.title}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -239,7 +422,7 @@ export default function Home() {
 
         /* Content Sections */
         .content-section {
-        background-color: #F5ECE1;
+          background-color: #F5ECE1;
           position: absolute;
           inset: 0;
           opacity: 0;
@@ -247,11 +430,11 @@ export default function Home() {
           display: none;
           overflow-y: auto;
           overflow-x: hidden;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         .content-section::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
 
         .content-section.active {
@@ -260,12 +443,11 @@ export default function Home() {
           display: block;
           overflow-y: auto;
           overflow-x: hidden;
-          scrollbar-width: none; /* Firefox */
-          -ms-overflow-style: none; /* IE and Edge */
-          // background-color: #1e140b;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
         .content-section.active::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, Opera */
+          display: none;
         }
 
         .section-content {
@@ -315,7 +497,6 @@ export default function Home() {
         }
 
         .navigation-layer.hero-mode {
-          /* In hero mode, navigation is part of the hero design */
           position: absolute;
           top: 0;
           left: 0;
@@ -331,7 +512,6 @@ export default function Home() {
         }
 
         .navigation-layer.nav-mode {
-          /* In nav mode, becomes top navbar */
           background: #F5ECE1;
           padding: 0;
         }
@@ -357,6 +537,44 @@ export default function Home() {
           margin: 0;
         }
 
+        .hero-cover-header-line {
+          display: flex;
+          align-items: baseline;
+          width: 100%;
+          gap: 0;
+          position: relative;
+        }
+
+        .hero-cover-title-full,
+        .hero-cover-title-portfol,
+        .hero-cover-title-i,
+        .hero-cover-title-o {
+          font-size: clamp(1rem, 2vw, 1.25rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          line-height: 1;
+          display: inline;
+          white-space: nowrap;
+        }
+
+        .hero-cover-title-i {
+          display: inline;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        .hero-cover-title-o {
+          will-change: transform;
+          position: relative;
+        }
+
+        .hero-cover-title-line {
+          will-change: transform;
+          transform-origin: left center;
+        }
+
         .hero-cover-header-top {
           display: flex;
           align-items: flex-end;
@@ -371,7 +589,7 @@ export default function Home() {
         }
 
         .hero-cover-title {
-            font-size: clamp(1rem, 2vw, 1.25rem);
+          font-size: clamp(1rem, 2vw, 1.25rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #1e140b;
@@ -384,151 +602,137 @@ export default function Home() {
           vertical-align: baseline;
         }
 
-        .hero-cover-line {
-          width: 100%;
-          height: 4px;
-          background-color: #DA451F;
-        }
-
-        /* Navigation Links */
-        .section-nav {
-          display: flex;
-          justify-content: flex-end;
-          align-items: flex-end;
-          gap: 0.25rem;
-          flex-wrap: wrap;
-          flex: 1;
-        }
-
-        .navigation-layer.hero-mode .section-nav,
-        .navigation-layer.nav-mode .section-nav {
-          align-items: flex-end;
-        }
-
-        .nav-link {
-          background: none;
-          border: none;
-          font-family: "Space Grotesk", sans-serif;
-          cursor: pointer;
-          padding: 0;
-          transition: all 0.3s ease;
-          position: relative;
-          transform-origin: center;
-          display: inline-flex;
-          align-items: flex-end;
-          gap: 0.5rem;
-          border-radius: 0.5rem;
-          line-height: 1;
-          vertical-align: baseline;
-        }
-
-        .navigation-layer.hero-mode .nav-link,
-        .navigation-layer.nav-mode .nav-link {
-          align-items: flex-end;
-          vertical-align: baseline;
-        }
-
-        .nav-link:hover:not(:disabled) {
-          background-color: rgba(218, 69, 31, 0.05);
-          padding: 0.25rem 0.5rem;
-          margin: -0.25rem -0.5rem;
-        }
-
-        .nav-link-badge {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          display: flex;
+        /* O Navigation Menu Styles */
+        .o-nav-menu-wrapper {
+          display: none;
           align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 0.7rem;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
-          align-self: flex-end;
-          margin-bottom: -2px;
+          gap: 0.5rem;
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
         }
 
-        .nav-link:hover:not(:disabled) .nav-link-badge {
+        .o-nav-toggle {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 40px;
+          height: 40px;
+          border: none;
+          background: #1e140b;
+          border-radius: 50%;
+          cursor: pointer;
+          padding: 8px;
+          transition: all 0.3s ease;
+        }
+
+        .o-nav-toggle:hover {
           transform: scale(1.1);
         }
 
-        .nav-link-text {
-          font-size: clamp(1rem, 2vw, 1.25rem);
-          font-weight: 600;
-          color: #14110F;
+        .o-nav-toggle.open {
+          background: #DA451F;
+        }
+
+        .hamburger-line {
+          width: 20px;
+          height: 2px;
+          background: #F5ECE1;
+          margin: 2px 0;
           transition: all 0.3s ease;
-          white-space: nowrap;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          line-height: 1;
-          display: inline-block;
-          vertical-align: baseline;
+          border-radius: 1px;
         }
 
-        .navigation-layer.hero-mode .nav-link-text,
-        .navigation-layer.nav-mode .nav-link-text {
-          line-height: 1;
-          vertical-align: baseline;
+        .o-nav-toggle.open .hamburger-line:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
         }
 
-        .nav-link:hover:not(:disabled) .nav-link-text {
-          color: var(--accent-color);
-        }
-
-        .nav-link:disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-
-        .nav-link::after {
-          display: none;
-        }
-
-        /* Current Section Title */
-        .current-section-title {
-          position: absolute;
-          top: calc(0.5rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-          right: 0.5rem;
-          font-family: "Momo Trust Display", serif;
-          font-size: 3rem;
-          color: #DA451F;
+        .o-nav-toggle.open .hamburger-line:nth-child(2) {
           opacity: 0;
-          transform: translateY(-20px);
-          transition: all 0.5s ease;
-          pointer-events: none;
         }
 
-        @media (min-width: 640px) {
-          .current-section-title {
-            top: calc(0.75rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 0.75rem;
-          }
+        .o-nav-toggle.open .hamburger-line:nth-child(3) {
+          transform: rotate(-45deg) translate(5px, -5px);
         }
 
-        @media (min-width: 1024px) {
-          .current-section-title {
-            top: calc(1rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 0.75rem;
-          }
+        .o-nav-menu {
+          display: none;
+          gap: 0.5rem;
+          align-items: center;
+          padding: 0.5rem;
+          background: #F5ECE1;
+          border-radius: 2rem;
+          border: 1px solid rgba(30, 20, 11, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          flex-wrap: wrap;
+          max-width: fit-content;
         }
 
-        @media (min-width: 1280px) {
-          .current-section-title {
-            top: calc(1.25rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 1rem;
-          }
+        .o-nav-menu.open {
+          display: flex;
+        }
+
+        .nav-menu-item {
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 0.9rem;
+          border-radius: 1.5rem;
+          border: none;
+          cursor: pointer;
+          font-family: "Space Grotesk", sans-serif;
+          font-weight: 600;
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          transition: all 0.3s ease;
+          opacity: 0;
+          transform: translateX(20px);
+          white-space: nowrap;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-menu-item:hover:not(:disabled) {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .nav-menu-item:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .nav-menu-number {
+          font-size: 0.65rem;
+          font-weight: 700;
+          opacity: 0.7;
+        }
+
+        .nav-menu-text {
+          font-size: 0.75rem;
         }
 
         @media (max-width: 768px) {
-          .current-section-title {
-            font-size: 2rem;
+          .o-nav-menu {
+            padding: 0.4rem;
+            gap: 0.4rem;
           }
-        }
 
-        .current-section-title.active {
-          opacity: 1;
-          transform: translateY(0);
+          .nav-menu-item {
+            padding: 0.4rem 0.7rem;
+            font-size: 0.65rem;
+          }
+
+          .nav-menu-number {
+            font-size: 0.6rem;
+          }
+
+          .nav-menu-text {
+            font-size: 0.65rem;
+          }
         }
       `}</style>
     </div>
