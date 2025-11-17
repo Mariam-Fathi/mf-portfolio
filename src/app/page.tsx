@@ -176,6 +176,10 @@ export default function Home() {
         iElement.style.display = "inline";
         oElement.style.display = "inline";
         lineElement.style.display = "block";
+        
+        // Set initial positions for animation
+        gsap.set(lineElement, { scaleX: 0, transformOrigin: "left center" });
+        gsap.set(oElement, { position: "relative", left: 0 });
       },
     });
 
@@ -199,32 +203,41 @@ export default function Home() {
       }
     });
 
-    // Step 4: Expand the line from 0 to full width
-    tl.fromTo(lineElement, 
-      {
-        scaleX: 0,
-        transformOrigin: "left center"
-      },
-      {
-        scaleX: 1,
-        duration: 1.2,
-        ease: "power2.out"
+    // Step 4: Simultaneously expand the line AND move the O to the right
+    // Calculate how far the O needs to move (full width minus O's width and some padding)
+    const headerWidth = portfolioHeaderRef.current.offsetWidth;
+    const oWidth = (oElement as HTMLElement).offsetWidth;
+    const portfolWidth = (portfolElement as HTMLElement).offsetWidth;
+    const availableSpace = headerWidth - portfolWidth - oWidth - 20; // 20px padding
+    
+    tl.to([lineElement, oElement], {
+      duration: 1.2,
+      ease: "power2.out",
+      onUpdate: function() {
+        // This ensures both animations stay synchronized
       }
-    );
+    });
 
-    // Step 5: Push O to the end with the expanding line
-    tl.to(oElement, {
-      x: "100%",
+    // Line expands
+    tl.to(lineElement, {
+      scaleX: 1,
       duration: 1.2,
       ease: "power2.out",
     }, "-=1.2");
 
-    // Step 6: Transform O into navigation menu
+    // O moves to the right as the line expands
+    tl.to(oElement, {
+      x: availableSpace,
+      duration: 1.2,
+      ease: "power2.out",
+    }, "-=1.2");
+
+    // Step 5: Transform O into navigation menu
     tl.to(oElement, {
       scale: 1.3,
       duration: 0.3,
       ease: "power2.inOut",
-    }, "+=0.5");
+    }, "+=0.3");
 
     tl.to(oElement, {
       opacity: 0,
@@ -235,10 +248,18 @@ export default function Home() {
         oElement.style.display = "none";
         navMenuElement.style.display = "flex";
         gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
+        
+        // Position the nav menu where the O ended up
+        gsap.set(navMenuElement, { 
+          position: "absolute", 
+          right: 0,
+          top: "50%",
+          transform: "translateY(-50%)"
+        });
       },
     });
 
-    // Step 7: Reveal navigation menu with smooth expansion
+    // Step 6: Reveal navigation menu with smooth expansion
     tl.to(navMenuElement, {
       opacity: 1,
       scale: 1,
@@ -246,7 +267,7 @@ export default function Home() {
       ease: "back.out(1.7)",
     });
 
-    // Step 8: Animate menu items appearing
+    // Step 7: Animate menu items appearing
     tl.to(".nav-menu-item", {
       opacity: 1,
       x: 0,
@@ -544,6 +565,11 @@ export default function Home() {
           will-change: transform, opacity;
         }
 
+        .hero-cover-title-o {
+          will-change: transform;
+          position: relative;
+        }
+
         .hero-cover-title-line {
           will-change: transform;
           transform-origin: left center;
@@ -576,152 +602,15 @@ export default function Home() {
           vertical-align: baseline;
         }
 
-        /* Navigation Links */
-        .section-nav {
-          display: flex;
-          justify-content: flex-end;
-          align-items: flex-end;
-          gap: 0.25rem;
-          flex-wrap: wrap;
-          flex: 1;
-        }
-
-        .navigation-layer.hero-mode .section-nav,
-        .navigation-layer.nav-mode .section-nav {
-          align-items: flex-end;
-        }
-
-        .nav-link {
-          background: none;
-          border: none;
-          font-family: "Space Grotesk", sans-serif;
-          cursor: pointer;
-          padding: 0;
-          transition: all 0.3s ease;
-          position: relative;
-          transform-origin: center;
-          display: inline-flex;
-          align-items: flex-end;
-          gap: 0.5rem;
-          border-radius: 0.5rem;
-          line-height: 1;
-          vertical-align: baseline;
-        }
-
-        .navigation-layer.hero-mode .nav-link,
-        .navigation-layer.nav-mode .nav-link {
-          align-items: flex-end;
-          vertical-align: baseline;
-        }
-
-        .nav-link:hover:not(:disabled) {
-          background-color: rgba(218, 69, 31, 0.05);
-          padding: 0.25rem 0.5rem;
-          margin: -0.25rem -0.5rem;
-        }
-
-        .nav-link-badge {
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 0.7rem;
-          flex-shrink: 0;
-          transition: all 0.3s ease;
-          align-self: flex-end;
-          margin-bottom: -2px;
-        }
-
-        .nav-link:hover:not(:disabled) .nav-link-badge {
-          transform: scale(1.1);
-        }
-
-        .nav-link-text {
-          font-size: clamp(1rem, 2vw, 1.25rem);
-          font-weight: 600;
-          color: #14110F;
-          transition: all 0.3s ease;
-          white-space: nowrap;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          line-height: 1;
-          display: inline-block;
-          vertical-align: baseline;
-        }
-
-        .navigation-layer.hero-mode .nav-link-text,
-        .navigation-layer.nav-mode .nav-link-text {
-          line-height: 1;
-          vertical-align: baseline;
-        }
-
-        .nav-link:hover:not(:disabled) .nav-link-text {
-          color: var(--accent-color);
-        }
-
-        .nav-link:disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-
-        .nav-link::after {
-          display: none;
-        }
-
-        /* Current Section Title */
-        .current-section-title {
-          position: absolute;
-          top: calc(0.5rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-          right: 0.5rem;
-          font-family: "Momo Trust Display", serif;
-          font-size: 3rem;
-          color: #DA451F;
-          opacity: 0;
-          transform: translateY(-20px);
-          transition: all 0.5s ease;
-          pointer-events: none;
-        }
-
-        @media (min-width: 640px) {
-          .current-section-title {
-            top: calc(0.75rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 0.75rem;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .current-section-title {
-            top: calc(1rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 0.75rem;
-          }
-        }
-
-        @media (min-width: 1280px) {
-          .current-section-title {
-            top: calc(1.25rem + clamp(1rem, 2vw, 1.25rem) + 0.5rem + 4px + 1rem);
-            right: 1rem;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .current-section-title {
-            font-size: 2rem;
-          }
-        }
-
-        .current-section-title.active {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
         /* O Navigation Menu Styles */
         .o-nav-menu-wrapper {
           display: none;
           align-items: center;
           gap: 0.5rem;
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
         }
 
         .o-nav-toggle {
