@@ -1,14 +1,17 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger);
 
 type ProjectLink = {
   name: string;
   url: string;
+  isGrouped?: boolean;
+  groupedLinks?: Array<{ name: string; url: string }>;
 };
 
 type Project = {
@@ -16,8 +19,6 @@ type Project = {
   title: string;
   role: string;
   description: string;
-  image: string;
-  tags: string[];
   links: ProjectLink[];
 };
 
@@ -28,469 +29,333 @@ type ProjectsProps = {
 const projects: Project[] = [
   {
     id: "personality-ai",
-    title: "Multimodal Personality Analysis",
-    role: "AI Research Lead",
+    title: "Multimodal Personality Analysis System",
+    role: "AI Research Lead | Benha University",
     description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/graduation.png",
-    tags: [],
+      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction. Built web application (Node.js, MongoDB) for demonstration and candidate assessment interface.",
     links: [
-   
-    ],
-  },
-  {
-    id: "real-estate",
-    title: "Data Quality & Analytics",
-    role: "Data Engineer & Analyst",
-    description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/kaggle.png",
-    tags: [],
-    links: [
-   
+      { name: "Graduation Project Book PDF", url: "#" },
+      { name: "GitHub Repository", url: "#" },
     ],
   },
   {
     id: "smart-key",
-    title: "Smart Key Hospitality Platform",
-    role: "Lead Mobile Engineer",
+    title: "Smart Key Hospitality Applications",
+    role: "Lead Mobile Engineer | Tarqia",
     description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/sk.png",
-    tags: [],
+      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
     links: [
-      
-    ],
-  },
-  {
-    id: "homi-app",
-    title: "Homi Real Estate App",
-    role: "Full-Stack Developer",
-    description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/homi.png",
-    tags: [],
-    links: [
- 
-    ],
-  },
-  {
-    id: "homi-dashboard",
-    title: "Homi Real Estate Dashboard",
-    role: "Full-Stack Developer",
-    description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/homi-dashboard.png",
-    tags: [],
-    links: [
-    
+      { name: "App on Play Store", url: "#" },
     ],
   },
   {
     id: "sales-ai",
-    title: "Sales Estimation Automation Tool",
-    role: "Full-Stack Developer",
+    title: "AI-Powered Cost Estimation Tool",
+    role: "Full-Stack Developer | Dracode",
     description:
-    "End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk End-to-end digital hospitality platform transforming guest journey from reservation to checkout, replacing traditional key cards with secure smartphone-based access control across Long Beach Resort chain. lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. lkjfl;gbmfslknglk;fnagkl;nfjkbannv lorem  nkldfmnklfnbk",
-    image: "/images/ai.png",
-    tags: [],
-    links: [],
+      "Internal tool leveraging Hugging Face pre-trained models to analyze project descriptions and generate instant cost estimates. Achieved 85% accuracy and reduced quotation time from days to minutes, addressing critical sales bottleneck in home services application. The solution streamlines the sales process by automating complex estimation workflows and providing real-time pricing insights.",
+    links: [
+      { name: "Demo Video", url: "#" },
+    ],
   },
-
-
- 
+  {
+    id: "home-services",
+    title: "Home Services Platform",
+    role: "Full-Stack Developer | Dracode",
+    description:
+      "Interactive multi-role application (client, worker, shop) with real-time order management, Google Maps integration, and WebSocket-based live tracking. Features Indrive-like on-demand service booking with real-time updates across all user roles. The platform enables seamless coordination between customers, service providers, and merchants with instant notifications and location tracking.",
+    links: [
+      { name: "Demo Video", url: "#" },
+    ],
+  },
+  {
+    id: "homi",
+    title: "Homi: Full-Stack PropTech Platform & Data Engineering Discovery",
+    role: "Full-Stack Developer & Data Engineer | Self-Directed",
+    description:
+      "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard providing business intelligence through revenue metrics, user engagement, and property performance visualizations. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
+    links: [
+      { name: "Kaggle Notebooks: [1], [2], [3]", url: "#", isGrouped: true, groupedLinks: [
+        { name: "Real Estate Data Discovery Analysis", url: "#" },
+        { name: "38.19% SUSPICIOUS RECORDS", url: "#" },
+        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
+      ]},
+      { name: "App on Play Store", url: "#" },
+      { name: "Dashboard Link", url: "#" },
+      { name: "Demo Video", url: "#" },
+    ],
+  },
 ];
 
+// Color palettes from the image: blue/yellow, cream/orange, dark green/pink
 const cardPalette = [
   {
-    background: "#E2E6E7", // Perfect Plum
-    headline: "#0B8658",
-    headlineStroke: "#0B8658",
-    body: "#251C00",
-    link: "#0B8658",
-  },
-
-  {
-    background: "#CCD982", 
-    headline: "#251B28",
-    headlineStroke: "rgba(37, 27, 40, 0.18)",
-    body: "rgba(37, 27, 40, 0.78)",
-    link: "#251B28",
+    background: "#3B9EFF", // Bright blue
+    headline: "#FFE500", // Yellow
+    headlineStroke: "#FFE500",
+    body: "#FFFFFF", // White
+    link: "#FFFFFF", // White
+    accent: "#FF6B9D", // Pink starburst
   },
   {
-    background: "#F4FED9", 
-    headline: "#251B28",
-    headlineStroke: "rgba(37, 27, 40, 0.18)",
-    body: "rgba(37, 27, 40, 0.78)",
-    link: "#251B28",
+    background: "#F5F0E8", // Cream/off-white
+    headline: "#FF6B35", // Orange
+    headlineStroke: "#FF6B35",
+    body: "#251B28", // Dark text
+    link: "#251B28", // Dark text
+    accent: "#3B9EFF", // Blue starburst
   },
   {
-    background: "#01332B", // Minty Emerald
-    headline: "#E74C3C",
-  headlineStroke: "#E74C3C",
-    body: "#F48019",
-    link: "#E74C3C",
+    background: "#1A4D3A", // Dark green
+    headline: "#FFB6C1", // Pink
+    headlineStroke: "#FFB6C1",
+    body: "#FFFFFF", // White
+    link: "#FFFFFF", // White
+    accent: "#FFE500", // Yellow starburst
   },
-
-  {
-    background: "#8ABFB2", // Sea Foam
-    headline: "#01332B",
-    headlineStroke: "rgba(1, 51, 43, 0.18)",
-    body: "rgba(1, 51, 43, 0.78)",
-    link: "rgba(1, 51, 43, 0.82)",
-  },
-  {
-    background: "#C4C4DB", // Lilac
-    headline: "#01332B",
-    headlineStroke: "rgba(1, 51, 43, 0.16)",
-    body: "rgba(1, 51, 43, 0.8)",
-    link: "#01332B",
-  },
-  {
-    background: "#F4FED9", 
-    headline: "#251B28",
-    headlineStroke: "rgba(37, 27, 40, 0.18)",
-    body: "rgba(37, 27, 40, 0.78)",
-    link: "#251B28",
-  },
-  
-
-
 ];
 
 export default function GalleryShowcase({
   scrollContainer = null,
 }: ProjectsProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const pinContainerRef = useRef<HTMLDivElement>(null);
-  const projectsWrapperRef = useRef<HTMLDivElement>(null);
-  const projectRefsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const [spacerHeight, setSpacerHeight] = useState<number>(0);
-  const spacerValueRef = useRef<number>(0);
+  const container = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useGSAP(
     () => {
-      if (
-        !pinContainerRef.current ||
-        !projectsWrapperRef.current ||
-        (typeof window === "undefined" && !scrollContainer)
-      )
-        return;
+      if (typeof window === "undefined") return;
 
-      const cards = projectRefsRef.current.filter(
+      const cardElements = cardRefs.current.filter(
         (card): card is HTMLDivElement => Boolean(card)
       );
 
-      if (!cards.length) {
-        setSpacerHeight(0);
-        spacerValueRef.current = 0;
-        return;
+      if (!cardElements.length || !cardElements[0] || !container.current) return;
+
+      // Find the scrollable parent (content-section)
+      let scrollableParent: HTMLElement | null = container.current.parentElement;
+      while (scrollableParent && !scrollableParent.classList.contains("content-section")) {
+        scrollableParent = scrollableParent.parentElement;
       }
 
-      const baseHeight =
-        pinContainerRef.current.offsetHeight || window.innerHeight || 1080;
-      const totalTransitions = Math.max(cards.length - 1, 0);
+      // Set initial positions
+      gsap.set(cardElements[0], { y: "0%", scale: 1, rotation: 0 });
 
-      const computedSpacerHeight = scrollContainer
-        ? 0
-        : totalTransitions * baseHeight;
+      for (let i = 1; i < cardElements.length; i++) {
+        if (!cardElements[i]) continue;
+        gsap.set(cardElements[i], { y: "100%", scale: 1, rotation: 0 });
+      }
 
-      spacerValueRef.current = computedSpacerHeight;
-      setSpacerHeight(computedSpacerHeight);
-
-      gsap.set(projectsWrapperRef.current, {
-        width: "100%",
-        height: `${baseHeight}px`,
+      const totalCards = cardElements.length;
+      const scrollHeight = scrollableParent?.scrollHeight || window.innerHeight;
+      const viewportHeight = scrollableParent?.clientHeight || window.innerHeight;
+      
+      const scrollTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top top",
+          end: `+=${viewportHeight * (totalCards - 1)}`,
+          pin: true,
+          scrub: 0.5,
+          pinSpacing: true,
+          invalidateOnRefresh: true,
+          scroller: scrollableParent || undefined,
+        },
       });
 
-      const topZIndex = cards.length * 2;
+      // Animate transitions between cards
+      for (let i = 0; i < totalCards - 1; i++) {
+        const currentCard = cardElements[i];
+        const nextCard = cardElements[i + 1];
+        const position = i;
 
-      cards.forEach((card, index) => {
-        gsap.set(card, {
-          yPercent: index === 0 ? 0 : 110,
-          zIndex: index === 0 ? topZIndex : index + 1,
-          autoAlpha: 1,
-          filter: index === 0 ? "blur(0px)" : "blur(16px)",
-        });
-      });
+        if (!currentCard || !nextCard) continue;
 
-      const timeline = gsap.timeline({
-        defaults: { ease: "power2.inOut", duration: 1 },
-      });
-
-      cards.forEach((card, index) => {
-        if (index === 0) return;
-
-        const transitionStart = index - 1;
-        const previousCard = cards[index - 1];
-
-        timeline.add(() => {
-          gsap.set(card, { zIndex: topZIndex + index });
-        }, transitionStart);
-
-        timeline.to(
-          card,
-          { yPercent: 0, filter: "blur(0px)" },
-          transitionStart
+        scrollTimeline.to(
+          currentCard,
+          {
+            scale: 0.7,
+            rotation: 5,
+            duration: 1,
+            ease: "none",
+          },
+          position
         );
 
-        if (previousCard) {
-          timeline.to(
-            previousCard,
-            { filter: "blur(16px)" },
-            transitionStart
-          );
-        }
-      });
-
-      const useTransformPin =
-        typeof window !== "undefined" &&
-        scrollContainer instanceof HTMLElement &&
-        scrollContainer !== document.body &&
-        scrollContainer !== document.documentElement;
-
-      const triggerConfig: ScrollTrigger.Vars & {
-        animation?: gsap.core.Animation;
-      } = {
-        trigger: pinContainerRef.current,
-        start: `top top`,
-        end: `+=${totalTransitions * baseHeight}`,
-        pin: true,
-        scrub: 1,
-        anticipatePin: 1,
-        snap: totalTransitions > 0 ? 1 / totalTransitions : undefined,
-        pinSpacing: true,
-        invalidateOnRefresh: true,
-        animation: timeline,
-        onLeave: () => {
-          if (!scrollContainer) {
-            setSpacerHeight(0);
-          }
-        },
-        onEnterBack: () => {
-          if (!scrollContainer) {
-            setSpacerHeight(spacerValueRef.current);
-          }
-        },
-      };
-
-      if (scrollContainer) {
-        triggerConfig.scroller = scrollContainer;
-        triggerConfig.pinType = useTransformPin ? "transform" : "fixed";
+        scrollTimeline.to(
+          nextCard,
+          {
+            y: "0%",
+            duration: 1,
+            ease: "none",
+          },
+          position
+        );
       }
 
-      const pinTrigger = ScrollTrigger.create(triggerConfig);
-
-      const handleResize = () => {
-        const nextHeight =
-          pinContainerRef.current?.offsetHeight || window.innerHeight || baseHeight;
-
-        const updatedSpacerHeight = scrollContainer
-          ? 0
-          : Math.max((cards.length - 1) * nextHeight, 0);
-
-        spacerValueRef.current = updatedSpacerHeight;
-        setSpacerHeight(updatedSpacerHeight);
-
-        gsap.set(projectsWrapperRef.current, {
-          height: `${nextHeight}px`,
-        });
-
-        cards.forEach((card, index) => {
-          gsap.set(card, {
-            yPercent: index === 0 ? 0 : 110,
-            zIndex: index === 0 ? topZIndex : index + 1,
-            filter: index === 0 ? "blur(0px)" : "blur(16px)",
-          });
-        });
-
-        timeline.invalidate().restart();
+      const resizeObserver = new ResizeObserver(() => {
         ScrollTrigger.refresh();
-      };
+      });
 
-        window.addEventListener("resize", handleResize);
-
-      ScrollTrigger.refresh();
+      if (container.current) {
+        resizeObserver.observe(container.current);
+      }
 
       return () => {
-        pinTrigger?.kill();
-        timeline.kill();
-        window.removeEventListener("resize", handleResize);
-        setSpacerHeight(0);
-        spacerValueRef.current = 0;
+        resizeObserver.disconnect();
+        scrollTimeline.kill();
+        ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       };
     },
-    { scope: containerRef, dependencies: [scrollContainer] }
+    { scope: container }
   );
-
-  const containerClassName = scrollContainer
-    ? "relative min-h-full w-full"
-    : "relative min-h-full w-full";
 
   return (
     <section
       id="projects"
-      className="relative h-full w-full overflow-x-hidden"
+      className="relative w-full"
       style={{
-        minHeight: "100vh",
+        minHeight: `${projects.length * 100}vh`,
+        height: `${projects.length * 100}vh`,
         background: "#F5ECE1",
       }}
     >
-      <div
-        ref={containerRef}
-        className={containerClassName}
-      >
-        {/* Pinned Container - Full Viewport Fixed */}
-        <div
-          ref={pinContainerRef}
-          className="relative w-full"
-          style={{
-            height: "100dvh",
-            minHeight: "100dvh",
-            paddingTop: "6vh",
-            paddingBottom: "6vh",
-            boxSizing: "border-box",
-            overflow: "hidden",
-            background: "#F5ECE1",
-          }}
-        >
-          {/* Projects Wrapper - Horizontal Layout with Blank Pages */}
-          <div
-            ref={projectsWrapperRef}
-            className="absolute inset-0 w-full h-full flex items-center justify-center"
-            style={{
-              transformOrigin: "center center",
-            }}
-          >
+      <div ref={container} className="relative w-full" style={{ height: "100vh" }}>
+        <div className="sticky-cards relative flex h-full w-full items-center justify-center overflow-hidden p-3 lg:p-8">
+          <div className="relative h-[90%] w-[85vw] max-w-[90vw] overflow-hidden rounded-lg">
             {projects.map((project, index) => {
-              // Store ref for individual project blur control
-              if (!projectRefsRef.current[index]) {
-                projectRefsRef.current[index] = null;
-              }
-              
               const colors = cardPalette[index % cardPalette.length];
 
               return (
-              <React.Fragment key={project.id}>
-                {/* Project */}
                 <div
+                  key={project.id}
                   ref={(el) => {
-                    projectRefsRef.current[index] = el;
+                    cardRefs.current[index] = el;
                   }}
-                  className="absolute inset-0 flex items-center justify-center overflow-hidden"
-                >
-                  <div className="w-[90vw]  max-h-[85vh] aspect-[16/10] mx-auto flex flex-col relative">
-                    {/* Rounded Card Container with Hero Background */}
-                    <div 
-                      className="rounded-4xl w-full h-full px-6 md:px-8 lg:px-12 pt-6 md:pt-8 lg:pt-12 pb-3 md:pb-4 lg:pb-6 relative overflow-hidden"
+                  className={cn(
+                    "absolute inset-0 h-full w-full rounded-4xl p-6 md:p-8 lg:p-12 flex flex-col",
+                    "overflow-hidden"
+                  )}
                       style={{
                         background: colors.background,
                       }}
                     >
-                      <div className="relative flex h-full w-full">
-                        <div className="absolute inset-0 flex items-end gap-8">
-                          {/* Hero Number */}
-                          <div
-                            className="select-none leading-none tracking-tight"
+                  {/* Links Section - Magazine Style (Above the line) */}
+                  {project.links.length > 0 && (
+                    <div className="mb-6 md:mb-8 relative">
+                      <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-end">
+                        {project.links.map((link, linkIndex) => {
+                          // Consistent styling for all links
+                          const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70";
+
+                          // Handle grouped links (like Kaggle Notebooks)
+                          if (link.isGrouped && link.groupedLinks) {
+                            const prefix = link.name.split(":")[0];
+                            return (
+                              <div
+                                key={linkIndex}
+                                className={linkClassName}
+                                style={{ color: colors.link }}
+                              >
+                                <span>{prefix}: </span>
+                                {link.groupedLinks.map((groupedLink, idx) => (
+                                  <React.Fragment key={idx}>
+                                    <a
+                                      href={groupedLink.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="transition-opacity hover:opacity-70"
+                                    >
+                                      [{idx + 1}]
+                                    </a>
+                                    {idx < link.groupedLinks!.length - 1 && ", "}
+                                  </React.Fragment>
+                                ))}
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <a
+                              key={linkIndex}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={linkClassName}
+                              style={{ color: colors.link }}
+                            >
+                              {link.name}
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Line Separator */}
+                  <div
+                    className="h-px w-full mb-6 md:mb-8"
+                    style={{
+                      backgroundColor: colors.link,
+                      opacity: 0.4,
+                    }}
+                  />
+
+                  {/* Content Section - Aligned with number's right edge */}
+                  <div className="flex-1 flex items-end gap-6 md:gap-8">
+                    {/* Big Project Number - Bottom Left */}
+                    <div
+                      className="select-none leading-none tracking-tight flex-shrink-0"
                             style={{
                               fontFamily:
                                 '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
                               WebkitTextStroke: `1px ${colors.headlineStroke}`,
                               color: colors.headline,
-                              fontSize: "clamp(12rem, 38vw, 28rem)",
+                        fontSize: "clamp(8rem, 25vw, 20rem)",
                               lineHeight: 1,
-                              transform: "translateY(14%)",
+                        transform: "translateY(8%)",
                             } as React.CSSProperties}
                           >
                             {String(index + 1).padStart(2, "0")}
                           </div>
 
-                          {/* Detail Block */}
+                    {/* Text Section - Aligned with number's right edge */}
                           <div
-                            className="flex flex-col gap-4 text-left"
+                      className="flex flex-col gap-3 md:gap-4 text-left flex-1"
                             style={{
                               fontFamily: '"Inter", sans-serif',
-                              // maxWidth: "min(700px, 70vw)",
-                            }}
-                          >
-                            <div className="w-full flex justify-center">
-                              <div
-                                className="relative w-full max-w-[520px] aspect-[4/3] overflow-hidden"
-                              >
-                                {/* <img
-                                  src={project.image}
-                                  alt={project.title}
-                                  className="absolute inset-0 h-full w-full object-contain"
-                                  style={{ mixBlendMode: "normal" }}
-                                /> */}
-                              </div>
-                            </div>
-                            <div
-                              className="h-px w-full"
-                              style={{ backgroundColor: colors.link, opacity: 0.4 }}
-                            />
+                      }}
+                    >
+                      {/* Role */}
                             <p
                               className="text-[10px] md:text-xs tracking-[0.35em] uppercase"
                               style={{ color: colors.link }}
                             >
                               {project.role}
                             </p>
+
+                      {/* Project Title */}
                             <h3
-                              className="text-sm md:text-3xl font-semibold uppercase tracking-[0.2em]"
+                        className="text-lg md:text-2xl lg:text-3xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
                               style={{ color: colors.headline }}
                             >
                               {project.title}
                             </h3>
+
+                      {/* Short Description */}
                             <p
-                              className="text-xs md:text-sm leading-relaxed font-light"
+                        className="text-xs md:text-sm leading-relaxed font-light max-w-2xl"
                               style={{ color: colors.body }}
                             >
                               {project.description}
                             </p>
-                            {project.tags.length > 0 && (
-                              <div
-                                className="flex flex-wrap gap-2 text-[10px] md:text-xs uppercase tracking-[0.25em] font-medium opacity-80"
-                                style={{ color: colors.link }}
-                              >
-                                {project.tags.map((tag) => (
-                                  <span key={tag}>{tag}</span>
-                                ))}
-                              </div>
-                            )}
-                            {project.links.length > 0 && (
-                              <div className="flex flex-wrap gap-3 text-[10px] md:text-xs tracking-[0.25em] uppercase">
-                                {project.links.map((link, i) => (
-                                  <a
-                                    key={i}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="opacity-80 transition-opacity hover:opacity-100"
-                                    style={{ color: colors.link }}
-                                  >
-                                    {link.name}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
-              </React.Fragment>
-            )})}
+              );
+            })}
           </div>
         </div>
-        {!scrollContainer && spacerHeight > 0 ? (
-          <div
-            aria-hidden="true"
-            style={{ height: spacerHeight }}
-            className="pointer-events-none w-full"
-          />
-        ) : null}
       </div>
     </section>
   );
