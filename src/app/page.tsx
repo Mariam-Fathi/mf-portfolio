@@ -21,6 +21,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
+  const [isHeaderAnimationComplete, setIsHeaderAnimationComplete] = useState(false);
   
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -90,18 +91,24 @@ export default function Home() {
         ease: "power2.out"
       });
 
-      tl.to(`#${sectionId}-content`, {
-        opacity: 1,
-        x: 0,
-        duration: 0.6,
-        ease: "power2.out",
-        onStart: () => {
-          setActiveSection(sectionId);
-        },
-        onComplete: () => {
-          setIsTransitioning(false);
-        }
-      });
+      // If header animation is not complete, complete it now
+      if (!isHeaderAnimationComplete) {
+        completeHeaderAnimation(sectionId);
+      } else {
+        // Just navigate to the section
+        tl.to(`#${sectionId}-content`, {
+          opacity: 1,
+          x: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          onStart: () => {
+            setActiveSection(sectionId);
+          },
+          onComplete: () => {
+            setIsTransitioning(false);
+          }
+        });
+      }
 
     } else {
       // Switching between non-hero sections
@@ -140,7 +147,80 @@ export default function Home() {
       });
     }
 
-  }, [activeSection, isTransitioning]);
+  }, [activeSection, isTransitioning, isHeaderAnimationComplete]);
+
+  const completeHeaderAnimation = (sectionId: SectionId) => {
+    if (!portfolioHeaderRef.current) return;
+
+    const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o");
+    const navMenuEl = portfolioHeaderRef.current.querySelector(".o-nav-menu-wrapper");
+
+    if (!oEl || !navMenuEl) return;
+
+    const oElement = oEl as HTMLElement;
+    const navMenuElement = navMenuEl as HTMLElement;
+
+    const tl = gsap.timeline();
+
+    // Immediately transform O into navigation menu
+    tl.to(oElement, {
+      scale: 1.3,
+      duration: 0.3,
+      ease: "power2.inOut",
+    });
+
+    tl.to(oElement, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        oElement.style.display = "none";
+        navMenuElement.style.display = "flex";
+        gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
+        
+        // Position the nav menu at the end with same padding as left
+        gsap.set(navMenuElement, { 
+          position: "absolute", 
+          right: "1rem",
+          top: "50%",
+          transform: "translateY(-50%)"
+        });
+      },
+    });
+
+    // Reveal navigation menu with smooth expansion
+    tl.to(navMenuElement, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.5,
+      ease: "back.out(1.7)",
+    });
+
+    // Animate menu items appearing
+    tl.to(".nav-menu-item", {
+      opacity: 1,
+      x: 0,
+      duration: 0.4,
+      stagger: 0.08,
+      ease: "power2.out",
+    }, "-=0.3");
+
+    // Navigate to the target section
+    tl.to(`#${sectionId}-content`, {
+      opacity: 1,
+      x: 0,
+      duration: 0.6,
+      ease: "power2.out",
+      onStart: () => {
+        setActiveSection(sectionId);
+        setIsHeaderAnimationComplete(true);
+      },
+      onComplete: () => {
+        setIsTransitioning(false);
+      }
+    });
+  };
 
   // Animate portfolio header on mount
   useEffect(() => {
@@ -177,13 +257,13 @@ export default function Home() {
         oElement.style.display = "inline";
         lineElement.style.display = "none"; // Keep line hidden initially
         
-        // Set initial positions for animation - O should be right after I
+        // Set initial positions for animation
         gsap.set([portfolElement, iElement, oElement], { 
           display: "inline",
           opacity: 1 
         });
         gsap.set(lineElement, { display: "none", scaleX: 0, transformOrigin: "left center" });
-        gsap.set(oElement, { position: "static", x: 0 }); // O starts in normal text flow
+        gsap.set(oElement, { position: "static", x: 0 });
       },
     });
 
@@ -196,7 +276,7 @@ export default function Home() {
       transformOrigin: "center center",
     }, "-=0.2");
 
-    // Step 3: Replace I with line and move O to create PORTFOI_O effect
+    // Step 3: Replace I with line and move O slightly to create space
     tl.to(iElement, {
       opacity: 0,
       duration: 0.3,
@@ -205,80 +285,34 @@ export default function Home() {
         iElement.style.display = "none";
         lineElement.style.display = "block";
         gsap.set(lineElement, { opacity: 1 });
-        
-        // Calculate the space needed - measure the width difference between I and the line
-        const iWidth = iElement.offsetWidth;
-        const lineInitialWidth = iWidth; // Start line at same width as I
-        gsap.set(lineElement, { scaleX: lineInitialWidth / lineElement.offsetWidth });
       }
     });
 
-    // Step 4: Expand line while pushing O to the right
-    const headerWidth = portfolioHeaderRef.current.offsetWidth;
-    const portfolWidth = (portfolElement as HTMLElement).offsetWidth;
-    const oWidth = (oElement as HTMLElement).offsetWidth;
-    const navMenuWidth = (navMenuElement as HTMLElement).offsetWidth;
-    
-    // Calculate final position for O (far right with proper spacing)
-    const spacing = 8; // 8px spacing same as margin between line and L
-    const finalOPosition = headerWidth - navMenuWidth - spacing; // Leave space between line and menu
-    
-    // Animate line expansion and O movement simultaneously
+    // Step 4: Move O slightly to create PORTFOI_O effect
+    tl.to(oElement, {
+      x: 20, // Move O slightly to create space for rotated I
+      duration: 0.4,
+      ease: "power2.out",
+    }, "-=0.2");
+
+    // Step 5: Expand line while pushing O to the right with proper spacing
+    // Use a simpler approach - expand line fully and move O to a reasonable position
     tl.to(lineElement, {
       scaleX: 1,
       duration: 1.2,
       ease: "power2.out",
     }, "-=0.2");
 
+    // Move O to a position that leaves space for the menu
+    // We'll move it to about 80% of the available space to ensure it's visible
     tl.to(oElement, {
-      x: finalOPosition,
+      x: "calc(100vw - 120px)", // Conservative position that should keep it visible
       duration: 1.2,
       ease: "power2.out",
-    }, "-=1.2");
-
-    // Step 5: Transform O into navigation menu
-    tl.to(oElement, {
-      scale: 1.3,
-      duration: 0.3,
-      ease: "power2.inOut",
-    }, "+=0.3");
-
-    tl.to(oElement, {
-      opacity: 0,
-      scale: 0.8,
-      duration: 0.4,
-      ease: "power2.in",
       onComplete: () => {
-        oElement.style.display = "none";
-        navMenuElement.style.display = "flex";
-        gsap.set(navMenuElement, { scale: 0.8, opacity: 0 });
-        
-        // Position the nav menu where the O ended up with proper spacing from the line
-        gsap.set(navMenuElement, { 
-          position: "absolute", 
-          right: `${spacing}px`, // Same spacing as between line and L
-          top: "50%",
-          transform: "translateY(-50%)"
-        });
-      },
-    });
-
-    // Step 6: Reveal navigation menu with smooth expansion
-    tl.to(navMenuElement, {
-      opacity: 1,
-      scale: 1,
-      duration: 0.5,
-      ease: "back.out(1.7)",
-    });
-
-    // Step 7: Animate menu items appearing
-    tl.to(".nav-menu-item", {
-      opacity: 1,
-      x: 0,
-      duration: 0.4,
-      stagger: 0.08,
-      ease: "power2.out",
-    }, "-=0.3");
+        setIsHeaderAnimationComplete(true);
+      }
+    }, "-=1.2");
 
     return () => {
       tl.kill();
@@ -490,14 +524,8 @@ export default function Home() {
           left: 0;
           right: 0;
           z-index: 3;
-          padding: 0;
+          padding: 0 1rem;
           transition: all 0.4s ease;
-        }
-
-        @media (min-width: 1280px) {
-          .navigation-layer {
-            padding: 0 1rem;
-          }
         }
 
         .navigation-layer.hero-mode {
@@ -506,24 +534,12 @@ export default function Home() {
           left: 0;
           right: 0;
           background: transparent;
-          padding: 0;
-        }
-
-        @media (min-width: 1280px) {
-          .navigation-layer.hero-mode {
-            padding: 0 1rem;
-          }
+          padding: 0 1rem;
         }
 
         .navigation-layer.nav-mode {
           background: #F5ECE1;
-          padding: 0;
-        }
-
-        @media (min-width: 1280px) {
-          .navigation-layer.nav-mode {
-            padding: 0 1rem;
-          }
+          padding: 0 1rem;
         }
 
         .nav-top-section {
@@ -576,7 +592,7 @@ export default function Home() {
         .hero-cover-title-line {
           will-change: transform;
           transform-origin: left center;
-          margin-right: 8px; /* Add space between line and menu */
+          margin-right: 8px;
         }
 
         .hero-cover-header-top {
@@ -612,7 +628,7 @@ export default function Home() {
           align-items: center;
           gap: 0.5rem;
           position: absolute;
-          right: 8px; /* Same spacing as between line and L */
+          right: 1rem;
           top: 50%;
           transform: translateY(-50%);
         }
@@ -630,7 +646,7 @@ export default function Home() {
           cursor: pointer;
           padding: 6px;
           transition: all 0.3s ease;
-          margin-left: 8px; /* Add space between line and menu icon */
+          margin-left: 8px;
         }
 
         .o-nav-toggle:hover {
@@ -673,7 +689,7 @@ export default function Home() {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           flex-wrap: wrap;
           max-width: fit-content;
-          margin-left: 8px; /* Add space between line and menu */
+          margin-left: 8px;
         }
 
         .o-nav-menu.open {
