@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
+import GalleryShowcase from "@/components/projects/projects";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
@@ -167,12 +168,7 @@ export default function Home() {
             id="work-content" 
             className={`content-section ${activeSection === "work" ? "active" : ""}`}
           >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>Selected Projects</h2>
-                <p>Work content will appear here</p>
-              </div>
-            </div>
+            <GalleryShowcase />
           </section>
 
           {/* Skills Section */}
