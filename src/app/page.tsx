@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
 import GalleryShowcase from "@/components/projects/projects";
 import { Skiper52 } from "@/components/Skiper52";
+import { Skiper31 } from "@/components/SkillsScrollAnimation";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
@@ -357,12 +358,7 @@ export default function Home() {
             id="skills-content" 
             className={`content-section ${activeSection === "skills" ? "active" : ""}`}
           >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>Skills & Expertise</h2>
-                <p>Skills content will appear here</p>
-              </div>
-            </div>
+            <Skiper31 />
           </section>
 
           {/* Certificates Section */}
