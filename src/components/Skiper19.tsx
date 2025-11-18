@@ -13,7 +13,7 @@ const experienceItems = [
     toDate: "Present",
     position: 0.2, // Position along path (0-1) - left side (moved slightly right to avoid edge)
     side: "above", // "above" or "below" the path
-    color: "#EF4444", // Red
+    color: "#66BB6A", // Green from color palette
   },
   {
     number: "02",
@@ -22,9 +22,9 @@ const experienceItems = [
     type: "Freelance Project",
     fromDate: "Mar 2025",
     toDate: "Jul 2025",
-    position: 0.75, // Position along path (0-1) - right side (moved slightly left to avoid edge)
+    position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#3B82F6", // Blue
+    color: "#FF8C00", // Orange from color palette
   },
 ];
 
@@ -49,14 +49,31 @@ const Skiper19 = () => {
         
         {/* Experience items positioned along the path */}
         {experienceItems.map((item, index) => (
-          <PathItem
-            key={index}
-            pathRef={pathRef}
-            scrollYProgress={scrollYProgress}
-            position={item.position}
-            side={item.side as "above" | "below"}
-            item={item}
-          />
+          <React.Fragment key={index}>
+            <PathItem
+              pathRef={pathRef}
+              scrollYProgress={scrollYProgress}
+              position={item.position}
+              side={item.side as "above" | "below"}
+              item={item}
+              color={item.color}
+            />
+            {/* Two pulsing points on the path for each experience item */}
+            <PathPoint
+              pathRef={pathRef}
+              scrollYProgress={scrollYProgress}
+              position={item.position}
+              color={item.color}
+              delay={0}
+            />
+            <PathPoint
+              pathRef={pathRef}
+              scrollYProgress={scrollYProgress}
+              position={item.position}
+              color={item.color}
+              delay={0.3}
+            />
+          </React.Fragment>
         ))}
       </div>
     </section>
@@ -101,7 +118,7 @@ const LinePath = React.forwardRef<
       <motion.path
         ref={ref}
         d={pathD}
-        stroke="#C2F84F"
+        stroke="#00BCD4"
         strokeWidth="4"
         fill="none"
         pathLength="1"
@@ -126,6 +143,7 @@ const PathItem = ({
   position,
   side,
   item,
+  color,
 }: {
   pathRef: React.RefObject<SVGPathElement | null>;
   scrollYProgress: any;
@@ -138,6 +156,7 @@ const PathItem = ({
     toDate: string;
     type: string;
   };
+  color: string;
 }) => {
   const [point, setPoint] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -176,9 +195,9 @@ const PathItem = ({
       
       // Apply offset based on side
       if (side === "above") {
-        y = y - offsetDistance; // Move up (above the path)
+        y = y - 230; // Move up (above the path)
       } else {
-        y = y + offsetDistance; // Move down (below the path)
+        y = y + 50; // Move down (below the path)
       }
       
       // Ensure items stay within reasonable bounds (prevent extreme positioning)
@@ -297,36 +316,36 @@ const PathItem = ({
         animate={{ opacity: opacity || 0, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="rounded-4xl font-jakarta-sans bg-transparent pb-10 text-[#FAFDEE] min-w-[300px]">
+        <div className="rounded-4xl font-jakarta-sans bg-transparent pb-10 min-w-[300px]">
           {item.company === "Tarqia" ? (
             <>
               <div className="mb-8 flex w-full flex-col items-start gap-5 px-4 font-medium lg:flex-row lg:justify-between">
                 <div className="flex w-full items-center justify-between gap-12 uppercase lg:w-fit lg:justify-center">
-                  <p className="w-fit text-sm text-[#1F3A4B]">
+                  <p className="w-fit text-sm" style={{ color }}>
                     {item.fromDate} <br />
                     {item.toDate}
                   </p>
-                  <p className="w-fit text-right text-sm text-[#1F3A4B] lg:text-left">
+                  <p className="w-fit text-right text-sm lg:text-left" style={{ color }}>
                     {item.title} <br /> {item.type}
                   </p>
                 </div>
               </div>
-              <h1 className="text-center text-[8vw] font-bold leading-[0.9] tracking-tighter lg:text-[10vw]">
+              <h1 className="text-center text-[8vw] font-bold leading-[0.9] tracking-tighter lg:text-[10vw]" style={{ color }}>
                 {item.company}
               </h1>
             </>
           ) : (
             <>
-              <h1 className="text-center text-[8vw] font-bold leading-[0.9] tracking-tighter lg:text-[10vw]">
+              <h1 className="text-center text-[8vw] font-bold leading-[0.9] tracking-tighter lg:text-[10vw]" style={{ color }}>
                 {item.company}
               </h1>
               <div className="mt-8 flex w-full flex-col items-start gap-5 px-4 font-medium lg:flex-row lg:justify-between">
                 <div className="flex w-full items-center justify-between gap-12 uppercase lg:w-fit lg:justify-center">
-                  <p className="w-fit text-sm text-[#1F3A4B]">
+                  <p className="w-fit text-sm" style={{ color }}>
                     {item.fromDate} <br />
                     {item.toDate}
                   </p>
-                  <p className="w-fit text-right text-sm text-[#1F3A4B] lg:text-left">
+                  <p className="w-fit text-right text-sm lg:text-left" style={{ color }}>
                     {item.title} <br /> {item.type}
                   </p>
                 </div>
@@ -335,6 +354,155 @@ const PathItem = ({
           )}
         </div>
       </motion.div>
+    </div>
+  );
+};
+
+// Component to render pulsing points on the path
+const PathPoint = ({
+  pathRef,
+  scrollYProgress,
+  position,
+  color,
+  delay,
+}: {
+  pathRef: React.RefObject<SVGPathElement | null>;
+  scrollYProgress: any;
+  position: number;
+  color: string;
+  delay: number;
+}) => {
+  const [point, setPoint] = useState({ x: 0, y: 0 });
+  const [opacity, setOpacity] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updatePosition = () => {
+      if (!pathRef.current || !containerRef.current) return;
+
+      const path = pathRef.current;
+      const svg = path.ownerSVGElement;
+      if (!svg) return;
+
+      // Get the point along the path in SVG coordinates
+      const totalLength = path.getTotalLength();
+      if (totalLength === 0) return; // Path not ready yet
+      
+      const pathPoint = path.getPointAtLength(totalLength * position);
+
+      // Get SVG dimensions and viewBox
+      const svgRect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+
+      // Calculate scale factors from viewBox to actual SVG size
+      const scaleX = svgRect.width / viewBox.width;
+      const scaleY = svgRect.height / viewBox.height;
+
+      // Convert SVG viewBox coordinates to container-relative pixel coordinates
+      // No vertical offset - points stay exactly on the path
+      const x = pathPoint.x * scaleX;
+      const y = pathPoint.y * scaleY;
+
+      // Update point with coordinates
+      setPoint({ x, y });
+    };
+
+    // Use multiple attempts to ensure DOM is ready
+    const rafId1 = requestAnimationFrame(() => {
+      updatePosition();
+    });
+
+    const rafId2 = requestAnimationFrame(() => {
+      updatePosition();
+    });
+
+    // Also update after delays to ensure SVG is rendered
+    const timeoutId1 = setTimeout(updatePosition, 50);
+    const timeoutId2 = setTimeout(updatePosition, 200);
+    const timeoutId3 = setTimeout(updatePosition, 500);
+
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      cancelAnimationFrame(rafId1);
+      cancelAnimationFrame(rafId2);
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [pathRef, position]);
+
+  // Update opacity based on scroll progress and position
+  useEffect(() => {
+    if (point.x !== 0 || point.y !== 0) {
+      const updateOpacity = () => {
+        try {
+          const currentProgress = scrollYProgress.get();
+          // Show point when scroll reaches 20% of its position
+          const itemProgress = position * 0.2;
+          if (currentProgress >= itemProgress) {
+            setOpacity(1);
+          } else {
+            const fadeInStart = itemProgress * 0.3;
+            if (currentProgress >= fadeInStart) {
+              setOpacity(0.3 + (currentProgress - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
+            } else {
+              setOpacity(0.3);
+            }
+          }
+        } catch (e) {
+          setOpacity(1);
+        }
+      };
+
+      updateOpacity();
+
+      const unsubscribe = scrollYProgress.on("change", (latest: number) => {
+        const itemProgress = position * 0.2;
+        if (latest >= itemProgress) {
+          setOpacity(1);
+        } else {
+          const fadeInStart = itemProgress * 0.3;
+          if (latest >= fadeInStart) {
+            setOpacity(0.3 + (latest - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
+          } else {
+            setOpacity(0.3);
+          }
+        }
+      });
+
+      return () => unsubscribe();
+    } else {
+      setOpacity(0);
+    }
+  }, [scrollYProgress, position, point]);
+
+  return (
+    <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none">
+      <div
+        className="absolute z-20"
+        style={{
+          left: `${point.x}px`,
+          top: `${point.y}px`,
+          transform: "translate(-50%, -50%)",
+          opacity: opacity || 0,
+          visibility: (point.x === 0 && point.y === 0 && position > 0.01) ? "hidden" : "visible",
+        }}
+      >
+        {/* Static point on the path */}
+        <div
+          className="absolute rounded-full"
+          style={{
+            backgroundColor: color,
+            width: "24px",
+            height: "24px",
+            transform: "translate(-50%, -50%)",
+            left: "50%",
+            top: "50%",
+            boxShadow: `0 0 12px ${color}`,
+          }}
+        />
+      </div>
     </div>
   );
 };
