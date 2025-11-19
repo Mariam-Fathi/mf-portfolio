@@ -16,7 +16,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const a2mRef = useRef<HTMLSpanElement | null>(null);
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
-  const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
+  const softwareEngineerRef = useRef<SVGTextElement | null>(null);
+  const iamWrapperRef = useRef<HTMLSpanElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const [linkPositions, setLinkPositions] = useState<Array<{ x: number; y: number }>>([]);
@@ -460,10 +461,95 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           ]
         });
       
-        // Keep the dot visible permanently (no fade out)
+        // Keep the dot visible for a moment, then fade it out
         finalDotTimeline.to(finalDot, {
-          duration: 1
+          duration: 0.5
         });
+        
+        // Hide the final dot after it finishes its motion
+        finalDotTimeline.to(finalDot, {
+          opacity: 0,
+          scale: 0.8,
+          duration: 0.4,
+          ease: "power2.in",
+          onComplete: () => {
+            if (finalDot && finalDot.parentNode) {
+              finalDot.style.display = "none";
+            }
+          }
+        });
+        
+        // Add "software engineer" handwriting animation after dot finishes
+        finalDotTimeline.call(() => {
+          const svgText = softwareEngineerRef.current;
+          
+          if (!svgText) {
+            console.warn("softwareEngineerRef is null");
+            return;
+          }
+          
+          // Wait a bit for the SVG to render, then convert text to path for DrawSVG effect
+          setTimeout(() => {
+            const svg = svgText.ownerSVGElement;
+            if (!svg) {
+              console.warn("SVG element not found");
+              return;
+            }
+            
+            // Get the text element's bounding box first (while hidden)
+            let bbox;
+            try {
+              // Temporarily make it visible to get bbox, then hide again
+              gsap.set(svgText, { opacity: 0.01, strokeOpacity: 0.01 });
+              bbox = svgText.getBBox();
+              // If bbox is empty or invalid, use fallback
+              if (!bbox || bbox.width === 0) {
+                throw new Error("Empty bbox");
+              }
+            } catch (e) {
+              console.warn("Could not get BBox, using fallback", e);
+              // Fallback: estimate based on text content
+              const textContent = svgText.textContent || "software engineer";
+              const fontSize = parseFloat(window.getComputedStyle(svgText).fontSize) || 24;
+              const estimatedWidth = textContent.length * fontSize * 0.6; // rough estimate
+              bbox = { width: estimatedWidth, height: fontSize };
+            }
+            
+            // Estimate path length based on text width
+            // Multiply by 1.8 to account for curves and letter complexity
+            const estimatedPathLength = bbox.width * 1.8;
+            
+            // Make SVG visible
+            gsap.set(svg, {
+              opacity: 1
+            });
+            
+            // Set initial stroke-dasharray and stroke-dashoffset for DrawSVG effect
+            gsap.set(svgText, {
+              strokeDasharray: estimatedPathLength,
+              strokeDashoffset: estimatedPathLength,
+              fillOpacity: 0,
+              strokeOpacity: 1,
+              opacity: 1
+            });
+            
+            // Animate the stroke-dashoffset to create handwriting drawing effect
+            gsap.to(svgText, {
+              strokeDashoffset: 0,
+              duration: 3,
+              ease: "power1.inOut", // Linear ease for more natural handwriting feel
+              onComplete: () => {
+                // After drawing completes, fade in the fill and fade out the stroke
+                gsap.to(svgText, {
+                  fillOpacity: 1,
+                  strokeOpacity: 0,
+                  duration: 0.6,
+                  ease: "power2.out"
+                });
+              }
+            });
+          }, 300); // Small delay to ensure SVG is rendered and font is loaded
+        }, [], "+=0.3");
         
         dotTimeline.add(finalDotTimeline);
         
@@ -571,8 +657,54 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   r
                 </span>
               </span>
-              <span className="hero-iam-wrapper">
+              <span ref={iamWrapperRef} className="hero-iam-wrapper">
                 <span className="hero-iam">
+                  {/* Software Engineer Text - positioned above "iam" */}
+                  <div
+                    className="software-engineer-wrapper"
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "2%",
+                      width: "auto",
+                      height: "auto",
+                      marginBottom: "0.5rem"
+                    }}
+                  >
+                    <svg
+                      className="software-engineer-svg"
+                      width="700"
+                      height="120"
+                      style={{
+                        fontFamily: '"Floralis Couture", cursive',
+                        fontSize: "clamp(3rem, 6vw, 5rem)",
+                        overflow: "visible",
+                        pointerEvents: "none",
+                        opacity: 0
+                      }}
+                    >
+                      <text
+                        ref={softwareEngineerRef}
+                        x="0"
+                        y="85"
+                        fill="#1e140b"
+                        fillOpacity="0"
+                        stroke="#1e140b"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeOpacity="0"
+                        style={{
+                          fontFamily: '"Floralis Couture", cursive',
+                          fontSize: "clamp(3rem, 6vw, 5rem)",
+                          letterSpacing: "0.05em",
+                          fontWeight: "normal"
+                        }}
+                      >
+                        software engineer
+                      </text>
+                    </svg>
+                  </div>
                   <span className="hero-i-wrapper">
                     <span ref={iRef} className="hero-letter hero-letter-i">
                       i
@@ -652,6 +784,25 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           width: 100%;
           margin-top: auto; /* push to bottom */
           padding: 1rem;
+          position: relative;
+        }
+
+        .software-engineer-wrapper {
+          position: absolute;
+          top: -1.5rem;
+          right: 0;
+          z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+          .software-engineer-wrapper {
+            top: -1rem;
+          }
+        }
+
+        .software-engineer-svg {
+          width: auto;
+          height: auto;
         }
 
         @media (max-width: 768px) {
@@ -864,6 +1015,26 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: inline-flex;
           align-items: flex-end;
           position: relative;
+        }
+
+        .hero-iam {
+          display: inline-flex;
+          align-items: flex-end;
+          position: relative;
+        }
+
+        .software-engineer-wrapper {
+          position: absolute;
+          bottom: 100%;
+          right: 0;
+          z-index: 10;
+          margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+          .software-engineer-wrapper {
+            margin-bottom: 0.3rem;
+          }
         }
 
 

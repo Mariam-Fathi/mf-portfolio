@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+    font-family: "Floralis Couture";
+    src: url("/fonts/floralis_couture/Floralis Couture.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
     --font-default: "Momo Trust Display", "Stack Sans", sans-serif;
