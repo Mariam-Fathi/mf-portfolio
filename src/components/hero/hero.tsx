@@ -71,7 +71,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     onNavigate(section);
   };
 
-  // Calculate random positions for links
+  // Calculate random positions for links (fixed across reloads)
   useEffect(() => {
     const calculatePositions = () => {
       if (!heroCoverRef.current) return;
@@ -95,6 +95,25 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       // Responsive values based on screen size
       const isMobile = window.innerWidth < 768;
       const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+      
+      // Create a key for localStorage based on screen size category
+      const screenSizeKey = isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop';
+      const storageKey = `hero-link-positions-v8-${screenSizeKey}`;
+      
+      // Try to load existing positions from localStorage
+      const storedPositions = localStorage.getItem(storageKey);
+      if (storedPositions) {
+        try {
+          const parsed = JSON.parse(storedPositions);
+          // Verify the stored positions are valid
+          if (Array.isArray(parsed) && parsed.length === coverSections.length) {
+            setLinkPositions(parsed);
+            return;
+          }
+        } catch (e) {
+          // If parsing fails, continue to generate new positions
+        }
+      }
       
       // Minimum distance between links to prevent overlap (responsive)
       // On mobile, links are smaller but we need more spacing to account for their width
@@ -176,16 +195,29 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         positions.push(position);
       }
 
+      // Store positions in localStorage for future reloads
+      localStorage.setItem(storageKey, JSON.stringify(positions));
       setLinkPositions(positions);
     };
 
     // Calculate on mount and window resize
     const timeoutId = setTimeout(calculatePositions, 100);
-    window.addEventListener('resize', calculatePositions);
+    
+    // Only recalculate on resize if screen size category changes
+    let lastScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
+    const handleResize = () => {
+      const currentScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
+      if (currentScreenSize !== lastScreenSize) {
+        lastScreenSize = currentScreenSize;
+        calculatePositions();
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
     
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('resize', calculatePositions);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -668,7 +700,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                       left: "2%",
                       width: "auto",
                       height: "auto",
-                      marginBottom: "0.5rem"
+                      marginBottom: "0.2rem"
                     }}
                   >
                     <svg
@@ -1028,12 +1060,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           bottom: 100%;
           right: 0;
           z-index: 10;
-          margin-bottom: 0.5rem;
+          margin-bottom: 0.2rem;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            margin-bottom: 0.3rem;
+            margin-bottom: 0.15rem;
           }
         }
 

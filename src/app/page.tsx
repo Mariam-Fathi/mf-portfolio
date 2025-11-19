@@ -285,7 +285,7 @@ export default function Home() {
       const menuSpace = 200; // Space reserved for navigation menu
       
       // Position O at the end of viewport minus padding and menu space
-      return viewportWidth - containerRect.left - padding - menuSpace;
+      return viewportWidth - containerRect.left - menuSpace + 36;
     };
 
     getElements().then((elements) => {
@@ -369,7 +369,7 @@ export default function Home() {
           const iRect = iElement.getBoundingClientRect();
           const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
           if (containerRect) {
-            iOriginalPosition = iRect.left - containerRect.left;
+            iOriginalPosition = iRect.left;
           }
         },
         onComplete: () => {
@@ -403,7 +403,7 @@ export default function Home() {
           
           // Line expands as O moves
           gsap.to(lineEl, {
-            width: lineFinalWidth,
+            width: lineFinalWidth + 100,
             duration: 1.2,
             ease: "power2.out",
           });
