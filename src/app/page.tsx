@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";
 import GalleryShowcase from "@/components/projects/projects";
 import { Skiper52 } from "@/components/Skiper52";
-import { Skiper31 } from "@/components/SkillsScrollAnimation";
+import Contact from "@/components/Contact";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
 
@@ -231,11 +231,8 @@ export default function Home() {
     let tl: gsap.core.Timeline | null = null;
     let oElement: HTMLElement | null = null;
     let lineElement: HTMLElement | null = null;
-    let verticalLineElement: HTMLElement | null = null;
     let animationComplete = false;
     let iOriginalPosition = 0;
-    let portfolEndPosition = 0;
-    let portfolTopPosition = 0;
 
     // Helper function to safely query elements with retry logic
     const getElements = (retries = 3, delay = 100): Promise<{
@@ -244,7 +241,6 @@ export default function Home() {
       iElement: HTMLElement;
       oElement: HTMLElement;
       lineElement: HTMLElement;
-      verticalLineElement: HTMLElement;
       navMenuElement: HTMLElement;
     } | null> => {
       return new Promise((resolve) => {
@@ -254,17 +250,15 @@ export default function Home() {
           const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i");
           const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o");
           const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line");
-          const verticalLineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-vertical-line");
           const navMenuEl = portfolioHeaderRef.current?.querySelector(".o-nav-menu-wrapper");
 
-          if (fullTextEl && portfolEl && iEl && oEl && lineEl && verticalLineEl && navMenuEl) {
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl && navMenuEl) {
             resolve({
               fullTextElement: fullTextEl as HTMLElement,
               portfolElement: portfolEl as HTMLElement,
               iElement: iEl as HTMLElement,
               oElement: oEl as HTMLElement,
               lineElement: lineEl as HTMLElement,
-              verticalLineElement: verticalLineEl as HTMLElement,
               navMenuElement: navMenuEl as HTMLElement,
             });
           } else if (attemptNumber < retries) {
@@ -303,13 +297,11 @@ export default function Home() {
         iElement,
         oElement: oEl,
         lineElement: lineEl,
-        verticalLineElement: verticalLineEl,
         navMenuElement,
       } = elements;
 
       oElement = oEl; // Store for resize handler
       lineElement = lineEl; // Store for resize handler
-      verticalLineElement = verticalLineEl; // Store for resize handler
 
       // Create smooth motion graphics timeline
       tl = gsap.timeline({ delay: 0.8 });
@@ -327,7 +319,6 @@ export default function Home() {
           iElement.style.display = "inline";
           oEl.style.display = "inline";
           lineEl.style.display = "none";
-          verticalLineEl.style.display = "none";
           
           // Set initial positions for animation
           gsap.set([portfolElement, iElement, oEl], {
@@ -339,22 +330,12 @@ export default function Home() {
             width: 0,
             transformOrigin: "left center",
           });
-          gsap.set(verticalLineEl, {
-            display: "none",
-            height: 0,
-            transformOrigin: "top center",
-          });
           gsap.set(oEl, { position: "static", x: 0 });
           
           // Measure I width after it's displayed (force reflow)
           void iElement.offsetWidth;
           const iRect = iElement.getBoundingClientRect();
           iWidth = iRect.width;
-          
-          // Measure PORTFOL position (end of P) for vertical line - both X and Y
-          const portfolRect = portfolElement.getBoundingClientRect();
-          portfolEndPosition = portfolRect.right; // Right edge of PORTFOL (end of P) - X position
-          portfolTopPosition = portfolRect.top; // Top of PORTFOL (top of P) - Y position
         },
       });
 
@@ -406,20 +387,9 @@ export default function Home() {
       }, "-=0.3");
 
       // Step 5: Expand line while moving O to the end of the viewport
-      // Also animate vertical line from end of P down to left corner
       const endPosition = calculateEndPosition();
       
-      // Get current position of O after it was pushed by I
-      const oCurrentX = gsap.getProperty(oEl, "x") as number;
-      
-      // Calculate vertical line properties
-      // Use stored P position (measured when PORTFOL was first displayed)
-      const viewportHeight = window.innerHeight;
-      const verticalLineStartY = portfolTopPosition; // Use stored P's top position
-      const verticalLineEndY = viewportHeight;
-      const verticalLineHeight = verticalLineEndY - verticalLineStartY;
-      
-      // Animate both horizontal line expansion, O movement, and vertical line simultaneously
+      // Animate horizontal line expansion and O movement simultaneously
       tl.to(oEl, {
         x: endPosition,
         duration: 1.2,
@@ -434,24 +404,6 @@ export default function Home() {
             duration: 1.2,
             ease: "power2.out",
           });
-          
-          // Vertical line: start from end of P's position (both X and Y from stored P position)
-          // Same expansion feel as horizontal line - just expand, no movement
-          verticalLineEl.style.display = "block";
-          gsap.set(verticalLineEl, {
-            left: portfolEndPosition - 111.5, // X position: end of P (stored from Step 1)
-            top: portfolTopPosition + 32, // Y position: top of P (stored from Step 1)
-            height: 0, // Start with zero height
-            opacity: 0.4,
-            transformOrigin: "top center", // Expand from top
-          });
-          
-          // Expand downward to bottom of screen - same feel as horizontal line expansion
-          gsap.to(verticalLineEl, {
-            height: verticalLineHeight - 70, // Expand to bottom of viewport
-            duration: 1.2,
-            ease: "power2.out", // Same easing as horizontal line
-          });
         },
         onComplete: () => {
           animationComplete = true;
@@ -461,7 +413,7 @@ export default function Home() {
 
       // Handle window resize to recalculate positions
       const handleResize = () => {
-        if (animationComplete && oElement && lineElement && verticalLineElement) {
+        if (animationComplete && oElement && lineElement) {
           const newEndPosition = calculateEndPosition();
           gsap.set(oElement, { x: newEndPosition });
           
@@ -469,22 +421,6 @@ export default function Home() {
           const lineStartX = iOriginalPosition || (gsap.getProperty(lineElement, "x") as number);
           const lineFinalWidth = newEndPosition - lineStartX;
           gsap.set(lineElement, { width: Math.max(0, lineFinalWidth) });
-          
-          // Update vertical line position and height on resize
-          const viewportHeight = window.innerHeight;
-          // Recalculate portfol position on resize
-          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol") as HTMLElement;
-          if (portfolEl) {
-            const portfolRect = portfolEl.getBoundingClientRect();
-            const newPortfolEndPosition = portfolRect.right;
-            const newPortfolTopPosition = portfolRect.top;
-            const verticalLineHeight = viewportHeight - newPortfolTopPosition;
-            gsap.set(verticalLineElement, {
-              left: newPortfolEndPosition, // Stay at end of P position
-              top: newPortfolTopPosition, // Use P's top position
-              height: Math.max(0, verticalLineHeight),
-            });
-          }
         }
       };
 
@@ -537,7 +473,7 @@ export default function Home() {
             id="skills-content" 
             className={`content-section ${activeSection === "skills" ? "active" : ""}`}
           >
-            <Skiper31 />
+            SKILLS SECTION
           </section>
 
           {/* Certificates Section */}
@@ -553,12 +489,7 @@ export default function Home() {
             id="contact-content" 
             className={`content-section ${activeSection === "contact" ? "active" : ""}`}
           >
-            <div className="section-content">
-              <div className="placeholder-content">
-                <h2>Get In Touch</h2>
-                <p>Contact content will appear here</p>
-              </div>
-            </div>
+            <Contact />
           </section>
         </div>
       )}
@@ -572,7 +503,6 @@ export default function Home() {
             <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
             <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
             <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
-            <div className="hero-cover-title-vertical-line" style={{ display: "none", width: "2px", backgroundColor: "#1e140b", position: "fixed" }} aria-hidden="true"></div>
             
             {/* Navigation Menu that replaces O */}
             <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
@@ -784,15 +714,6 @@ export default function Home() {
           opacity: 0.4;
           top: 50%;
           transform: translateY(-50%);
-        }
-
-        .hero-cover-title-vertical-line {
-          will-change: height, transform;
-          transform-origin: top center;
-          position: fixed;
-          width: 2px;
-          background-color: #1e140b;
-          z-index: 1;
         }
 
         .hero-cover-header-top {

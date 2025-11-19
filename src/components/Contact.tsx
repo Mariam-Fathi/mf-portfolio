@@ -32,7 +32,7 @@ const contactTiles: ContactTile[] = [
     caption: "kaggle.com/mariamfathi",
     href: "https://www.kaggle.com/mariamfathiamin",
     background: "linear-gradient(135deg, rgba(32, 190, 255, 0.15) 0%, rgba(32, 190, 255, 0.05) 100%)",
-    accent: "#20BEFF",
+    accent: "#20BEFF", // Kaggle brand blue
     icon: IconLetterK,
     position: {
       top: "28%",
@@ -44,8 +44,8 @@ const contactTiles: ContactTile[] = [
     label: "GitHub",
     caption: "github.com/mariamfathi",
     href: "https://github.com/Mariam-Fathi",
-    background: "linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0.05) 100%)",
-    accent: "#8B5CF6",
+    background: "linear-gradient(135deg, rgba(36, 41, 46, 0.15) 0%, rgba(36, 41, 46, 0.05) 100%)",
+    accent: "#24292e", // GitHub brand dark gray/black
     icon: IconBrandGithub,
     position: {
       top: "26%",
@@ -57,8 +57,8 @@ const contactTiles: ContactTile[] = [
     label: "LinkedIn",
     caption: "linkedin.com/in/mariamfathi",
     href: "https://www.linkedin.com/in/mariam-fathi-siam",
-    background: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%)",
-    accent: "#10B981",
+    background: "linear-gradient(135deg, rgba(0, 119, 181, 0.15) 0%, rgba(0, 119, 181, 0.05) 100%)",
+    accent: "#0077b5", // LinkedIn brand blue
     icon: IconBrandLinkedin,
     position: {
       bottom: "28%",
@@ -70,8 +70,8 @@ const contactTiles: ContactTile[] = [
     label: "Email",
     caption: "mariam.fathi.siam@outlook.com",
     href: "mailto:mariam.fathi.siam@outlook.com",
-    background: "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(249, 115, 22, 0.05) 100%)",
-    accent: "#F97316",
+    background: "linear-gradient(135deg, rgba(0, 120, 212, 0.15) 0%, rgba(0, 120, 212, 0.05) 100%)",
+    accent: "#0078d4", // Outlook/Microsoft brand blue
     icon: IconMail,
     position: {
       bottom: "26%",
@@ -208,56 +208,16 @@ const Contact: React.FC = () => {
         floatTimelines.set(tile, floatTimeline);
       });
 
-      // Playful hover effects
+      // Pause floating animation on hover for better UX
       Array.from(tiles).forEach((tile) => {
         tile.addEventListener("mouseenter", () => {
           const timeline = floatTimelines.get(tile);
           timeline?.pause();
-
-          // Gentle hover lift
-          gsap.to(tile, {
-            y: -18,
-            scale: 1.08,
-            duration: 0.45,
-            ease: "sine.out",
-          });
-
-          // Icon jump effect
-          const icon = tile.querySelector("span:first-child");
-          if (icon) {
-            gsap.to(icon, {
-              y: -8,
-              scale: 1.12,
-              duration: 0.45,
-              ease: "sine.out",
-            });
-          }
         });
 
         tile.addEventListener("mouseleave", () => {
           const timeline = floatTimelines.get(tile);
-
-          // Spring back to original position
-          gsap.to(tile, {
-            y: 0,
-            scale: 1,
-            duration: 0.5,
-            ease: "power2.out",
-            onComplete: () => {
-              timeline?.restart();
-            },
-          });
-
-          // Icon spring back
-          const icon = tile.querySelector("span:first-child");
-          if (icon) {
-            gsap.to(icon, {
-              y: 0,
-              scale: 1,
-              duration: 0.4,
-              ease: "power2.out",
-            });
-          }
+          timeline?.restart();
         });
       });
     }
@@ -283,18 +243,7 @@ const Contact: React.FC = () => {
         }
       );
 
-      // Add tap effects for mobile
-      Array.from(mobileTiles).forEach((tile) => {
-        tile.addEventListener('click', () => {
-          gsap.to(tile, {
-            scale: 0.95,
-            duration: 0.1,
-            yoyo: true,
-            repeat: 1,
-            ease: "power2.inOut"
-          });
-        });
-      });
+      // No tap motion effects
     }
   }, []);
 
@@ -303,6 +252,33 @@ const Contact: React.FC = () => {
       id="contact"
       className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F5ECE1] text-[#111827]"
     >
+      {/* SVG Filter for Liquid Glass Effect */}
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <filter id="glass-distortion-contact" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.02 0.02"
+              numOctaves="2" 
+              seed="92" 
+              result="noise" 
+            />
+            <feGaussianBlur 
+              in="noise" 
+              stdDeviation="2" 
+              result="blurred" 
+            />
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="blurred" 
+              scale="110"
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+            />
+          </filter>
+        </defs>
+      </svg>
+
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_top_left,_rgba(255,246,223,0.65),_transparent_55%)]" />
         <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_bottom_right,_rgba(229,246,255,0.7),_transparent_55%)]" />
@@ -318,32 +294,20 @@ const Contact: React.FC = () => {
 
         <div ref={tilesRef} className="absolute inset-0 hidden lg:block">
           {contactTiles.map(
-            ({ id, label, caption, href, background, accent, icon: Icon, position }) => (
+            ({ id, label, caption, href, accent, icon: Icon, position }) => (
               <a
                 key={id}
                 href={href}
                 target={href.startsWith("http") ? "_blank" : undefined}
                 rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group absolute flex items-center gap-3 rounded-full p-2 cursor-pointer"
+                className="group absolute flex items-center gap-3 cursor-pointer"
                 style={position}
               >
-                <span
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/5"
-                  style={{ 
-                    color: accent,
-                    background: `linear-gradient(135deg, ${accent}20 0%, ${accent}10 100%)`
-                  }}
-                >
+                <span className="contact-icon-glass flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
                   <Icon className="h-7 w-7" stroke={1.7} />
                 </span>
 
-                <span
-                  className="flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold shadow-lg ring-1 ring-black/5 backdrop-blur-sm"
-                  style={{ 
-                    background, 
-                    color: "#0F172A",
-                  }}
-                >
+                <span className="contact-text-glass flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ color: "#0F172A" }}>
                   <span className="text-xs uppercase tracking-wide text-black/60">
                     {label}
                   </span>
@@ -355,36 +319,197 @@ const Contact: React.FC = () => {
         </div>
 
         <div ref={mobileTilesRef} className="relative z-20 mt-12 flex w-full flex-col gap-4 px-6 lg:hidden">
-          {contactTiles.map(({ id, label, caption, href, background, accent, icon: Icon }) => (
+          {contactTiles.map(({ id, label, caption, href, accent, icon: Icon }) => (
             <a
               key={id}
               href={href}
               target={href.startsWith("http") ? "_blank" : undefined}
               rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur-sm active:scale-95 transition-transform"
-              style={{ background }}
+              className="flex items-center gap-3 active:scale-95 transition-transform"
             >
-              <span
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-black/5"
-                style={{ 
-                  color: accent,
-                  background: `linear-gradient(135deg, ${accent}20 0%, ${accent}10 100%)`
-                }}
-              >
+              <span className="contact-icon-glass-mobile flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
                 <Icon className="h-6 w-6" stroke={1.7} />
               </span>
-              <span className="flex flex-col">
+              <span className="contact-text-glass-mobile flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ color: "#0F172A" }}>
                 <span className="text-xs uppercase tracking-wide text-black/60">
                   {label}
                 </span>
-                <span className="text-sm font-semibold text-[#0F172A]">
-                  {caption}
-                </span>
+                <span className="text-sm font-semibold">{caption}</span>
               </span>
             </a>
           ))}
         </div>
       </div>
+
+      <style jsx>{`
+        /* Liquid Glass Effect for Icon Container - Desktop (Rounded) */
+        .contact-icon-glass {
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          border-radius: 9999px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        .contact-icon-glass::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 9999px;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        .contact-icon-glass::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 9999px;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion-contact);
+          -webkit-filter: url(#glass-distortion-contact);
+          isolation: isolate;
+          pointer-events: none;
+        }
+
+        .contact-icon-glass > * {
+          position: relative;
+          z-index: 10;
+        }
+
+        /* Liquid Glass Effect for Text Container - Desktop (Auto-fit) */
+        .contact-text-glass {
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          border-radius: 1rem;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        .contact-text-glass::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 1rem;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        .contact-text-glass::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 1rem;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion-contact);
+          -webkit-filter: url(#glass-distortion-contact);
+          isolation: isolate;
+          pointer-events: none;
+        }
+
+        .contact-text-glass > * {
+          position: relative;
+          z-index: 10;
+        }
+
+        /* Liquid Glass Effect for Icon Container - Mobile (Rounded) */
+        .contact-icon-glass-mobile {
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          border-radius: 9999px;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        .contact-icon-glass-mobile::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 9999px;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        .contact-icon-glass-mobile::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 9999px;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion-contact);
+          -webkit-filter: url(#glass-distortion-contact);
+          isolation: isolate;
+          pointer-events: none;
+        }
+
+        .contact-icon-glass-mobile > * {
+          position: relative;
+          z-index: 10;
+        }
+
+        /* Liquid Glass Effect for Text Container - Mobile (Auto-fit) */
+        .contact-text-glass-mobile {
+          position: relative;
+          width: fit-content;
+          height: fit-content;
+          border-radius: 1rem;
+          overflow: hidden;
+          transition: all 0.3s ease;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        .contact-text-glass-mobile::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 1rem;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        .contact-text-glass-mobile::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 1rem;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion-contact);
+          -webkit-filter: url(#glass-distortion-contact);
+          isolation: isolate;
+          pointer-events: none;
+        }
+
+        .contact-text-glass-mobile > * {
+          position: relative;
+          z-index: 10;
+        }
+      `}</style>
     </section>
   );
 };
