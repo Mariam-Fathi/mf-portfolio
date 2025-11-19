@@ -484,13 +484,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         {/* Mariam at Top */}
         
         {/* Navigation Panels - horizontal at bottom */}
-        <div className="hero-panel-strip px-4" role="list">
+        <div className="hero-panel-strip" role="list">
           {coverSections.map((section) => {
             return (
               <div
                 key={section.id}
                 role="listitem"
-                className="hero-panel border-t-2 border-[#D0D8C3] collapsed"
+                className="hero-panel collapsed"
                 style={{ backgroundColor: section.badgeColor }}
                 onClick={() => handleNavigate(section.id)}
                 tabIndex={0}
@@ -500,7 +500,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                     {section.label}
                   </span>
                   <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
-                    <ArrowUpRight size={35} strokeWidth={1.5} />
+                    <ArrowUpRight size={27} strokeWidth={2} />
                   </span>
                 </div>
               </div>
@@ -569,15 +569,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           margin-top: 1rem;
         }
 
-        /* Panel Strip - vertical stack, full width panels */
+        /* Panel Strip - horizontal row with auto-fit panels */
         .hero-panel-strip {
           display: flex;
-          flex-direction: column;
-          width: 100vw;
-          margin-left: calc(50% - 50vw); /* full-bleed from edge to edge */
-          gap: 0.25rem;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 24px;
           margin-top: auto; /* push to bottom */
-          padding-bottom: 0;
+          padding: 1rem;
+          justify-content: flex-start;
+          align-items: center;
         }
 
         .hero-panel {
@@ -590,7 +591,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: center;
           justify-content: center;
           height: 4rem; /* fixed height for horizontal panels */
-          width: 100%;
+          width: auto;
+          min-width: fit-content;
           isolation: isolate;
           box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
         }
@@ -631,8 +633,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           flex-direction: row;
           align-items: center;
           justify-content: space-between; /* text left, icon right */
-          padding: 0 2rem;
-          // gap: 1rem;
+          padding: 0 1.5rem;
+          gap: 0.75rem;
+          white-space: nowrap;
         }
 
         .hero-panel-code {
