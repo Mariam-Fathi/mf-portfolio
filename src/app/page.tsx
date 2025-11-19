@@ -228,96 +228,214 @@ export default function Home() {
   useEffect(() => {
     if (!portfolioHeaderRef.current) return;
 
-    const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full");
-    const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol");
-    const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i");
-    const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o");
-    const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line");
-    const navMenuEl = portfolioHeaderRef.current.querySelector(".o-nav-menu-wrapper");
+    let tl: gsap.core.Timeline | null = null;
+    let oElement: HTMLElement | null = null;
+    let lineElement: HTMLElement | null = null;
+    let animationComplete = false;
+    let iOriginalPosition = 0;
 
-    if (!fullTextEl || !portfolEl || !iEl || !oEl || !lineEl || !navMenuEl) return;
+    // Helper function to safely query elements with retry logic
+    const getElements = (retries = 3, delay = 100): Promise<{
+      fullTextElement: HTMLElement;
+      portfolElement: HTMLElement;
+      iElement: HTMLElement;
+      oElement: HTMLElement;
+      lineElement: HTMLElement;
+      navMenuElement: HTMLElement;
+    } | null> => {
+      return new Promise((resolve) => {
+        const attempt = (attemptNumber: number) => {
+          const fullTextEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-full");
+          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol");
+          const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i");
+          const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o");
+          const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line");
+          const navMenuEl = portfolioHeaderRef.current?.querySelector(".o-nav-menu-wrapper");
 
-    const fullTextElement = fullTextEl as HTMLElement;
-    const portfolElement = portfolEl as HTMLElement;
-    const iElement = iEl as HTMLElement;
-    const oElement = oEl as HTMLElement;
-    const lineElement = lineEl as HTMLElement;
-    const navMenuElement = navMenuEl as HTMLElement;
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl && navMenuEl) {
+            resolve({
+              fullTextElement: fullTextEl as HTMLElement,
+              portfolElement: portfolEl as HTMLElement,
+              iElement: iEl as HTMLElement,
+              oElement: oEl as HTMLElement,
+              lineElement: lineEl as HTMLElement,
+              navMenuElement: navMenuEl as HTMLElement,
+            });
+          } else if (attemptNumber < retries) {
+            setTimeout(() => attempt(attemptNumber + 1), delay);
+          } else {
+            console.warn("Portfolio header elements not found after retries");
+            resolve(null);
+          }
+        };
+        attempt(0);
+      });
+    };
 
-    // Create smooth motion graphics timeline
-    const tl = gsap.timeline({ delay: 0.8 });
+    // Calculate responsive end position for O
+    const calculateEndPosition = (): number => {
+      const container = portfolioHeaderRef.current;
+      if (!container) return 0;
+      
+      const containerRect = container.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      
+      // Calculate available space (viewport width minus padding and menu space)
+      const padding = window.innerWidth < 768 ? 16 : 32; // Responsive padding
+      const menuSpace = 200; // Space reserved for navigation menu
+      
+      // Position O at the end of viewport minus padding and menu space
+      return viewportWidth - containerRect.left - menuSpace + 36;
+    };
 
-    // Step 1: Hide full text and show split text with O in its original position
-    tl.to(fullTextElement, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in",
-      onComplete: () => {
-        fullTextElement.style.display = "none";
-        portfolElement.style.display = "inline";
-        iElement.style.display = "inline";
-        oElement.style.display = "inline";
-        lineElement.style.display = "none"; // Keep line hidden initially
-        
-        // Set initial positions for animation
-        gsap.set([portfolElement, iElement, oElement], { 
-          display: "inline",
-          opacity: 1 
-        });
-        gsap.set(lineElement, { display: "none", scaleX: 0, transformOrigin: "left center" });
-        gsap.set(oElement, { position: "static", x: 0 });
-      },
+    getElements().then((elements) => {
+      if (!elements) return;
+
+      const {
+        fullTextElement,
+        portfolElement,
+        iElement,
+        oElement: oEl,
+        lineElement: lineEl,
+        navMenuElement,
+      } = elements;
+
+      oElement = oEl; // Store for resize handler
+      lineElement = lineEl; // Store for resize handler
+
+      // Create smooth motion graphics timeline
+      tl = gsap.timeline({ delay: 0.8 });
+
+      // Step 1: Hide full text and show split text with O in its original position
+      let iWidth = 0; // Store I width for later use
+      
+      tl.to(fullTextElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          fullTextElement.style.display = "none";
+          portfolElement.style.display = "inline";
+          iElement.style.display = "inline";
+          oEl.style.display = "inline";
+          lineEl.style.display = "none";
+          
+          // Set initial positions for animation
+          gsap.set([portfolElement, iElement, oEl], {
+            display: "inline",
+            opacity: 1,
+          });
+          gsap.set(lineEl, {
+            display: "none",
+            width: 0,
+            transformOrigin: "left center",
+          });
+          gsap.set(oEl, { position: "static", x: 0 });
+          
+          // Measure I width after it's displayed (force reflow)
+          void iElement.offsetWidth;
+          const iRect = iElement.getBoundingClientRect();
+          iWidth = iRect.width;
+        },
+      });
+
+      // Step 2: Animate I rotating 90 degrees while simultaneously pushing O
+      // The O should shift by the width of I to simulate the push effect
+      tl.to(iElement, {
+        rotation: 90,
+        duration: 0.8,
+        ease: "power2.inOut",
+        transformOrigin: "center center",
+        onStart: () => {
+          // Simultaneously move O by the width of I (creating push effect)
+          if (iWidth > 0) {
+            gsap.to(oEl, {
+              x: iWidth,
+              duration: 0.8,
+              ease: "power2.inOut",
+            });
+          }
+        },
+      }, "-=0.2");
+
+      // Step 4: Replace I with line
+      // Store the original position of I before rotation for line positioning
+      tl.to(iElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onStart: () => {
+          // Get the original position of I (where it was before rotation)
+          const iRect = iElement.getBoundingClientRect();
+          const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+          if (containerRect) {
+            iOriginalPosition = iRect.left;
+          }
+        },
+        onComplete: () => {
+          iElement.style.display = "none";
+          lineEl.style.display = "block";
+          
+          // Position line to start from where I originally was
+          gsap.set(lineEl, {
+            opacity: 1,
+            x: iOriginalPosition,
+            width: 0,
+            transformOrigin: "left center",
+          });
+        },
+      }, "-=0.3");
+
+      // Step 5: Expand line while moving O to the end of the viewport
+      const endPosition = calculateEndPosition();
+      
+      // Get current position of O after it was pushed by I
+      const oCurrentX = gsap.getProperty(oEl, "x") as number;
+      
+      // Animate both line expansion and O movement simultaneously
+      tl.to(oEl, {
+        x: endPosition,
+        duration: 1.2,
+        ease: "power2.out",
+        onStart: () => {
+          // Calculate final line width: from I's original position to O's final position
+          const lineFinalWidth = endPosition - iOriginalPosition;
+          
+          // Line expands as O moves
+          gsap.to(lineEl, {
+            width: lineFinalWidth + 100,
+            duration: 1.2,
+            ease: "power2.out",
+          });
+        },
+        onComplete: () => {
+          animationComplete = true;
+          setIsHeaderAnimationComplete(true);
+        },
+      }, "-=0.2");
+
+      // Handle window resize to recalculate positions
+      const handleResize = () => {
+        if (animationComplete && oElement && lineElement) {
+          const newEndPosition = calculateEndPosition();
+          gsap.set(oElement, { x: newEndPosition });
+          
+          // Also update line width - use stored iOriginalPosition or get from line's x
+          const lineStartX = iOriginalPosition || (gsap.getProperty(lineElement, "x") as number);
+          const lineFinalWidth = newEndPosition - lineStartX;
+          gsap.set(lineElement, { width: Math.max(0, lineFinalWidth) });
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
     });
-
-    // Step 2: Animate I falling down and rotating 90 degrees
-    tl.to(iElement, {
-      y: 0,
-      rotation: 90,
-      duration: 0.8,
-      ease: "power2.inOut",
-      transformOrigin: "center center",
-    }, "-=0.2");
-
-    // Step 3: Replace I with line and move O slightly to create space
-    tl.to(iElement, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in",
-      onComplete: () => {
-        iElement.style.display = "none";
-        lineElement.style.display = "block";
-        gsap.set(lineElement, { opacity: 1 });
-      }
-    });
-
-    // Step 4: Move O slightly to create PORTFOI_O effect
-    tl.to(oElement, {
-      x: 20, // Move O slightly to create space for rotated I
-      duration: 0.4,
-      ease: "power2.out",
-    }, "-=0.2");
-
-    // Step 5: Expand line while pushing O to the right with proper spacing
-    // Use a simpler approach - expand line fully and move O to a reasonable position
-    tl.to(lineElement, {
-      scaleX: 1,
-      duration: 1.2,
-      ease: "power2.out",
-    }, "-=0.2");
-
-    // Move O to a position that leaves space for the menu
-    // We'll move it to about 80% of the available space to ensure it's visible
-    tl.to(oElement, {
-      x: "calc(100vw - 120px)", // Conservative position that should keep it visible
-      duration: 1.2,
-      ease: "power2.out",
-      onComplete: () => {
-        setIsHeaderAnimationComplete(true);
-      }
-    }, "-=1.2");
 
     return () => {
-      tl.kill();
+      if (tl) tl.kill();
     };
   }, []);
 
@@ -388,11 +506,11 @@ export default function Home() {
       <div className={`navigation-layer ${activeSection !== "hero" ? "nav-mode" : "hero-mode"} ${activeSection === "certificates" ? "hidden" : ""} ${activeSection === "work" ? "hidden" : ""}`}>
         <div className="hero-cover-header">
           <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-            <span className="hero-cover-title-full">PORTFOLIO</span>
-            <span className="hero-cover-title-portfol" style={{ display: "none" }}>PORTFOL</span>
-            <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }}>I</span>
-            <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }}>O</span>
-            <div className="hero-cover-title-line" style={{ display: "none", flex: 1, height: "1px", backgroundColor: "#1e140b", opacity: 0.4, margin: "0 64px 0px 8px", alignSelf: "center" }}></div>
+            <span className="hero-cover-title-full" aria-label="Portfolio">PORTFOLIO</span>
+            <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
+            <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
+            <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
+            <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
             
             {/* Navigation Menu that replaces O */}
             <div className="o-nav-menu-wrapper" style={{ display: "none" }}>
@@ -596,9 +714,14 @@ export default function Home() {
         }
 
         .hero-cover-title-line {
-          will-change: transform;
+          will-change: width, transform;
           transform-origin: left center;
-          margin-right: 8px;
+          position: absolute;
+          height: 1px;
+          background-color: #1e140b;
+          opacity: 0.4;
+          top: 50%;
+          transform: translateY(-50%);
         }
 
         .hero-cover-header-top {
