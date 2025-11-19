@@ -453,6 +453,33 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         backgroundColor: "#F5ECE1",
       }}
     >
+      {/* SVG Filter for Liquid Glass Effect */}
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.02 0.02"
+              numOctaves="2" 
+              seed="92" 
+              result="noise" 
+            />
+            <feGaussianBlur 
+              in="noise" 
+              stdDeviation="2" 
+              result="blurred" 
+            />
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="blurred" 
+              scale="110"
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+            />
+          </filter>
+        </defs>
+      </svg>
+
       <div className="hero-cover">
         {/* Mariam at Top */}
         
@@ -564,10 +591,40 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           justify-content: center;
           height: 4rem; /* fixed height for horizontal panels */
           width: 100%;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        /* Tint and inner shadow layer */
+        .hero-panel::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 2rem;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        /* Backdrop blur and distortion layer */
+        .hero-panel::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 2rem;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion);
+          -webkit-filter: url(#glass-distortion);
+          isolation: isolate;
+          pointer-events: none;
         }
 
         .hero-panel-inner {
           position: relative;
+          z-index: 10;
           width: 100%;
           height: 100%;
           display: flex;
