@@ -16,10 +16,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const a2mRef = useRef<HTMLSpanElement | null>(null);
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
-  const cursorRef = useRef<HTMLDivElement | null>(null);
   const softwareEngineerRef = useRef<HTMLDivElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
+  const [linkPositions, setLinkPositions] = useState<Array<{ x: number; y: number }>>([]);
+  const heroCoverRef = useRef<HTMLDivElement | null>(null);
 
   
   // Navigation sections - these will become the navbar
@@ -69,36 +70,115 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     onNavigate(section);
   };
 
-  // Cursor follower effect
+  // Calculate random positions for links
   useEffect(() => {
-    const cursor = cursorRef.current;
-    if (!cursor) return;
+    const calculatePositions = () => {
+      if (!heroCoverRef.current) return;
 
-    const moveCursor = (e: MouseEvent) => {
-      gsap.to(cursor, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.1,
-        ease: "power2.out"
-      });
+      const container = heroCoverRef.current;
+      const headingWrapper = container.querySelector('.hero-heading-wrapper');
+      
+      if (!headingWrapper) {
+        // Retry after a short delay if heading wrapper isn't ready
+        setTimeout(calculatePositions, 100);
+        return;
+      }
+
+      const containerRect = container.getBoundingClientRect();
+      const headingRect = (headingWrapper as HTMLElement).getBoundingClientRect();
+      
+      // Calculate available space above the heading
+      const availableHeight = headingRect.top - containerRect.top;
+      const availableWidth = containerRect.width;
+
+      // Minimum distance between links to prevent overlap
+      // Links are approximately 200px wide and 64px tall, so we need at least 250px spacing
+      const minDistance = 250;
+      const padding = 120;
+      const minX = padding;
+      const maxX = availableWidth - padding;
+      const minY = padding;
+      const maxY = Math.max(availableHeight - padding, padding + 100);
+
+      // Helper function to check if two positions are too close
+      const isTooClose = (pos1: { x: number; y: number }, pos2: { x: number; y: number }) => {
+        const dx = pos1.x - pos2.x;
+        const dy = pos1.y - pos2.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < minDistance;
+      };
+
+      // Calculate positions for each link with collision detection
+      const positions: Array<{ x: number; y: number }> = [];
+      
+      for (let i = 0; i < coverSections.length; i++) {
+        let attempts = 0;
+        const maxAttempts = 100;
+        let position: { x: number; y: number } | null = null;
+        let isValid = false;
+
+        // Try to find a position that doesn't overlap with existing positions
+        while (!isValid && attempts < maxAttempts) {
+          position = {
+            x: Math.random() * (maxX - minX) + minX,
+            y: Math.random() * (maxY - minY) + minY
+          };
+
+          // Check if this position is too close to any existing position
+          isValid = !positions.some(existingPos => isTooClose(position!, existingPos));
+          attempts++;
+        }
+
+        // If we couldn't find a non-overlapping position, find the best available position
+        if (!isValid && position) {
+          // Try to find the best available position by checking all existing positions
+          let bestPosition = position;
+          let minDistanceToNearest = Infinity;
+          
+          // Try a few more random positions and pick the one furthest from others
+          for (let j = 0; j < 20; j++) {
+            const testPos = {
+              x: Math.random() * (maxX - minX) + minX,
+              y: Math.random() * (maxY - minY) + minY
+            };
+            
+            const distances = positions.map(p => {
+              const dx = testPos.x - p.x;
+              const dy = testPos.y - p.y;
+              return Math.sqrt(dx * dx + dy * dy);
+            });
+            
+            const minDist = Math.min(...distances);
+            if (minDist > minDistanceToNearest) {
+              minDistanceToNearest = minDist;
+              bestPosition = testPos;
+            }
+          }
+          
+          position = bestPosition;
+        }
+
+        // Fallback: if somehow position is still null, use a default position
+        if (!position) {
+          position = {
+            x: minX + (maxX - minX) / 2,
+            y: minY + (maxY - minY) / 2
+          };
+        }
+
+        positions.push(position);
+      }
+
+      setLinkPositions(positions);
     };
 
-    const handleMouseEnter = () => {
-      gsap.to(cursor, { scale: 1, opacity: 1, duration: 0.2 });
-    };
-
-    const handleMouseLeave = () => {
-      gsap.to(cursor, { scale: 0, opacity: 0, duration: 0.2 });
-    };
-
-    window.addEventListener('mousemove', moveCursor);
-    document.addEventListener('mouseenter', handleMouseEnter);
-    document.addEventListener('mouseleave', handleMouseLeave);
-
+    // Calculate on mount and window resize
+    const timeoutId = setTimeout(calculatePositions, 100);
+    window.addEventListener('resize', calculatePositions);
+    
     return () => {
-      window.removeEventListener('mousemove', moveCursor);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-      document.removeEventListener('mouseleave', handleMouseLeave);
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', calculatePositions);
     };
   }, []);
 
@@ -109,17 +189,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       // Initial hide all letters
       const letters = document.querySelectorAll('.hero-letter');
       gsap.set(letters, { opacity: 0, y: 100, rotationX: 90 });
-
-      // Initial hide software engineer text characters
-      if (softwareEngineerRef.current) {
-        const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
-        gsap.set(chars, { 
-          opacity: 0, 
-          y: 20,
-          scale: 0.5,
-          rotation: -5
-        });
-      }
 
       const nameEntrance = gsap.timeline();
 
@@ -385,52 +454,23 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           ]
         });
       
-        // Fade out the final dot before showing software engineer text
+        // Keep the dot visible permanently (no fade out)
         finalDotTimeline.to(finalDot, {
-          opacity: 0,
-          scale: 0,
-          duration: 0.4,
-          ease: "power2.in",
-          onComplete: () => {
-            if (finalDot && finalDot.parentNode) {
-              finalDot.style.display = "none";
-            }
-          }
+          duration: 1
         });
         
         dotTimeline.add(finalDotTimeline);
         
-        return { timeline: dotTimeline, finalDot: finalDot };
+        return dotTimeline;
       };
 
       // Add dot animation
       masterTimeline.add(() => {
-        const result = buildDotTimeline();
-        if (result && result.timeline) {
-          const dotTimeline = result.timeline;
+        const dotTimeline = buildDotTimeline();
+        if (dotTimeline) {
           const nameEntranceDuration = nameEntrance.duration();
-          const softwareEngineerStartTime = Math.max(0, nameEntranceDuration - 0.3);
-          masterTimeline.add(dotTimeline, softwareEngineerStartTime);
-          
-          // Animate software engineer text AFTER final dot disappears
-          if (softwareEngineerRef.current) {
-            const chars = softwareEngineerRef.current.querySelectorAll('.hero-char');
-            const dotEndTime = softwareEngineerStartTime + dotTimeline.duration();
-            masterTimeline.to(chars, {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              rotation: 0,
-              duration: 0.3,
-              stagger: {
-                amount: 1.5,
-                from: "start",
-                ease: "power2.out"
-              },
-              ease: "back.out(1.2)",
-              immediateRender: false
-            }, dotEndTime);
-          }
+          const dotStartTime = Math.max(0, nameEntranceDuration - 0.3);
+          masterTimeline.add(dotTimeline, dotStartTime);
         }
       });
 
@@ -448,42 +488,100 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#0C5446] relative overflow-hidden cursor-none"
+      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#0C5446] relative overflow-hidden"
       style={{
         backgroundColor: "#F5ECE1",
       }}
     >
-      <div className="hero-cover">
-        {/* Mariam at Top */}
-        
-        {/* Navigation Panels - horizontal at bottom */}
-        <div className="hero-panel-strip px-4" role="list">
-          {coverSections.map((section) => {
-            return (
-              <div
-                key={section.id}
-                role="listitem"
-                className="hero-panel border-t-2 border-[#D0D8C3] collapsed"
-                style={{ backgroundColor: section.badgeColor }}
-                onClick={() => handleNavigate(section.id)}
-                tabIndex={0}
-              >
-                <div className="hero-panel-inner">
-                  <span className="hero-panel-text horizontal" style={{ color: section.badgeText }}>
-                    {section.label}
-                  </span>
-                  <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
-                    <ArrowUpRight size={35} strokeWidth={1.5} />
-                  </span>
-                </div>
+      {/* SVG Filter for Liquid Glass Effect */}
+      <svg width="0" height="0" style={{ position: "absolute" }}>
+        <defs>
+          <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.02 0.02"
+              numOctaves="2" 
+              seed="92" 
+              result="noise" 
+            />
+            <feGaussianBlur 
+              in="noise" 
+              stdDeviation="2" 
+              result="blurred" 
+            />
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="blurred" 
+              scale="110"
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+            />
+          </filter>
+        </defs>
+      </svg>
+
+      <div ref={heroCoverRef} className="hero-cover">
+        {/* Navigation Panels - randomly positioned */}
+        {coverSections.map((section, index) => {
+          const position = linkPositions[index] || { x: 0, y: 0 };
+          return (
+            <div
+              key={section.id}
+              role="listitem"
+              className="hero-panel collapsed"
+              style={{ 
+                backgroundColor: section.badgeColor,
+                position: 'absolute',
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                transform: 'translate(-50%, -50%)'
+              }}
+              onClick={() => handleNavigate(section.id)}
+              tabIndex={0}
+            >
+              <div className="hero-panel-inner">
+                <span className="hero-panel-text horizontal" style={{ color: section.badgeText }}>
+                  {section.label}
+                </span>
+                <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
+                  <ArrowUpRight size={27} strokeWidth={2} />
+                </span>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
+
+        {/* Mariam at Bottom */}
+        <div className="hero-heading-wrapper">
+          <h1
+            ref={headingRef}
+            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+          >
+            <span className="hero-name">
+              <span className="hero-mar">
+                <span className="hero-letter">M</span>
+                <span ref={a1Ref} className="hero-letter">a</span>
+                <span ref={rRef} className="hero-letter hero-letter-r">
+                  r
+                </span>
+              </span>
+              <span className="hero-iam-wrapper">
+                <span className="hero-iam">
+                  <span className="hero-i-wrapper">
+                    <span ref={iRef} className="hero-letter hero-letter-i">
+                      i
+                    </span>
+                  </span>
+                  <span ref={amContainerRef} className="hero-am">
+                    <span ref={a2mRef} className="hero-letter">a</span>
+                    <span ref={mMariamRef} className="hero-letter">m</span>
+                  </span>
+                </span>
+              </span>
+            </span>
+          </h1>
         </div>
       </div>
-
-      {/* Custom Cursor */}
-      <div ref={cursorRef} className="custom-cursor" aria-hidden="true" />
 
       <style jsx>{`
         .hero-heading {
@@ -498,9 +596,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: flex;
           flex-direction: column;
           height: 100%;
-          justify-content: space-between; /* Mariam at top, panels at bottom */
+          justify-content: space-between; /* Links at top, Mariam at bottom */
           margin: 0;
           padding: 0;
+          position: relative;
         }
 
         @media (min-width: 1280px) {
@@ -537,20 +636,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-heading-wrapper {
           display: flex;
           justify-content: flex-end;
-          align-items: flex-start;
+          align-items: flex-end;
           width: 100%;
-          margin-top: 1rem;
-        }
-
-        /* Panel Strip - vertical stack, full width panels */
-        .hero-panel-strip {
-          display: flex;
-          flex-direction: column;
-          width: 100vw;
-          margin-left: calc(50% - 50vw); /* full-bleed from edge to edge */
-          gap: 0.25rem;
           margin-top: auto; /* push to bottom */
-          padding-bottom: 0;
+          padding: 1rem;
         }
 
         .hero-panel {
@@ -563,19 +652,51 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: center;
           justify-content: center;
           height: 4rem; /* fixed height for horizontal panels */
-          width: 100%;
+          width: auto;
+          min-width: fit-content;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        /* Tint and inner shadow layer */
+        .hero-panel::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          border-radius: 2rem;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        /* Backdrop blur and distortion layer */
+        .hero-panel::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          border-radius: 2rem;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion);
+          -webkit-filter: url(#glass-distortion);
+          isolation: isolate;
+          pointer-events: none;
         }
 
         .hero-panel-inner {
           position: relative;
+          z-index: 10;
           width: 100%;
           height: 100%;
           display: flex;
           flex-direction: row;
           align-items: center;
           justify-content: space-between; /* text left, icon right */
-          padding: 0 2rem;
-          // gap: 1rem;
+          padding: 0 1.5rem;
+          gap: 0.75rem;
+          white-space: nowrap;
         }
 
         .hero-panel-code {
@@ -666,24 +787,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           position: relative;
         }
 
-        .hero-software-engineer {
-          font-family: "Rock Salt", cursive;
-          font-size: clamp(1.3rem, 3.6vw, 2.8rem);
-          color: #DA451F;
-          text-align: center;
-          position: absolute;
-          top: 0%;
-          left: 50%;
-          transform: translateX(-50%);
-          white-space: nowrap;
-          z-index: 10;
-          line-height: 1.2;
-        }
-
-        .hero-software-engineer .hero-char {
-          display: inline-block;
-          transform-origin: bottom center;
-        }
 
         .hero-am {
           display: inline-flex;
@@ -723,26 +826,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         /* Final dot specific style */
         :global(.final-i-dot) {
           background-color: #DA451F;
-        }
-
-        /* Hide default cursor when custom cursor is active */
-        .cursor-none {
-          cursor: none;
-        }
-
-        /* visible custom cursor that follows the mouse */
-        .custom-cursor {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 18px;
-          height: 18px;
-          border: 2px solid #DA451F;
-          border-radius: 9999px;
-          pointer-events: none;
-          z-index: 10000;
-          transform: translate(-50%, -50%);
-          opacity: 0; /* will be revealed by gsap on mouseenter */
         }
       `}</style>
     </section>
