@@ -91,14 +91,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       const availableHeight = headingRect.top - containerRect.top;
       const availableWidth = containerRect.width;
 
-      // Minimum distance between links to prevent overlap
-      // Links are approximately 200px wide and 64px tall, so we need at least 250px spacing
-      const minDistance = 250;
-      const padding = 120;
+      // Responsive values based on screen size
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+      
+      // Minimum distance between links to prevent overlap (responsive)
+      // On mobile, links are smaller but we need more spacing to account for their width
+      const minDistance = isMobile ? 200 : isTablet ? 220 : 250;
+      const padding = isMobile ? 60 : isTablet ? 80 : 120;
       const minX = padding;
       const maxX = availableWidth - padding;
       const minY = padding;
-      const maxY = Math.max(availableHeight - padding, padding + 100);
+      const maxY = Math.max(availableHeight - padding, padding + (isMobile ? 60 : 100));
 
       // Helper function to check if two positions are too close
       const isTooClose = (pos1: { x: number; y: number }, pos2: { x: number; y: number }) => {
@@ -113,7 +117,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       
       for (let i = 0; i < coverSections.length; i++) {
         let attempts = 0;
-        const maxAttempts = 100;
+        // Increase attempts on mobile to ensure we find non-overlapping positions
+        const maxAttempts = isMobile ? 200 : 100;
         let position: { x: number; y: number } | null = null;
         let isValid = false;
 
@@ -133,10 +138,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         if (!isValid && position) {
           // Try to find the best available position by checking all existing positions
           let bestPosition = position;
-          let minDistanceToNearest = Infinity;
+          let minDistanceToNearest = 0;
           
-          // Try a few more random positions and pick the one furthest from others
-          for (let j = 0; j < 20; j++) {
+          // Try more random positions on mobile to ensure better spacing
+          const fallbackAttempts = isMobile ? 50 : 20;
+          for (let j = 0; j < fallbackAttempts; j++) {
             const testPos = {
               x: Math.random() * (maxX - minX) + minX,
               y: Math.random() * (maxY - minY) + minY
@@ -602,6 +608,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           position: relative;
         }
 
+        @media (max-width: 768px) {
+          .hero-cover {
+            padding: 0 0.5rem;
+          }
+        }
+
         @media (min-width: 1280px) {
           .hero-cover {
             padding: 0 1rem;
@@ -642,6 +654,36 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           padding: 1rem;
         }
 
+        @media (max-width: 768px) {
+          .hero-heading-wrapper {
+            justify-content: center;
+            padding: 0.5rem;
+            width: 100%;
+            overflow: hidden;
+          }
+
+          .hero-heading {
+            text-align: center;
+            font-size: clamp(2.5rem, 12vw, 5rem) !important;
+            line-height: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
+          }
+
+          .hero-name {
+            white-space: nowrap;
+            display: inline-flex;
+            max-width: 100%;
+          }
+
+          .hero-mar,
+          .hero-iam {
+            white-space: nowrap;
+          }
+        }
+
         .hero-panel {
           position: relative;
           cursor: pointer;
@@ -656,6 +698,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           min-width: fit-content;
           isolation: isolate;
           box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        @media (max-width: 768px) {
+          .hero-panel {
+            height: 3rem;
+            border-radius: 1.5rem;
+          }
         }
 
         /* Tint and inner shadow layer */
@@ -699,6 +748,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           white-space: nowrap;
         }
 
+        @media (max-width: 768px) {
+          .hero-panel-inner {
+            padding: 0 1rem;
+            gap: 0.5rem;
+          }
+        }
+
         .hero-panel-code {
           position: absolute;
           top: 0.75rem;
@@ -733,7 +789,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           writing-mode: horizontal-tb;
           transform: none;
           opacity: 1;
-          font-size: clamp(1rem, 1.3vw, 1.3rem);
+          font-size: clamp(0.875rem, 1.3vw, 1.3rem);
+        }
+
+        @media (max-width: 768px) {
+          .hero-panel-text.horizontal {
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+          }
         }
 
         .hero-panel-arrow {
@@ -746,6 +808,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
 
         @media (max-width: 768px) {
+          .hero-panel-arrow {
+            transform: scale(0.8);
+          }
+
+          .hero-panel-arrow svg {
+            width: 20px;
+            height: 20px;
+          }
+
           .hero-heading-wrapper {
             justify-content: center;
           }
@@ -758,6 +829,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         #hero {
           margin: 0;
           padding: 0;
+          min-height: 100vh;
+          min-height: 100dvh;
+        }
+
+        @media (max-width: 768px) {
+          #hero {
+            padding: 0.5rem;
+          }
         }
 
         @media (min-width: 1024px) {
