@@ -967,8 +967,8 @@ Turning ideas into real life products                </p>
                   >
                     <text
                       ref={softwareRef}
-                      x="370"
-                      y="90"
+                      x="290"
+                      y="110"
                       textAnchor="middle"
                       fill="#1e140b"
                       fillOpacity="0"
