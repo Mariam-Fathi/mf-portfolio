@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ArrowUpRight } from "lucide-react";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
@@ -18,20 +17,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
   const softwareEngineerRef = useRef<SVGTextElement | null>(null);
   const iamWrapperRef = useRef<HTMLSpanElement | null>(null);
+  const mLetterRef = useRef<HTMLSpanElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
-  const [linkPositions, setLinkPositions] = useState<Array<{ x: number; y: number }>>([]);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
-
-  
-  // Navigation sections - these will become the navbar
-  const coverSections = [
-    { number: "01", label: "Experience", id: "experience", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "02", label: "Projects", id: "work", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "04", label: "Skills", id: "skills", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "05", label: "Contact", id: "contact", badgeColor: "#F5ECE1", badgeText: "#014421" },
-  ];
+  const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -70,158 +62,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     }
     onNavigate(section);
   };
-
-  // Calculate random positions for links (fixed across reloads)
-  useEffect(() => {
-    const calculatePositions = () => {
-      if (!heroCoverRef.current) return;
-
-      const container = heroCoverRef.current;
-      const headingWrapper = container.querySelector('.hero-heading-wrapper');
-      
-      if (!headingWrapper) {
-        // Retry after a short delay if heading wrapper isn't ready
-        setTimeout(calculatePositions, 100);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const headingRect = (headingWrapper as HTMLElement).getBoundingClientRect();
-      
-      // Calculate available space above the heading
-      const availableHeight = headingRect.top - containerRect.top;
-      const availableWidth = containerRect.width;
-
-      // Responsive values based on screen size
-      const isMobile = window.innerWidth < 768;
-      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-      
-      // Create a key for localStorage based on screen size category
-      const screenSizeKey = isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop';
-      const storageKey = `hero-link-positions-v8-${screenSizeKey}`;
-      
-      // Try to load existing positions from localStorage
-      const storedPositions = localStorage.getItem(storageKey);
-      if (storedPositions) {
-        try {
-          const parsed = JSON.parse(storedPositions);
-          // Verify the stored positions are valid
-          if (Array.isArray(parsed) && parsed.length === coverSections.length) {
-            setLinkPositions(parsed);
-            return;
-          }
-        } catch (e) {
-          // If parsing fails, continue to generate new positions
-        }
-      }
-      
-      // Minimum distance between links to prevent overlap (responsive)
-      // On mobile, links are smaller but we need more spacing to account for their width
-      const minDistance = isMobile ? 200 : isTablet ? 220 : 250;
-      const padding = isMobile ? 60 : isTablet ? 80 : 120;
-      const minX = padding;
-      const maxX = availableWidth - padding;
-      const minY = padding;
-      const maxY = Math.max(availableHeight - padding, padding + (isMobile ? 60 : 100));
-
-      // Helper function to check if two positions are too close
-      const isTooClose = (pos1: { x: number; y: number }, pos2: { x: number; y: number }) => {
-        const dx = pos1.x - pos2.x;
-        const dy = pos1.y - pos2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < minDistance;
-      };
-
-      // Calculate positions for each link with collision detection
-      const positions: Array<{ x: number; y: number }> = [];
-      
-      for (let i = 0; i < coverSections.length; i++) {
-        let attempts = 0;
-        // Increase attempts on mobile to ensure we find non-overlapping positions
-        const maxAttempts = isMobile ? 200 : 100;
-        let position: { x: number; y: number } | null = null;
-        let isValid = false;
-
-        // Try to find a position that doesn't overlap with existing positions
-        while (!isValid && attempts < maxAttempts) {
-          position = {
-            x: Math.random() * (maxX - minX) + minX,
-            y: Math.random() * (maxY - minY) + minY
-          };
-
-          // Check if this position is too close to any existing position
-          isValid = !positions.some(existingPos => isTooClose(position!, existingPos));
-          attempts++;
-        }
-
-        // If we couldn't find a non-overlapping position, find the best available position
-        if (!isValid && position) {
-          // Try to find the best available position by checking all existing positions
-          let bestPosition = position;
-          let minDistanceToNearest = 0;
-          
-          // Try more random positions on mobile to ensure better spacing
-          const fallbackAttempts = isMobile ? 50 : 20;
-          for (let j = 0; j < fallbackAttempts; j++) {
-            const testPos = {
-              x: Math.random() * (maxX - minX) + minX,
-              y: Math.random() * (maxY - minY) + minY
-            };
-            
-            const distances = positions.map(p => {
-              const dx = testPos.x - p.x;
-              const dy = testPos.y - p.y;
-              return Math.sqrt(dx * dx + dy * dy);
-            });
-            
-            const minDist = Math.min(...distances);
-            if (minDist > minDistanceToNearest) {
-              minDistanceToNearest = minDist;
-              bestPosition = testPos;
-            }
-          }
-          
-          position = bestPosition;
-        }
-
-        // Fallback: if somehow position is still null, use a default position
-        if (!position) {
-          position = {
-            x: minX + (maxX - minX) / 2,
-            y: minY + (maxY - minY) / 2
-          };
-        }
-
-        positions.push(position);
-      }
-
-      // Store positions in localStorage for future reloads
-      localStorage.setItem(storageKey, JSON.stringify(positions));
-      setLinkPositions(positions);
-    };
-
-    // Calculate on mount and window resize
-    const timeoutId = setTimeout(calculatePositions, 100);
-    
-    // Only recalculate on resize if screen size category changes
-    let lastScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
-    const handleResize = () => {
-      const currentScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
-      if (currentScreenSize !== lastScreenSize) {
-        lastScreenSize = currentScreenSize;
-        calculatePositions();
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // (reverted) no auto-fit logic
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -388,7 +228,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               gsap.to(a2mRef.current, {
                 color: "#DA451F",
                 duration: 0.3,
-                ease: "power2.out"
+                ease: "power2.out",
+                onComplete: function() {
+                  // Color is handled by GSAP
+                }
               });
             }
           }
@@ -416,7 +259,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   gsap.to(mMariamRef.current, {
                     color: "#DA451F",
                     duration: 0.3,
-                    ease: "power2.out"
+                    ease: "power2.out",
+                    onComplete: function() {
+                      // Color is handled by GSAP
+                    }
                   });
                 }
               }
@@ -485,7 +331,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   gsap.to(iRef.current, {
                     color: "#DA451F",
                     duration: 0.3,
-                    ease: "power2.out"
+                    ease: "power2.out",
+                    onComplete: function() {
+                      // Color is handled by GSAP
+                    }
                   });
                 }
               }
@@ -609,10 +458,336 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     };
   }, []);
 
+  // Animate portfolio header on mount
+  useEffect(() => {
+    if (!portfolioHeaderRef.current) return;
+
+    let tl: gsap.core.Timeline | null = null;
+    let oElement: HTMLElement | null = null;
+    let lineElement: HTMLElement | null = null;
+    let animationComplete = false;
+    let iOriginalPosition = 0;
+
+    // Helper function to safely query elements with retry logic
+    const getElements = (retries = 3, delay = 100): Promise<{
+      fullTextElement: HTMLElement;
+      portfolElement: HTMLElement;
+      iElement: HTMLElement;
+      oElement: HTMLElement;
+      lineElement: HTMLElement;
+    } | null> => {
+      return new Promise((resolve) => {
+        const attempt = (attemptNumber: number) => {
+          const fullTextEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-full");
+          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol");
+          const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i");
+          const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o");
+          const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line");
+
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+            resolve({
+              fullTextElement: fullTextEl as HTMLElement,
+              portfolElement: portfolEl as HTMLElement,
+              iElement: iEl as HTMLElement,
+              oElement: oEl as HTMLElement,
+              lineElement: lineEl as HTMLElement,
+            });
+          } else if (attemptNumber < retries) {
+            setTimeout(() => attempt(attemptNumber + 1), delay);
+          } else {
+            console.warn("Portfolio header elements not found after retries");
+            resolve(null);
+          }
+        };
+        attempt(0);
+      });
+    };
+
+    // Calculate responsive end position for O
+    const calculateEndPosition = (): number => {
+      const container = portfolioHeaderRef.current;
+      if (!container) return 0;
+      
+      const containerRect = container.getBoundingClientRect();
+      const containerWidth = containerRect.width;
+      
+      // Calculate end position within the container (frame width)
+      // Leave some padding from the right edge (around 1-2rem)
+      const padding = window.innerWidth < 768 ? 16 : 32;
+      
+      // Position O at the right edge of the container minus padding
+      // This ensures O stays within the frame bounds
+      return containerWidth - padding;
+    };
+
+    getElements().then((elements) => {
+      if (!elements) return;
+
+      const {
+        fullTextElement,
+        portfolElement,
+        iElement,
+        oElement: oEl,
+        lineElement: lineEl,
+      } = elements;
+
+      oElement = oEl; // Store for resize handler
+      lineElement = lineEl; // Store for resize handler
+
+      // Create smooth motion graphics timeline
+      tl = gsap.timeline({ delay: 0.8 });
+
+      // Step 1: Hide full text and show split text with O in its original position
+      let iWidth = 0; // Store I width for later use
+      
+      tl.to(fullTextElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          fullTextElement.style.display = "none";
+          portfolElement.style.display = "inline";
+          iElement.style.display = "inline";
+          oEl.style.display = "inline";
+          lineEl.style.display = "none";
+          
+          // Set initial positions for animation
+          gsap.set([portfolElement, iElement, oEl], {
+            display: "inline",
+            opacity: 1,
+          });
+          gsap.set(lineEl, {
+            display: "none",
+            width: 0,
+            transformOrigin: "left center",
+          });
+          gsap.set(oEl, { position: "static", x: 0 });
+          
+          // Measure I width after it's displayed (force reflow)
+          void iElement.offsetWidth;
+          const iRect = iElement.getBoundingClientRect();
+          iWidth = iRect.width;
+        },
+      });
+
+      // Step 2: Animate I rotating 90 degrees while simultaneously pushing O
+      // The O should shift by the width of I to simulate the push effect
+      let oStartX = 0; // Store O's starting position relative to container
+      tl.call(() => {
+        // Get O's starting position before any transforms
+        const oRect = oEl.getBoundingClientRect();
+        const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+        if (containerRect) {
+          oStartX = oRect.left - containerRect.left;
+        }
+      });
+      
+      tl.to(iElement, {
+        rotation: 90,
+        duration: 0.8,
+        ease: "power2.inOut",
+        transformOrigin: "center center",
+        onStart: () => {
+          // Simultaneously move O by the width of I (creating push effect)
+          if (iWidth > 0) {
+            gsap.to(oEl, {
+              x: iWidth,
+              duration: 0.8,
+              ease: "power2.inOut",
+            });
+          }
+        },
+      }, "-=0.2");
+
+      // Step 4: Replace I with line
+      // Store the original position of I before rotation for line positioning
+      tl.to(iElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onStart: () => {
+          // Get the original position of I relative to container
+          const iRect = iElement.getBoundingClientRect();
+          const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+          if (containerRect) {
+            iOriginalPosition = iRect.left - containerRect.left;
+          }
+        },
+        onComplete: () => {
+          iElement.style.display = "none";
+          lineEl.style.display = "block";
+          
+          // Position line to start from where I originally was (relative to container)
+          gsap.set(lineEl, {
+            opacity: 1,
+            x: iOriginalPosition,
+            width: 0,
+            transformOrigin: "left center",
+          });
+        },
+      }, "-=0.3");
+
+      // Step 5: Expand line while moving O to the end position
+      tl.call(() => {
+        // Wait a frame to ensure all previous animations have applied their transforms
+        requestAnimationFrame(() => {
+          const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+          if (!containerRect) return;
+          
+          // Get O's current width and position after being pushed by I
+          const oRect = oEl.getBoundingClientRect();
+          const oWidth = oRect.width;
+          
+          // Get O's current absolute position after I push (relative to container)
+          const oCurrentAbsoluteX = oRect.left - containerRect.left;
+          
+          // Calculate absolute end position within container (with padding from right edge)
+          // This is where O's CENTER should be positioned
+          const padding = window.innerWidth < 768 ? 16 : 32;
+          const absoluteEndPosition = containerRect.width - padding;
+          
+          // Calculate where O's LEFT EDGE should be (center at endPosition, so left edge is center - half width)
+          const oFinalLeftEdge = absoluteEndPosition - (oWidth / 2);
+          
+          // Calculate gap between L and I to match the gap before O
+          const portfolRect = portfolElement.getBoundingClientRect();
+          const lEndPosition = portfolRect.right - containerRect.left;
+          
+          // Gap is the space between L's end and I's start
+          const gapBeforeI = iOriginalPosition - lEndPosition;
+          
+          // Ensure gap is positive
+          const gap = Math.max(0, gapBeforeI);
+          
+          // Line should end BEFORE O's left edge with the same gap as between L and I
+          // Line ends at: O's left edge position minus the gap
+          const lineEndPosition = oFinalLeftEdge - gap - 10;
+          
+          // Calculate O's final x transform value
+          // GSAP x is always relative to element's initial position (oStartX)
+          // To position O's left edge at oFinalLeftEdge, we need: x = oFinalLeftEdge - oStartX
+          const oFinalX = oFinalLeftEdge - oStartX + 40;
+          
+          // Calculate final line width: from I's original position to line end position (before O)
+          // This ensures the line stops before O with the gap
+          const lineFinalWidth = lineEndPosition - iOriginalPosition;
+          const maxWidth = containerRect.width - iOriginalPosition;
+          
+          // Ensure line width is positive and doesn't exceed container
+          const finalLineWidth = Math.max(0, Math.min(lineFinalWidth, maxWidth));
+          
+          // Animate O movement and line expansion simultaneously
+          gsap.to(oEl, {
+            x: oFinalX,
+            duration: 1.2,
+            ease: "power2.out",
+            onComplete: () => {
+              animationComplete = true;
+              setIsPortfolioAnimationComplete(true);
+            },
+          });
+          
+          gsap.to(lineEl, {
+            width: finalLineWidth,
+            duration: 1.2,
+            ease: "power2.out",
+          });
+        });
+      });
+
+      // Handle window resize to recalculate positions
+      const handleResize = () => {
+        if (animationComplete && oElement && lineElement) {
+          const newEndPosition = calculateEndPosition();
+          gsap.set(oElement, { x: newEndPosition });
+          
+          // Also update line width - use stored iOriginalPosition or get from line's x
+          const lineStartX = iOriginalPosition || (gsap.getProperty(lineElement, "x") as number);
+          const lineFinalWidth = newEndPosition - lineStartX;
+          gsap.set(lineElement, { width: Math.max(0, lineFinalWidth) });
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    });
+
+    return () => {
+      if (tl) tl.kill();
+    };
+  }, []);
+
+  // Position navigation at the end of the line between PORTFOL and O
+  useEffect(() => {
+    const positionNavigation = () => {
+      if (!navRef.current || !portfolioHeaderRef.current || !isPortfolioAnimationComplete) return;
+
+      // Find the PORTFOL element, O element, and the line
+      const portfolElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-portfol') as HTMLElement;
+      const oElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-o') as HTMLElement;
+      const lineElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-line') as HTMLElement;
+      
+      if (!portfolElement || !oElement || !lineElement) {
+        // Retry after a short delay if elements aren't ready
+        setTimeout(positionNavigation, 100);
+        return;
+      }
+
+      // Get positions relative to the header-line container
+      const container = portfolioHeaderRef.current;
+      const containerRect = container.getBoundingClientRect();
+      
+      // Get line's position and width to find where it ends
+      const lineRect = lineElement.getBoundingClientRect();
+      const lineX = lineRect.left - containerRect.left;
+      const lineWidth = lineRect.width;
+      const lineEndX = lineX + lineWidth; // End of the line
+      
+      // Line is at 50% of container height, position navigation vertically centered on the line
+      const lineY = containerRect.height * 0.5 - 24; // 50% of container
+      
+      // Position navigation at the end of the line, aligned to the right
+      if (navRef.current) {
+        navRef.current.style.top = `${lineY}px`;
+        navRef.current.style.left = `${lineEndX}px`;
+        navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
+        // Fade in after positioning
+        navRef.current.style.opacity = '1';
+      }
+    };
+
+    if (isPortfolioAnimationComplete) {
+      // Initially hide and position the nav to prevent flash
+      if (navRef.current) {
+        navRef.current.style.opacity = '0';
+        // Set initial position off-screen or at a safe position
+        navRef.current.style.top = '50%';
+        navRef.current.style.left = '100%';
+        navRef.current.style.transform = 'translate(-100%, -50%)';
+      }
+      
+      // Position immediately on next frame to avoid layout shift
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          positionNavigation();
+        });
+      });
+      
+      window.addEventListener('resize', positionNavigation);
+
+      return () => {
+        window.removeEventListener('resize', positionNavigation);
+      };
+    }
+  }, [isPortfolioAnimationComplete]);
+
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#0C5446] relative overflow-hidden"
+      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#1e140b] relative overflow-hidden"
       style={{
         backgroundColor: "#F5ECE1",
       }}
@@ -645,45 +820,60 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       </svg>
 
       <div ref={heroCoverRef} className="hero-cover">
-        {/* Navigation Panels - randomly positioned */}
-        {coverSections.map((section, index) => {
-          const position = linkPositions[index] || { x: 0, y: 0 };
-          return (
-            <div
-              key={section.id}
-              role="listitem"
-              className="hero-panel collapsed"
-              style={{ 
-                backgroundColor: section.badgeColor,
-                position: 'absolute',
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                transform: 'translate(-50%, -50%)'
-              }}
-              onClick={() => handleNavigate(section.id)}
-              tabIndex={0}
-            >
-              <div className="hero-panel-inner">
-                <span className="hero-panel-text horizontal" style={{ color: section.badgeText }}>
-                  {section.label}
-                </span>
-                <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
-                  <ArrowUpRight size={27} strokeWidth={2} />
-                </span>
-              </div>
-            </div>
-          );
-        })}
+   
 
         {/* Mariam at Bottom */}
         <div className="hero-heading-wrapper">
           <h1
             ref={headingRef}
-            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+            className="hero-heading font-black text-[clamp(6rem,18vw,18rem)]"
           >
             <span className="hero-name">
+              <span className="hero-about-me">about me</span>
+              {/* Horizontal text paragraph on left of Mariam */}
+              <div className="hero-left-text">
+                <p className="hero-left-paragraph">
+Turning ideas into real life products                </p>
+              </div>
+              {/* Software Engineer Text - positioned above "Mariam" */}
+              <div className="software-engineer-wrapper">
+                <svg
+                  className="software-engineer-svg"
+                  width="700"
+                  height="120"
+                  style={{
+                    fontFamily: '"Floralis Couture", cursive',
+                    fontSize: "clamp(3rem, 6vw, 5rem)",
+                    overflow: "visible",
+                    pointerEvents: "none",
+                    opacity: 0
+                  }}
+                >
+                  <text
+                    ref={softwareEngineerRef}
+                    x="700"
+                    y="85"
+                    textAnchor="end"
+                    fill="#1e140b"
+                    fillOpacity="0"
+                    stroke="#1e140b"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeOpacity="0"
+                    style={{
+                      fontFamily: '"Floralis Couture", cursive',
+                      fontSize: "clamp(3rem, 6vw, 5rem)",
+                      letterSpacing: "0.05em",
+                      fontWeight: "normal"
+                    }}
+                  >
+                    software engineer
+                  </text>
+                </svg>
+              </div>
               <span className="hero-mar">
-                <span className="hero-letter">M</span>
+                <span ref={mLetterRef} className="hero-letter">M</span>
                 <span ref={a1Ref} className="hero-letter">a</span>
                 <span ref={rRef} className="hero-letter hero-letter-r">
                   r
@@ -691,52 +881,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               </span>
               <span ref={iamWrapperRef} className="hero-iam-wrapper">
                 <span className="hero-iam">
-                  {/* Software Engineer Text - positioned above "iam" */}
-                  <div
-                    className="software-engineer-wrapper"
-                    style={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "2%",
-                      width: "auto",
-                      height: "auto",
-                      marginBottom: "0.2rem"
-                    }}
-                  >
-                    <svg
-                      className="software-engineer-svg"
-                      width="700"
-                      height="120"
-                      style={{
-                        fontFamily: '"Floralis Couture", cursive',
-                        fontSize: "clamp(3rem, 6vw, 5rem)",
-                        overflow: "visible",
-                        pointerEvents: "none",
-                        opacity: 0
-                      }}
-                    >
-                      <text
-                        ref={softwareEngineerRef}
-                        x="0"
-                        y="85"
-                        fill="#1e140b"
-                        fillOpacity="0"
-                        stroke="#1e140b"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeOpacity="0"
-                        style={{
-                          fontFamily: '"Floralis Couture", cursive',
-                          fontSize: "clamp(3rem, 6vw, 5rem)",
-                          letterSpacing: "0.05em",
-                          fontWeight: "normal"
-                        }}
-                      >
-                        software engineer
-                      </text>
-                    </svg>
-                  </div>
                   <span className="hero-i-wrapper">
                     <span ref={iRef} className="hero-letter hero-letter-i">
                       i
@@ -753,11 +897,51 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {/* Yellow Frame with Repeating Text - Marquee Style */}
+      <div className="hero-yellow-frame">
+        {/* Top marquee - Portfolio Header only */}
+        <div className="hero-frame-marquee hero-frame-marquee-top">
+          {/* Portfolio Header */}
+          <div className="hero-cover-header">
+            <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
+              <span className="hero-cover-title-full" aria-label="Portfolio">PORTFOLIO</span>
+              <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
+              <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
+              <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
+              <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
+              {/* Site Navigation - appears after portfolio animation, centered on the line */}
+              {isPortfolioAnimationComplete && (
+                <nav ref={navRef} className="hero-site-navigation">
+                  <ul className="hero-nav-links">
+                    <li><a href="#experience" onClick={(e) => { e.preventDefault(); onNavigate('experience'); }}>experience</a></li>
+                    <li><a href="#work" onClick={(e) => { e.preventDefault(); onNavigate('work'); }}>projects</a></li>
+                    <li><a href="#certificates" onClick={(e) => { e.preventDefault(); onNavigate('certificates'); }}>certificates</a></li>
+                    <li><a href="#skills" onClick={(e) => { e.preventDefault(); onNavigate('skills'); }}>skills</a></li>
+                    <li><a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>contact</a></li>
+                  </ul>
+                </nav>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Left marquee */}
+   
+
+      </div>
+
+
+
       <style jsx>{`
         .hero-heading {
-          font-family: "Momo Trust Display", sans-serif;
+          font-family: "Space Grotesk", "Inter", sans-serif;
           letter-spacing: normal;
           text-align: right;
+          margin: 0;
+          margin-bottom: 0;
+          padding: 0;
+          padding-bottom: 0;
+          line-height: 0.7;
         }
 
         .hero-cover {
@@ -814,21 +998,29 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           justify-content: flex-end;
           align-items: flex-end;
           width: 100%;
-          margin-top: auto; /* push to bottom */
-          padding: 1rem;
-          position: relative;
+          height: 100%;
+          padding: 100px 0 0 100px;
+          padding-bottom: 0;
+          position: absolute;
+          inset: 0;
+          z-index: 200;
         }
 
         .software-engineer-wrapper {
-          position: absolute;
-          top: -1.5rem;
-          right: 0;
-          z-index: 10;
+          position: relative;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+          margin-bottom: -0.5rem;
+          margin-right: 0;
+          padding-right: 0;
+          z-index: 999;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            top: -1rem;
+            margin-bottom: -0.3rem;
           }
         }
 
@@ -839,9 +1031,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         @media (max-width: 768px) {
           .hero-heading-wrapper {
-            justify-content: center;
-            padding: 0.5rem;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 100px 0 0 100px;
+            padding-bottom: 0;
             width: 100%;
+            height: 100%;
             overflow: hidden;
           }
 
@@ -902,6 +1097,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           pointer-events: none;
         }
 
+        @media (max-width: 768px) {
+          .hero-panel::before {
+            border-radius: 1.5rem;
+          }
+        }
+
         /* Backdrop blur and distortion layer */
         .hero-panel::after {
           content: '';
@@ -915,6 +1116,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           -webkit-filter: url(#glass-distortion);
           isolation: isolate;
           pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+          .hero-panel::after {
+            border-radius: 1.5rem;
+          }
         }
 
         .hero-panel-inner {
@@ -972,7 +1179,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           writing-mode: horizontal-tb;
           transform: none;
           opacity: 1;
-          font-size: clamp(0.875rem, 1.3vw, 1.3rem);
+          font-size: clamp(0.875rem, 2vw, 2rem);
         }
 
         @media (max-width: 768px) {
@@ -1002,6 +1209,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
           .hero-heading-wrapper {
             justify-content: center;
+            align-items: center;
           }
 
           .hero-heading {
@@ -1034,6 +1242,127 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: flex-end;
           position: relative;
           transform-origin: left bottom;
+          margin-bottom: 0;
+          padding-bottom: 0;
+          vertical-align: bottom;
+        }
+
+        .hero-about-me {
+          position: absolute;
+          right: 100%;
+          bottom: 0;
+          margin-right: -1rem;
+          margin-bottom: .2rem;
+          padding-bottom: 0;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.7rem, 1vw, 0.9rem);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4em;
+          color: #1e140b;
+          opacity: 0.6;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+          white-space: nowrap;
+          line-height: 1.2;
+          align-self: flex-end;
+        }
+
+        @media (max-width: 768px) {
+          .hero-about-me {
+            margin-right: 1.5rem;
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            letter-spacing: 0.3em;
+          }
+        }
+
+        .hero-cover-header {
+          position: relative;
+        }
+
+        .hero-site-navigation {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          font-family: "Space Grotesk", "Inter", monospace;
+          opacity: 0;
+          z-index: 30;
+          white-space: nowrap;
+          pointer-events: auto;
+          transition: opacity 0.3s ease;
+        }
+
+        .hero-nav-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          gap: 1.5rem;
+          align-items: center;
+        }
+
+        .hero-nav-links li {
+          margin: 0;
+          padding: 0;
+        }
+
+        .hero-nav-links a {
+          font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+          font-weight: 400;
+          text-transform: lowercase;
+          letter-spacing: 0.05em;
+          color: #1e140b;
+          text-decoration: none;
+          opacity: 0.8;
+          transition: opacity 0.2s ease;
+        }
+
+        .hero-nav-links a:hover {
+          opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+          .hero-nav-links {
+            gap: 1rem;
+          }
+          
+          .hero-nav-links a {
+            font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+          }
+        }
+
+        .hero-left-text {
+          position: absolute;
+          right: 100%;
+          bottom: 0;
+          max-width: 300px;
+          margin-right: 2rem;
+          z-index: 10;
+        }
+
+        .hero-left-paragraph {
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+          font-weight: 400;
+          line-height: 1.6;
+          color: #8B7355;
+          margin: 0;
+          padding: 0;
+          text-align: left;
+        }
+
+        @media (max-width: 768px) {
+          .hero-left-text {
+            max-width: 200px;
+            margin-right: 1.5rem;
+          }
+          
+          .hero-left-paragraph {
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            line-height: 1.5;
+          }
         }
 
         .hero-mar,
@@ -1056,16 +1385,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
 
         .software-engineer-wrapper {
-          position: absolute;
-          bottom: 100%;
-          right: 0;
+          position: relative;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+          margin-bottom: -3rem;
+          margin-right: 0;
+          padding-right: 32;
           z-index: 10;
-          margin-bottom: 0.2rem;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            margin-bottom: 0.15rem;
+            margin-bottom: -0.3rem;
           }
         }
 
@@ -1080,6 +1413,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: inline-block;
           position: relative;
           transform-origin: bottom center;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+        }
+        
+        /* When GSAP sets color, update the color */
+        .hero-letter[style*="color"] {
+          color: currentColor;
         }
 
         .hero-letter-r {
@@ -1108,6 +1448,303 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         /* Final dot specific style */
         :global(.final-i-dot) {
           background-color: #DA451F;
+        }
+
+        .hero-marquee {
+          width: 100vw;
+          height: 100px;
+          background-color: #FFD7DF;
+          overflow: hidden;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          padding-right: 2rem;
+        }
+
+        .hero-marquee-content {
+          display: flex;
+          width: fit-content;
+          animation: marquee-scroll 30s linear infinite;
+          white-space: nowrap;
+          align-items: center;
+          will-change: transform;
+          gap: 4rem;
+        }
+
+        .hero-marquee-text {
+          display: inline-block;
+          padding: 0 2rem;
+          padding-right: 6rem;
+          color: #1A5632;
+          font-size: clamp(1.5rem, 3vw, 2.5rem);
+          font-weight: 700;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          letter-spacing: 0.1em;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          vertical-align: baseline;
+          flex-shrink: 0;
+        }
+
+        @keyframes marquee-scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-33.333%);
+          }
+        }
+
+        .hero-yellow-frame {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 200;
+          overflow: hidden;
+          border-radius: 0;
+          margin: 0;
+          padding: 0;
+        }
+
+        .hero-frame-marquee {
+          position: absolute;
+          background-color: transparent;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          margin: 0;
+          padding: 0;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        /* Tint and inner shadow layer */
+        .hero-frame-marquee::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        /* Backdrop blur and distortion layer */
+        .hero-frame-marquee::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion);
+          -webkit-filter: url(#glass-distortion);
+          isolation: isolate;
+          pointer-events: none;
+        }
+
+        .hero-frame-marquee-top {
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 100px;
+          border-radius: 0;
+          padding-right: 2rem;
+          position: relative;
+          overflow: visible;
+        }
+
+        /* Remove liquid glass effect from top marquee (Portfolio header) */
+        .hero-frame-marquee-top {
+          box-shadow: none;
+        }
+
+        .hero-frame-marquee-top::before,
+        .hero-frame-marquee-top::after {
+          display: none;
+        }
+        
+        .hero-frame-marquee-top .hero-frame-marquee-content {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+        }
+
+        .hero-frame-marquee-bottom {
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 100px;
+          border-radius: 0;
+          padding-right: 2rem;
+        }
+
+        .hero-frame-marquee-right {
+          right: 0;
+          top: 100px;
+          bottom: 100px;
+          width: 100px;
+          border-radius: 0;
+          justify-content: center;
+          padding-bottom: 2rem;
+        }
+
+        .hero-frame-marquee-left {
+          left: 0;
+          top: 100px;
+          bottom: 0px;
+          width: 50px;
+          border-radius: 0;
+          justify-content: center;
+          padding-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .hero-frame-marquee-top,
+          .hero-frame-marquee-bottom {
+            height: 100px;
+            border-radius: 0;
+          }
+          .hero-frame-marquee-right {
+            top: 100px;
+            bottom: 100px;
+            width: 100px;
+          }
+          .hero-frame-marquee-left {
+            top: 100px;
+            bottom: 100px;
+            width: 100px;
+          }
+        }
+
+        .hero-frame-marquee-content {
+          display: flex;
+          width: fit-content;
+          animation: frame-marquee-scroll-horizontal 30s linear infinite;
+          white-space: nowrap;
+          align-items: center;
+          will-change: transform;
+          gap: 4rem;
+          position: relative;
+          z-index: 10;
+        }
+
+        .hero-frame-marquee-content-vertical {
+          flex-direction: column;
+          height: fit-content;
+          animation: frame-marquee-scroll-vertical 30s linear infinite;
+        }
+
+        .hero-frame-marquee-text {
+          display: inline-block;
+          padding: 0 2rem;
+          padding-right: 2rem;
+          color: #1A5632;
+          font-size: clamp(1.5rem, 1.5vw, 1.5rem);
+          font-weight: 700;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          letter-spacing: 0.1em;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          vertical-align: baseline;
+          flex-shrink: 0;
+          writing-mode: horizontal-tb;
+          position: relative;
+          z-index: 10;
+        }
+
+        .hero-frame-marquee-content-vertical .hero-frame-marquee-text {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          padding: 2rem 0;
+          padding-bottom: 6rem;
+        }
+
+        @keyframes frame-marquee-scroll-horizontal {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-33.333%);
+          }
+        }
+
+        @keyframes frame-marquee-scroll-vertical {
+          0% {
+            transform: translateY(-33.333%);
+          }
+          100% {
+            transform: translateY(0);
+          }
+        }
+
+        /* Portfolio Header in Top Frame */
+        .hero-frame-marquee-top .hero-cover-header {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 0.5rem;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          width: 100%;
+          padding: 0 1rem;
+          margin: 0;
+          z-index: 10;
+          pointer-events: auto;
+          overflow: visible;
+        }
+
+        .hero-cover-header-line {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          gap: 0;
+          position: relative;
+        }
+
+        .hero-cover-title-full,
+        .hero-cover-title-portfol,
+        .hero-cover-title-i,
+        .hero-cover-title-o {
+          font-size: clamp(3.5rem, 10vw, 6rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          height: 100px;
+        }
+
+        .hero-cover-title-i {
+          display: inline;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        .hero-cover-title-o {
+          will-change: transform;
+        }
+
+        .hero-cover-title-line {
+          will-change: width, transform;
+          transform-origin: left center;
+          position: absolute;
+          height: 1px;
+          background-color: #1e140b;
+          opacity: 0.4;
+          top: 50%;
+          transform: translateY(-50%);
         }
       `}</style>
     </section>
