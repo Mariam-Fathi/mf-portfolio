@@ -18,21 +18,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
   const softwareEngineerRef = useRef<SVGTextElement | null>(null);
   const iamWrapperRef = useRef<HTMLSpanElement | null>(null);
+  const mLetterRef = useRef<HTMLSpanElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
+  const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
-  const [linkPositions, setLinkPositions] = useState<Array<{ x: number; y: number }>>([]);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
   const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
-
-  
-  // Navigation sections - these will become the navbar
-  const coverSections = [
-    { number: "01", label: "Experience", id: "experience", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "02", label: "Projects", id: "work", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "03", label: "Certificates", id: "certificates", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "04", label: "Skills", id: "skills", badgeColor: "#F5ECE1", badgeText: "#014421" },
-    { number: "05", label: "Contact", id: "contact", badgeColor: "#F5ECE1", badgeText: "#014421" },
-  ];
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -71,158 +63,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     }
     onNavigate(section);
   };
-
-  // Calculate random positions for links (fixed across reloads)
-  useEffect(() => {
-    const calculatePositions = () => {
-      if (!heroCoverRef.current) return;
-
-      const container = heroCoverRef.current;
-      const headingWrapper = container.querySelector('.hero-heading-wrapper');
-      
-      if (!headingWrapper) {
-        // Retry after a short delay if heading wrapper isn't ready
-        setTimeout(calculatePositions, 100);
-        return;
-      }
-
-      const containerRect = container.getBoundingClientRect();
-      const headingRect = (headingWrapper as HTMLElement).getBoundingClientRect();
-      
-      // Calculate available space above the heading
-      const availableHeight = headingRect.top - containerRect.top;
-      const availableWidth = containerRect.width;
-
-      // Responsive values based on screen size
-      const isMobile = window.innerWidth < 768;
-      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-      
-      // Create a key for localStorage based on screen size category
-      const screenSizeKey = isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop';
-      const storageKey = `hero-link-positions-v8-${screenSizeKey}`;
-      
-      // Try to load existing positions from localStorage
-      const storedPositions = localStorage.getItem(storageKey);
-      if (storedPositions) {
-        try {
-          const parsed = JSON.parse(storedPositions);
-          // Verify the stored positions are valid
-          if (Array.isArray(parsed) && parsed.length === coverSections.length) {
-            setLinkPositions(parsed);
-            return;
-          }
-        } catch (e) {
-          // If parsing fails, continue to generate new positions
-        }
-      }
-      
-      // Minimum distance between links to prevent overlap (responsive)
-      // On mobile, links are smaller but we need more spacing to account for their width
-      const minDistance = isMobile ? 200 : isTablet ? 220 : 250;
-      const padding = isMobile ? 60 : isTablet ? 80 : 120;
-      const minX = padding;
-      const maxX = availableWidth - padding;
-      const minY = padding;
-      const maxY = Math.max(availableHeight - padding, padding + (isMobile ? 60 : 100));
-
-      // Helper function to check if two positions are too close
-      const isTooClose = (pos1: { x: number; y: number }, pos2: { x: number; y: number }) => {
-        const dx = pos1.x - pos2.x;
-        const dy = pos1.y - pos2.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < minDistance;
-      };
-
-      // Calculate positions for each link with collision detection
-      const positions: Array<{ x: number; y: number }> = [];
-      
-      for (let i = 0; i < coverSections.length; i++) {
-        let attempts = 0;
-        // Increase attempts on mobile to ensure we find non-overlapping positions
-        const maxAttempts = isMobile ? 200 : 100;
-        let position: { x: number; y: number } | null = null;
-        let isValid = false;
-
-        // Try to find a position that doesn't overlap with existing positions
-        while (!isValid && attempts < maxAttempts) {
-          position = {
-            x: Math.random() * (maxX - minX) + minX,
-            y: Math.random() * (maxY - minY) + minY
-          };
-
-          // Check if this position is too close to any existing position
-          isValid = !positions.some(existingPos => isTooClose(position!, existingPos));
-          attempts++;
-        }
-
-        // If we couldn't find a non-overlapping position, find the best available position
-        if (!isValid && position) {
-          // Try to find the best available position by checking all existing positions
-          let bestPosition = position;
-          let minDistanceToNearest = 0;
-          
-          // Try more random positions on mobile to ensure better spacing
-          const fallbackAttempts = isMobile ? 50 : 20;
-          for (let j = 0; j < fallbackAttempts; j++) {
-            const testPos = {
-              x: Math.random() * (maxX - minX) + minX,
-              y: Math.random() * (maxY - minY) + minY
-            };
-            
-            const distances = positions.map(p => {
-              const dx = testPos.x - p.x;
-              const dy = testPos.y - p.y;
-              return Math.sqrt(dx * dx + dy * dy);
-            });
-            
-            const minDist = Math.min(...distances);
-            if (minDist > minDistanceToNearest) {
-              minDistanceToNearest = minDist;
-              bestPosition = testPos;
-            }
-          }
-          
-          position = bestPosition;
-        }
-
-        // Fallback: if somehow position is still null, use a default position
-        if (!position) {
-          position = {
-            x: minX + (maxX - minX) / 2,
-            y: minY + (maxY - minY) / 2
-          };
-        }
-
-        positions.push(position);
-      }
-
-      // Store positions in localStorage for future reloads
-      localStorage.setItem(storageKey, JSON.stringify(positions));
-      setLinkPositions(positions);
-    };
-
-    // Calculate on mount and window resize
-    const timeoutId = setTimeout(calculatePositions, 100);
-    
-    // Only recalculate on resize if screen size category changes
-    let lastScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
-    const handleResize = () => {
-      const currentScreenSize = window.innerWidth < 768 ? 'mobile' : window.innerWidth >= 768 && window.innerWidth < 1024 ? 'tablet' : 'desktop';
-      if (currentScreenSize !== lastScreenSize) {
-        lastScreenSize = currentScreenSize;
-        calculatePositions();
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // (reverted) no auto-fit logic
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -844,6 +684,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             ease: "power2.out",
             onComplete: () => {
               animationComplete = true;
+              setIsPortfolioAnimationComplete(true);
             },
           });
           
@@ -879,6 +720,58 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       if (tl) tl.kill();
     };
   }, []);
+
+  // Position navigation in the center of the line between PORTFOL and O
+  useEffect(() => {
+    const positionNavigation = () => {
+      if (!navRef.current || !portfolioHeaderRef.current || !isPortfolioAnimationComplete) return;
+
+      // Find the PORTFOL element, O element, and the line
+      const portfolElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-portfol') as HTMLElement;
+      const oElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-o') as HTMLElement;
+      const lineElement = portfolioHeaderRef.current.querySelector('.hero-cover-title-line') as HTMLElement;
+      
+      if (!portfolElement || !oElement || !lineElement) {
+        // Retry after a short delay if elements aren't ready
+        setTimeout(positionNavigation, 100);
+        return;
+      }
+
+      // Get positions relative to the header-line container
+      const container = portfolioHeaderRef.current;
+      const containerRect = container.getBoundingClientRect();
+      
+      // Get PORTFOL's right edge position relative to container
+      const portfolRect = portfolElement.getBoundingClientRect();
+      const portfolRightRelative = portfolRect.right - containerRect.left;
+      
+      // Get O's left edge position relative to container (after animation)
+      const oRect = oElement.getBoundingClientRect();
+      const oLeftRelative = oRect.left - containerRect.left;
+      
+      // Calculate the center point between PORTFOL's right edge and O's left edge
+      const centerX = (portfolRightRelative + oLeftRelative) / 2;
+      
+      // Line is at 50% of container height, position navigation vertically centered on the line
+      const lineY = containerRect.height * 0.5 - 24; // 50% of container
+      
+      // Position navigation at the center point, vertically aligned with the line
+      // We need to account for the navigation's own width to truly center it
+      navRef.current.style.top = `${lineY}px`;
+      navRef.current.style.left = `${centerX}px`;
+      navRef.current.style.transform = 'translate(-50%, -50%)'; // Center the navigation element itself
+    };
+
+    if (isPortfolioAnimationComplete) {
+      const timeoutId = setTimeout(positionNavigation, 500);
+      window.addEventListener('resize', positionNavigation);
+
+      return () => {
+        clearTimeout(timeoutId);
+        window.removeEventListener('resize', positionNavigation);
+      };
+    }
+  }, [isPortfolioAnimationComplete]);
 
   return (
     <section
@@ -922,11 +815,55 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         <div className="hero-heading-wrapper">
           <h1
             ref={headingRef}
-            className="hero-heading font-black leading-[0.85] text-[clamp(6rem,18vw,18rem)]"
+            className="hero-heading font-black text-[clamp(6rem,18vw,18rem)]"
           >
             <span className="hero-name">
+              <span className="hero-about-me">about me</span>
+              {/* Horizontal text paragraph on left of Mariam */}
+              <div className="hero-left-text">
+                <p className="hero-left-paragraph">
+                  Passionate about creating innovative solutions and bringing ideas to life through code.
+                </p>
+              </div>
+              {/* Software Engineer Text - positioned above "Mariam" */}
+              <div className="software-engineer-wrapper">
+                <svg
+                  className="software-engineer-svg"
+                  width="700"
+                  height="120"
+                  style={{
+                    fontFamily: '"Floralis Couture", cursive',
+                    fontSize: "clamp(3rem, 6vw, 5rem)",
+                    overflow: "visible",
+                    pointerEvents: "none",
+                    opacity: 0
+                  }}
+                >
+                  <text
+                    ref={softwareEngineerRef}
+                    x="700"
+                    y="85"
+                    textAnchor="end"
+                    fill="#1e140b"
+                    fillOpacity="0"
+                    stroke="#1e140b"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeOpacity="0"
+                    style={{
+                      fontFamily: '"Floralis Couture", cursive',
+                      fontSize: "clamp(3rem, 6vw, 5rem)",
+                      letterSpacing: "0.05em",
+                      fontWeight: "normal"
+                    }}
+                  >
+                    software engineer
+                  </text>
+                </svg>
+              </div>
               <span className="hero-mar">
-                <span className="hero-letter">M</span>
+                <span ref={mLetterRef} className="hero-letter">M</span>
                 <span ref={a1Ref} className="hero-letter">a</span>
                 <span ref={rRef} className="hero-letter hero-letter-r">
                   r
@@ -934,52 +871,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               </span>
               <span ref={iamWrapperRef} className="hero-iam-wrapper">
                 <span className="hero-iam">
-                  {/* Software Engineer Text - positioned above "iam" */}
-                  <div
-                    className="software-engineer-wrapper"
-                    style={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "2%",
-                      width: "auto",
-                      height: "auto",
-                      marginBottom: "0.2rem"
-                    }}
-                  >
-                    <svg
-                      className="software-engineer-svg"
-                      width="700"
-                      height="120"
-                      style={{
-                        fontFamily: '"Floralis Couture", cursive',
-                        fontSize: "clamp(3rem, 6vw, 5rem)",
-                        overflow: "visible",
-                        pointerEvents: "none",
-                        opacity: 0
-                      }}
-                    >
-                      <text
-                        ref={softwareEngineerRef}
-                        x="0"
-                        y="85"
-                        fill="#1e140b"
-                        fillOpacity="0"
-                        stroke="#1e140b"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeOpacity="0"
-                        style={{
-                          fontFamily: '"Floralis Couture", cursive',
-                          fontSize: "clamp(3rem, 6vw, 5rem)",
-                          letterSpacing: "0.05em",
-                          fontWeight: "normal"
-                        }}
-                      >
-                        software engineer
-                      </text>
-                    </svg>
-                  </div>
                   <span className="hero-i-wrapper">
                     <span ref={iRef} className="hero-letter hero-letter-i">
                       i
@@ -1008,49 +899,39 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
               <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
               <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
+              {/* Site Navigation - appears after portfolio animation, centered on the line */}
+              {isPortfolioAnimationComplete && (
+                <nav ref={navRef} className="hero-site-navigation">
+                  <ul className="hero-nav-links">
+                    <li><a href="#experience" onClick={(e) => { e.preventDefault(); onNavigate('experience'); }}>experience</a></li>
+                    <li><a href="#work" onClick={(e) => { e.preventDefault(); onNavigate('work'); }}>projects</a></li>
+                    <li><a href="#certificates" onClick={(e) => { e.preventDefault(); onNavigate('certificates'); }}>certificates</a></li>
+                    <li><a href="#skills" onClick={(e) => { e.preventDefault(); onNavigate('skills'); }}>skills</a></li>
+                    <li><a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>contact</a></li>
+                  </ul>
+                </nav>
+              )}
             </div>
           </div>
         </div>
-        {/* Right marquee */}
-        <div className="hero-frame-marquee hero-frame-marquee-right">
-          <div className="hero-frame-marquee-content hero-frame-marquee-content-vertical">
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-          </div>
-        </div>
-        {/* Bottom marquee */}
-        <div className="hero-frame-marquee hero-frame-marquee-bottom">
-          <div className="hero-frame-marquee-content">
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-          </div>
-        </div>
+
         {/* Left marquee */}
-        <div className="hero-frame-marquee hero-frame-marquee-left">
-          <div className="hero-frame-marquee-content hero-frame-marquee-content-vertical">
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
-          </div>
-        </div>
+   
+
       </div>
 
-      {/* Marquee below Mariam - outside hero-cover to overlay full width */}
-      <div className="hero-marquee">
-        <div className="hero-marquee-content">
-          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
-          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
-          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
-        </div>
-      </div>
+
 
       <style jsx>{`
         .hero-heading {
           font-family: "Space Grotesk", "Inter", sans-serif;
           letter-spacing: normal;
-          text-align: center;
+          text-align: right;
+          margin: 0;
+          margin-bottom: 0;
+          padding: 0;
+          padding-bottom: 0;
+          line-height: 0.7;
         }
 
         .hero-cover {
@@ -1104,26 +985,32 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-heading-wrapper {
           display: flex;
-          justify-content: center;
-          align-items: center;
+          justify-content: flex-end;
+          align-items: flex-end;
           width: 100%;
           height: 100%;
-          padding: 100px;
+          padding: 100px 0 0 100px;
+          padding-bottom: 0;
           position: absolute;
           inset: 0;
           z-index: 200;
         }
 
         .software-engineer-wrapper {
-          position: absolute;
-          top: -1.5rem;
-          right: 0;
-          z-index: 10;
+          position: relative;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+          margin-bottom: -0.5rem;
+          margin-right: 0;
+          padding-right: 0;
+          z-index: 999;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            top: -1rem;
+            margin-bottom: -0.3rem;
           }
         }
 
@@ -1134,9 +1021,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         @media (max-width: 768px) {
           .hero-heading-wrapper {
-            justify-content: center;
-            align-items: center;
-            padding: 100px;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 100px 0 0 100px;
+            padding-bottom: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -1344,6 +1232,126 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: flex-end;
           position: relative;
           transform-origin: left bottom;
+          margin-bottom: 0;
+          padding-bottom: 0;
+          vertical-align: bottom;
+        }
+
+        .hero-about-me {
+          position: absolute;
+          right: 100%;
+          bottom: 0;
+          margin-right: -1rem;
+          margin-bottom: .2rem;
+          padding-bottom: 0;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.7rem, 1vw, 0.9rem);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4em;
+          color: #1e140b;
+          opacity: 0.6;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+          white-space: nowrap;
+          line-height: 1.2;
+          align-self: flex-end;
+        }
+
+        @media (max-width: 768px) {
+          .hero-about-me {
+            margin-right: 1.5rem;
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            letter-spacing: 0.3em;
+          }
+        }
+
+        .hero-cover-header {
+          position: relative;
+        }
+
+        .hero-site-navigation {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          font-family: "Space Grotesk", "Inter", monospace;
+          opacity: 1;
+          z-index: 30;
+          white-space: nowrap;
+          pointer-events: auto;
+        }
+
+        .hero-nav-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: row;
+          gap: 1.5rem;
+          align-items: center;
+        }
+
+        .hero-nav-links li {
+          margin: 0;
+          padding: 0;
+        }
+
+        .hero-nav-links a {
+          font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+          font-weight: 400;
+          text-transform: lowercase;
+          letter-spacing: 0.05em;
+          color: #1e140b;
+          text-decoration: none;
+          opacity: 0.8;
+          transition: opacity 0.2s ease;
+        }
+
+        .hero-nav-links a:hover {
+          opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+          .hero-nav-links {
+            gap: 1rem;
+          }
+          
+          .hero-nav-links a {
+            font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+          }
+        }
+
+        .hero-left-text {
+          position: absolute;
+          right: 100%;
+          bottom: 0;
+          max-width: 300px;
+          margin-right: 2rem;
+          z-index: 10;
+        }
+
+        .hero-left-paragraph {
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.75rem, 1.2vw, 0.95rem);
+          font-weight: 400;
+          line-height: 1.6;
+          color: #8B7355;
+          margin: 0;
+          padding: 0;
+          text-align: left;
+        }
+
+        @media (max-width: 768px) {
+          .hero-left-text {
+            max-width: 200px;
+            margin-right: 1.5rem;
+          }
+          
+          .hero-left-paragraph {
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            line-height: 1.5;
+          }
         }
 
         .hero-mar,
@@ -1366,16 +1374,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
 
         .software-engineer-wrapper {
-          position: absolute;
-          bottom: 100%;
-          right: 0;
+          position: relative;
+          width: 100%;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-start;
+          margin-bottom: -3rem;
+          margin-right: 0;
+          padding-right: 32;
           z-index: 10;
-          margin-bottom: 0.2rem;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            margin-bottom: 0.15rem;
+            margin-bottom: -0.3rem;
           }
         }
 
@@ -1489,12 +1501,39 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-frame-marquee {
           position: absolute;
-          background-color: #FFE500;
+          background-color: transparent;
           overflow: hidden;
           display: flex;
           align-items: center;
           margin: 0;
           padding: 0;
+          isolation: isolate;
+          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
+        }
+
+        /* Tint and inner shadow layer */
+        .hero-frame-marquee::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
+          background-color: rgba(109, 109, 109, 0);
+          pointer-events: none;
+        }
+
+        /* Backdrop blur and distortion layer */
+        .hero-frame-marquee::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          filter: url(#glass-distortion);
+          -webkit-filter: url(#glass-distortion);
+          isolation: isolate;
+          pointer-events: none;
         }
 
         .hero-frame-marquee-top {
@@ -1505,6 +1544,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           border-radius: 0;
           padding-right: 2rem;
           position: relative;
+          overflow: visible;
+        }
+
+        /* Remove liquid glass effect from top marquee (Portfolio header) */
+        .hero-frame-marquee-top {
+          box-shadow: none;
+        }
+
+        .hero-frame-marquee-top::before,
+        .hero-frame-marquee-top::after {
+          display: none;
         }
         
         .hero-frame-marquee-top .hero-frame-marquee-content {
@@ -1535,8 +1585,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-frame-marquee-left {
           left: 0;
           top: 100px;
-          bottom: 100px;
-          width: 100px;
+          bottom: 0px;
+          width: 50px;
           border-radius: 0;
           justify-content: center;
           padding-bottom: 2rem;
@@ -1568,6 +1618,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           align-items: center;
           will-change: transform;
           gap: 4rem;
+          position: relative;
+          z-index: 10;
         }
 
         .hero-frame-marquee-content-vertical {
@@ -1579,9 +1631,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         .hero-frame-marquee-text {
           display: inline-block;
           padding: 0 2rem;
-          padding-right: 6rem;
+          padding-right: 2rem;
           color: #1A5632;
-          font-size: clamp(1.5rem, 3vw, 2.5rem);
+          font-size: clamp(1.5rem, 1.5vw, 1.5rem);
           font-weight: 700;
           font-family: "Space Grotesk", "Inter", sans-serif;
           letter-spacing: 0.1em;
@@ -1591,6 +1643,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           vertical-align: baseline;
           flex-shrink: 0;
           writing-mode: horizontal-tb;
+          position: relative;
+          z-index: 10;
         }
 
         .hero-frame-marquee-content-vertical .hero-frame-marquee-text {
@@ -1611,10 +1665,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         @keyframes frame-marquee-scroll-vertical {
           0% {
-            transform: translateY(0);
+            transform: translateY(-33.333%);
           }
           100% {
-            transform: translateY(-33.333%);
+            transform: translateY(0);
           }
         }
 
@@ -1633,6 +1687,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           margin: 0;
           z-index: 10;
           pointer-events: auto;
+          overflow: visible;
         }
 
         .hero-cover-header-line {
