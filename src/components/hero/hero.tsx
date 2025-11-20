@@ -756,17 +756,35 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       
       // Position navigation at the center point, vertically aligned with the line
       // We need to account for the navigation's own width to truly center it
-      navRef.current.style.top = `${lineY}px`;
-      navRef.current.style.left = `${centerX}px`;
-      navRef.current.style.transform = 'translate(-50%, -50%)'; // Center the navigation element itself
+      if (navRef.current) {
+        navRef.current.style.top = `${lineY}px`;
+        navRef.current.style.left = `${centerX}px`;
+        navRef.current.style.transform = 'translate(-50%, -50%)'; // Center the navigation element itself
+        // Fade in after positioning
+        navRef.current.style.opacity = '1';
+      }
     };
 
     if (isPortfolioAnimationComplete) {
-      const timeoutId = setTimeout(positionNavigation, 500);
+      // Initially hide and position the nav to prevent flash
+      if (navRef.current) {
+        navRef.current.style.opacity = '0';
+        // Set initial position off-screen or at a safe position
+        navRef.current.style.top = '50%';
+        navRef.current.style.left = '50%';
+        navRef.current.style.transform = 'translate(-50%, -50%)';
+      }
+      
+      // Position immediately on next frame to avoid layout shift
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          positionNavigation();
+        });
+      });
+      
       window.addEventListener('resize', positionNavigation);
 
       return () => {
-        clearTimeout(timeoutId);
         window.removeEventListener('resize', positionNavigation);
       };
     }
@@ -1274,10 +1292,11 @@ Turning ideas into real life products                </p>
           display: flex;
           align-items: center;
           font-family: "Space Grotesk", "Inter", monospace;
-          opacity: 1;
+          opacity: 0;
           z-index: 30;
           white-space: nowrap;
           pointer-events: auto;
+          transition: opacity 0.3s ease;
         }
 
         .hero-nav-links {
