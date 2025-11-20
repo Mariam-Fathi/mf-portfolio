@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Skiper19 } from "@/components/Skiper19";

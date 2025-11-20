@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { ArrowUpRight } from "lucide-react";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
@@ -822,8 +821,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               {/* Horizontal text paragraph on left of Mariam */}
               <div className="hero-left-text">
                 <p className="hero-left-paragraph">
-                  Passionate about creating innovative solutions and bringing ideas to life through code.
-                </p>
+Turning ideas into real life products                </p>
               </div>
               {/* Software Engineer Text - positioned above "Mariam" */}
               <div className="software-engineer-wrapper">
