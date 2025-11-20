@@ -16,11 +16,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
   const softwareEngineerRef = useRef<SVGTextElement | null>(null);
+  const softwareRef = useRef<SVGTextElement | null>(null);
+  const engineerRef = useRef<SVGTextElement | null>(null);
   const iamWrapperRef = useRef<HTMLSpanElement | null>(null);
+  const iamRef = useRef<HTMLSpanElement | null>(null);
   const mLetterRef = useRef<HTMLSpanElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
+  const [softwareEngineerFontSize, setSoftwareEngineerFontSize] = useState<string>("clamp(3rem, 6vw, 5rem)");
+  const [softwareEngineerTransform, setSoftwareEngineerTransform] = useState<string>("");
+  const softwareEngineerWrapperRef = useRef<HTMLDivElement | null>(null);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
   const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
@@ -362,73 +368,82 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         
         // Add "software engineer" handwriting animation after dot finishes
         finalDotTimeline.call(() => {
-          const svgText = softwareEngineerRef.current;
+          const softwareText = softwareRef.current;
+          const engineerText = engineerRef.current;
           
-          if (!svgText) {
-            console.warn("softwareEngineerRef is null");
+          if (!softwareText || !engineerText) {
+            console.warn("software or engineer ref is null");
             return;
           }
           
           // Wait a bit for the SVG to render, then convert text to path for DrawSVG effect
           setTimeout(() => {
-            const svg = svgText.ownerSVGElement;
+            const svg = softwareText.ownerSVGElement;
             if (!svg) {
               console.warn("SVG element not found");
               return;
             }
             
-            // Get the text element's bounding box first (while hidden)
-            let bbox;
-            try {
-              // Temporarily make it visible to get bbox, then hide again
-              gsap.set(svgText, { opacity: 0.01, strokeOpacity: 0.01 });
-              bbox = svgText.getBBox();
-              // If bbox is empty or invalid, use fallback
-              if (!bbox || bbox.width === 0) {
-                throw new Error("Empty bbox");
+            // Helper function to animate a text element
+            const animateText = (textElement: SVGTextElement, delay: number = 0) => {
+              // Get the text element's bounding box first (while hidden)
+              let bbox;
+              try {
+                // Temporarily make it visible to get bbox, then hide again
+                gsap.set(textElement, { opacity: 0.01, strokeOpacity: 0.01 });
+                bbox = textElement.getBBox();
+                // If bbox is empty or invalid, use fallback
+                if (!bbox || bbox.width === 0) {
+                  throw new Error("Empty bbox");
+                }
+              } catch (e) {
+                console.warn("Could not get BBox, using fallback", e);
+                // Fallback: estimate based on text content
+                const textContent = textElement.textContent || "";
+                const fontSize = parseFloat(window.getComputedStyle(textElement).fontSize) || 24;
+                const estimatedWidth = textContent.length * fontSize * 0.6; // rough estimate
+                bbox = { width: estimatedWidth, height: fontSize };
               }
-            } catch (e) {
-              console.warn("Could not get BBox, using fallback", e);
-              // Fallback: estimate based on text content
-              const textContent = svgText.textContent || "software engineer";
-              const fontSize = parseFloat(window.getComputedStyle(svgText).fontSize) || 24;
-              const estimatedWidth = textContent.length * fontSize * 0.6; // rough estimate
-              bbox = { width: estimatedWidth, height: fontSize };
-            }
-            
-            // Estimate path length based on text width
-            // Multiply by 1.8 to account for curves and letter complexity
-            const estimatedPathLength = bbox.width * 1.8;
+              
+              // Estimate path length based on text width
+              // Multiply by 1.8 to account for curves and letter complexity
+              const estimatedPathLength = bbox.width * 1.8;
+              
+              // Set initial stroke-dasharray and stroke-dashoffset for DrawSVG effect
+              gsap.set(textElement, {
+                strokeDasharray: estimatedPathLength,
+                strokeDashoffset: estimatedPathLength,
+                fillOpacity: 0,
+                strokeOpacity: 1,
+                opacity: 1
+              });
+              
+              // Animate the stroke-dashoffset to create handwriting drawing effect
+              gsap.to(textElement, {
+                strokeDashoffset: 0,
+                duration: 2.5,
+                delay: delay,
+                ease: "power1.inOut", // Linear ease for more natural handwriting feel
+                onComplete: () => {
+                  // After drawing completes, fade in the fill and fade out the stroke
+                  gsap.to(textElement, {
+                    fillOpacity: 1,
+                    strokeOpacity: 0,
+                    duration: 0.6,
+                    ease: "power2.out"
+                  });
+                }
+              });
+            };
             
             // Make SVG visible
             gsap.set(svg, {
               opacity: 1
             });
             
-            // Set initial stroke-dasharray and stroke-dashoffset for DrawSVG effect
-            gsap.set(svgText, {
-              strokeDasharray: estimatedPathLength,
-              strokeDashoffset: estimatedPathLength,
-              fillOpacity: 0,
-              strokeOpacity: 1,
-              opacity: 1
-            });
-            
-            // Animate the stroke-dashoffset to create handwriting drawing effect
-            gsap.to(svgText, {
-              strokeDashoffset: 0,
-              duration: 3,
-              ease: "power1.inOut", // Linear ease for more natural handwriting feel
-              onComplete: () => {
-                // After drawing completes, fade in the fill and fade out the stroke
-                gsap.to(svgText, {
-                  fillOpacity: 1,
-                  strokeOpacity: 0,
-                  duration: 0.6,
-                  ease: "power2.out"
-                });
-              }
-            });
+            // Animate "software" first, then "engineer" below it
+            animateText(softwareText, 0);
+            animateText(engineerText, 0.3); // Start engineer slightly after software
           }, 300); // Small delay to ensure SVG is rendered and font is loaded
         }, [], "+=0.3");
         
@@ -457,6 +472,94 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       finalDotRef.current = null;
     };
   }, []);
+
+  // Calculate font size for "software engineer" to match "iam" width
+  useEffect(() => {
+    if (!isAnimationComplete) return;
+
+    const calculateFontSize = () => {
+      if (!iamRef.current || !softwareRef.current || !engineerRef.current) return;
+
+      // Measure the width of "iam"
+      const iamRect = iamRef.current.getBoundingClientRect();
+      const iamWidth = iamRect.width;
+
+      if (iamWidth === 0) {
+        // Retry after a short delay if not yet rendered
+        setTimeout(calculateFontSize, 100);
+        return;
+      }
+
+      // Use canvas for more accurate text measurement
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) {
+        setTimeout(calculateFontSize, 100);
+        return;
+      }
+
+      // Measure both words and use the wider one
+      context.font = '100px "Floralis Couture", cursive';
+      const softwareMetrics = context.measureText("software");
+      const engineerMetrics = context.measureText("engineer");
+      const baseWidth = Math.max(softwareMetrics.width, engineerMetrics.width);
+
+      if (baseWidth === 0) {
+        setTimeout(calculateFontSize, 100);
+        return;
+      }
+
+      // Calculate the font size - make it smaller than iam width (about 60% of iam width)
+      const ratio = (iamWidth / baseWidth) * 0.6; // 60% of iam width for smaller size
+      const targetFontSize = 100 * ratio;
+
+      // Convert to rem and create responsive clamp
+      const fontSizeInRem = targetFontSize / 16;
+      const minSize = Math.max(1.5, fontSizeInRem * 0.7);
+      const maxSize = Math.min(6, fontSizeInRem * 1.3);
+      const vwSize = (targetFontSize / window.innerWidth) * 100;
+
+      setSoftwareEngineerFontSize(`clamp(${minSize.toFixed(2)}rem, ${vwSize.toFixed(2)}vw, ${maxSize.toFixed(2)}rem)`);
+
+      // Position and rotate the text above "iam" as a sloped sign
+      if (iamRef.current && iamWrapperRef.current && softwareEngineerWrapperRef.current) {
+        const iamRect = iamRef.current.getBoundingClientRect();
+        const iamWrapperRect = iamWrapperRef.current.getBoundingClientRect();
+        
+        // Fixed rotation for consistent slope (always the same)
+        const fixedRotation = -8; // Fixed -8 degree slope
+        
+        // Calculate position relative to iam-wrapper
+        const iamCenterX = iamRect.left - iamWrapperRect.left + iamRect.width / 2;
+        const iamTop = iamRect.top - iamWrapperRect.top;
+        
+        // Position above "iam" - centered vertically to account for both lines
+        // Shift up enough so both "software" and "engineer" are visible above "iam"
+        const offsetY = -iamRect.height * 0.5; // Position above "iam"
+        
+        // Center the SVG wrapper with "iam"
+        // SVG text is centered at x="350" (center of 700px SVG), so we center the wrapper
+        const svgWidth = 700;
+        const translateX = iamCenterX - svgWidth / 2; // Center the SVG with "iam"
+        const translateY = iamTop + offsetY;
+        
+        setSoftwareEngineerTransform(
+          `translate(${translateX}px, ${translateY}px) rotate(${fixedRotation}deg)`
+        );
+      }
+    };
+
+    // Wait for elements to be rendered and font to load
+    const timeoutId = setTimeout(calculateFontSize, 300);
+    
+    // Also recalculate on resize
+    window.addEventListener("resize", calculateFontSize);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", calculateFontSize);
+    };
+  }, [isAnimationComplete]);
 
   // Animate portfolio header on mount
   useEffect(() => {
@@ -835,43 +938,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                 <p className="hero-left-paragraph">
 Turning ideas into real life products                </p>
               </div>
-              {/* Software Engineer Text - positioned above "Mariam" */}
-              <div className="software-engineer-wrapper">
-                <svg
-                  className="software-engineer-svg"
-                  width="700"
-                  height="120"
-                  style={{
-                    fontFamily: '"Floralis Couture", cursive',
-                    fontSize: "clamp(3rem, 6vw, 5rem)",
-                    overflow: "visible",
-                    pointerEvents: "none",
-                    opacity: 0
-                  }}
-                >
-                  <text
-                    ref={softwareEngineerRef}
-                    x="700"
-                    y="85"
-                    textAnchor="end"
-                    fill="#1e140b"
-                    fillOpacity="0"
-                    stroke="#1e140b"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeOpacity="0"
-                    style={{
-                      fontFamily: '"Floralis Couture", cursive',
-                      fontSize: "clamp(3rem, 6vw, 5rem)",
-                      letterSpacing: "0.05em",
-                      fontWeight: "normal"
-                    }}
-                  >
-                    software engineer
-                  </text>
-                </svg>
-              </div>
               <span className="hero-mar">
                 <span ref={mLetterRef} className="hero-letter">M</span>
                 <span ref={a1Ref} className="hero-letter">a</span>
@@ -880,7 +946,65 @@ Turning ideas into real life products                </p>
                 </span>
               </span>
               <span ref={iamWrapperRef} className="hero-iam-wrapper">
-                <span className="hero-iam">
+                {/* Software Engineer Text - positioned above "iam" as a sloped sign */}
+                <div ref={softwareEngineerWrapperRef} className="software-engineer-wrapper" style={{ transform: softwareEngineerTransform }}>
+                  <svg
+                    className="software-engineer-svg"
+                    width="700"
+                    height="250"
+                    style={{
+                      fontFamily: '"Floralis Couture", cursive',
+                      fontSize: softwareEngineerFontSize,
+                      overflow: "visible",
+                      pointerEvents: "none",
+                      opacity: 0
+                    }}
+                  >
+                    <text
+                      ref={softwareRef}
+                      x="370"
+                      y="90"
+                      textAnchor="middle"
+                      fill="#1e140b"
+                      fillOpacity="0"
+                      stroke="#1e140b"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeOpacity="0"
+                      style={{
+                        fontFamily: '"Floralis Couture", cursive',
+                        fontSize: softwareEngineerFontSize,
+                        letterSpacing: "0.05em",
+                        fontWeight: "normal"
+                      }}
+                    >
+                      software
+                    </text>
+                    <text
+                      ref={engineerRef}
+                      x="400"
+                      y="150"
+                      textAnchor="middle"
+                      fill="#1e140b"
+                      fillOpacity="0"
+                      stroke="#1e140b"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeOpacity="0"
+                      style={{
+                        fontFamily: '"Floralis Couture", cursive',
+                        fontSize: softwareEngineerFontSize,
+                        letterSpacing: "0.05em",
+                        fontWeight: "normal"
+                      }}
+                    >
+                      engineer
+                    </text>
+                  </svg>
+                </div>
+                <span ref={iamRef} className="hero-iam">
                   <span className="hero-i-wrapper">
                     <span ref={iRef} className="hero-letter hero-letter-i">
                       i
@@ -1004,29 +1128,34 @@ Turning ideas into real life products                </p>
           position: absolute;
           inset: 0;
           z-index: 200;
+          overflow: visible;
         }
 
         .software-engineer-wrapper {
-          position: relative;
-          width: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: auto;
+          height: auto;
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: flex-start;
-          margin-bottom: -0.5rem;
-          margin-right: 0;
-          padding-right: 0;
-          z-index: 999;
+          z-index: 10;
+          transform-origin: center center;
+          pointer-events: none;
+          overflow: visible;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            margin-bottom: -0.3rem;
+            /* Keep same positioning on mobile */
           }
         }
 
         .software-engineer-svg {
           width: auto;
           height: auto;
+          overflow: visible;
         }
 
         @media (max-width: 768px) {
@@ -1376,6 +1505,7 @@ Turning ideas into real life products                </p>
           display: inline-flex;
           align-items: flex-end;
           position: relative;
+          overflow: visible;
         }
 
         .hero-iam {
@@ -1384,21 +1514,27 @@ Turning ideas into real life products                </p>
           position: relative;
         }
 
-        .software-engineer-wrapper {
+        .hero-iam-wrapper {
           position: relative;
-          width: 100%;
+        }
+
+        .software-engineer-wrapper {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: auto;
+          height: auto;
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: flex-start;
-          margin-bottom: -3rem;
-          margin-right: 0;
-          padding-right: 32;
           z-index: 10;
+          transform-origin: center center;
+          pointer-events: none;
         }
 
         @media (max-width: 768px) {
           .software-engineer-wrapper {
-            margin-bottom: -0.3rem;
+            /* Keep same positioning on mobile */
           }
         }
 
