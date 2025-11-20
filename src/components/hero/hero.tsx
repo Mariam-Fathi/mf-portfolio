@@ -932,14 +932,19 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             className="hero-heading font-black text-[clamp(6rem,18vw,18rem)]"
           >
             <span className="hero-name">
-              <span className="hero-about-me">about me</span>
+            <span className="hero-about-me">Turning ideas</span>
+
               {/* Horizontal text paragraph on left of Mariam */}
-              <div className="hero-left-text">
+              {/* <div className="hero-left-text">
                 <p className="hero-left-paragraph">
 Turning ideas into real life products                </p>
-              </div>
+              </div> */}
               <span className="hero-mar">
-                <span ref={mLetterRef} className="hero-letter">M</span>
+                <span className="hero-m-wrapper">
+                  <span className="hero-about-me-up">into</span>
+                  <span ref={mLetterRef} className="hero-letter">M</span>
+                  <span className="hero-about-me-right">real life products</span>
+                </span>
                 <span ref={a1Ref} className="hero-letter">a</span>
                 <span ref={rRef} className="hero-letter hero-letter-r">
                   r
@@ -1384,7 +1389,7 @@ Turning ideas into real life products                </p>
           margin-bottom: .2rem;
           padding-bottom: 0;
           font-family: "Space Grotesk", "Inter", sans-serif;
-          font-size: clamp(0.7rem, 1vw, 0.9rem);
+          font-size: clamp(0.7rem, 1vw, 0.7rem);
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.4em;
@@ -1401,6 +1406,55 @@ Turning ideas into real life products                </p>
         @media (max-width: 768px) {
           .hero-about-me {
             margin-right: 1.5rem;
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            letter-spacing: 0.3em;
+          }
+        }
+
+        .hero-about-me-up {
+          position: absolute;
+          left: 50%;
+          top: 0;
+          transform: translateX(-50%) translateY(-100%);
+          margin-top: -0.5rem;
+          padding-bottom: 0;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.7rem, 1vw, 0.7rem);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4em;
+          color: #1e140b;
+          opacity: 0.6;
+          white-space: nowrap;
+          line-height: 1.2;
+          text-align: center;
+        }
+
+        .hero-about-me-right {
+          position: absolute;
+          left: 100%;
+          bottom: 0;
+          margin-left: -1rem;
+          // margin-bottom: .2rem;
+          padding-bottom: 0;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-size: clamp(0.7rem, 1vw, 0.7rem);
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.4em;
+          color: #1e140b;
+          opacity: 0.6;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(0deg);
+          white-space: nowrap;
+          line-height: 1.2;
+          align-self: flex-end;
+        }
+
+        @media (max-width: 768px) {
+          .hero-about-me-right {
+            margin-left: 1.5rem;
             font-size: clamp(0.6rem, 0.9vw, 0.75rem);
             letter-spacing: 0.3em;
           }
@@ -1469,6 +1523,8 @@ Turning ideas into real life products                </p>
           max-width: 300px;
           margin-right: 2rem;
           z-index: 10;
+          rotate: 90deg;
+          text-align: right;
         }
 
         .hero-left-paragraph {
@@ -1542,6 +1598,11 @@ Turning ideas into real life products                </p>
         .hero-am {
           display: inline-flex;
           align-items: flex-end;
+          position: relative;
+        }
+
+        .hero-m-wrapper {
+          display: inline-block;
           position: relative;
         }
 
