@@ -22,6 +22,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const [linkPositions, setLinkPositions] = useState<Array<{ x: number; y: number }>>([]);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
+  const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
 
   
   // Navigation sections - these will become the navbar
@@ -388,7 +389,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               gsap.to(a2mRef.current, {
                 color: "#DA451F",
                 duration: 0.3,
-                ease: "power2.out"
+                ease: "power2.out",
+                onComplete: function() {
+                  // Color is handled by GSAP
+                }
               });
             }
           }
@@ -416,7 +420,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   gsap.to(mMariamRef.current, {
                     color: "#DA451F",
                     duration: 0.3,
-                    ease: "power2.out"
+                    ease: "power2.out",
+                    onComplete: function() {
+                      // Color is handled by GSAP
+                    }
                   });
                 }
               }
@@ -485,7 +492,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                   gsap.to(iRef.current, {
                     color: "#DA451F",
                     duration: 0.3,
-                    ease: "power2.out"
+                    ease: "power2.out",
+                    onComplete: function() {
+                      // Color is handled by GSAP
+                    }
                   });
                 }
               }
@@ -609,10 +619,271 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     };
   }, []);
 
+  // Animate portfolio header on mount
+  useEffect(() => {
+    if (!portfolioHeaderRef.current) return;
+
+    let tl: gsap.core.Timeline | null = null;
+    let oElement: HTMLElement | null = null;
+    let lineElement: HTMLElement | null = null;
+    let animationComplete = false;
+    let iOriginalPosition = 0;
+
+    // Helper function to safely query elements with retry logic
+    const getElements = (retries = 3, delay = 100): Promise<{
+      fullTextElement: HTMLElement;
+      portfolElement: HTMLElement;
+      iElement: HTMLElement;
+      oElement: HTMLElement;
+      lineElement: HTMLElement;
+    } | null> => {
+      return new Promise((resolve) => {
+        const attempt = (attemptNumber: number) => {
+          const fullTextEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-full");
+          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol");
+          const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i");
+          const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o");
+          const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line");
+
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+            resolve({
+              fullTextElement: fullTextEl as HTMLElement,
+              portfolElement: portfolEl as HTMLElement,
+              iElement: iEl as HTMLElement,
+              oElement: oEl as HTMLElement,
+              lineElement: lineEl as HTMLElement,
+            });
+          } else if (attemptNumber < retries) {
+            setTimeout(() => attempt(attemptNumber + 1), delay);
+          } else {
+            console.warn("Portfolio header elements not found after retries");
+            resolve(null);
+          }
+        };
+        attempt(0);
+      });
+    };
+
+    // Calculate responsive end position for O
+    const calculateEndPosition = (): number => {
+      const container = portfolioHeaderRef.current;
+      if (!container) return 0;
+      
+      const containerRect = container.getBoundingClientRect();
+      const containerWidth = containerRect.width;
+      
+      // Calculate end position within the container (frame width)
+      // Leave some padding from the right edge (around 1-2rem)
+      const padding = window.innerWidth < 768 ? 16 : 32;
+      
+      // Position O at the right edge of the container minus padding
+      // This ensures O stays within the frame bounds
+      return containerWidth - padding;
+    };
+
+    getElements().then((elements) => {
+      if (!elements) return;
+
+      const {
+        fullTextElement,
+        portfolElement,
+        iElement,
+        oElement: oEl,
+        lineElement: lineEl,
+      } = elements;
+
+      oElement = oEl; // Store for resize handler
+      lineElement = lineEl; // Store for resize handler
+
+      // Create smooth motion graphics timeline
+      tl = gsap.timeline({ delay: 0.8 });
+
+      // Step 1: Hide full text and show split text with O in its original position
+      let iWidth = 0; // Store I width for later use
+      
+      tl.to(fullTextElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          fullTextElement.style.display = "none";
+          portfolElement.style.display = "inline";
+          iElement.style.display = "inline";
+          oEl.style.display = "inline";
+          lineEl.style.display = "none";
+          
+          // Set initial positions for animation
+          gsap.set([portfolElement, iElement, oEl], {
+            display: "inline",
+            opacity: 1,
+          });
+          gsap.set(lineEl, {
+            display: "none",
+            width: 0,
+            transformOrigin: "left center",
+          });
+          gsap.set(oEl, { position: "static", x: 0 });
+          
+          // Measure I width after it's displayed (force reflow)
+          void iElement.offsetWidth;
+          const iRect = iElement.getBoundingClientRect();
+          iWidth = iRect.width;
+        },
+      });
+
+      // Step 2: Animate I rotating 90 degrees while simultaneously pushing O
+      // The O should shift by the width of I to simulate the push effect
+      let oStartX = 0; // Store O's starting position relative to container
+      tl.call(() => {
+        // Get O's starting position before any transforms
+        const oRect = oEl.getBoundingClientRect();
+        const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+        if (containerRect) {
+          oStartX = oRect.left - containerRect.left;
+        }
+      });
+      
+      tl.to(iElement, {
+        rotation: 90,
+        duration: 0.8,
+        ease: "power2.inOut",
+        transformOrigin: "center center",
+        onStart: () => {
+          // Simultaneously move O by the width of I (creating push effect)
+          if (iWidth > 0) {
+            gsap.to(oEl, {
+              x: iWidth,
+              duration: 0.8,
+              ease: "power2.inOut",
+            });
+          }
+        },
+      }, "-=0.2");
+
+      // Step 4: Replace I with line
+      // Store the original position of I before rotation for line positioning
+      tl.to(iElement, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.in",
+        onStart: () => {
+          // Get the original position of I relative to container
+          const iRect = iElement.getBoundingClientRect();
+          const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+          if (containerRect) {
+            iOriginalPosition = iRect.left - containerRect.left;
+          }
+        },
+        onComplete: () => {
+          iElement.style.display = "none";
+          lineEl.style.display = "block";
+          
+          // Position line to start from where I originally was (relative to container)
+          gsap.set(lineEl, {
+            opacity: 1,
+            x: iOriginalPosition,
+            width: 0,
+            transformOrigin: "left center",
+          });
+        },
+      }, "-=0.3");
+
+      // Step 5: Expand line while moving O to the end position
+      tl.call(() => {
+        // Wait a frame to ensure all previous animations have applied their transforms
+        requestAnimationFrame(() => {
+          const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+          if (!containerRect) return;
+          
+          // Get O's current width and position after being pushed by I
+          const oRect = oEl.getBoundingClientRect();
+          const oWidth = oRect.width;
+          
+          // Get O's current absolute position after I push (relative to container)
+          const oCurrentAbsoluteX = oRect.left - containerRect.left;
+          
+          // Calculate absolute end position within container (with padding from right edge)
+          // This is where O's CENTER should be positioned
+          const padding = window.innerWidth < 768 ? 16 : 32;
+          const absoluteEndPosition = containerRect.width - padding;
+          
+          // Calculate where O's LEFT EDGE should be (center at endPosition, so left edge is center - half width)
+          const oFinalLeftEdge = absoluteEndPosition - (oWidth / 2);
+          
+          // Calculate gap between L and I to match the gap before O
+          const portfolRect = portfolElement.getBoundingClientRect();
+          const lEndPosition = portfolRect.right - containerRect.left;
+          
+          // Gap is the space between L's end and I's start
+          const gapBeforeI = iOriginalPosition - lEndPosition;
+          
+          // Ensure gap is positive
+          const gap = Math.max(0, gapBeforeI);
+          
+          // Line should end BEFORE O's left edge with the same gap as between L and I
+          // Line ends at: O's left edge position minus the gap
+          const lineEndPosition = oFinalLeftEdge - gap - 10;
+          
+          // Calculate O's final x transform value
+          // GSAP x is always relative to element's initial position (oStartX)
+          // To position O's left edge at oFinalLeftEdge, we need: x = oFinalLeftEdge - oStartX
+          const oFinalX = oFinalLeftEdge - oStartX + 40;
+          
+          // Calculate final line width: from I's original position to line end position (before O)
+          // This ensures the line stops before O with the gap
+          const lineFinalWidth = lineEndPosition - iOriginalPosition;
+          const maxWidth = containerRect.width - iOriginalPosition;
+          
+          // Ensure line width is positive and doesn't exceed container
+          const finalLineWidth = Math.max(0, Math.min(lineFinalWidth, maxWidth));
+          
+          // Animate O movement and line expansion simultaneously
+          gsap.to(oEl, {
+            x: oFinalX,
+            duration: 1.2,
+            ease: "power2.out",
+            onComplete: () => {
+              animationComplete = true;
+            },
+          });
+          
+          gsap.to(lineEl, {
+            width: finalLineWidth,
+            duration: 1.2,
+            ease: "power2.out",
+          });
+        });
+      });
+
+      // Handle window resize to recalculate positions
+      const handleResize = () => {
+        if (animationComplete && oElement && lineElement) {
+          const newEndPosition = calculateEndPosition();
+          gsap.set(oElement, { x: newEndPosition });
+          
+          // Also update line width - use stored iOriginalPosition or get from line's x
+          const lineStartX = iOriginalPosition || (gsap.getProperty(lineElement, "x") as number);
+          const lineFinalWidth = newEndPosition - lineStartX;
+          gsap.set(lineElement, { width: Math.max(0, lineFinalWidth) });
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    });
+
+    return () => {
+      if (tl) tl.kill();
+    };
+  }, []);
+
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#0C5446] relative overflow-hidden"
+      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#1e140b] relative overflow-hidden"
       style={{
         backgroundColor: "#F5ECE1",
       }}
@@ -645,35 +916,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       </svg>
 
       <div ref={heroCoverRef} className="hero-cover">
-        {/* Navigation Panels - randomly positioned */}
-        {coverSections.map((section, index) => {
-          const position = linkPositions[index] || { x: 0, y: 0 };
-          return (
-            <div
-              key={section.id}
-              role="listitem"
-              className="hero-panel collapsed"
-              style={{ 
-                backgroundColor: section.badgeColor,
-                position: 'absolute',
-                left: `${position.x}px`,
-                top: `${position.y}px`,
-                transform: 'translate(-50%, -50%)'
-              }}
-              onClick={() => handleNavigate(section.id)}
-              tabIndex={0}
-            >
-              <div className="hero-panel-inner">
-                <span className="hero-panel-text horizontal" style={{ color: section.badgeText }}>
-                  {section.label}
-                </span>
-                <span className="hero-panel-arrow" aria-hidden="true" style={{ color: section.badgeText }}>
-                  <ArrowUpRight size={27} strokeWidth={2} />
-                </span>
-              </div>
-            </div>
-          );
-        })}
+   
 
         {/* Mariam at Bottom */}
         <div className="hero-heading-wrapper">
@@ -753,11 +996,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {/* Yellow Frame with Repeating Text - Marquee Style */}
+      <div className="hero-yellow-frame">
+        {/* Top marquee - Portfolio Header only */}
+        <div className="hero-frame-marquee hero-frame-marquee-top">
+          {/* Portfolio Header */}
+          <div className="hero-cover-header">
+            <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
+              <span className="hero-cover-title-full" aria-label="Portfolio">PORTFOLIO</span>
+              <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
+              <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
+              <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
+              <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+        {/* Right marquee */}
+        <div className="hero-frame-marquee hero-frame-marquee-right">
+          <div className="hero-frame-marquee-content hero-frame-marquee-content-vertical">
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+          </div>
+        </div>
+        {/* Bottom marquee */}
+        <div className="hero-frame-marquee hero-frame-marquee-bottom">
+          <div className="hero-frame-marquee-content">
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+          </div>
+        </div>
+        {/* Left marquee */}
+        <div className="hero-frame-marquee hero-frame-marquee-left">
+          <div className="hero-frame-marquee-content hero-frame-marquee-content-vertical">
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+            <span className="hero-frame-marquee-text">New Episodes Every Thursday New Ep</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Marquee below Mariam - outside hero-cover to overlay full width */}
+      <div className="hero-marquee">
+        <div className="hero-marquee-content">
+          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
+          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
+          <span className="hero-marquee-text">Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll • Scroll</span>
+        </div>
+      </div>
+
       <style jsx>{`
         .hero-heading {
-          font-family: "Momo Trust Display", sans-serif;
+          font-family: "Space Grotesk", "Inter", sans-serif;
           letter-spacing: normal;
-          text-align: right;
+          text-align: center;
         }
 
         .hero-cover {
@@ -811,12 +1104,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
         .hero-heading-wrapper {
           display: flex;
-          justify-content: flex-end;
-          align-items: flex-end;
+          justify-content: center;
+          align-items: center;
           width: 100%;
-          margin-top: auto; /* push to bottom */
-          padding: 1rem;
-          position: relative;
+          height: 100%;
+          padding: 100px;
+          position: absolute;
+          inset: 0;
+          z-index: 200;
         }
 
         .software-engineer-wrapper {
@@ -840,8 +1135,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         @media (max-width: 768px) {
           .hero-heading-wrapper {
             justify-content: center;
-            padding: 0.5rem;
+            align-items: center;
+            padding: 100px;
             width: 100%;
+            height: 100%;
             overflow: hidden;
           }
 
@@ -902,6 +1199,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           pointer-events: none;
         }
 
+        @media (max-width: 768px) {
+          .hero-panel::before {
+            border-radius: 1.5rem;
+          }
+        }
+
         /* Backdrop blur and distortion layer */
         .hero-panel::after {
           content: '';
@@ -915,6 +1218,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           -webkit-filter: url(#glass-distortion);
           isolation: isolate;
           pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+          .hero-panel::after {
+            border-radius: 1.5rem;
+          }
         }
 
         .hero-panel-inner {
@@ -972,7 +1281,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           writing-mode: horizontal-tb;
           transform: none;
           opacity: 1;
-          font-size: clamp(0.875rem, 1.3vw, 1.3rem);
+          font-size: clamp(0.875rem, 2vw, 2rem);
         }
 
         @media (max-width: 768px) {
@@ -1002,6 +1311,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
 
           .hero-heading-wrapper {
             justify-content: center;
+            align-items: center;
           }
 
           .hero-heading {
@@ -1080,6 +1390,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           display: inline-block;
           position: relative;
           transform-origin: bottom center;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+        }
+        
+        /* When GSAP sets color, update the color */
+        .hero-letter[style*="color"] {
+          color: currentColor;
         }
 
         .hero-letter-r {
@@ -1108,6 +1425,260 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         /* Final dot specific style */
         :global(.final-i-dot) {
           background-color: #DA451F;
+        }
+
+        .hero-marquee {
+          width: 100vw;
+          height: 100px;
+          background-color: #FFD7DF;
+          overflow: hidden;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          z-index: 100;
+          display: flex;
+          align-items: center;
+          padding-right: 2rem;
+        }
+
+        .hero-marquee-content {
+          display: flex;
+          width: fit-content;
+          animation: marquee-scroll 30s linear infinite;
+          white-space: nowrap;
+          align-items: center;
+          will-change: transform;
+          gap: 4rem;
+        }
+
+        .hero-marquee-text {
+          display: inline-block;
+          padding: 0 2rem;
+          padding-right: 6rem;
+          color: #1A5632;
+          font-size: clamp(1.5rem, 3vw, 2.5rem);
+          font-weight: 700;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          letter-spacing: 0.1em;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          vertical-align: baseline;
+          flex-shrink: 0;
+        }
+
+        @keyframes marquee-scroll {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-33.333%);
+          }
+        }
+
+        .hero-yellow-frame {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 200;
+          overflow: hidden;
+          border-radius: 0;
+          margin: 0;
+          padding: 0;
+        }
+
+        .hero-frame-marquee {
+          position: absolute;
+          background-color: #FFE500;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          margin: 0;
+          padding: 0;
+        }
+
+        .hero-frame-marquee-top {
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 100px;
+          border-radius: 0;
+          padding-right: 2rem;
+          position: relative;
+        }
+        
+        .hero-frame-marquee-top .hero-frame-marquee-content {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+        }
+
+        .hero-frame-marquee-bottom {
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 100px;
+          border-radius: 0;
+          padding-right: 2rem;
+        }
+
+        .hero-frame-marquee-right {
+          right: 0;
+          top: 100px;
+          bottom: 100px;
+          width: 100px;
+          border-radius: 0;
+          justify-content: center;
+          padding-bottom: 2rem;
+        }
+
+        .hero-frame-marquee-left {
+          left: 0;
+          top: 100px;
+          bottom: 100px;
+          width: 100px;
+          border-radius: 0;
+          justify-content: center;
+          padding-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+          .hero-frame-marquee-top,
+          .hero-frame-marquee-bottom {
+            height: 100px;
+            border-radius: 0;
+          }
+          .hero-frame-marquee-right {
+            top: 100px;
+            bottom: 100px;
+            width: 100px;
+          }
+          .hero-frame-marquee-left {
+            top: 100px;
+            bottom: 100px;
+            width: 100px;
+          }
+        }
+
+        .hero-frame-marquee-content {
+          display: flex;
+          width: fit-content;
+          animation: frame-marquee-scroll-horizontal 30s linear infinite;
+          white-space: nowrap;
+          align-items: center;
+          will-change: transform;
+          gap: 4rem;
+        }
+
+        .hero-frame-marquee-content-vertical {
+          flex-direction: column;
+          height: fit-content;
+          animation: frame-marquee-scroll-vertical 30s linear infinite;
+        }
+
+        .hero-frame-marquee-text {
+          display: inline-block;
+          padding: 0 2rem;
+          padding-right: 6rem;
+          color: #1A5632;
+          font-size: clamp(1.5rem, 3vw, 2.5rem);
+          font-weight: 700;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          letter-spacing: 0.1em;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          vertical-align: baseline;
+          flex-shrink: 0;
+          writing-mode: horizontal-tb;
+        }
+
+        .hero-frame-marquee-content-vertical .hero-frame-marquee-text {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          padding: 2rem 0;
+          padding-bottom: 6rem;
+        }
+
+        @keyframes frame-marquee-scroll-horizontal {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-33.333%);
+          }
+        }
+
+        @keyframes frame-marquee-scroll-vertical {
+          0% {
+            transform: translateY(0);
+          }
+          100% {
+            transform: translateY(-33.333%);
+          }
+        }
+
+        /* Portfolio Header in Top Frame */
+        .hero-frame-marquee-top .hero-cover-header {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: center;
+          gap: 0.5rem;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          width: 100%;
+          padding: 0 1rem;
+          margin: 0;
+          z-index: 10;
+          pointer-events: auto;
+        }
+
+        .hero-cover-header-line {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+          gap: 0;
+          position: relative;
+        }
+
+        .hero-cover-title-full,
+        .hero-cover-title-portfol,
+        .hero-cover-title-i,
+        .hero-cover-title-o {
+          font-size: clamp(3.5rem, 10vw, 6rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #1e140b;
+          font-family: "Space Grotesk", "Inter", sans-serif;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          height: 100px;
+        }
+
+        .hero-cover-title-i {
+          display: inline;
+          transform-origin: center center;
+          will-change: transform, opacity;
+        }
+
+        .hero-cover-title-o {
+          will-change: transform;
+        }
+
+        .hero-cover-title-line {
+          will-change: width, transform;
+          transform-origin: left center;
+          position: absolute;
+          height: 1px;
+          background-color: #1e140b;
+          opacity: 0.4;
+          top: 50%;
+          transform: translateY(-50%);
         }
       `}</style>
     </section>
