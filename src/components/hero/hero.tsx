@@ -720,7 +720,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     };
   }, []);
 
-  // Position navigation in the center of the line between PORTFOL and O
+  // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
     const positionNavigation = () => {
       if (!navRef.current || !portfolioHeaderRef.current || !isPortfolioAnimationComplete) return;
@@ -740,26 +740,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       const container = portfolioHeaderRef.current;
       const containerRect = container.getBoundingClientRect();
       
-      // Get PORTFOL's right edge position relative to container
-      const portfolRect = portfolElement.getBoundingClientRect();
-      const portfolRightRelative = portfolRect.right - containerRect.left;
-      
-      // Get O's left edge position relative to container (after animation)
-      const oRect = oElement.getBoundingClientRect();
-      const oLeftRelative = oRect.left - containerRect.left;
-      
-      // Calculate the center point between PORTFOL's right edge and O's left edge
-      const centerX = (portfolRightRelative + oLeftRelative) / 2;
+      // Get line's position and width to find where it ends
+      const lineRect = lineElement.getBoundingClientRect();
+      const lineX = lineRect.left - containerRect.left;
+      const lineWidth = lineRect.width;
+      const lineEndX = lineX + lineWidth; // End of the line
       
       // Line is at 50% of container height, position navigation vertically centered on the line
       const lineY = containerRect.height * 0.5 - 24; // 50% of container
       
-      // Position navigation at the center point, vertically aligned with the line
-      // We need to account for the navigation's own width to truly center it
+      // Position navigation at the end of the line, aligned to the right
       if (navRef.current) {
         navRef.current.style.top = `${lineY}px`;
-        navRef.current.style.left = `${centerX}px`;
-        navRef.current.style.transform = 'translate(-50%, -50%)'; // Center the navigation element itself
+        navRef.current.style.left = `${lineEndX}px`;
+        navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
         // Fade in after positioning
         navRef.current.style.opacity = '1';
       }
@@ -771,8 +765,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         navRef.current.style.opacity = '0';
         // Set initial position off-screen or at a safe position
         navRef.current.style.top = '50%';
-        navRef.current.style.left = '50%';
-        navRef.current.style.transform = 'translate(-50%, -50%)';
+        navRef.current.style.left = '100%';
+        navRef.current.style.transform = 'translate(-100%, -50%)';
       }
       
       // Position immediately on next frame to avoid layout shift
