@@ -26,6 +26,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const navRef = useRef<HTMLElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
+  const [isDotAnimationComplete, setIsDotAnimationComplete] = useState(false);
   const [softwareEngineerFontSize, setSoftwareEngineerFontSize] = useState<string>("clamp(3rem, 6vw, 5rem)");
   const [softwareEngineerTransform, setSoftwareEngineerTransform] = useState<string>("");
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
@@ -231,13 +232,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const m2ScreenX = m2Rect.left + m2Rect.width / 2;
     const m2ScreenY = m2Rect.top + m2Rect.height / 2;
     
-    // Create dot element
-    const originalDot = document.createElement("div");
-    originalDot.className = "original-i-dot-svg";
-    
-    // Append to body to ensure it's above all other elements
-    document.body.appendChild(originalDot);
-    
     const dotSize = Math.max(iRect.width * 0.25, 35);
     
     // Debug: Log positions to verify they're reasonable
@@ -250,277 +244,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       dotSize
     });
     
-    // Calculate initial position
-    const initialX = iScreenX - (dotSize / 2);
-    const initialY = iScreenY - (dotSize / 2);
-    
-    // Set initial styles directly on the element to ensure visibility
-    originalDot.style.width = `${dotSize}px`;
-    originalDot.style.height = `${dotSize}px`;
-    originalDot.style.borderRadius = "50%";
-    originalDot.style.backgroundColor = "#C92924";
-    originalDot.style.position = "fixed";
-    originalDot.style.zIndex = "999999";
-    originalDot.style.opacity = "1";
-    originalDot.style.left = "0px";
-    originalDot.style.top = "0px";
-    originalDot.style.display = "block";
-    originalDot.style.visibility = "visible";
-    originalDot.style.pointerEvents = "none";
-    originalDot.style.transformOrigin = "center center";
-    originalDot.style.willChange = "transform, opacity";
-    originalDot.style.border = "none";
-    originalDot.style.boxShadow = "none";
-    originalDot.style.setProperty('z-index', '999999', 'important');
-    originalDot.style.setProperty('opacity', '1', 'important');
-    originalDot.style.setProperty('visibility', 'visible', 'important');
-    originalDot.style.setProperty('display', 'block', 'important');
-    
-    // Force a reflow to ensure element is in DOM
-    void originalDot.offsetHeight;
-    
-    // Use GSAP to set initial position IMMEDIATELY - this is critical
-    // Set position using GSAP transforms (x/y) which work with fixed positioning
-    gsap.set(originalDot, {
-      x: initialX,
-      y: initialY,
-      rotation: 0,
-      scale: 1,
-      opacity: 1,
-      immediateRender: true,
-      force3D: true,
-      overwrite: "auto"
-    });
-    
-    // Verify the position is valid (not NaN or Infinity)
-    if (isNaN(initialX) || isNaN(initialY) || !isFinite(initialX) || !isFinite(initialY)) {
-      console.error('Invalid dot position:', { initialX, initialY, iScreenX, iScreenY, dotSize });
-      // Fallback to center of screen if position is invalid
-      gsap.set(originalDot, {
-        x: window.innerWidth / 2 - dotSize / 2,
-        y: window.innerHeight / 2 - dotSize / 2,
-        immediateRender: true
-      });
-    }
-    
-    // Force another reflow after GSAP set to ensure it's applied
-    void originalDot.offsetHeight;
-    
-    // Verify the dot is actually positioned correctly
-    const computedStyle = window.getComputedStyle(originalDot);
-    const transform = computedStyle.transform;
-    
-    // Double-check the element is visible - force it with !important equivalent
-    originalDot.setAttribute('style', 
-      originalDot.getAttribute('style') + 
-      '; opacity: 1 !important; visibility: visible !important; display: block !important;'
-    );
-    
-    // Also set directly
-    originalDot.style.setProperty('opacity', '1', 'important');
-    originalDot.style.setProperty('visibility', 'visible', 'important');
-    originalDot.style.setProperty('display', 'block', 'important');
-    originalDot.style.setProperty('z-index', '999999', 'important');
-    
-    // One more force reflow to ensure everything is applied
-    void originalDot.offsetHeight;
-    
-    // Verify dot is actually in DOM and visible
-    const rect = originalDot.getBoundingClientRect();
-    const isInViewport = rect.width > 0 && rect.height > 0;
-    
-    // If dot is not visible, force it to be visible
-    if (!isInViewport || originalDot.offsetParent === null) {
-      originalDot.style.setProperty('opacity', '1', 'important');
-      originalDot.style.setProperty('visibility', 'visible', 'important');
-      originalDot.style.setProperty('display', 'block', 'important');
-      originalDot.style.setProperty('z-index', '999999', 'important');
-      originalDot.style.setProperty('position', 'fixed', 'important');
-    }
-    
-    // Create timeline - it should start with dot already visible
+    // Create timeline - original dot removed, only using final dot
     const dotTimeline = gsap.timeline({ immediateRender: true, paused: true });
-    
-    // First, ensure dot is visible and positioned BEFORE any animation
-    dotTimeline.set(originalDot, {
-      opacity: 1,
-      display: "block",
-      visibility: "visible",
-      x: initialX,
-      y: initialY,
-      scale: 1,
-      scaleX: 1,
-      scaleY: 1,
-      rotation: 0,
-      backgroundColor: "#C92924",
-      zIndex: 999999,
-      immediateRender: true
-    }, 0);
-    
-    // Dot is already visible from initial setup, no need for extra callbacks
-    
-    // Change "i" to "ı" (dotless i) - at same time
-    dotTimeline.set(svgIRefEl, {
-      textContent: "ı",
-    }, 0);
-    
-    // Wiggle animation on the "i" position - smooth elastic wiggle with bounce back
-    dotTimeline.to(originalDot, {
-      keyframes: [
-        { x: initialX - 5, y: initialY, duration: 0.1, ease: "power2.out", force3D: true },
-        { x: initialX, y: initialY, duration: 0.1, ease: "elastic.out(1, 0.6)", force3D: true }
-      ]
-    }, 0.1);
-    
-    // STUCK JUMP from "i" to "a"
-    dotTimeline.to(originalDot, {
-      keyframes: [
-        { 
-          // Build up energy for the real jump - compression
-          scaleX: 1.2,
-          scaleY: 0.7,
-          duration: 0.2,
-          ease: "power2.out",
-          force3D: true
-        },
-        { 
-          // EXPLOSIVE BREAK FREE JUMP!
-          y: iCenterY - 80, // Jump up from center of "i"
-          scaleY: 0.9,
-          scaleX: 1.1,
-          duration: 0.7,
-          ease: "power4.out",
-          force3D: true
-        },
-        { 
-          // Arc smoothly to "a" position
-          x: a2ScreenX - (dotSize / 2),
-          y: a2ScreenY - 50,
-          scaleY: 0.75,
-          scaleX: 1,
-          backgroundColor: "#C92924",
-          duration: 0.4,
-          ease: "sine.inOut",
-          force3D: true
-        }
-      ]
-    });
-    
-    dotTimeline.to(svgIRefEl, {
-      fill: "#C92924",
-      duration: 0.4,
-      ease: "power2.out"
-    }, "-=0.7");
-    
-    // Continue with the "a" landing animation
-    dotTimeline.to(originalDot, { 
-      y: a2ScreenY - 70, 
-      duration: 0.2, 
-      ease: "sine.inOut",
-      force3D: true
-    });
-    
-    dotTimeline.to(originalDot, {
-      y: a2ScreenY + 10,
-      scaleY: 1.2,
-      backgroundColor: "#C92924",
-      duration: 0.25,
-      ease: "power2.in",
-      force3D: true
-    });
-    
-    dotTimeline.to(originalDot, {
-      y: a2ScreenY,
-      scaleY: 0.8,
-      backgroundColor: "#C92924",
-      duration: 0.15,
-      ease: "bounce.out",
-      force3D: true,
-      onComplete: () => {
-        if (svgA2RefEl) {
-          gsap.to(svgA2RefEl, {
-            fill: "#C92924",
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        }
-      }
-    });
-    
-    dotTimeline.to(originalDot, { 
-      scaleY: 1,
-      duration: 0.1,
-      force3D: true
-    });
-    
-    // Continue with the rest of the animation to "m"
-    dotTimeline.to(originalDot, {
-      keyframes: [
-        { x: m2ScreenX - (dotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#C92924", duration: 0.3, ease: "power2.out", force3D: true },
-        { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut", force3D: true },
-        { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#C92924", duration: 0.25, ease: "power2.in", force3D: true },
-        {
-          y: m2ScreenY,
-          scaleY: 0.8,
-          backgroundColor: "#C92924",
-          duration: 0.15,
-          ease: "bounce.out",
-          force3D: true,
-          onComplete: () => {
-            if (svgM2RefEl) {
-              gsap.to(svgM2RefEl, {
-                fill: "#C92924",
-                duration: 0.3,
-                ease: "power2.out",
-              });
-            }
-          }
-        },
-        { scaleY: 1, duration: 0.1, force3D: true }
-      ]
-    }, "+=0.3");
-    
-    dotTimeline.to(originalDot, {
-      keyframes: [
-        { 
-          backgroundColor: "#C92924", 
-          y: m2ScreenY - 40, 
-          scaleY: 0.75, 
-          duration: 0.2, 
-          ease: "power2.out",
-          force3D: true,
-          onStart: () => {
-            originalDot.style.border = "2px solid #C92924";
-            originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
-          }
-        },
-        { 
-          y: m2ScreenY + 20, 
-          scaleY: 0.9, 
-          duration: 0.15, 
-          ease: "power2.in",
-          force3D: true 
-        },
-        { 
-          y: window.innerHeight * 0.7, 
-          scaleY: 1.1, 
-          opacity: 0.7, 
-          duration: 0.3, 
-          ease: "power2.inOut",
-          force3D: true 
-        },
-        { 
-          y: window.innerHeight + 100, 
-          scaleY: 1.2, 
-          opacity: 0, 
-          duration: 0.3, 
-          ease: "power2.in",
-          force3D: true 
-        }
-      ]
-    }, "+=0.3");
-    
-    dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
     
     // Create final dot that lands on "i"
     const finalDot = document.createElement("div");
@@ -575,15 +300,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     const finalDotTimeline = gsap.timeline({ immediateRender: true });
     
-    // EXACT SAME MOTION as the original dot's first movement on "i" - EXACT MATCH
-    finalDotTimeline.to(finalDot, {
-      keyframes: [
-        { x: iScreenX - (finalDotSize / 2) - 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
-        { x: iScreenX - (finalDotSize / 2) + 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
-        { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.2, ease: "power1.inOut" }
-      ],
-      immediateRender: true
-    });
+    // Fall from top to "ı" position (already dotless from start)
+    const finalInitialX = iScreenX - (finalDotSize / 2);
+    const finalInitialY = iScreenY - (finalDotSize / 2);
     
     finalDotTimeline.to(finalDot, {
       keyframes: [
@@ -592,7 +311,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           backgroundColor: "#C92924", 
           opacity: 1, 
           duration: 0.4, 
-          ease: "power2.in"
+          ease: "power2.in",
+          onComplete: () => {
+            // Color "i" when dot first hits
+            if (svgIRefEl) {
+              gsap.to(svgIRefEl, {
+                fill: "#C92924",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            }
+          }
         },
         { 
           y: iScreenY + 30, 
@@ -608,14 +337,187 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           backgroundColor: "#C92924",
           opacity: 1,
           duration: 0.2, 
+          ease: "power2.out"
+        }
+      ],
+      immediateRender: true
+    });
+    
+    // STUCK JUMP from "i" to "a"
+    finalDotTimeline.to(finalDot, {
+      keyframes: [
+        { 
+          // Build up energy for the real jump - compression
+          y: iScreenY, // Keep at current position during compression
+          scaleX: 1.2,
+          scaleY: 0.7,
+          duration: 0.2,
           ease: "power2.out",
+          force3D: true
+        },
+        { 
+          // EXPLOSIVE BREAK FREE JUMP!
+          y: iScreenY - 80, // Jump up from current position (iScreenY)
+          scaleY: 0.9,
+          scaleX: 1.1,
+          duration: 0.7,
+          ease: "power4.out",
+          force3D: true
+        },
+        { 
+          // Arc smoothly to "a" position
+          x: a2ScreenX - (finalDotSize / 2),
+          y: a2ScreenY - 50,
+          scaleY: 0.75,
+          scaleX: 1,
+          backgroundColor: "#C92924",
+          duration: 0.4,
+          ease: "sine.inOut",
+          force3D: true
+        }
+      ]
+    });
+    
+    // Continue with the "a" landing animation
+    finalDotTimeline.to(finalDot, { 
+      y: a2ScreenY - 70, 
+      duration: 0.2, 
+      ease: "sine.inOut",
+      force3D: true
+    });
+    
+    finalDotTimeline.to(finalDot, {
+      y: a2ScreenY + 10,
+      scaleY: 1.2,
+      backgroundColor: "#C92924",
+      opacity: 1,
+      duration: 0.25,
+      ease: "power2.in",
+      force3D: true
+    });
+    
+    finalDotTimeline.to(finalDot, {
+      y: a2ScreenY,
+      scaleY: 0.8,
+      backgroundColor: "#C92924",
+      opacity: 1,
+      duration: 0.15,
+      ease: "bounce.out",
+      force3D: true,
+      onComplete: () => {
+        if (svgA2RefEl) {
+          gsap.to(svgA2RefEl, {
+            fill: "#C92924",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
+      }
+    });
+    
+    finalDotTimeline.to(finalDot, { 
+      scaleY: 1,
+      duration: 0.1,
+      force3D: true
+    });
+    
+    // Continue with the rest of the animation to "m"
+    finalDotTimeline.to(finalDot, {
+      keyframes: [
+        { x: m2ScreenX - (finalDotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#C92924", duration: 0.3, ease: "power2.out", force3D: true },
+        { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut", force3D: true },
+        { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#C92924", duration: 0.25, ease: "power2.in", force3D: true },
+        {
+          y: m2ScreenY,
+          scaleY: 0.8,
+          backgroundColor: "#C92924",
+          opacity: 1,
+          duration: 0.15,
+          ease: "bounce.out",
+          force3D: true,
           onComplete: () => {
-            // Ensure final dot is visible before color change
-            finalDot.style.setProperty('opacity', '1', 'important');
-            finalDot.style.setProperty('visibility', 'visible', 'important');
-            finalDot.style.setProperty('display', 'block', 'important');
-            
-            // Land permanently on "i" - change the "i" color and make it stay
+            if (svgM2RefEl) {
+              gsap.to(svgM2RefEl, {
+                fill: "#C92924",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            }
+          }
+        },
+        { scaleY: 1, duration: 0.1, force3D: true }
+      ]
+    }, "+=0.3");
+    
+    // Fall to bottom after landing on "m" - keep x position, just fall down
+    finalDotTimeline.to(finalDot, {
+      y: window.innerHeight + 100, 
+      scaleY: 1.1, 
+      opacity: 1,
+      duration: 0.5, 
+      ease: "power2.in",
+      force3D: true,
+      onComplete: () => {
+        // Ensure dot stays visible when off screen
+        if (finalDot) {
+          finalDot.style.setProperty('opacity', '1', 'important');
+          finalDot.style.setProperty('visibility', 'visible', 'important');
+          finalDot.style.setProperty('display', 'block', 'important');
+        }
+      }
+    }, "+=0.3");
+    
+    // Move to top and position at "i" x coordinate (return to start position)
+    finalDotTimeline.to(finalDot, {
+      x: iScreenX - (finalDotSize / 2),
+      y: -50,
+      opacity: 1,
+      scale: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 0.1,
+      ease: "none",
+      force3D: true,
+      onComplete: () => {
+        // Ensure dot is visible at top
+        if (finalDot) {
+          finalDot.style.setProperty('opacity', '1', 'important');
+          finalDot.style.setProperty('visibility', 'visible', 'important');
+          finalDot.style.setProperty('display', 'block', 'important');
+        }
+      }
+    });
+    
+    // Fall from top on "i" (same as initial fall animation)
+    finalDotTimeline.to(finalDot, {
+      keyframes: [
+        { 
+          y: iScreenY + 60, 
+          backgroundColor: "#C92924", 
+          opacity: 1, 
+          duration: 0.4, 
+          ease: "power2.in",
+          force3D: true
+        },
+        { 
+          y: iScreenY + 30, 
+          scaleY: 0.7, 
+          backgroundColor: "#C92924", 
+          opacity: 1, 
+          duration: 0.15, 
+          ease: "power2.out",
+          force3D: true
+        },
+        { 
+          y: iScreenY, 
+          scaleY: 1, 
+          backgroundColor: "#C92924",
+          opacity: 1,
+          duration: 0.2, 
+          ease: "power2.out",
+          force3D: true,
+          onComplete: () => {
+            // Change "i" color at the last fall
             if (svgIRefEl) {
               gsap.to(svgIRefEl, {
                 fill: "#C92924",
@@ -625,29 +527,27 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             }
           }
         }
-      ],
-      immediateRender: true
+      ]
     });
     
-    // Keep the dot visible for a moment, then fade it out
-    finalDotTimeline.to(finalDot, {
-      duration: 0.5
-    });
-    
+    // Vanish (fade out and scale down) - same as previous
     finalDotTimeline.to(finalDot, {
       opacity: 0,
       scale: 0.8,
       duration: 0.4,
       ease: "power2.in",
+      force3D: true,
       onComplete: () => {
         if (finalDot && finalDot.parentNode) {
           finalDot.style.display = "none";
         }
+        // Mark dot animation as complete
+        setIsDotAnimationComplete(true);
       }
-    });
+    }, "+=0.5");
     
-    // Add final dot timeline after the original dot is hidden
-    dotTimeline.add(finalDotTimeline, "+=0.1");
+    // Add final dot timeline at the start (replacing original dot)
+    dotTimeline.add(finalDotTimeline, 0);
     
     return dotTimeline;
   };
@@ -707,6 +607,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     if (!isActive) {
       // Reset state and visual elements when hero becomes inactive
       setIsPortfolioAnimationComplete(false);
+      setIsDotAnimationComplete(false);
       
       // Reset portfolio elements to initial state
       const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
@@ -724,8 +625,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       return;
     }
     
-    // Reset animation state when hero becomes active
+    // Reset portfolio animation state when hero becomes active
     setIsPortfolioAnimationComplete(false);
+
+    // Wait for dot animation to complete before starting portfolio animation
+    if (!isDotAnimationComplete) {
+      // Dot animation hasn't completed yet, wait for it
+      return;
+    }
 
     let tl: gsap.core.Timeline | null = null;
     let oElement: HTMLElement | null = null;
@@ -800,7 +707,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       lineElement = lineEl; // Store for resize handler
 
       // Create smooth motion graphics timeline
-      tl = gsap.timeline({ delay: 0.8 });
+      tl = gsap.timeline({ delay: 0 });
 
       // Step 1: Hide full text and show split text with O in its original position
       let iWidth = 0; // Store I width for later use
@@ -988,7 +895,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       if (tl) tl.kill();
     };
-  }, [isActive]);
+  }, [isActive, isDotAnimationComplete]);
 
   // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
@@ -1054,7 +961,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isPortfolioAnimationComplete]);
 
-  // Trigger dot animation when both isActive and isMariamReady are true
+  // Trigger dot animation when isActive and isMariamReady are true
   useEffect(() => {
     if (!isActive || !isMariamReady) return;
     
@@ -1070,24 +977,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             if (dotTimeline) {
               // Small delay to ensure dot is rendered before animation starts
               setTimeout(() => {
-                // Verify dot exists and is visible before playing
-                const existingDot = document.querySelector('.original-i-dot-svg') as HTMLElement;
-                if (existingDot) {
-                  // Force visibility
-                  existingDot.style.setProperty('opacity', '1', 'important');
-                  existingDot.style.setProperty('visibility', 'visible', 'important');
-                  existingDot.style.setProperty('display', 'block', 'important');
-                  existingDot.style.setProperty('z-index', '999999', 'important');
-                  
-                  // Check if dot is actually visible
-                  const rect = existingDot.getBoundingClientRect();
-                  console.log('Original dot visibility check:', {
-                    exists: !!existingDot,
-                    rect,
-                    computed: window.getComputedStyle(existingDot),
-                    transform: window.getComputedStyle(existingDot).transform
-                  });
-                }
                 dotTimeline.play();
               }, 100);
             }
@@ -1973,7 +1862,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             <tspan ref={svgMRef}>M</tspan>
             <tspan ref={svgA1Ref}>a</tspan>
             <tspan ref={svgRRef}>r</tspan>
-            <tspan ref={svgIRef}>i</tspan>
+            <tspan ref={svgIRef}>ı</tspan>
             <tspan ref={svgA2Ref}>a</tspan>
             <tspan ref={svgM2Ref}>m</tspan>
           </text>
