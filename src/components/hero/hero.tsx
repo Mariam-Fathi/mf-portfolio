@@ -26,6 +26,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const navRef = useRef<HTMLElement | null>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
+  const [isDotAnimationComplete, setIsDotAnimationComplete] = useState(false);
   const [softwareEngineerFontSize, setSoftwareEngineerFontSize] = useState<string>("clamp(3rem, 6vw, 5rem)");
   const [softwareEngineerTransform, setSoftwareEngineerTransform] = useState<string>("");
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
@@ -310,7 +311,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           backgroundColor: "#C92924", 
           opacity: 1, 
           duration: 0.4, 
-          ease: "power2.in"
+          ease: "power2.in",
+          onComplete: () => {
+            // Color "i" when dot first hits
+            if (svgIRefEl) {
+              gsap.to(svgIRefEl, {
+                fill: "#C92924",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            }
+          }
         },
         { 
           y: iScreenY + 30, 
@@ -332,19 +343,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       immediateRender: true
     });
     
-    // Wiggle animation on the "i" position - smooth elastic wiggle with bounce back
-    finalDotTimeline.to(finalDot, {
-      keyframes: [
-        { x: finalInitialX - 5, y: iScreenY, duration: 0.1, ease: "power2.out", force3D: true },
-        { x: finalInitialX, y: iScreenY, duration: 0.1, ease: "elastic.out(1, 0.6)", force3D: true }
-      ]
-    }, "+=0.1");
-    
     // STUCK JUMP from "i" to "a"
     finalDotTimeline.to(finalDot, {
       keyframes: [
         { 
           // Build up energy for the real jump - compression
+          y: iScreenY, // Keep at current position during compression
           scaleX: 1.2,
           scaleY: 0.7,
           duration: 0.2,
@@ -353,7 +357,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         },
         { 
           // EXPLOSIVE BREAK FREE JUMP!
-          y: iCenterY - 80, // Jump up from center of "i"
+          y: iScreenY - 80, // Jump up from current position (iScreenY)
           scaleY: 0.9,
           scaleX: 1.1,
           duration: 0.7,
@@ -537,6 +541,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         if (finalDot && finalDot.parentNode) {
           finalDot.style.display = "none";
         }
+        // Mark dot animation as complete
+        setIsDotAnimationComplete(true);
       }
     }, "+=0.5");
     
@@ -601,6 +607,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     if (!isActive) {
       // Reset state and visual elements when hero becomes inactive
       setIsPortfolioAnimationComplete(false);
+      setIsDotAnimationComplete(false);
       
       // Reset portfolio elements to initial state
       const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
@@ -618,8 +625,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       return;
     }
     
-    // Reset animation state when hero becomes active
+    // Reset portfolio animation state when hero becomes active
     setIsPortfolioAnimationComplete(false);
+
+    // Wait for dot animation to complete before starting portfolio animation
+    if (!isDotAnimationComplete) {
+      // Dot animation hasn't completed yet, wait for it
+      return;
+    }
 
     let tl: gsap.core.Timeline | null = null;
     let oElement: HTMLElement | null = null;
@@ -694,7 +707,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       lineElement = lineEl; // Store for resize handler
 
       // Create smooth motion graphics timeline
-      tl = gsap.timeline({ delay: 0.8 });
+      tl = gsap.timeline({ delay: 0 });
 
       // Step 1: Hide full text and show split text with O in its original position
       let iWidth = 0; // Store I width for later use
@@ -882,7 +895,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       if (tl) tl.kill();
     };
-  }, [isActive]);
+  }, [isActive, isDotAnimationComplete]);
 
   // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
@@ -948,7 +961,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isPortfolioAnimationComplete]);
 
-  // Trigger dot animation when both isActive and isMariamReady are true
+  // Trigger dot animation when isActive and isMariamReady are true
   useEffect(() => {
     if (!isActive || !isMariamReady) return;
     
