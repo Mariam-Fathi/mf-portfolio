@@ -1123,6 +1123,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       const m2ScreenX = svgRect.left + ((m2CenterX - viewBoxX) * scaleX);
       const m2ScreenY = svgRect.top + ((m2CenterY - viewBoxY) * scaleY);
       
+      // Calculate initial position
+      const initialX = iScreenX - (dotSize / 2);
+      const initialY = iScreenY - (dotSize / 2);
+      
       // Set initial styles directly on the element to ensure visibility
       originalDot.style.width = `${dotSize}px`;
       originalDot.style.height = `${dotSize}px`;
@@ -1136,28 +1140,79 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       originalDot.style.display = "block";
       originalDot.style.visibility = "visible";
       originalDot.style.pointerEvents = "none";
+      originalDot.style.transformOrigin = "center center";
+      originalDot.style.willChange = "transform, opacity";
+      originalDot.style.border = "none";
+      originalDot.style.boxShadow = "none";
       
-      // Use GSAP for transform properties
+      // Force a reflow to ensure element is in DOM
+      void originalDot.offsetHeight;
+      
+      // Use GSAP to set initial position and visibility - do this BEFORE creating timeline
+      // Ensure maximum visibility
+      originalDot.style.zIndex = "99999";
+      originalDot.style.backgroundColor = "#C92924";
+      
       gsap.set(originalDot, {
-        x: iScreenX - (dotSize / 2),
-        y: iScreenY - (dotSize / 2),
+        x: initialX,
+        y: initialY,
         rotation: 0,
         scale: 1,
-        opacity: 1
+        opacity: 1,
+        immediateRender: true,
+        force3D: true,
+        overwrite: "auto"
       });
       
-      const dotTimeline = gsap.timeline();
+      // Force another reflow after GSAP set to ensure it's applied
+      void originalDot.offsetHeight;
       
-      // Change "i" to "ı" (dotless i)
+      // Double-check the element is visible - force it with !important equivalent
+      originalDot.setAttribute('style', 
+        originalDot.getAttribute('style') + 
+        '; opacity: 1 !important; visibility: visible !important; display: block !important;'
+      );
+      
+      // Also set directly
+      originalDot.style.setProperty('opacity', '1', 'important');
+      originalDot.style.setProperty('visibility', 'visible', 'important');
+      originalDot.style.setProperty('display', 'block', 'important');
+      
+      // Create timeline - it should start with dot already visible
+      const dotTimeline = gsap.timeline({ immediateRender: true });
+      
+      // Explicitly set visibility at timeline start (position 0) to ensure it stays visible
+      dotTimeline.set(originalDot, {
+        opacity: 1,
+        display: "block",
+        visibility: "visible",
+        x: initialX,
+        y: initialY,
+        scale: 1,
+        rotation: 0,
+        backgroundColor: "#C92924",
+        immediateRender: true
+      }, 0);
+      
+      // Change "i" to "ı" (dotless i) - at same time
       dotTimeline.set(svgIRefEl, {
         textContent: "ı",
-      });
+      }, 0);
       
-      // Wiggle animation on the "i" position
+      // First visible animation - use to since we've already set initial state
       dotTimeline.to(originalDot, {
         keyframes: [
-          { x: iScreenX - (dotSize / 2), opacity: 1, duration: .15, ease: "elastic" },
-        ]
+          { x: initialX - 2, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
+          { x: initialX + 2, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
+          { x: initialX, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
+        ],
+        immediateRender: true,  // Ensure dot is visible during transitions
+        onStart: () => {
+          // Force visibility on animation start with important flags
+          originalDot.style.setProperty('opacity', '1', 'important');
+          originalDot.style.setProperty('visibility', 'visible', 'important');
+          originalDot.style.setProperty('display', 'block', 'important');
+        }
       });
       
       // STUCK JUMP from "i" to "a" - same as HTML version
@@ -1188,7 +1243,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             duration: 0.4,
             ease: "sine.inOut"
           }
-        ]
+        ],
+        immediateRender: true
       });
       
       dotTimeline.to(svgIRefEl, {
@@ -1202,7 +1258,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         y: a2ScreenY - 70,
         opacity: 1,
         duration: 0.2, 
-        ease: "sine.inOut" 
+        ease: "sine.inOut",
+        immediateRender: true
       });
       
       dotTimeline.to(originalDot, {
@@ -1211,7 +1268,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         backgroundColor: "#E55A3A",
         opacity: 1,
         duration: 0.25,
-        ease: "power2.in"
+        ease: "power2.in",
+        immediateRender: true
       });
       
       dotTimeline.to(originalDot, {
@@ -1221,6 +1279,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         opacity: 1,
         duration: 0.15,
         ease: "bounce.out",
+        immediateRender: true,
         onComplete: () => {
           if (svgA2RefEl) {
             gsap.to(svgA2RefEl, {
@@ -1235,7 +1294,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       dotTimeline.to(originalDot, { 
         scaleY: 1,
         opacity: 1,
-        duration: 0.1 
+        duration: 0.1,
+        immediateRender: true
       });
       
       // Continue with animation to "m"
@@ -1262,14 +1322,27 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             }
           },
           { scaleY: 1, opacity: 1, duration: 0.1 }
-        ]
+        ],
+        immediateRender: true
       }, "+=0.3");
       
       dotTimeline.to(originalDot, {
         keyframes: [
-          { backgroundColor: "#FEF0EB", y: m2ScreenY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+          { 
+            backgroundColor: "#FEF0EB", 
+            y: m2ScreenY - 40, 
+            scaleY: 0.75, 
+            opacity: 1, 
+            duration: 0.2, 
+            ease: "power2.out",
+            onStart: () => {
+              originalDot.style.border = "2px solid #C92924";
+              originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
+            }
+          },
           { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
-        ]
+        ],
+        immediateRender: true
       }, "+=0.3");
       
       dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
@@ -1294,34 +1367,77 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       finalDot.style.left = "0px";
       finalDot.style.top = "0px";
       finalDot.style.display = "block";
+      finalDot.style.visibility = "visible";
       finalDot.style.pointerEvents = "none";
+      finalDot.style.transformOrigin = "center center";
+      finalDot.style.willChange = "transform, opacity";
+      finalDot.style.border = "none";
+      finalDot.style.boxShadow = "none";
+      
+      // Force a reflow to ensure element is in DOM
+      void finalDot.offsetHeight;
       
       gsap.set(finalDot, {
         x: iScreenX - (finalDotSize / 2),
         y: -50,
         rotation: 0,
-        scale: 1
+        scale: 1,
+        opacity: 1,
+        immediateRender: true,
+        force3D: true
       });
       
-      const finalDotTimeline = gsap.timeline();
+      // Force another reflow after GSAP set
+      void finalDot.offsetHeight;
+      
+      // Double-check the element is visible
+      if (finalDot.style.opacity !== "1" || finalDot.style.visibility !== "visible") {
+        finalDot.style.opacity = "1";
+        finalDot.style.visibility = "visible";
+      }
+      
+      const finalDotTimeline = gsap.timeline({ immediateRender: true });
       
       // Same motion as original dot's first movement on "i"
       finalDotTimeline.to(finalDot, {
         keyframes: [
-          { x: iScreenX - (finalDotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2), duration: 0.2, ease: "power1.inOut" }
-        ]
+          { x: iScreenX - (finalDotSize / 2) - 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2) + 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.2, ease: "power1.inOut" }
+        ],
+        immediateRender: true
       });
       
       finalDotTimeline.to(finalDot, {
         keyframes: [
-          { y: iScreenY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" },
-          { y: iScreenY + 30, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.15, ease: "power2.out" },
+          { 
+            y: iScreenY + 60, 
+            backgroundColor: "#F9D5CC", 
+            opacity: 1, 
+            duration: 0.4, 
+            ease: "power2.in",
+            onStart: () => {
+              finalDot.style.border = "2px solid #C92924";
+              finalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
+            }
+          },
+          { 
+            y: iScreenY + 30, 
+            scaleY: 0.7, 
+            backgroundColor: "#E55A3A", 
+            opacity: 1, 
+            duration: 0.15, 
+            ease: "power2.out",
+            onStart: () => {
+              finalDot.style.border = "none";
+              finalDot.style.boxShadow = "none";
+            }
+          },
           { 
             y: iScreenY, 
             scaleY: 1, 
             backgroundColor: "#C92924",
+            opacity: 1,
             duration: 0.2, 
             ease: "power2.out",
             onComplete: () => {
@@ -1334,7 +1450,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               }
             }
           }
-        ]
+        ],
+        immediateRender: true
       });
       
       // Keep the dot visible for a moment, then fade it out
@@ -1466,22 +1583,48 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       
       const dotSize = Math.max(iPos.width * 0.25, 20);
       
+      // Set initial styles directly on the element to ensure visibility
+      originalDot.style.width = `${dotSize}px`;
+      originalDot.style.height = `${dotSize}px`;
+      originalDot.style.borderRadius = "50%";
+      originalDot.style.backgroundColor = "#C92924";
+      originalDot.style.position = "fixed";
+      originalDot.style.zIndex = "1001";
+      originalDot.style.opacity = "1";
+      originalDot.style.left = "0px";
+      originalDot.style.top = "0px";
+      originalDot.style.display = "block";
+      originalDot.style.visibility = "visible";
+      originalDot.style.pointerEvents = "none";
+      originalDot.style.transformOrigin = "center center";
+      originalDot.style.willChange = "transform, opacity";
+      originalDot.style.border = "none";
+      originalDot.style.boxShadow = "none";
+      
+      // Force a reflow to ensure element is in DOM
+      void originalDot.offsetHeight;
+      
       gsap.set(originalDot, {
-        width: `${dotSize}px`,
-        height: `${dotSize}px`,
-        borderRadius: "50%",
-        backgroundColor: "#C92924",
-        position: "fixed",
-        zIndex: 1001,
-        opacity: 1,
-        left: 0,
-        top: 0,
         x: iScreenX - (dotSize / 2),
         y: iScreenY - (dotSize / 2),
         rotation: 0,
+        scale: 1,
+        opacity: 1,
+        immediateRender: true,
+        force3D: true,  // Use 3D transforms for better performance and visibility
+        overwrite: "auto"
       });
       
-      const dotTimeline = gsap.timeline();
+      // Force another reflow after GSAP set to ensure it's applied
+      void originalDot.offsetHeight;
+      
+      // Double-check the element is visible
+      if (originalDot.style.opacity !== "1" || originalDot.style.visibility !== "visible") {
+        originalDot.style.opacity = "1";
+        originalDot.style.visibility = "visible";
+      }
+      
+      const dotTimeline = gsap.timeline({ immediateRender: true });
       
       dotTimeline.set(seIRefEl, {
         textContent: "ı",
@@ -1492,6 +1635,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           { 
             scaleX: 1.2,
             scaleY: 0.7,
+            opacity: 1,
             duration: 0.2,
             ease: "power2.out"
           },
@@ -1499,6 +1643,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             y: iScreenY - 40,
             scaleY: 0.9,
             scaleX: 1.1,
+            opacity: 1,
             duration: 0.5,
             ease: "power4.out"
           },
@@ -1508,10 +1653,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             scaleY: 0.75,
             scaleX: 1,
             backgroundColor: "#E55A3A",
+            opacity: 1,
             duration: 0.3,
             ease: "sine.inOut"
           }
-        ]
+        ],
+        immediateRender: true
       });
       
       dotTimeline.to(seIRefEl, {
@@ -1524,16 +1671,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         y: n2ScreenY + 5,
         scaleY: 1.2,
         backgroundColor: "#E55A3A",
+        opacity: 1,
         duration: 0.2,
-        ease: "power2.in"
+        ease: "power2.in",
+        immediateRender: true
       });
       
       dotTimeline.to(originalDot, {
         y: n2ScreenY,
         scaleY: 0.8,
         backgroundColor: "#C92924",
+        opacity: 1,
         duration: 0.15,
         ease: "bounce.out",
+        immediateRender: true,
         onComplete: () => {
           if (seN2RefEl) {
             gsap.to(seN2RefEl, {
@@ -1546,18 +1697,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       });
       
       dotTimeline.to(originalDot, { 
-        scaleY: 1, 
-        duration: 0.1 
+        scaleY: 1,
+        opacity: 1,
+        duration: 0.1,
+        immediateRender: true
       });
       
       dotTimeline.to(originalDot, {
         keyframes: [
-          { x: e2ScreenX - (dotSize / 2), y: e2ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
-          { y: e2ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          { x: e2ScreenX - (dotSize / 2), y: e2ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
+          { y: e2ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
           {
             y: e2ScreenY,
             scaleY: 0.8,
             backgroundColor: "#C92924",
+            opacity: 1,
             duration: 0.15,
             ease: "bounce.out",
             onComplete: () => {
@@ -1570,18 +1724,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               }
             }
           },
-          { scaleY: 1, duration: 0.1 }
-        ]
+          { scaleY: 1, opacity: 1, duration: 0.1 }
+        ],
+        immediateRender: true
       }, "+=0.2");
       
       dotTimeline.to(originalDot, {
         keyframes: [
-          { x: e3ScreenX - (dotSize / 2), y: e3ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
-          { y: e3ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          { x: e3ScreenX - (dotSize / 2), y: e3ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
+          { y: e3ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
           {
             y: e3ScreenY,
             scaleY: 0.8,
             backgroundColor: "#C92924",
+            opacity: 1,
             duration: 0.15,
             ease: "bounce.out",
             onComplete: () => {
@@ -1594,18 +1750,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               }
             }
           },
-          { scaleY: 1, duration: 0.1 }
-        ]
+          { scaleY: 1, opacity: 1, duration: 0.1 }
+        ],
+        immediateRender: true
       }, "+=0.2");
       
       dotTimeline.to(originalDot, {
         keyframes: [
-          { x: rScreenX - (dotSize / 2), y: rScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
-          { y: rScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          { x: rScreenX - (dotSize / 2), y: rScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
+          { y: rScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
           {
             y: rScreenY,
             scaleY: 0.8,
             backgroundColor: "#C92924",
+            opacity: 1,
             duration: 0.15,
             ease: "bounce.out",
             onComplete: () => {
@@ -1618,15 +1776,28 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               }
             }
           },
-          { scaleY: 1, duration: 0.1 }
-        ]
+          { scaleY: 1, opacity: 1, duration: 0.1 }
+        ],
+        immediateRender: true
       }, "+=0.2");
       
       dotTimeline.to(originalDot, {
         keyframes: [
-          { backgroundColor: "#FEF0EB", y: rScreenY - 20, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+          { 
+            backgroundColor: "#FEF0EB", 
+            y: rScreenY - 20, 
+            scaleY: 0.75, 
+            opacity: 1, 
+            duration: 0.2, 
+            ease: "power2.out",
+            onStart: () => {
+              originalDot.style.border = "2px solid #C92924";
+              originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
+            }
+          },
           { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
-        ]
+        ],
+        immediateRender: true
       }, "+=0.3");
       
       dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
@@ -1639,40 +1810,87 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       
       const finalDotSize = dotSize;
       
+      // Set initial styles directly on the element to ensure visibility
+      finalDot.style.width = `${finalDotSize}px`;
+      finalDot.style.height = `${finalDotSize}px`;
+      finalDot.style.borderRadius = "50%";
+      finalDot.style.backgroundColor = "#C92924";
+      finalDot.style.position = "fixed";
+      finalDot.style.zIndex = "1001";
+      finalDot.style.opacity = "1";
+      finalDot.style.left = "0px";
+      finalDot.style.top = "0px";
+      finalDot.style.display = "block";
+      finalDot.style.visibility = "visible";
+      finalDot.style.pointerEvents = "none";
+      finalDot.style.transformOrigin = "center center";
+      finalDot.style.willChange = "transform, opacity";
+      finalDot.style.border = "none";
+      finalDot.style.boxShadow = "none";
+      
+      // Force a reflow to ensure element is in DOM
+      void finalDot.offsetHeight;
+      
       gsap.set(finalDot, {
-        width: `${finalDotSize}px`,
-        height: `${finalDotSize}px`,
-        borderRadius: "50%",
-        backgroundColor: "#C92924",
-        position: "fixed",
-        zIndex: 1001,
-        opacity: 1,
-        left: 0,
-        top: 0,
         x: iScreenX - (finalDotSize / 2),
         y: -50,
         rotation: 0,
-        scale: 1
+        scale: 1,
+        opacity: 1,
+        immediateRender: true,
+        force3D: true
       });
       
-      const finalDotTimeline = gsap.timeline();
+      // Force another reflow after GSAP set
+      void finalDot.offsetHeight;
+      
+      // Double-check the element is visible
+      if (finalDot.style.opacity !== "1" || finalDot.style.visibility !== "visible") {
+        finalDot.style.opacity = "1";
+        finalDot.style.visibility = "visible";
+      }
+      
+      const finalDotTimeline = gsap.timeline({ immediateRender: true });
       
       finalDotTimeline.to(finalDot, {
         keyframes: [
-          { x: iScreenX - (finalDotSize / 2) - 3, duration: 0.15, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2) + 3, duration: 0.15, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2), duration: 0.15, ease: "power1.inOut" }
-        ]
+          { x: iScreenX - (finalDotSize / 2) - 3, opacity: 1, duration: 0.15, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2) + 3, opacity: 1, duration: 0.15, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.15, ease: "power1.inOut" }
+        ],
+        immediateRender: true
       });
       
       finalDotTimeline.to(finalDot, {
         keyframes: [
-          { y: iScreenY + 40, backgroundColor: "#F9D5CC", duration: 0.3, ease: "power2.in" },
-          { y: iScreenY + 20, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.12, ease: "power2.out" },
+          { 
+            y: iScreenY + 40, 
+            backgroundColor: "#F9D5CC", 
+            opacity: 1, 
+            duration: 0.3, 
+            ease: "power2.in",
+            onStart: () => {
+              finalDot.style.border = "2px solid #C92924";
+              finalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
+            }
+          },
+          { 
+            y: iScreenY + 20, 
+            scaleY: 0.7, 
+            backgroundColor: "#E55A3A", 
+            opacity: 1, 
+            duration: 0.12, 
+            ease: "power2.out",
+            onStart: () => {
+              finalDot.style.border = "none";
+              finalDot.style.boxShadow = "none";
+            }
+          },
           { 
             y: iScreenY, 
             scaleY: 1, 
             backgroundColor: "#C92924",
+            opacity: 1,
             duration: 0.18, 
             ease: "power2.out",
             onComplete: () => {
@@ -1685,7 +1903,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               }
             }
           }
-        ]
+        ],
+        immediateRender: true
       });
       
       finalDotTimeline.to(finalDot, {
