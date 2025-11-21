@@ -1594,57 +1594,19 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Mark Software Engineer as ready after positioning
             setIsSoftwareEngineerReady(true);
             
-            // Start handwriting animation after positioning
-            // Reduced delay to make text appear faster
-            setTimeout(() => {
-              // Helper function to animate a text element
-              const animateText = (textElement: SVGTextElement, delay: number = 0) => {
-                let bbox;
-                try {
-                  gsap.set(textElement, { opacity: 0.01, strokeOpacity: 0.01 });
-                  bbox = textElement.getBBox();
-                  if (!bbox || bbox.width === 0) {
-                    throw new Error("Empty bbox");
-                  }
-                } catch (e) {
-                  console.warn("Could not get BBox, using fallback", e);
-                  const textContent = textElement.textContent || "";
-                  const fontSize = parseFloat(window.getComputedStyle(textElement).fontSize) || 24;
-                  const estimatedWidth = textContent.length * fontSize * 0.6;
-                  bbox = { width: estimatedWidth, height: fontSize };
-                }
-                
-                const estimatedPathLength = bbox.width * 1.8;
-                
-                gsap.set(textElement, {
-                  strokeDasharray: estimatedPathLength,
-                  strokeDashoffset: estimatedPathLength,
-                  fillOpacity: 0,
-                  strokeOpacity: 1,
-                  opacity: 1
-                });
-                
-                gsap.to(textElement, {
-                  strokeDashoffset: 0,
-                  duration: 2.5,
-                  delay: delay,
-                  ease: "power1.inOut",
-                  onComplete: () => {
-                    gsap.to(textElement, {
-                      fillOpacity: 1,
-                      strokeOpacity: 0,
-                      duration: 0.6,
-                      ease: "power2.out"
-                    });
-                  }
-                });
-              };
-              
-              animateText(softwareText, 0);
-              animateText(engineerText, 0.3);
-              
-              // Software Engineer only has handwriting animation, no dot animation
-            }, 50);
+            // Set text to be visible immediately (no animation)
+            if (softwareText && engineerText) {
+              gsap.set(softwareText, {
+                fillOpacity: 1,
+                strokeOpacity: 0,
+                opacity: 1
+              });
+              gsap.set(engineerText, {
+                fillOpacity: 1,
+                strokeOpacity: 0,
+                opacity: 1
+              });
+            }
           } else {
             // Mark as ready even if elements don't exist
             setIsSoftwareEngineerReady(true);
@@ -2023,7 +1985,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             x="0"
             y="0"
             fill="#280B0B"
-            fillOpacity="0"
+            fillOpacity="1"
             stroke="#280B0B"
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -2052,7 +2014,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             x="0"
             y="0"
             fill="#280B0B"
-            fillOpacity="0"
+            fillOpacity="1"
             stroke="#280B0B"
             strokeWidth="2.5"
             strokeLinecap="round"
