@@ -31,8 +31,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
   const [isMariamReady, setIsMariamReady] = useState(false);
   const [isSoftwareEngineerReady, setIsSoftwareEngineerReady] = useState(false);
-  const svgDotTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const seDotTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const softwareEngineerWrapperRef = useRef<HTMLDivElement | null>(null);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
@@ -140,6 +138,520 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     setIsAnimationComplete(true);
   }, []);
 
+  // Function to animate dot along SVG Mariam letters
+  const buildDotTimeline = () => {
+    if (!svgMariamTextRef.current || !numberSevenRef.current) return undefined;
+    
+    const svg = numberSevenRef.current;
+    const svgMariamText = svgMariamTextRef.current;
+    const svgIRefEl = svgIRef.current;
+    const svgA2RefEl = svgA2Ref.current;
+    const svgM2RefEl = svgM2Ref.current;
+    
+    if (!svgIRefEl || !svgA2RefEl || !svgM2RefEl) return undefined;
+    
+    // Get the text element's position and font properties
+    const textRect = svgMariamText.getBBox();
+    const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
+    const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
+    const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
+    const fontFamily = svgMariamText.getAttribute("font-family") || '"Space Grotesk", "Inter", sans-serif';
+    const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
+    
+    // Get actual letter positions by measuring with temporary text elements
+    // that match the exact positioning of the tspan elements
+    const measureLetter = (letter: string, index: number) => {
+      const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      tempText.setAttribute("font-size", `${fontSize}px`);
+      tempText.setAttribute("font-family", fontFamily);
+      tempText.setAttribute("font-weight", "700");
+      tempText.setAttribute("letter-spacing", "0");
+      tempText.setAttribute("x", textX.toString());
+      tempText.setAttribute("y", textY.toString());
+      tempText.setAttribute("dominant-baseline", dominantBaseline);
+      tempText.setAttribute("text-anchor", "start");
+      tempText.textContent = letter;
+      tempText.style.visibility = "hidden";
+      svg.appendChild(tempText);
+      
+      const bbox = tempText.getBBox();
+      // Calculate cumulative x position by measuring all previous letters
+      let cumulativeX = 0;
+      for (let i = 0; i < index; i++) {
+        const prevLetter = ["M", "a", "r", "i", "a", "m"][i];
+        const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        prevTemp.setAttribute("font-size", `${fontSize}px`);
+        prevTemp.setAttribute("font-family", fontFamily);
+        prevTemp.setAttribute("font-weight", "700");
+        prevTemp.setAttribute("letter-spacing", "0");
+        prevTemp.setAttribute("x", textX.toString());
+        prevTemp.setAttribute("y", textY.toString());
+        prevTemp.setAttribute("dominant-baseline", dominantBaseline);
+        prevTemp.setAttribute("text-anchor", "start");
+        prevTemp.textContent = prevLetter;
+        prevTemp.style.visibility = "hidden";
+        svg.appendChild(prevTemp);
+        const prevBbox = prevTemp.getBBox();
+        cumulativeX += prevBbox.width;
+        svg.removeChild(prevTemp);
+      }
+      
+      svg.removeChild(tempText);
+      
+      return {
+        x: textX + cumulativeX,
+        y: textY + bbox.y,
+        width: bbox.width,
+        height: bbox.height,
+        centerX: textX + cumulativeX + bbox.width / 2,
+        centerY: textY + bbox.y + bbox.height / 2
+      };
+    };
+    
+    // Measure positions for i, a, m (letters 3, 4, 5 in "Mariam")
+    const iPos = measureLetter("i", 3);
+    const a2Pos = measureLetter("a", 4);
+    const m2Pos = measureLetter("m", 5);
+    
+    if (!iPos || !a2Pos || !m2Pos) return undefined;
+    
+    // Use the actual tspan elements' getBoundingClientRect() for accurate screen positions
+    // This is much simpler and more accurate than manual coordinate conversion
+    const iRect = svgIRefEl.getBoundingClientRect();
+    const a2Rect = svgA2RefEl.getBoundingClientRect();
+    const m2Rect = svgM2RefEl.getBoundingClientRect();
+    
+    // Calculate screen positions directly from the tspan elements
+    // For "i", the dot should be at 25% from top of the letter (where it starts)
+    const iScreenX = iRect.left + iRect.width / 2;
+    const iScreenY = iRect.top + iRect.height * 0.25; // Dot position on "i"
+    const iCenterY = iRect.top + iRect.height / 2; // Center of "i" for jump calculations
+    const a2ScreenX = a2Rect.left + a2Rect.width / 2;
+    const a2ScreenY = a2Rect.top + a2Rect.height / 2;
+    const m2ScreenX = m2Rect.left + m2Rect.width / 2;
+    const m2ScreenY = m2Rect.top + m2Rect.height / 2;
+    
+    // Create dot element
+    const originalDot = document.createElement("div");
+    originalDot.className = "original-i-dot-svg";
+    
+    // Append to body to ensure it's above all other elements
+    document.body.appendChild(originalDot);
+    
+    const dotSize = Math.max(iRect.width * 0.25, 35);
+    
+    // Debug: Log positions to verify they're reasonable
+    console.log('Position calculations (using tspan getBoundingClientRect):', {
+      iRect: { left: iRect.left, top: iRect.top, width: iRect.width, height: iRect.height },
+      iScreen: { x: iScreenX, y: iScreenY },
+      a2Screen: { x: a2ScreenX, y: a2ScreenY },
+      m2Screen: { x: m2ScreenX, y: m2ScreenY },
+      windowHeight: window.innerHeight,
+      dotSize
+    });
+    
+    // Calculate initial position
+    const initialX = iScreenX - (dotSize / 2);
+    const initialY = iScreenY - (dotSize / 2);
+    
+    // Set initial styles directly on the element to ensure visibility
+    originalDot.style.width = `${dotSize}px`;
+    originalDot.style.height = `${dotSize}px`;
+    originalDot.style.borderRadius = "50%";
+    originalDot.style.backgroundColor = "#C92924";
+    originalDot.style.position = "fixed";
+    originalDot.style.zIndex = "999999";
+    originalDot.style.opacity = "1";
+    originalDot.style.left = "0px";
+    originalDot.style.top = "0px";
+    originalDot.style.display = "block";
+    originalDot.style.visibility = "visible";
+    originalDot.style.pointerEvents = "none";
+    originalDot.style.transformOrigin = "center center";
+    originalDot.style.willChange = "transform, opacity";
+    originalDot.style.border = "none";
+    originalDot.style.boxShadow = "none";
+    originalDot.style.setProperty('z-index', '999999', 'important');
+    originalDot.style.setProperty('opacity', '1', 'important');
+    originalDot.style.setProperty('visibility', 'visible', 'important');
+    originalDot.style.setProperty('display', 'block', 'important');
+    
+    // Force a reflow to ensure element is in DOM
+    void originalDot.offsetHeight;
+    
+    // Use GSAP to set initial position IMMEDIATELY - this is critical
+    // Set position using GSAP transforms (x/y) which work with fixed positioning
+    gsap.set(originalDot, {
+      x: initialX,
+      y: initialY,
+      rotation: 0,
+      scale: 1,
+      opacity: 1,
+      immediateRender: true,
+      force3D: true,
+      overwrite: "auto"
+    });
+    
+    // Verify the position is valid (not NaN or Infinity)
+    if (isNaN(initialX) || isNaN(initialY) || !isFinite(initialX) || !isFinite(initialY)) {
+      console.error('Invalid dot position:', { initialX, initialY, iScreenX, iScreenY, dotSize });
+      // Fallback to center of screen if position is invalid
+      gsap.set(originalDot, {
+        x: window.innerWidth / 2 - dotSize / 2,
+        y: window.innerHeight / 2 - dotSize / 2,
+        immediateRender: true
+      });
+    }
+    
+    // Force another reflow after GSAP set to ensure it's applied
+    void originalDot.offsetHeight;
+    
+    // Verify the dot is actually positioned correctly
+    const computedStyle = window.getComputedStyle(originalDot);
+    const transform = computedStyle.transform;
+    
+    // Double-check the element is visible - force it with !important equivalent
+    originalDot.setAttribute('style', 
+      originalDot.getAttribute('style') + 
+      '; opacity: 1 !important; visibility: visible !important; display: block !important;'
+    );
+    
+    // Also set directly
+    originalDot.style.setProperty('opacity', '1', 'important');
+    originalDot.style.setProperty('visibility', 'visible', 'important');
+    originalDot.style.setProperty('display', 'block', 'important');
+    originalDot.style.setProperty('z-index', '999999', 'important');
+    
+    // One more force reflow to ensure everything is applied
+    void originalDot.offsetHeight;
+    
+    // Verify dot is actually in DOM and visible
+    const rect = originalDot.getBoundingClientRect();
+    const isInViewport = rect.width > 0 && rect.height > 0;
+    
+    // If dot is not visible, force it to be visible
+    if (!isInViewport || originalDot.offsetParent === null) {
+      originalDot.style.setProperty('opacity', '1', 'important');
+      originalDot.style.setProperty('visibility', 'visible', 'important');
+      originalDot.style.setProperty('display', 'block', 'important');
+      originalDot.style.setProperty('z-index', '999999', 'important');
+      originalDot.style.setProperty('position', 'fixed', 'important');
+    }
+    
+    // Create timeline - it should start with dot already visible
+    const dotTimeline = gsap.timeline({ immediateRender: true, paused: true });
+    
+    // First, ensure dot is visible and positioned BEFORE any animation
+    dotTimeline.set(originalDot, {
+      opacity: 1,
+      display: "block",
+      visibility: "visible",
+      x: initialX,
+      y: initialY,
+      scale: 1,
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+      backgroundColor: "#C92924",
+      zIndex: 999999,
+      immediateRender: true
+    }, 0);
+    
+    // Dot is already visible from initial setup, no need for extra callbacks
+    
+    // Change "i" to "ı" (dotless i) - at same time
+    dotTimeline.set(svgIRefEl, {
+      textContent: "ı",
+    }, 0);
+    
+    // Wiggle animation on the "i" position - smooth elastic wiggle with bounce back
+    dotTimeline.to(originalDot, {
+      keyframes: [
+        { x: initialX - 5, y: initialY, duration: 0.1, ease: "power2.out", force3D: true },
+        { x: initialX, y: initialY, duration: 0.1, ease: "elastic.out(1, 0.6)", force3D: true }
+      ]
+    }, 0.1);
+    
+    // STUCK JUMP from "i" to "a"
+    dotTimeline.to(originalDot, {
+      keyframes: [
+        { 
+          // Build up energy for the real jump - compression
+          scaleX: 1.2,
+          scaleY: 0.7,
+          duration: 0.2,
+          ease: "power2.out",
+          force3D: true
+        },
+        { 
+          // EXPLOSIVE BREAK FREE JUMP!
+          y: iCenterY - 80, // Jump up from center of "i"
+          scaleY: 0.9,
+          scaleX: 1.1,
+          duration: 0.7,
+          ease: "power4.out",
+          force3D: true
+        },
+        { 
+          // Arc smoothly to "a" position
+          x: a2ScreenX - (dotSize / 2),
+          y: a2ScreenY - 50,
+          scaleY: 0.75,
+          scaleX: 1,
+          backgroundColor: "#C92924",
+          duration: 0.4,
+          ease: "sine.inOut",
+          force3D: true
+        }
+      ]
+    });
+    
+    dotTimeline.to(svgIRefEl, {
+      fill: "#C92924",
+      duration: 0.4,
+      ease: "power2.out"
+    }, "-=0.7");
+    
+    // Continue with the "a" landing animation
+    dotTimeline.to(originalDot, { 
+      y: a2ScreenY - 70, 
+      duration: 0.2, 
+      ease: "sine.inOut",
+      force3D: true
+    });
+    
+    dotTimeline.to(originalDot, {
+      y: a2ScreenY + 10,
+      scaleY: 1.2,
+      backgroundColor: "#C92924",
+      duration: 0.25,
+      ease: "power2.in",
+      force3D: true
+    });
+    
+    dotTimeline.to(originalDot, {
+      y: a2ScreenY,
+      scaleY: 0.8,
+      backgroundColor: "#C92924",
+      duration: 0.15,
+      ease: "bounce.out",
+      force3D: true,
+      onComplete: () => {
+        if (svgA2RefEl) {
+          gsap.to(svgA2RefEl, {
+            fill: "#C92924",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        }
+      }
+    });
+    
+    dotTimeline.to(originalDot, { 
+      scaleY: 1,
+      duration: 0.1,
+      force3D: true
+    });
+    
+    // Continue with the rest of the animation to "m"
+    dotTimeline.to(originalDot, {
+      keyframes: [
+        { x: m2ScreenX - (dotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#C92924", duration: 0.3, ease: "power2.out", force3D: true },
+        { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut", force3D: true },
+        { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#C92924", duration: 0.25, ease: "power2.in", force3D: true },
+        {
+          y: m2ScreenY,
+          scaleY: 0.8,
+          backgroundColor: "#C92924",
+          duration: 0.15,
+          ease: "bounce.out",
+          force3D: true,
+          onComplete: () => {
+            if (svgM2RefEl) {
+              gsap.to(svgM2RefEl, {
+                fill: "#C92924",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            }
+          }
+        },
+        { scaleY: 1, duration: 0.1, force3D: true }
+      ]
+    }, "+=0.3");
+    
+    dotTimeline.to(originalDot, {
+      keyframes: [
+        { 
+          backgroundColor: "#C92924", 
+          y: m2ScreenY - 40, 
+          scaleY: 0.75, 
+          duration: 0.2, 
+          ease: "power2.out",
+          force3D: true,
+          onStart: () => {
+            originalDot.style.border = "2px solid #C92924";
+            originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
+          }
+        },
+        { 
+          y: m2ScreenY + 20, 
+          scaleY: 0.9, 
+          duration: 0.15, 
+          ease: "power2.in",
+          force3D: true 
+        },
+        { 
+          y: window.innerHeight * 0.7, 
+          scaleY: 1.1, 
+          opacity: 0.7, 
+          duration: 0.3, 
+          ease: "power2.inOut",
+          force3D: true 
+        },
+        { 
+          y: window.innerHeight + 100, 
+          scaleY: 1.2, 
+          opacity: 0, 
+          duration: 0.3, 
+          ease: "power2.in",
+          force3D: true 
+        }
+      ]
+    }, "+=0.3");
+    
+    dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
+    
+    // Create final dot that lands on "i"
+    const finalDot = document.createElement("div");
+    finalDot.className = "final-i-dot-svg";
+    svgFinalDotRef.current = finalDot;
+    
+    // Append to body to ensure it's above all other elements
+    document.body.appendChild(finalDot);
+    
+    const finalDotSize = dotSize;
+    
+    // Set initial final dot position and make it visible
+    finalDot.style.width = `${finalDotSize}px`;
+    finalDot.style.height = `${finalDotSize}px`;
+    finalDot.style.borderRadius = "50%";
+    finalDot.style.backgroundColor = "#C92924";
+    finalDot.style.position = "fixed";
+    finalDot.style.zIndex = "999999";
+    finalDot.style.setProperty('z-index', '999999', 'important');
+    finalDot.style.opacity = "1";
+    finalDot.style.left = "0px";
+    finalDot.style.top = "0px";
+    finalDot.style.display = "block";
+    finalDot.style.visibility = "visible";
+    finalDot.style.pointerEvents = "none";
+    finalDot.style.transformOrigin = "center center";
+    finalDot.style.willChange = "transform, opacity";
+    finalDot.style.border = "none";
+    finalDot.style.boxShadow = "none";
+    
+    // Force a reflow to ensure element is in DOM
+    void finalDot.offsetHeight;
+    
+    gsap.set(finalDot, {
+      x: iScreenX - (finalDotSize / 2),
+      y: -50,
+      rotation: 0,
+      scale: 1,
+      opacity: 1,
+      immediateRender: true,
+      force3D: true
+    });
+    
+    // Force another reflow after GSAP set
+    void finalDot.offsetHeight;
+    
+    // Double-check the element is visible
+    if (finalDot.style.opacity !== "1" || finalDot.style.visibility !== "visible") {
+      finalDot.style.opacity = "1";
+      finalDot.style.visibility = "visible";
+    }
+    
+    const finalDotTimeline = gsap.timeline({ immediateRender: true });
+    
+    // EXACT SAME MOTION as the original dot's first movement on "i" - EXACT MATCH
+    finalDotTimeline.to(finalDot, {
+      keyframes: [
+        { x: iScreenX - (finalDotSize / 2) - 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
+        { x: iScreenX - (finalDotSize / 2) + 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
+        { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.2, ease: "power1.inOut" }
+      ],
+      immediateRender: true
+    });
+    
+    finalDotTimeline.to(finalDot, {
+      keyframes: [
+        { 
+          y: iScreenY + 60, 
+          backgroundColor: "#C92924", 
+          opacity: 1, 
+          duration: 0.4, 
+          ease: "power2.in"
+        },
+        { 
+          y: iScreenY + 30, 
+          scaleY: 0.7, 
+          backgroundColor: "#C92924", 
+          opacity: 1, 
+          duration: 0.15, 
+          ease: "power2.out"
+        },
+        { 
+          y: iScreenY, 
+          scaleY: 1, 
+          backgroundColor: "#C92924",
+          opacity: 1,
+          duration: 0.2, 
+          ease: "power2.out",
+          onComplete: () => {
+            // Ensure final dot is visible before color change
+            finalDot.style.setProperty('opacity', '1', 'important');
+            finalDot.style.setProperty('visibility', 'visible', 'important');
+            finalDot.style.setProperty('display', 'block', 'important');
+            
+            // Land permanently on "i" - change the "i" color and make it stay
+            if (svgIRefEl) {
+              gsap.to(svgIRefEl, {
+                fill: "#C92924",
+                duration: 0.3,
+                ease: "power2.out",
+              });
+            }
+          }
+        }
+      ],
+      immediateRender: true
+    });
+    
+    // Keep the dot visible for a moment, then fade it out
+    finalDotTimeline.to(finalDot, {
+      duration: 0.5
+    });
+    
+    finalDotTimeline.to(finalDot, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.4,
+      ease: "power2.in",
+      onComplete: () => {
+        if (finalDot && finalDot.parentNode) {
+          finalDot.style.display = "none";
+        }
+      }
+    });
+    
+    // Add final dot timeline after the original dot is hidden
+    dotTimeline.add(finalDotTimeline, "+=0.1");
+    
+    return dotTimeline;
+  };
+
   // Call onReady when all calculations are complete (not waiting for animations)
   useEffect(() => {
     // Only need Mariam and Software Engineer calculations to be ready
@@ -154,20 +666,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isMariamReady, isSoftwareEngineerReady, onReady]);
 
-  // Cleanup animations when hero becomes inactive
-  useEffect(() => {
-    if (!isActive) {
-      // Kill dot animations when hero is not active
-      if (svgDotTimelineRef.current) {
-        svgDotTimelineRef.current.kill();
-        svgDotTimelineRef.current = null;
-      }
-      if (seDotTimelineRef.current) {
-        seDotTimelineRef.current.kill();
-        seDotTimelineRef.current = null;
-      }
-    }
-  }, [isActive]);
 
   // Removed HTML Mariam animations - now using only SVG Mariam
 
@@ -556,6 +1054,65 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isPortfolioAnimationComplete]);
 
+  // Trigger dot animation when both isActive and isMariamReady are true
+  useEffect(() => {
+    if (!isActive || !isMariamReady) return;
+    
+    // Wait a bit to ensure all refs are ready and DOM is fully rendered
+    const timeoutId = setTimeout(() => {
+      // Double-check that all required refs are available
+      if (svgMariamTextRef.current && numberSevenRef.current && 
+          svgIRef.current && svgA2Ref.current && svgM2Ref.current) {
+        // Use requestAnimationFrame to ensure DOM is ready
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const dotTimeline = buildDotTimeline();
+            if (dotTimeline) {
+              // Small delay to ensure dot is rendered before animation starts
+              setTimeout(() => {
+                // Verify dot exists and is visible before playing
+                const existingDot = document.querySelector('.original-i-dot-svg') as HTMLElement;
+                if (existingDot) {
+                  // Force visibility
+                  existingDot.style.setProperty('opacity', '1', 'important');
+                  existingDot.style.setProperty('visibility', 'visible', 'important');
+                  existingDot.style.setProperty('display', 'block', 'important');
+                  existingDot.style.setProperty('z-index', '999999', 'important');
+                  
+                  // Check if dot is actually visible
+                  const rect = existingDot.getBoundingClientRect();
+                  console.log('Original dot visibility check:', {
+                    exists: !!existingDot,
+                    rect,
+                    computed: window.getComputedStyle(existingDot),
+                    transform: window.getComputedStyle(existingDot).transform
+                  });
+                }
+                dotTimeline.play();
+              }, 100);
+            }
+          });
+        });
+      } else {
+        // Retry after a short delay if refs aren't ready
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            const dotTimeline = buildDotTimeline();
+            if (dotTimeline) {
+              setTimeout(() => {
+                dotTimeline.play();
+              }, 50);
+            }
+          });
+        }, 200);
+      }
+    }, 200);
+    
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [isActive, isMariamReady]);
+
   // Position and size the SVG number 7 directly below PORTFOL
   useEffect(() => {
     if (!numberSevenRef.current || portfolWidth === 0 || !portfolioHeaderRef.current) return;
@@ -756,23 +1313,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 
                 // Mark Mariam as ready after positioning
                 setIsMariamReady(true);
-                
-                // Start dot animation after positioning is complete when hero is active
-                // Reduced delay to make text appear faster
-                if (isActive) {
-                  setTimeout(() => {
-                    // Kill previous timeline if it exists
-                    if (svgDotTimelineRef.current) {
-                      svgDotTimelineRef.current.kill();
-                    }
-                    const svgDotTimeline = buildSvgDotTimeline();
-                    if (svgDotTimeline) {
-                      svgDotTimelineRef.current = svgDotTimeline;
-                      // Start animation with a slight delay after positioning
-                      svgDotTimeline.play();
-                    }
-                  }, 100);
-                }
               } catch (e) {
                 // Ignore
                 setIsMariamReady(true); // Mark ready even on error
@@ -1054,10 +1594,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Mark Software Engineer as ready after positioning
             setIsSoftwareEngineerReady(true);
             
-            // Start handwriting animation after positioning when hero is active
+            // Start handwriting animation after positioning
             // Reduced delay to make text appear faster
-            if (isActive) {
-              setTimeout(() => {
+            setTimeout(() => {
               // Helper function to animate a text element
               const animateText = (textElement: SVGTextElement, delay: number = 0) => {
                 let bbox;
@@ -1104,19 +1643,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               animateText(softwareText, 0);
               animateText(engineerText, 0.3);
               
-              // Start Software Engineer dot animation when hero is active
-              setTimeout(() => {
-                if (seDotTimelineRef.current) {
-                  seDotTimelineRef.current.kill();
-                }
-                const seDotTimeline = buildSoftwareEngineerDotTimeline();
-                if (seDotTimeline) {
-                  seDotTimelineRef.current = seDotTimeline;
-                  seDotTimeline.play();
-                }
-              }, 500); // Start after handwriting animation begins
+              // Software Engineer only has handwriting animation, no dot animation
             }, 50);
-            }
           } else {
             // Mark as ready even if elements don't exist
             setIsSoftwareEngineerReady(true);
@@ -1128,938 +1656,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       }
     };
     
-    // Function to animate dot along SVG Mariam letters (same as HTML Mariam)
-    const buildSvgDotTimeline = () => {
-      if (!svgMariamTextRef.current || !numberSevenRef.current) return undefined;
-      
-      const svg = numberSevenRef.current;
-      const svgMariamText = svgMariamTextRef.current;
-      const svgIRefEl = svgIRef.current;
-      const svgA2RefEl = svgA2Ref.current;
-      const svgM2RefEl = svgM2Ref.current;
-      
-      if (!svgIRefEl || !svgA2RefEl || !svgM2RefEl) return undefined;
-      
-      // Get the text element's position and font properties
-      const textRect = svgMariamText.getBBox();
-      const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
-      const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
-      const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
-      const fontFamily = svgMariamText.getAttribute("font-family") || '"Space Grotesk", "Inter", sans-serif';
-      const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
-      
-      // Get actual letter positions by measuring with temporary text elements
-      // that match the exact positioning of the tspan elements
-      const measureLetter = (letter: string, index: number) => {
-        const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        tempText.setAttribute("font-size", `${fontSize}px`);
-        tempText.setAttribute("font-family", fontFamily);
-        tempText.setAttribute("font-weight", "700");
-        tempText.setAttribute("letter-spacing", "0");
-        tempText.setAttribute("x", textX.toString());
-        tempText.setAttribute("y", textY.toString());
-        tempText.setAttribute("dominant-baseline", dominantBaseline);
-        tempText.setAttribute("text-anchor", "start");
-        tempText.textContent = letter;
-        tempText.style.visibility = "hidden";
-        svg.appendChild(tempText);
-        
-        const bbox = tempText.getBBox();
-        // Calculate cumulative x position by measuring all previous letters
-        let cumulativeX = 0;
-        for (let i = 0; i < index; i++) {
-          const prevLetter = ["M", "a", "r", "i", "a", "m"][i];
-          const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          prevTemp.setAttribute("font-size", `${fontSize}px`);
-          prevTemp.setAttribute("font-family", fontFamily);
-          prevTemp.setAttribute("font-weight", "700");
-          prevTemp.setAttribute("letter-spacing", "0");
-          prevTemp.setAttribute("x", textX.toString());
-          prevTemp.setAttribute("y", textY.toString());
-          prevTemp.setAttribute("dominant-baseline", dominantBaseline);
-          prevTemp.setAttribute("text-anchor", "start");
-          prevTemp.textContent = prevLetter;
-          prevTemp.style.visibility = "hidden";
-          svg.appendChild(prevTemp);
-          const prevBbox = prevTemp.getBBox();
-          cumulativeX += prevBbox.width;
-          svg.removeChild(prevTemp);
-        }
-        
-        svg.removeChild(tempText);
-        
-        return {
-          x: textX + cumulativeX,
-          y: textY + bbox.y,
-          width: bbox.width,
-          height: bbox.height,
-          centerX: textX + cumulativeX + bbox.width / 2,
-          centerY: textY + bbox.y + bbox.height / 2
-        };
-      };
-      
-      // Measure positions for i, a, m (letters 3, 4, 5 in "Mariam")
-      const iPos = measureLetter("i", 3);
-      const a2Pos = measureLetter("a", 4);
-      const m2Pos = measureLetter("m", 5);
-      
-      if (!iPos || !a2Pos || !m2Pos) return undefined;
-      
-      // Get positions relative to the SVG
-      const svgRect = svg.getBoundingClientRect();
-      
-      // Calculate positions relative to SVG viewport
-      // For "i", the dot should be at 25% from top of the letter
-      const iCenterX = iPos.centerX;
-      const iCenterY = iPos.y + (iPos.height * 0.25);
-      const a2CenterX = a2Pos.centerX;
-      const a2CenterY = a2Pos.centerY;
-      const m2CenterX = m2Pos.centerX;
-      const m2CenterY = m2Pos.centerY;
-      
-      // Create dot element
-      const originalDot = document.createElement("div");
-      originalDot.className = "original-i-dot-svg";
-      
-      // Append to SVG's parent or body
-      const heroSection = document.getElementById("hero");
-      if (!heroSection) return undefined;
-      heroSection.appendChild(originalDot);
-      
-      const dotSize = Math.max(iPos.width * 0.25, 35);
-      
-      // Position dot relative to viewport (since SVG is fixed)
-      // The SVG coordinates need to be converted to screen coordinates
-      // Since the SVG uses a viewBox, we need to account for the transform
-      const svgViewBox = svg.viewBox.baseVal;
-      const svgWidth = svgRect.width;
-      const svgHeight = svgRect.height;
-      const viewBoxWidth = svgViewBox.width || svgWidth;
-      const viewBoxHeight = svgViewBox.height || svgHeight;
-      const scaleX = svgWidth / viewBoxWidth;
-      const scaleY = svgHeight / viewBoxHeight;
-      
-      // Account for viewBox origin if it exists
-      const viewBoxX = svgViewBox.x || 0;
-      const viewBoxY = svgViewBox.y || 0;
-      
-      // Convert SVG coordinates to screen coordinates
-      // SVG coordinates are relative to the viewBox, so we need to account for the viewBox origin and scale
-      const iScreenX = svgRect.left + ((iCenterX - viewBoxX) * scaleX);
-      const iScreenY = svgRect.top + ((iCenterY - viewBoxY) * scaleY);
-      const a2ScreenX = svgRect.left + ((a2CenterX - viewBoxX) * scaleX);
-      const a2ScreenY = svgRect.top + ((a2CenterY - viewBoxY) * scaleY);
-      const m2ScreenX = svgRect.left + ((m2CenterX - viewBoxX) * scaleX);
-      const m2ScreenY = svgRect.top + ((m2CenterY - viewBoxY) * scaleY);
-      
-      // Calculate initial position
-      const initialX = iScreenX - (dotSize / 2);
-      const initialY = iScreenY - (dotSize / 2);
-      
-      // Set initial styles directly on the element to ensure visibility
-      originalDot.style.width = `${dotSize}px`;
-      originalDot.style.height = `${dotSize}px`;
-      originalDot.style.borderRadius = "50%";
-      originalDot.style.backgroundColor = "#C92924";
-      originalDot.style.position = "fixed";
-      originalDot.style.zIndex = "1001";
-      originalDot.style.opacity = "1";
-      originalDot.style.left = "0px";
-      originalDot.style.top = "0px";
-      originalDot.style.display = "block";
-      originalDot.style.visibility = "visible";
-      originalDot.style.pointerEvents = "none";
-      originalDot.style.transformOrigin = "center center";
-      originalDot.style.willChange = "transform, opacity";
-      originalDot.style.border = "none";
-      originalDot.style.boxShadow = "none";
-      
-      // Force a reflow to ensure element is in DOM
-      void originalDot.offsetHeight;
-      
-      // Use GSAP to set initial position and visibility - do this BEFORE creating timeline
-      // Ensure maximum visibility
-      originalDot.style.zIndex = "99999";
-      originalDot.style.backgroundColor = "#C92924";
-      
-      gsap.set(originalDot, {
-        x: initialX,
-        y: initialY,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        immediateRender: true,
-        force3D: true,
-        overwrite: "auto"
-      });
-      
-      // Force another reflow after GSAP set to ensure it's applied
-      void originalDot.offsetHeight;
-      
-      // Double-check the element is visible - force it with !important equivalent
-      originalDot.setAttribute('style', 
-        originalDot.getAttribute('style') + 
-        '; opacity: 1 !important; visibility: visible !important; display: block !important;'
-      );
-      
-      // Also set directly
-      originalDot.style.setProperty('opacity', '1', 'important');
-      originalDot.style.setProperty('visibility', 'visible', 'important');
-      originalDot.style.setProperty('display', 'block', 'important');
-      
-      // Create timeline - it should start with dot already visible
-      const dotTimeline = gsap.timeline({ immediateRender: true });
-      
-      // Explicitly set visibility at timeline start (position 0) to ensure it stays visible
-      dotTimeline.set(originalDot, {
-        opacity: 1,
-        display: "block",
-        visibility: "visible",
-        x: initialX,
-        y: initialY,
-        scale: 1,
-        rotation: 0,
-        backgroundColor: "#C92924",
-        immediateRender: true
-      }, 0);
-      
-      // Change "i" to "ı" (dotless i) - at same time
-      dotTimeline.set(svgIRefEl, {
-        textContent: "ı",
-      }, 0);
-      
-      // First visible animation - use to since we've already set initial state
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { x: initialX - 2, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
-          { x: initialX + 2, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
-          { x: initialX, y: initialY, opacity: 1, scale: 1, backgroundColor: "#C92924", duration: .08, ease: "power1.out" },
-        ],
-        immediateRender: true,  // Ensure dot is visible during transitions
-        onStart: () => {
-          // Force visibility on animation start with important flags
-          originalDot.style.setProperty('opacity', '1', 'important');
-          originalDot.style.setProperty('visibility', 'visible', 'important');
-          originalDot.style.setProperty('display', 'block', 'important');
-        }
-      });
-      
-      // STUCK JUMP from "i" to "a" - same as HTML version
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { 
-            scaleX: 1.2,
-            scaleY: 0.7,
-            opacity: 1,
-            duration: 0.2,
-            ease: "power2.out"
-          },
-          { 
-            y: iScreenY - 80,
-            scaleY: 0.9,
-            scaleX: 1.1,
-            opacity: 1,
-            duration: 0.7,
-            ease: "power4.out"
-          },
-          { 
-            x: a2ScreenX - (dotSize / 2),
-            y: a2ScreenY - 50,
-            scaleY: 0.75,
-            scaleX: 1,
-            backgroundColor: "#E55A3A",
-            opacity: 1,
-            duration: 0.4,
-            ease: "sine.inOut"
-          }
-        ],
-        immediateRender: true
-      });
-      
-      dotTimeline.to(svgIRefEl, {
-        fill: "#C92924",
-        duration: 0.4,
-        ease: "power2.out"
-      }, "-=0.7");
-      
-      // Continue with "a" landing animation
-      dotTimeline.to(originalDot, { 
-        y: a2ScreenY - 70,
-        opacity: 1,
-        duration: 0.2, 
-        ease: "sine.inOut",
-        immediateRender: true
-      });
-      
-      dotTimeline.to(originalDot, {
-        y: a2ScreenY + 10,
-        scaleY: 1.2,
-        backgroundColor: "#E55A3A",
-        opacity: 1,
-        duration: 0.25,
-        ease: "power2.in",
-        immediateRender: true
-      });
-      
-      dotTimeline.to(originalDot, {
-        y: a2ScreenY,
-        scaleY: 0.8,
-        backgroundColor: "#C92924",
-        opacity: 1,
-        duration: 0.15,
-        ease: "bounce.out",
-        immediateRender: true,
-        onComplete: () => {
-          if (svgA2RefEl) {
-            gsap.to(svgA2RefEl, {
-              fill: "#C92924",
-              duration: 0.3,
-              ease: "power2.out",
-            });
-          }
-        }
-      });
-      
-      dotTimeline.to(originalDot, { 
-        scaleY: 1,
-        opacity: 1,
-        duration: 0.1,
-        immediateRender: true
-      });
-      
-      // Continue with animation to "m"
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { x: m2ScreenX - (dotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.3, ease: "power2.out" },
-          { y: m2ScreenY - 120, opacity: 1, duration: 0.2, ease: "sine.inOut" },
-          { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.in" },
-          {
-            y: m2ScreenY,
-            scaleY: 0.8,
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.15,
-            ease: "bounce.out",
-            onComplete: () => {
-              if (svgM2RefEl) {
-                gsap.to(svgM2RefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          },
-          { scaleY: 1, opacity: 1, duration: 0.1 }
-        ],
-        immediateRender: true
-      }, "+=0.3");
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { 
-            backgroundColor: "#FEF0EB", 
-            y: m2ScreenY - 40, 
-            scaleY: 0.75, 
-            opacity: 1, 
-            duration: 0.2, 
-            ease: "power2.out",
-            onStart: () => {
-              originalDot.style.border = "2px solid #C92924";
-              originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
-            }
-          },
-          { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
-        ],
-        immediateRender: true
-      }, "+=0.3");
-      
-      dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
-      
-      // Create final dot that lands on "i"
-      const finalDot = document.createElement("div");
-      finalDot.className = "final-i-dot-svg";
-      svgFinalDotRef.current = finalDot;
-      
-      heroSection.appendChild(finalDot);
-      
-      const finalDotSize = dotSize;
-      
-      // Set initial final dot position and make it visible
-      finalDot.style.width = `${finalDotSize}px`;
-      finalDot.style.height = `${finalDotSize}px`;
-      finalDot.style.borderRadius = "50%";
-      finalDot.style.backgroundColor = "#C92924";
-      finalDot.style.position = "fixed";
-      finalDot.style.zIndex = "1001";
-      finalDot.style.opacity = "1";
-      finalDot.style.left = "0px";
-      finalDot.style.top = "0px";
-      finalDot.style.display = "block";
-      finalDot.style.visibility = "visible";
-      finalDot.style.pointerEvents = "none";
-      finalDot.style.transformOrigin = "center center";
-      finalDot.style.willChange = "transform, opacity";
-      finalDot.style.border = "none";
-      finalDot.style.boxShadow = "none";
-      
-      // Force a reflow to ensure element is in DOM
-      void finalDot.offsetHeight;
-      
-      gsap.set(finalDot, {
-        x: iScreenX - (finalDotSize / 2),
-        y: -50,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        immediateRender: true,
-        force3D: true
-      });
-      
-      // Force another reflow after GSAP set
-      void finalDot.offsetHeight;
-      
-      // Double-check the element is visible
-      if (finalDot.style.opacity !== "1" || finalDot.style.visibility !== "visible") {
-        finalDot.style.opacity = "1";
-        finalDot.style.visibility = "visible";
-      }
-      
-      const finalDotTimeline = gsap.timeline({ immediateRender: true });
-      
-      // Same motion as original dot's first movement on "i"
-      finalDotTimeline.to(finalDot, {
-        keyframes: [
-          { x: iScreenX - (finalDotSize / 2) - 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2) + 5, opacity: 1, duration: 0.2, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.2, ease: "power1.inOut" }
-        ],
-        immediateRender: true
-      });
-      
-      finalDotTimeline.to(finalDot, {
-        keyframes: [
-          { 
-            y: iScreenY + 60, 
-            backgroundColor: "#F9D5CC", 
-            opacity: 1, 
-            duration: 0.4, 
-            ease: "power2.in",
-            onStart: () => {
-              finalDot.style.border = "2px solid #C92924";
-              finalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
-            }
-          },
-          { 
-            y: iScreenY + 30, 
-            scaleY: 0.7, 
-            backgroundColor: "#E55A3A", 
-            opacity: 1, 
-            duration: 0.15, 
-            ease: "power2.out",
-            onStart: () => {
-              finalDot.style.border = "none";
-              finalDot.style.boxShadow = "none";
-            }
-          },
-          { 
-            y: iScreenY, 
-            scaleY: 1, 
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.2, 
-            ease: "power2.out",
-            onComplete: () => {
-              if (svgIRefEl) {
-                gsap.to(svgIRefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          }
-        ],
-        immediateRender: true
-      });
-      
-      // Keep the dot visible for a moment, then fade it out
-      finalDotTimeline.to(finalDot, {
-        duration: 0.5
-      });
-      
-      finalDotTimeline.to(finalDot, {
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.4,
-        ease: "power2.in",
-        onComplete: () => {
-          if (finalDot && finalDot.parentNode) {
-            finalDot.style.display = "none";
-          }
-        }
-      });
-      
-      dotTimeline.add(finalDotTimeline);
-      
-      return dotTimeline;
-    };
+    // buildDotTimeline is now defined outside this useEffect
     
-    // Function to animate dot along Software Engineer letters
-    const buildSoftwareEngineerDotTimeline = () => {
-      if (!seEngineerTextRef.current || !numberSevenRef.current) return undefined;
-      
-      const svg = numberSevenRef.current;
-      const engineerText = seEngineerTextRef.current;
-      const seE1RefEl = seE1Ref.current;
-      const seN1RefEl = seN1Ref.current;
-      const seGRefEl = seGRef.current;
-      const seIRefEl = seIRef.current;
-      const seN2RefEl = seN2Ref.current;
-      const seE2RefEl = seE2Ref.current;
-      const seE3RefEl = seE3Ref.current;
-      const seR2RefEl = seR2Ref.current;
-      
-      if (!seE1RefEl || !seN1RefEl || !seGRefEl || !seIRefEl || !seN2RefEl || !seE2RefEl || !seE3RefEl || !seR2RefEl) return undefined;
-      
-      const svgRect = svg.getBoundingClientRect();
-      const engineerTextRect = engineerText.getBoundingClientRect();
-      const textX = parseFloat(engineerText.getAttribute("x") || "0");
-      const textY = parseFloat(engineerText.getAttribute("y") || "0");
-      const fontSize = parseFloat(engineerText.getAttribute("font-size") || window.getComputedStyle(engineerText).fontSize) || 50;
-      const fontFamily = engineerText.getAttribute("font-family") || '"Floralis Couture", cursive';
-      const letterSpacing = 0.05;
-      
-      const measureLetter = (letter: string, index: number) => {
-        const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        tempText.setAttribute("font-size", `${fontSize}px`);
-        tempText.setAttribute("font-family", fontFamily);
-        tempText.setAttribute("letter-spacing", `${letterSpacing}em`);
-        tempText.setAttribute("x", textX.toString());
-        tempText.setAttribute("y", textY.toString());
-        tempText.setAttribute("text-anchor", "middle");
-        tempText.setAttribute("dominant-baseline", "middle");
-        tempText.textContent = letter;
-        tempText.style.visibility = "hidden";
-        svg.appendChild(tempText);
-        
-        const bbox = tempText.getBBox();
-        
-        let cumulativeX = 0;
-        const letters = ["e", "n", "g", "i", "n", "e", "e", "r"];
-        for (let i = 0; i < index; i++) {
-          const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          prevTemp.setAttribute("font-size", `${fontSize}px`);
-          prevTemp.setAttribute("font-family", fontFamily);
-          prevTemp.setAttribute("letter-spacing", `${letterSpacing}em`);
-          prevTemp.textContent = letters[i];
-          prevTemp.style.visibility = "hidden";
-          svg.appendChild(prevTemp);
-          const prevBbox = prevTemp.getBBox();
-          cumulativeX += prevBbox.width + (fontSize * letterSpacing);
-          svg.removeChild(prevTemp);
-        }
-        
-        svg.removeChild(tempText);
-        
-        return {
-          x: textX + cumulativeX - (engineerTextRect.width / 2),
-          y: textY,
-          width: bbox.width,
-          height: bbox.height,
-          centerX: textX + cumulativeX - (engineerTextRect.width / 2) + bbox.width / 2,
-          centerY: textY
-        };
-      };
-      
-      const e1Pos = measureLetter("e", 0);
-      const n1Pos = measureLetter("n", 1);
-      const gPos = measureLetter("g", 2);
-      const iPos = measureLetter("i", 3);
-      const n2Pos = measureLetter("n", 4);
-      const e2Pos = measureLetter("e", 5);
-      const e3Pos = measureLetter("e", 6);
-      const rPos = measureLetter("r", 7);
-      
-      // Get SVG transform to convert coordinates
-      const svgTransform = svg.getScreenCTM();
-      const scaleX = svgTransform ? svgTransform.a : 1;
-      const scaleY = svgTransform ? svgTransform.d : 1;
-      
-      const e1ScreenX = svgRect.left + (e1Pos.centerX * scaleX);
-      const e1ScreenY = svgRect.top + (e1Pos.centerY * scaleY);
-      const n1ScreenX = svgRect.left + (n1Pos.centerX * scaleX);
-      const n1ScreenY = svgRect.top + (n1Pos.centerY * scaleY);
-      const gScreenX = svgRect.left + (gPos.centerX * scaleX);
-      const gScreenY = svgRect.top + (gPos.centerY * scaleY);
-      const iScreenX = svgRect.left + (iPos.centerX * scaleX);
-      const iScreenY = svgRect.top + (iPos.centerY * scaleY);
-      const n2ScreenX = svgRect.left + (n2Pos.centerX * scaleX);
-      const n2ScreenY = svgRect.top + (n2Pos.centerY * scaleY);
-      const e2ScreenX = svgRect.left + (e2Pos.centerX * scaleX);
-      const e2ScreenY = svgRect.top + (e2Pos.centerY * scaleY);
-      const e3ScreenX = svgRect.left + (e3Pos.centerX * scaleX);
-      const e3ScreenY = svgRect.top + (e3Pos.centerY * scaleY);
-      const rScreenX = svgRect.left + (rPos.centerX * scaleX);
-      const rScreenY = svgRect.top + (rPos.centerY * scaleY);
-      
-      const originalDot = document.createElement("div");
-      originalDot.className = "original-i-dot-se";
-      
-      const heroSection = document.getElementById("hero");
-      if (!heroSection) return undefined;
-      heroSection.appendChild(originalDot);
-      
-      const dotSize = Math.max(iPos.width * 0.25, 20);
-      
-      // Set initial styles directly on the element to ensure visibility
-      originalDot.style.width = `${dotSize}px`;
-      originalDot.style.height = `${dotSize}px`;
-      originalDot.style.borderRadius = "50%";
-      originalDot.style.backgroundColor = "#C92924";
-      originalDot.style.position = "fixed";
-      originalDot.style.zIndex = "1001";
-      originalDot.style.opacity = "1";
-      originalDot.style.left = "0px";
-      originalDot.style.top = "0px";
-      originalDot.style.display = "block";
-      originalDot.style.visibility = "visible";
-      originalDot.style.pointerEvents = "none";
-      originalDot.style.transformOrigin = "center center";
-      originalDot.style.willChange = "transform, opacity";
-      originalDot.style.border = "none";
-      originalDot.style.boxShadow = "none";
-      
-      // Force a reflow to ensure element is in DOM
-      void originalDot.offsetHeight;
-      
-      gsap.set(originalDot, {
-        x: iScreenX - (dotSize / 2),
-        y: iScreenY - (dotSize / 2),
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        immediateRender: true,
-        force3D: true,  // Use 3D transforms for better performance and visibility
-        overwrite: "auto"
-      });
-      
-      // Force another reflow after GSAP set to ensure it's applied
-      void originalDot.offsetHeight;
-      
-      // Double-check the element is visible
-      if (originalDot.style.opacity !== "1" || originalDot.style.visibility !== "visible") {
-        originalDot.style.opacity = "1";
-        originalDot.style.visibility = "visible";
-      }
-      
-      const dotTimeline = gsap.timeline({ immediateRender: true });
-      
-      dotTimeline.set(seIRefEl, {
-        textContent: "ı",
-      });
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { 
-            scaleX: 1.2,
-            scaleY: 0.7,
-            opacity: 1,
-            duration: 0.2,
-            ease: "power2.out"
-          },
-          { 
-            y: iScreenY - 40,
-            scaleY: 0.9,
-            scaleX: 1.1,
-            opacity: 1,
-            duration: 0.5,
-            ease: "power4.out"
-          },
-          { 
-            x: n2ScreenX - (dotSize / 2),
-            y: n2ScreenY - 20,
-            scaleY: 0.75,
-            scaleX: 1,
-            backgroundColor: "#E55A3A",
-            opacity: 1,
-            duration: 0.3,
-            ease: "sine.inOut"
-          }
-        ],
-        immediateRender: true
-      });
-      
-      dotTimeline.to(seIRefEl, {
-        fill: "#C92924",
-        duration: 0.3,
-        ease: "power2.out"
-      }, "-=0.5");
-      
-      dotTimeline.to(originalDot, {
-        y: n2ScreenY + 5,
-        scaleY: 1.2,
-        backgroundColor: "#E55A3A",
-        opacity: 1,
-        duration: 0.2,
-        ease: "power2.in",
-        immediateRender: true
-      });
-      
-      dotTimeline.to(originalDot, {
-        y: n2ScreenY,
-        scaleY: 0.8,
-        backgroundColor: "#C92924",
-        opacity: 1,
-        duration: 0.15,
-        ease: "bounce.out",
-        immediateRender: true,
-        onComplete: () => {
-          if (seN2RefEl) {
-            gsap.to(seN2RefEl, {
-              fill: "#C92924",
-              duration: 0.3,
-              ease: "power2.out",
-            });
-          }
-        }
-      });
-      
-      dotTimeline.to(originalDot, { 
-        scaleY: 1,
-        opacity: 1,
-        duration: 0.1,
-        immediateRender: true
-      });
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { x: e2ScreenX - (dotSize / 2), y: e2ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
-          { y: e2ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
-          {
-            y: e2ScreenY,
-            scaleY: 0.8,
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.15,
-            ease: "bounce.out",
-            onComplete: () => {
-              if (seE2RefEl) {
-                gsap.to(seE2RefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          },
-          { scaleY: 1, opacity: 1, duration: 0.1 }
-        ],
-        immediateRender: true
-      }, "+=0.2");
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { x: e3ScreenX - (dotSize / 2), y: e3ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
-          { y: e3ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
-          {
-            y: e3ScreenY,
-            scaleY: 0.8,
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.15,
-            ease: "bounce.out",
-            onComplete: () => {
-              if (seE3RefEl) {
-                gsap.to(seE3RefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          },
-          { scaleY: 1, opacity: 1, duration: 0.1 }
-        ],
-        immediateRender: true
-      }, "+=0.2");
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { x: rScreenX - (dotSize / 2), y: rScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.out" },
-          { y: rScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.2, ease: "power2.in" },
-          {
-            y: rScreenY,
-            scaleY: 0.8,
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.15,
-            ease: "bounce.out",
-            onComplete: () => {
-              if (seR2RefEl) {
-                gsap.to(seR2RefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          },
-          { scaleY: 1, opacity: 1, duration: 0.1 }
-        ],
-        immediateRender: true
-      }, "+=0.2");
-      
-      dotTimeline.to(originalDot, {
-        keyframes: [
-          { 
-            backgroundColor: "#FEF0EB", 
-            y: rScreenY - 20, 
-            scaleY: 0.75, 
-            opacity: 1, 
-            duration: 0.2, 
-            ease: "power2.out",
-            onStart: () => {
-              originalDot.style.border = "2px solid #C92924";
-              originalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
-            }
-          },
-          { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
-        ],
-        immediateRender: true
-      }, "+=0.3");
-      
-      dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
-      
-      const finalDot = document.createElement("div");
-      finalDot.className = "final-i-dot-se";
-      seFinalDotRef.current = finalDot;
-      
-      heroSection.appendChild(finalDot);
-      
-      const finalDotSize = dotSize;
-      
-      // Set initial styles directly on the element to ensure visibility
-      finalDot.style.width = `${finalDotSize}px`;
-      finalDot.style.height = `${finalDotSize}px`;
-      finalDot.style.borderRadius = "50%";
-      finalDot.style.backgroundColor = "#C92924";
-      finalDot.style.position = "fixed";
-      finalDot.style.zIndex = "1001";
-      finalDot.style.opacity = "1";
-      finalDot.style.left = "0px";
-      finalDot.style.top = "0px";
-      finalDot.style.display = "block";
-      finalDot.style.visibility = "visible";
-      finalDot.style.pointerEvents = "none";
-      finalDot.style.transformOrigin = "center center";
-      finalDot.style.willChange = "transform, opacity";
-      finalDot.style.border = "none";
-      finalDot.style.boxShadow = "none";
-      
-      // Force a reflow to ensure element is in DOM
-      void finalDot.offsetHeight;
-      
-      gsap.set(finalDot, {
-        x: iScreenX - (finalDotSize / 2),
-        y: -50,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        immediateRender: true,
-        force3D: true
-      });
-      
-      // Force another reflow after GSAP set
-      void finalDot.offsetHeight;
-      
-      // Double-check the element is visible
-      if (finalDot.style.opacity !== "1" || finalDot.style.visibility !== "visible") {
-        finalDot.style.opacity = "1";
-        finalDot.style.visibility = "visible";
-      }
-      
-      const finalDotTimeline = gsap.timeline({ immediateRender: true });
-      
-      finalDotTimeline.to(finalDot, {
-        keyframes: [
-          { x: iScreenX - (finalDotSize / 2) - 3, opacity: 1, duration: 0.15, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2) + 3, opacity: 1, duration: 0.15, ease: "power1.inOut" },
-          { x: iScreenX - (finalDotSize / 2), opacity: 1, duration: 0.15, ease: "power1.inOut" }
-        ],
-        immediateRender: true
-      });
-      
-      finalDotTimeline.to(finalDot, {
-        keyframes: [
-          { 
-            y: iScreenY + 40, 
-            backgroundColor: "#F9D5CC", 
-            opacity: 1, 
-            duration: 0.3, 
-            ease: "power2.in",
-            onStart: () => {
-              finalDot.style.border = "2px solid #C92924";
-              finalDot.style.boxShadow = "0 0 4px rgba(201, 41, 36, 0.5)";
-            }
-          },
-          { 
-            y: iScreenY + 20, 
-            scaleY: 0.7, 
-            backgroundColor: "#E55A3A", 
-            opacity: 1, 
-            duration: 0.12, 
-            ease: "power2.out",
-            onStart: () => {
-              finalDot.style.border = "none";
-              finalDot.style.boxShadow = "none";
-            }
-          },
-          { 
-            y: iScreenY, 
-            scaleY: 1, 
-            backgroundColor: "#C92924",
-            opacity: 1,
-            duration: 0.18, 
-            ease: "power2.out",
-            onComplete: () => {
-              if (seIRefEl) {
-                gsap.to(seIRefEl, {
-                  fill: "#C92924",
-                  duration: 0.3,
-                  ease: "power2.out",
-                });
-              }
-            }
-          }
-        ],
-        immediateRender: true
-      });
-      
-      finalDotTimeline.to(finalDot, {
-        duration: 0.4
-      });
-      
-      finalDotTimeline.to(finalDot, {
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => {
-          if (finalDot && finalDot.parentNode) {
-            finalDot.style.display = "none";
-          }
-        }
-      });
-      
-      dotTimeline.add(finalDotTimeline);
-      
-      return dotTimeline;
-    };
+    // Software Engineer dot animation removed - only handwriting animation exists
     
     // Handle window resize
     const handleResize = () => {
       if (portfolWidth > 0 && portfolElement) {
+        const svg = numberSevenRef.current;
+        if (!svg) return;
+        
         const newPortfolRect = portfolElement.getBoundingClientRect();
         const newScreenHeight = window.innerHeight;
         const newAvailableHeight = newScreenHeight - newPortfolRect.bottom;
