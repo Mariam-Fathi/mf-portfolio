@@ -32,6 +32,36 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
   const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
   const numberSevenRef = useRef<SVGSVGElement | null>(null);
+  // Refs for SVG Mariam letters
+  const svgMRef = useRef<SVGTSpanElement | null>(null);
+  const svgA1Ref = useRef<SVGTSpanElement | null>(null);
+  const svgRRef = useRef<SVGTSpanElement | null>(null);
+  const svgIRef = useRef<SVGTSpanElement | null>(null);
+  const svgA2Ref = useRef<SVGTSpanElement | null>(null);
+  const svgM2Ref = useRef<SVGTSpanElement | null>(null);
+  const svgMariamTextRef = useRef<SVGTextElement | null>(null);
+  const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
+  // Refs for Software Engineer SVG letters
+  const softwareEngineerSvgRef = useRef<SVGSVGElement | null>(null);
+  const seSRef = useRef<SVGTSpanElement | null>(null);
+  const seORef = useRef<SVGTSpanElement | null>(null);
+  const seFRef = useRef<SVGTSpanElement | null>(null);
+  const seTRef = useRef<SVGTSpanElement | null>(null);
+  const seWRef = useRef<SVGTSpanElement | null>(null);
+  const seA1Ref = useRef<SVGTSpanElement | null>(null);
+  const seR1Ref = useRef<SVGTSpanElement | null>(null);
+  const seERef = useRef<SVGTSpanElement | null>(null);
+  const seE1Ref = useRef<SVGTSpanElement | null>(null);
+  const seN1Ref = useRef<SVGTSpanElement | null>(null);
+  const seGRef = useRef<SVGTSpanElement | null>(null);
+  const seIRef = useRef<SVGTSpanElement | null>(null);
+  const seN2Ref = useRef<SVGTSpanElement | null>(null);
+  const seE2Ref = useRef<SVGTSpanElement | null>(null);
+  const seE3Ref = useRef<SVGTSpanElement | null>(null);
+  const seR2Ref = useRef<SVGTSpanElement | null>(null);
+  const seSoftwareTextRef = useRef<SVGTextElement | null>(null);
+  const seEngineerTextRef = useRef<SVGTextElement | null>(null);
+  const seFinalDotRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -49,19 +79,47 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         }
       });
     }
-    // Also hide any original dots that might still be visible
-    const heroSection = document.getElementById("hero");
-    if (heroSection) {
-      const dots = heroSection.querySelectorAll('.original-i-dot, .final-i-dot');
-      dots.forEach((dot) => {
-        const htmlDot = dot as HTMLElement;
-        if (htmlDot.style.display !== "none") {
-          gsap.to(htmlDot, {
+    // Hide SVG final dot if it exists
+    if (svgFinalDotRef.current && svgFinalDotRef.current.style.display !== "none") {
+      gsap.to(svgFinalDotRef.current, {
             opacity: 0,
             scale: 0,
             duration: 0.3,
             ease: "power2.in",
             onComplete: () => {
+          if (svgFinalDotRef.current) {
+            svgFinalDotRef.current.style.display = "none";
+            }
+        }
+      });
+    }
+    // Hide Software Engineer final dot if it exists
+    if (seFinalDotRef.current && seFinalDotRef.current.style.display !== "none") {
+      gsap.to(seFinalDotRef.current, {
+        opacity: 0,
+        scale: 0,
+                duration: 0.3,
+        ease: "power2.in",
+              onComplete: () => {
+          if (seFinalDotRef.current) {
+            seFinalDotRef.current.style.display = "none";
+          }
+        }
+      });
+    }
+    // Also hide any original dots that might still be visible
+    const heroSection = document.getElementById("hero");
+    if (heroSection) {
+      const dots = heroSection.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
+      dots.forEach((dot) => {
+        const htmlDot = dot as HTMLElement;
+        if (htmlDot.style.display !== "none") {
+          gsap.to(htmlDot, {
+          opacity: 0,
+            scale: 0,
+            duration: 0.3,
+          ease: "power2.in",
+          onComplete: () => {
               htmlDot.style.display = "none";
             }
           });
@@ -72,496 +130,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   };
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Initial hide all letters
-      const letters = document.querySelectorAll('.hero-letter');
-      gsap.set(letters, { opacity: 0, y: 100, rotationX: 90 });
-
-      const nameEntrance = gsap.timeline();
-
-      nameEntrance.fromTo('.hero-mar .hero-letter', {
-        opacity: 0,
-        y: 100,
-        rotationX: 90
-      }, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-        immediateRender: false
-      });
-
-      nameEntrance.fromTo('.hero-iam .hero-letter', {
-        opacity: 0,
-        y: 100,
-        rotationX: 90
-      }, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: "elastic.out(1.2, 0.8)",
-        immediateRender: false
-      }, "-=0.3");
-
-      const masterTimeline = gsap.timeline({
-        onComplete: () => setIsAnimationComplete(true)
-      });
-
-      masterTimeline.add(nameEntrance);
-      
-      const buildDotTimeline = () => {
-        // Get the elements for dot animation
-        const iMariam = iRef.current;
-        const rLetter = rRef.current;
-        const a2Letter = a2mRef.current;
-        const mMariam = mMariamRef.current;
-        const amContainer = amContainerRef.current;
-      
-        if (!iMariam || !rLetter || !a2Letter || !mMariam || !amContainer) return undefined;
-      
-        const iMariamRect = iMariam.getBoundingClientRect();
-        const a2Rect = a2Letter.getBoundingClientRect();
-        const mMariamRect = mMariam.getBoundingClientRect();
-      
-        const heroSection = document.getElementById("hero");
-        if (!heroSection) return undefined;
-        const heroRect = heroSection.getBoundingClientRect();
-      
-        const iMariamCenterX = iMariamRect.left - heroRect.left + iMariamRect.width / 2;
-        const iMariamCenterY = iMariamRect.top - heroRect.top + (iMariamRect.height * 0.25);
-        const a2CenterX = a2Rect.left - heroRect.left + a2Rect.width / 2;
-        const a2CenterY = a2Rect.top - heroRect.top + a2Rect.height / 2;
-        const mCenterX = mMariamRect.left - heroRect.left + mMariamRect.width / 2;
-        const mCenterY = mMariamRect.top - heroRect.top + mMariamRect.height / 2;
-      
-        const originalDot = document.createElement("div");
-        originalDot.className = "original-i-dot";
-      
-        heroSection.appendChild(originalDot);
-      
-        const dotSize = Math.max(iMariamRect.width * 0.25, 35);
-      
-        gsap.set(originalDot, {
-          width: `${dotSize}px`,
-          height: `${dotSize}px`,
-          borderRadius: "50%",
-          backgroundColor: "#C92924",
-          position: "absolute",
-          zIndex: 1000,
-          opacity: 1,
-          left: 0,
-          top: 0,
-          x: iMariamCenterX - (dotSize / 2),
-          y: iMariamCenterY - (dotSize / 2),
-          rotation: 0,
-        });
-      
-        const dotTimeline = gsap.timeline();
-      
-        dotTimeline.set(iRef.current, {
-          textContent: "ı",
-          transformOrigin: "bottom center"
-        });
-      
-        // Wiggle animation on the "i" position
-        dotTimeline.to(originalDot, {
-          keyframes: [
-            { x: iMariamCenterX - (dotSize / 2), duration: .15, ease: "elastic" },
-          ]
-        });
-    
-        // STUCK JUMP from "i" to "a" - gets stuck, struggles, then jumps
-        dotTimeline.to(originalDot, {
-          keyframes: [
-            { 
-              // Build up energy for the real jump - compression
-              scaleX: 1.2,
-              scaleY: 0.7,
-              duration: 0.2,
-              ease: "power2.out"
-            },
-            { 
-              // EXPLOSIVE BREAK FREE JUMP!
-              y: iMariamCenterY - 80,
-              scaleY: 0.9,
-              scaleX: 1.1,
-              duration: 0.7,
-              ease: "power4.out"
-            },
-            { 
-              // Arc smoothly to "a" position
-              x: a2CenterX - (dotSize / 2),
-              y: a2CenterY - 50,
-              scaleY: 0.75,
-              scaleX: 1,
-              backgroundColor: "#E55A3A",
-              duration: 0.4,
-              ease: "sine.inOut"
-            }
-          ]
-        });
-        dotTimeline.to(iRef.current, {
-          color: "#C92924",
-          duration: 0.4,
-          ease: "power2.out"
-        }, "-=0.7");
-      
-        // Continue with the existing "a" landing animation
-        dotTimeline.to(originalDot, { 
-          y: a2CenterY - 70, 
-          duration: 0.2, 
-          ease: "sine.inOut" 
-        });
-        
-        dotTimeline.to(originalDot, {
-          y: a2CenterY + 10,
-          scaleY: 1.2,
-          backgroundColor: "#E55A3A",
-          duration: 0.25,
-          ease: "power2.in"
-        });
-        
-        dotTimeline.to(originalDot, {
-          y: a2CenterY,
-          scaleY: 0.8,
-          backgroundColor: "#C92924",
-          duration: 0.15,
-          ease: "bounce.out",
-          onComplete: () => {
-                if (a2mRef.current) {
-              gsap.to(a2mRef.current, {
-                color: "#C92924",
-                duration: 0.3,
-                ease: "power2.out",
-                onComplete: function() {
-                  // Color is handled by GSAP
-                }
-              });
-            }
-          }
-        });
-        
-        dotTimeline.to(originalDot, { 
-          scaleY: 1, 
-          duration: 0.1 
-        });
-      
-        // Continue with the rest of the animation to "m"
-        dotTimeline.to(originalDot, {
-          keyframes: [
-            { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.3, ease: "power2.out" },
-            { y: mCenterY - 120, duration: 0.2, ease: "sine.inOut" },
-            { y: mCenterY + 20, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.in" },
-            {
-              y: mCenterY,
-              scaleY: 0.8,
-              backgroundColor: "#C92924",
-              duration: 0.15,
-              ease: "bounce.out",
-              onComplete: () => {
-                if (mMariamRef.current) {
-                  gsap.to(mMariamRef.current, {
-                    color: "#C92924",
-                    duration: 0.3,
-                    ease: "power2.out",
-                    onComplete: function() {
-                      // Color is handled by GSAP
-                    }
-                  });
-                }
-              }
-            },
-            { scaleY: 1, duration: 0.1 }
-          ]
-        }, "+=0.3");
-      
-        dotTimeline.to(originalDot, {
-          keyframes: [
-            { backgroundColor: "#FEF0EB", y: mCenterY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
-            { y: heroRect.height + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
-          ]
-        }, "+=0.3");
-      
-        dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
-      
-        const finalDot = document.createElement("div");
-        finalDot.className = "final-i-dot";
-        finalDotRef.current = finalDot;
-
-        heroSection.appendChild(finalDot);
-      
-        const finalDotSize = dotSize;
-      
-        gsap.set(finalDot, {
-          width: `${finalDotSize}px`,
-          height: `${finalDotSize}px`,
-          borderRadius: "50%",
-          backgroundColor: "#C92924",
-          position: "absolute",
-          zIndex: 1000,
-          opacity: 1,
-          left: 0,
-          top: 0,
-          x: iMariamCenterX - (finalDotSize / 2),
-          y: -50,
-          rotation: 0,
-          scale: 1
-        });
-      
-        const finalDotTimeline = gsap.timeline();
-      
-        // EXACT SAME MOTION as the original dot's first movement on "i"
-        finalDotTimeline.to(finalDot, {
-          keyframes: [
-            { x: iMariamCenterX - (finalDotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
-            { x: iMariamCenterX - (finalDotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
-            { x: iMariamCenterX - (finalDotSize / 2), duration: 0.2, ease: "power1.inOut" }
-          ]
-        });
-      
-        finalDotTimeline.to(finalDot, {
-          keyframes: [
-            { y: iMariamCenterY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" },
-            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.15, ease: "power2.out" },
-            { 
-              y: iMariamCenterY, 
-              scaleY: 1, 
-              backgroundColor: "#C92924",
-              duration: 0.2, 
-              ease: "power2.out",
-              onComplete: () => {
-                // Land permanently on "i" - change the "i" color and make it stay
-                if (iRef.current) {
-                  gsap.to(iRef.current, {
-                    color: "#C92924",
-                    duration: 0.3,
-                    ease: "power2.out",
-                    onComplete: function() {
-                      // Color is handled by GSAP
-                    }
-                  });
-                }
-              }
-            }
-          ]
-        });
-      
-        // Keep the dot visible for a moment, then fade it out
-        finalDotTimeline.to(finalDot, {
-          duration: 0.5
-        });
-        
-        // Hide the final dot after it finishes its motion
-        finalDotTimeline.to(finalDot, {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.4,
-          ease: "power2.in",
-          onComplete: () => {
-            if (finalDot && finalDot.parentNode) {
-              finalDot.style.display = "none";
-            }
-          }
-        });
-        
-        // Add "software engineer" handwriting animation after dot finishes
-        finalDotTimeline.call(() => {
-          const softwareText = softwareRef.current;
-          const engineerText = engineerRef.current;
-          
-          if (!softwareText || !engineerText) {
-            console.warn("software or engineer ref is null");
-            return;
-          }
-          
-          // Wait a bit for the SVG to render, then convert text to path for DrawSVG effect
-          setTimeout(() => {
-            const svg = softwareText.ownerSVGElement;
-            if (!svg) {
-              console.warn("SVG element not found");
-              return;
-            }
-            
-            // Helper function to animate a text element
-            const animateText = (textElement: SVGTextElement, delay: number = 0) => {
-              // Get the text element's bounding box first (while hidden)
-              let bbox;
-              try {
-                // Temporarily make it visible to get bbox, then hide again
-                gsap.set(textElement, { opacity: 0.01, strokeOpacity: 0.01 });
-                bbox = textElement.getBBox();
-                // If bbox is empty or invalid, use fallback
-                if (!bbox || bbox.width === 0) {
-                  throw new Error("Empty bbox");
-                }
-              } catch (e) {
-                console.warn("Could not get BBox, using fallback", e);
-                // Fallback: estimate based on text content
-                const textContent = textElement.textContent || "";
-                const fontSize = parseFloat(window.getComputedStyle(textElement).fontSize) || 24;
-                const estimatedWidth = textContent.length * fontSize * 0.6; // rough estimate
-                bbox = { width: estimatedWidth, height: fontSize };
-              }
-              
-              // Estimate path length based on text width
-              // Multiply by 1.8 to account for curves and letter complexity
-              const estimatedPathLength = bbox.width * 1.8;
-              
-              // Set initial stroke-dasharray and stroke-dashoffset for DrawSVG effect
-              gsap.set(textElement, {
-                strokeDasharray: estimatedPathLength,
-                strokeDashoffset: estimatedPathLength,
-                fillOpacity: 0,
-                strokeOpacity: 1,
-                opacity: 1
-              });
-              
-              // Animate the stroke-dashoffset to create handwriting drawing effect
-              gsap.to(textElement, {
-                strokeDashoffset: 0,
-                duration: 2.5,
-                delay: delay,
-                ease: "power1.inOut", // Linear ease for more natural handwriting feel
-                onComplete: () => {
-                  // After drawing completes, fade in the fill and fade out the stroke
-                  gsap.to(textElement, {
-                    fillOpacity: 1,
-                    strokeOpacity: 0,
-                    duration: 0.6,
-                    ease: "power2.out"
-                  });
-                }
-              });
-            };
-            
-            // Make SVG visible
-            gsap.set(svg, {
-              opacity: 1
-            });
-            
-            // Animate "software" first, then "engineer" below it
-            animateText(softwareText, 0);
-            animateText(engineerText, 0.3); // Start engineer slightly after software
-          }, 300); // Small delay to ensure SVG is rendered and font is loaded
-        }, [], "+=0.3");
-        
-        dotTimeline.add(finalDotTimeline);
-        
-        return dotTimeline;
-      };
-
-      // Add dot animation
-      masterTimeline.add(() => {
-        const dotTimeline = buildDotTimeline();
-        if (dotTimeline) {
-          const nameEntranceDuration = nameEntrance.duration();
-          const dotStartTime = Math.max(0, nameEntranceDuration - 0.3);
-          masterTimeline.add(dotTimeline, dotStartTime);
-        }
-      });
-
-    }, headingRef);
-
-    return () => {
-      ctx.revert();
-      // Remove any created dots
-      document.querySelectorAll('.original-i-dot').forEach(dot => dot.remove());
-      document.querySelectorAll('.final-i-dot').forEach(dot => dot.remove());
-      finalDotRef.current = null;
-    };
+    // Set animation complete immediately since we removed HTML Mariam
+    setIsAnimationComplete(true);
   }, []);
 
-  // Calculate font size for "software engineer" to match "iam" width
-  useEffect(() => {
-    if (!isAnimationComplete) return;
+  // Removed HTML Mariam animations - now using only SVG Mariam
 
-    const calculateFontSize = () => {
-      if (!iamRef.current || !softwareRef.current || !engineerRef.current) return;
-
-      // Measure the width of "iam"
-      const iamRect = iamRef.current.getBoundingClientRect();
-      const iamWidth = iamRect.width;
-
-      if (iamWidth === 0) {
-        // Retry after a short delay if not yet rendered
-        setTimeout(calculateFontSize, 100);
-        return;
-      }
-
-      // Use canvas for more accurate text measurement
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      if (!context) {
-        setTimeout(calculateFontSize, 100);
-        return;
-      }
-
-      // Measure both words and use the wider one
-      context.font = '100px "Floralis Couture", cursive';
-      const softwareMetrics = context.measureText("software");
-      const engineerMetrics = context.measureText("engineer");
-      const baseWidth = Math.max(softwareMetrics.width, engineerMetrics.width);
-
-      if (baseWidth === 0) {
-        setTimeout(calculateFontSize, 100);
-        return;
-      }
-
-      // Calculate the font size - make it smaller than iam width (about 60% of iam width)
-      const ratio = (iamWidth / baseWidth) * 0.6; // 60% of iam width for smaller size
-      const targetFontSize = 100 * ratio;
-
-      // Convert to rem and create responsive clamp
-      const fontSizeInRem = targetFontSize / 16;
-      const minSize = Math.max(1.5, fontSizeInRem * 0.7);
-      const maxSize = Math.min(6, fontSizeInRem * 1.3);
-      const vwSize = (targetFontSize / window.innerWidth) * 100;
-
-      setSoftwareEngineerFontSize(`clamp(${minSize.toFixed(2)}rem, ${vwSize.toFixed(2)}vw, ${maxSize.toFixed(2)}rem)`);
-
-      // Position and rotate the text above "iam" as a sloped sign
-      if (iamRef.current && iamWrapperRef.current && softwareEngineerWrapperRef.current) {
-        const iamRect = iamRef.current.getBoundingClientRect();
-        const iamWrapperRect = iamWrapperRef.current.getBoundingClientRect();
-        
-        // Fixed rotation for consistent slope (always the same)
-        const fixedRotation = -8; // Fixed -8 degree slope
-        
-        // Calculate position relative to iam-wrapper
-        const iamCenterX = iamRect.left - iamWrapperRect.left + iamRect.width / 2;
-        const iamTop = iamRect.top - iamWrapperRect.top;
-        
-        // Position above "iam" - centered vertically to account for both lines
-        // Shift up enough so both "software" and "engineer" are visible above "iam"
-        const offsetY = -iamRect.height * 0.5; // Position above "iam"
-        
-        // Center the SVG wrapper with "iam"
-        // SVG text is centered at x="350" (center of 700px SVG), so we center the wrapper
-        const svgWidth = 700;
-        const translateX = iamCenterX - svgWidth / 2; // Center the SVG with "iam"
-        const translateY = iamTop + offsetY;
-        
-        setSoftwareEngineerTransform(
-          `translate(${translateX}px, ${translateY}px) rotate(${fixedRotation}deg)`
-        );
-      }
-    };
-
-    // Wait for elements to be rendered and font to load
-    const timeoutId = setTimeout(calculateFontSize, 300);
-    
-    // Also recalculate on resize
-    window.addEventListener("resize", calculateFontSize);
-
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener("resize", calculateFontSize);
-    };
-  }, [isAnimationComplete]);
+  // Removed font size calculation for HTML "iam" - now using SVG only
 
   // Animate portfolio header on mount
   useEffect(() => {
@@ -969,15 +544,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     svg.setAttribute("width", `${mariamWidth}px`);
     svg.setAttribute("height", `${mariamHeight}px`);
     
-    // Position SVG so its TOP edge is exactly at PORTFOL bottom (no gap)
-    // This ensures the number 7 starts directly below PORTFOL with zero spacing
+    // Position SVG so its BOTTOM edge is at screen bottom
+    // This ensures Mariam is anchored at the bottom of the viewport
     svg.style.position = "fixed";
     svg.style.left = "0px";
-    svg.style.top = `${portfolBottom}px`; // Top of SVG = PORTFOL bottom (no gap, no space)
-    svg.style.bottom = "auto"; // Remove bottom positioning
+    svg.style.top = "auto";
+    svg.style.bottom = "0px"; // Anchor SVG at bottom of viewport
     svg.style.margin = "0";
     svg.style.padding = "0";
-    svg.style.height = `${mariamHeight}px`; // Explicit height to reach screen bottom
+    svg.style.height = `${mariamHeight}px`; // Explicit height
     svg.style.width = `${mariamWidth}px`; // Full screen width
     svg.style.overflow = "visible"; // Ensure no clipping
     
@@ -987,9 +562,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       // Position x at left edge (edge to edge, no padding)
       textElement.setAttribute("x", "0");
       
-      // Position y at exactly 0 (top of SVG = PORTFOL bottom, no gap)
-      textElement.setAttribute("y", "0");
-      textElement.setAttribute("dominant-baseline", "hanging");
+      // Position y at bottom of SVG (Mariam anchored at bottom of viewport)
+      // We'll adjust this after measuring to ensure bottom alignment
+      textElement.setAttribute("y", `${mariamHeight}px`);
+      textElement.setAttribute("dominant-baseline", "baseline");
       textElement.setAttribute("text-anchor", "start");
       textElement.setAttribute("dx", "0");
       
@@ -1000,20 +576,22 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       textElement.setAttribute("letter-spacing", "0"); // No letter spacing
       // No text-transform - keep "Mariam" as is (only first letter capital)
       
-      // Measure and adjust y position to eliminate gap after rendering
+      // Measure and adjust y position to align bottom of text with bottom of SVG
       requestAnimationFrame(() => {
         try {
           const textBbox = (textElement as SVGTextElement).getBBox();
-          const currentY = parseFloat(textElement.getAttribute("y") || "0");
-          const textActualTop = currentY + textBbox.y;
+          const currentY = parseFloat(textElement.getAttribute("y") || mariamHeight.toString());
           
-          // We want textActualTop to be exactly 0 (aligned with PORTFOL bottom)
-          if (textActualTop !== 0) {
-            const yAdjustment = -textActualTop;
+          // Calculate bottom of text in SVG coordinates
+          const textBottom = currentY + textBbox.y + textBbox.height;
+          
+          // We want text bottom to be exactly at mariamHeight (bottom of SVG = bottom of viewport)
+          if (Math.abs(textBottom - mariamHeight) > 0.1) {
+            const yAdjustment = mariamHeight - (textBbox.y + textBbox.height);
             textElement.setAttribute("y", yAdjustment.toString());
           }
         } catch (e) {
-          // If measurement fails, keep y at 0
+          // If measurement fails, keep y at mariamHeight
         }
       });
       
@@ -1048,30 +626,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                 // If text is slightly smaller than screen, center it or keep at 0
                 textElement.setAttribute("x", "0");
                 
-                // Fix vertical gap: ensure top of text is at y=0 (no gap from PORTFOL)
-                const newCurrentY = parseFloat(textElement.getAttribute("y") || "0");
-                const newTextActualTop = newCurrentY + newBbox.y;
-                // We want the top of the text to be exactly at y=0 (aligned with PORTFOL bottom)
-                if (Math.abs(newTextActualTop) > 0.1) {
-                  const yTopAdjustment = newCurrentY - newTextActualTop;
-                  textElement.setAttribute("y", yTopAdjustment.toString());
-                  
-                  // Re-measure after y adjustment
-                  const adjustedBbox = (textElement as SVGTextElement).getBBox();
-                  const adjustedTextBottomY = adjustedBbox.y + adjustedBbox.height;
-                  
-                  // Now ensure bottom-left corner is at screen bottom-left
-                  if (adjustedTextBottomY < mariamHeight) {
-                    const finalY = parseFloat(textElement.getAttribute("y") || "0") + (mariamHeight - adjustedTextBottomY);
-                    textElement.setAttribute("y", finalY.toString());
-                  }
-                } else {
-                  // If top is already aligned, just adjust bottom
-                  const textBottomY = newBbox.y + newBbox.height;
-                  if (textBottomY < mariamHeight) {
-                    const yOffset = mariamHeight - textBottomY;
-                    textElement.setAttribute("y", `${yOffset}px`);
-                  }
+                // Ensure bottom of text is aligned with bottom of SVG (bottom of viewport)
+                const newCurrentY = parseFloat(textElement.getAttribute("y") || mariamHeight.toString());
+                const newTextBottom = newCurrentY + newBbox.y + newBbox.height;
+                
+                // We want the bottom of the text to be exactly at mariamHeight (bottom of SVG)
+                if (Math.abs(newTextBottom - mariamHeight) > 0.1) {
+                  const yBottomAdjustment = mariamHeight - (newBbox.y + newBbox.height);
+                  textElement.setAttribute("y", yBottomAdjustment.toString());
                 }
               } catch (e) {
                 // Ignore
@@ -1080,6 +642,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           } else {
             // Font size is correct, just ensure positioning
             textElement.setAttribute("x", "0");
+            // Ensure bottom alignment
+            requestAnimationFrame(() => {
+              try {
+                const bbox = (textElement as SVGTextElement).getBBox();
+                const currentY = parseFloat(textElement.getAttribute("y") || mariamHeight.toString());
+                const textBottom = currentY + bbox.y + bbox.height;
+                if (Math.abs(textBottom - mariamHeight) > 0.1) {
+                  const yAdjustment = mariamHeight - (bbox.y + bbox.height);
+                  textElement.setAttribute("y", yAdjustment.toString());
+                }
+              } catch (e) {
+                // Ignore
+              }
+            });
           }
           
           // Position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes
@@ -1088,6 +664,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             requestAnimationFrame(() => {
               try {
                 positionTextsOnM(textElement as SVGTextElement, svg, fontSize);
+                
+                // Start dot animation after positioning is complete
+                // Wait a bit longer to ensure text is fully rendered and positioned
+                setTimeout(() => {
+                  const svgDotTimeline = buildSvgDotTimeline();
+                  if (svgDotTimeline) {
+                    // Start animation with a slight delay after positioning
+                    svgDotTimeline.play();
+                  }
+                }, 800);
               } catch (e) {
                 // Ignore
               }
@@ -1178,7 +764,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           const turningIdeasTextHeight = turningIdeasBbox.height; // This will be the vertical height when rotated
           
           // Calculate offset from stroke (small gap to prevent overlap)
-          const offsetFromStroke = 0; // pixels offset from the actual stroke
+          const offsetFromStroke = -16; // pixels offset from the actual stroke
           
           // Calculate center point of the stroke for rotation
           const strokeCenterY = leftStrokeStartY + (leftStrokeHeight / 2);
@@ -1208,7 +794,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           const realLifeProductsTextHeight = realLifeProductsBbox.height; // This will be the vertical height when rotated
           
           // Calculate offset from stroke (small gap to prevent overlap)
-          const offsetFromStroke = 0; // pixels offset from the actual stroke
+          const offsetFromStroke = -16; // pixels offset from the actual stroke
           
           // Calculate center point of the stroke for rotation
           const strokeCenterY = rightStrokeStartY + (rightStrokeHeight / 2);
@@ -1225,9 +811,902 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           realLifeProducts.setAttribute("opacity", "0.6");
           realLifeProducts.setAttribute("fill", "#280B0B");
         }
+        
+        // Position "software engineer" above the "iam" part (i-a-m letters)
+        const softwareText = seSoftwareTextRef.current;
+        const engineerText = seEngineerTextRef.current;
+        
+        if (softwareText && engineerText) {
+          // Measure the "iam" part (i-a-m letters) of Mariam
+          const measureIam = () => {
+            const tempIam = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tempIam.setAttribute("font-size", `${mariamFontSize}px`);
+            tempIam.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+            tempIam.setAttribute("font-weight", "700");
+            tempIam.setAttribute("letter-spacing", "0");
+            tempIam.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
+            tempIam.setAttribute("y", mariamTextElement.getAttribute("y") || "0");
+            tempIam.setAttribute("dominant-baseline", mariamTextElement.getAttribute("dominant-baseline") || "hanging");
+            tempIam.setAttribute("text-anchor", "start");
+            tempIam.textContent = "iam";
+            tempIam.style.visibility = "hidden";
+            svg.appendChild(tempIam);
+            
+            const iamBbox = tempIam.getBBox();
+            svg.removeChild(tempIam);
+            
+            // Calculate position of "iam" relative to "Mariam"
+            // "iam" starts after "Mar" (M-a-r)
+            const measureMar = () => {
+              const tempMar = document.createElementNS("http://www.w3.org/2000/svg", "text");
+              tempMar.setAttribute("font-size", `${mariamFontSize}px`);
+              tempMar.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+              tempMar.setAttribute("font-weight", "700");
+              tempMar.setAttribute("letter-spacing", "0");
+              tempMar.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
+              tempMar.setAttribute("y", mariamTextElement.getAttribute("y") || "0");
+              tempMar.setAttribute("dominant-baseline", mariamTextElement.getAttribute("dominant-baseline") || "hanging");
+              tempMar.setAttribute("text-anchor", "start");
+              tempMar.textContent = "Mar";
+              tempMar.style.visibility = "hidden";
+              svg.appendChild(tempMar);
+              
+              const marBbox = tempMar.getBBox();
+              svg.removeChild(tempMar);
+              return marBbox;
+            };
+            
+            const marBbox = measureMar();
+            const iamStartX = marBbox.x + marBbox.width;
+            const iamCenterX = iamStartX + iamBbox.width / 2;
+            const iamTop = iamBbox.y;
+            
+            return {
+              centerX: iamCenterX,
+              top: iamTop,
+              width: iamBbox.width,
+              height: iamBbox.height
+            };
+          };
+          
+          const iamPos = measureIam();
+          
+          // Calculate font size for software engineer to match iam width (60% of iam width)
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          if (context) {
+            context.font = '100px "Floralis Couture", cursive';
+            const softwareMetrics = context.measureText("software");
+            const engineerMetrics = context.measureText("engineer");
+            const baseWidth = Math.max(softwareMetrics.width, engineerMetrics.width);
+            const ratio = (iamPos.width / baseWidth) * 0.6;
+            const targetFontSize = 100 * ratio;
+            
+            // Set font size
+            const fontSizeInRem = targetFontSize / 16;
+            const minSize = Math.max(1.5, fontSizeInRem * 0.7);
+            const maxSize = Math.min(6, fontSizeInRem * 1.3);
+            const vwSize = (targetFontSize / window.innerWidth) * 100;
+            const fontSizeValue = `clamp(${minSize.toFixed(2)}rem, ${vwSize.toFixed(2)}vw, ${maxSize.toFixed(2)}rem)`;
+            
+            setSoftwareEngineerFontSize(fontSizeValue);
+            
+            // Position software engineer exactly on top of "iam" with rotation
+            const fixedRotation = 0; // -8 degree slope
+            
+            // Get the actual bounding box of "iam" to position exactly above it
+            const iamActualTop = iamPos.top; // Top of "iam" letters
+            const iamActualBottom = iamPos.top + iamPos.height; // Bottom of "iam" letters
+            
+            // Measure software text to center it
+            const tempSoftware = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tempSoftware.setAttribute("font-size", `${targetFontSize}px`);
+            tempSoftware.setAttribute("font-family", '"Floralis Couture", cursive');
+            tempSoftware.setAttribute("letter-spacing", "0.05em");
+            tempSoftware.textContent = "software";
+            tempSoftware.style.visibility = "hidden";
+            svg.appendChild(tempSoftware);
+            const softwareBbox = tempSoftware.getBBox();
+            svg.removeChild(tempSoftware);
+            
+            const tempEngineer = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            tempEngineer.setAttribute("font-size", `${targetFontSize}px`);
+            tempEngineer.setAttribute("font-family", '"Floralis Couture", cursive');
+            tempEngineer.setAttribute("letter-spacing", "0.05em");
+            tempEngineer.textContent = "engineer";
+            tempEngineer.style.visibility = "hidden";
+            svg.appendChild(tempEngineer);
+            const engineerBbox = tempEngineer.getBBox();
+            svg.removeChild(tempEngineer);
+            
+            // Calculate total height of both lines
+            const totalHeight = softwareBbox.height + engineerBbox.height;
+            
+            // Position exactly on top of "iam" - align bottom of "engineer" with top of "iam"
+            // Use negative spacing to achieve exact positioning (can overlap if needed)
+            const spacing = -120; // Negative spacing for exact positioning (adjust as needed for overlap)
+            const engineerY = iamActualTop - spacing;
+            const softwareY = engineerY - engineerBbox.height +200;
+            
+            // Position software text
+            softwareText.setAttribute("x", iamPos.centerX.toString());
+            softwareText.setAttribute("y", softwareY.toString());
+            softwareText.setAttribute("font-size", fontSizeValue);
+            softwareText.setAttribute("text-anchor", "middle");
+            softwareText.setAttribute("dominant-baseline", "hanging");
+            softwareText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${softwareY})`);
+            
+            // Position engineer text
+            engineerText.setAttribute("x", (iamPos.centerX+100).toString());
+            engineerText.setAttribute("y", engineerY.toString());
+            engineerText.setAttribute("font-size", fontSizeValue);
+            engineerText.setAttribute("text-anchor", "middle");
+            engineerText.setAttribute("dominant-baseline", "hanging");
+            engineerText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${engineerY})`);
+            
+            // Start handwriting animation after positioning
+            setTimeout(() => {
+              // Helper function to animate a text element
+              const animateText = (textElement: SVGTextElement, delay: number = 0) => {
+                let bbox;
+                try {
+                  gsap.set(textElement, { opacity: 0.01, strokeOpacity: 0.01 });
+                  bbox = textElement.getBBox();
+                  if (!bbox || bbox.width === 0) {
+                    throw new Error("Empty bbox");
+                  }
+                } catch (e) {
+                  console.warn("Could not get BBox, using fallback", e);
+                  const textContent = textElement.textContent || "";
+                  const fontSize = parseFloat(window.getComputedStyle(textElement).fontSize) || 24;
+                  const estimatedWidth = textContent.length * fontSize * 0.6;
+                  bbox = { width: estimatedWidth, height: fontSize };
+                }
+                
+                const estimatedPathLength = bbox.width * 1.8;
+                
+                gsap.set(textElement, {
+                  strokeDasharray: estimatedPathLength,
+                  strokeDashoffset: estimatedPathLength,
+                  fillOpacity: 0,
+                  strokeOpacity: 1,
+                  opacity: 1
+                });
+                
+                gsap.to(textElement, {
+                  strokeDashoffset: 0,
+                  duration: 2.5,
+                  delay: delay,
+                  ease: "power1.inOut",
+                  onComplete: () => {
+                    gsap.to(textElement, {
+                      fillOpacity: 1,
+                      strokeOpacity: 0,
+                      duration: 0.6,
+                      ease: "power2.out"
+                    });
+                  }
+                });
+              };
+              
+              animateText(softwareText, 0);
+              animateText(engineerText, 0.3);
+            }, 300);
+          }
+        }
       } catch (e) {
         // Ignore errors
       }
+    };
+    
+    // Function to animate dot along SVG Mariam letters (same as HTML Mariam)
+    const buildSvgDotTimeline = () => {
+      if (!svgMariamTextRef.current || !numberSevenRef.current) return undefined;
+      
+      const svg = numberSevenRef.current;
+      const svgMariamText = svgMariamTextRef.current;
+      const svgIRefEl = svgIRef.current;
+      const svgA2RefEl = svgA2Ref.current;
+      const svgM2RefEl = svgM2Ref.current;
+      
+      if (!svgIRefEl || !svgA2RefEl || !svgM2RefEl) return undefined;
+      
+      // Get the text element's position and font properties
+      const textRect = svgMariamText.getBBox();
+      const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
+      const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
+      const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
+      const fontFamily = svgMariamText.getAttribute("font-family") || '"Space Grotesk", "Inter", sans-serif';
+      const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
+      
+      // Get actual letter positions by measuring with temporary text elements
+      // that match the exact positioning of the tspan elements
+      const measureLetter = (letter: string, index: number) => {
+        const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tempText.setAttribute("font-size", `${fontSize}px`);
+        tempText.setAttribute("font-family", fontFamily);
+        tempText.setAttribute("font-weight", "700");
+        tempText.setAttribute("letter-spacing", "0");
+        tempText.setAttribute("x", textX.toString());
+        tempText.setAttribute("y", textY.toString());
+        tempText.setAttribute("dominant-baseline", dominantBaseline);
+        tempText.setAttribute("text-anchor", "start");
+        tempText.textContent = letter;
+        tempText.style.visibility = "hidden";
+        svg.appendChild(tempText);
+        
+        const bbox = tempText.getBBox();
+        // Calculate cumulative x position by measuring all previous letters
+        let cumulativeX = 0;
+        for (let i = 0; i < index; i++) {
+          const prevLetter = ["M", "a", "r", "i", "a", "m"][i];
+          const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          prevTemp.setAttribute("font-size", `${fontSize}px`);
+          prevTemp.setAttribute("font-family", fontFamily);
+          prevTemp.setAttribute("font-weight", "700");
+          prevTemp.setAttribute("letter-spacing", "0");
+          prevTemp.setAttribute("x", textX.toString());
+          prevTemp.setAttribute("y", textY.toString());
+          prevTemp.setAttribute("dominant-baseline", dominantBaseline);
+          prevTemp.setAttribute("text-anchor", "start");
+          prevTemp.textContent = prevLetter;
+          prevTemp.style.visibility = "hidden";
+          svg.appendChild(prevTemp);
+          const prevBbox = prevTemp.getBBox();
+          cumulativeX += prevBbox.width;
+          svg.removeChild(prevTemp);
+        }
+        
+        svg.removeChild(tempText);
+        
+        return {
+          x: textX + cumulativeX,
+          y: textY + bbox.y,
+          width: bbox.width,
+          height: bbox.height,
+          centerX: textX + cumulativeX + bbox.width / 2,
+          centerY: textY + bbox.y + bbox.height / 2
+        };
+      };
+      
+      // Measure positions for i, a, m (letters 3, 4, 5 in "Mariam")
+      const iPos = measureLetter("i", 3);
+      const a2Pos = measureLetter("a", 4);
+      const m2Pos = measureLetter("m", 5);
+      
+      if (!iPos || !a2Pos || !m2Pos) return undefined;
+      
+      // Get positions relative to the SVG
+      const svgRect = svg.getBoundingClientRect();
+      
+      // Calculate positions relative to SVG viewport
+      // For "i", the dot should be at 25% from top of the letter
+      const iCenterX = iPos.centerX;
+      const iCenterY = iPos.y + (iPos.height * 0.25);
+      const a2CenterX = a2Pos.centerX;
+      const a2CenterY = a2Pos.centerY;
+      const m2CenterX = m2Pos.centerX;
+      const m2CenterY = m2Pos.centerY;
+      
+      // Create dot element
+      const originalDot = document.createElement("div");
+      originalDot.className = "original-i-dot-svg";
+      
+      // Append to SVG's parent or body
+      const heroSection = document.getElementById("hero");
+      if (!heroSection) return undefined;
+      heroSection.appendChild(originalDot);
+      
+      const dotSize = Math.max(iPos.width * 0.25, 35);
+      
+      // Position dot relative to viewport (since SVG is fixed)
+      // The SVG coordinates need to be converted to screen coordinates
+      // Since the SVG uses a viewBox, we need to account for the transform
+      const svgViewBox = svg.viewBox.baseVal;
+      const svgWidth = svgRect.width;
+      const svgHeight = svgRect.height;
+      const viewBoxWidth = svgViewBox.width || svgWidth;
+      const viewBoxHeight = svgViewBox.height || svgHeight;
+      const scaleX = svgWidth / viewBoxWidth;
+      const scaleY = svgHeight / viewBoxHeight;
+      
+      // Account for viewBox origin if it exists
+      const viewBoxX = svgViewBox.x || 0;
+      const viewBoxY = svgViewBox.y || 0;
+      
+      // Convert SVG coordinates to screen coordinates
+      // SVG coordinates are relative to the viewBox, so we need to account for the viewBox origin and scale
+      const iScreenX = svgRect.left + ((iCenterX - viewBoxX) * scaleX);
+      const iScreenY = svgRect.top + ((iCenterY - viewBoxY) * scaleY);
+      const a2ScreenX = svgRect.left + ((a2CenterX - viewBoxX) * scaleX);
+      const a2ScreenY = svgRect.top + ((a2CenterY - viewBoxY) * scaleY);
+      const m2ScreenX = svgRect.left + ((m2CenterX - viewBoxX) * scaleX);
+      const m2ScreenY = svgRect.top + ((m2CenterY - viewBoxY) * scaleY);
+      
+      // Set initial styles directly on the element to ensure visibility
+      originalDot.style.width = `${dotSize}px`;
+      originalDot.style.height = `${dotSize}px`;
+      originalDot.style.borderRadius = "50%";
+      originalDot.style.backgroundColor = "#C92924";
+      originalDot.style.position = "fixed";
+      originalDot.style.zIndex = "1001";
+      originalDot.style.opacity = "1";
+      originalDot.style.left = "0px";
+      originalDot.style.top = "0px";
+      originalDot.style.display = "block";
+      originalDot.style.visibility = "visible";
+      originalDot.style.pointerEvents = "none";
+      
+      // Use GSAP for transform properties
+      gsap.set(originalDot, {
+        x: iScreenX - (dotSize / 2),
+        y: iScreenY - (dotSize / 2),
+        rotation: 0,
+        scale: 1,
+        opacity: 1
+      });
+      
+      const dotTimeline = gsap.timeline();
+      
+      // Change "i" to "ı" (dotless i)
+      dotTimeline.set(svgIRefEl, {
+        textContent: "ı",
+      });
+      
+      // Wiggle animation on the "i" position
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { x: iScreenX - (dotSize / 2), opacity: 1, duration: .15, ease: "elastic" },
+        ]
+      });
+      
+      // STUCK JUMP from "i" to "a" - same as HTML version
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { 
+            scaleX: 1.2,
+            scaleY: 0.7,
+            opacity: 1,
+            duration: 0.2,
+            ease: "power2.out"
+          },
+          { 
+            y: iScreenY - 80,
+            scaleY: 0.9,
+            scaleX: 1.1,
+            opacity: 1,
+            duration: 0.7,
+            ease: "power4.out"
+          },
+          { 
+            x: a2ScreenX - (dotSize / 2),
+            y: a2ScreenY - 50,
+            scaleY: 0.75,
+            scaleX: 1,
+            backgroundColor: "#E55A3A",
+            opacity: 1,
+            duration: 0.4,
+            ease: "sine.inOut"
+          }
+        ]
+      });
+      
+      dotTimeline.to(svgIRefEl, {
+        fill: "#C92924",
+        duration: 0.4,
+        ease: "power2.out"
+      }, "-=0.7");
+      
+      // Continue with "a" landing animation
+      dotTimeline.to(originalDot, { 
+        y: a2ScreenY - 70,
+        opacity: 1,
+        duration: 0.2, 
+        ease: "sine.inOut" 
+      });
+      
+      dotTimeline.to(originalDot, {
+        y: a2ScreenY + 10,
+        scaleY: 1.2,
+        backgroundColor: "#E55A3A",
+        opacity: 1,
+        duration: 0.25,
+        ease: "power2.in"
+      });
+      
+      dotTimeline.to(originalDot, {
+        y: a2ScreenY,
+        scaleY: 0.8,
+        backgroundColor: "#C92924",
+        opacity: 1,
+        duration: 0.15,
+        ease: "bounce.out",
+        onComplete: () => {
+          if (svgA2RefEl) {
+            gsap.to(svgA2RefEl, {
+              fill: "#C92924",
+              duration: 0.3,
+              ease: "power2.out",
+            });
+          }
+        }
+      });
+      
+      dotTimeline.to(originalDot, { 
+        scaleY: 1,
+        opacity: 1,
+        duration: 0.1 
+      });
+      
+      // Continue with animation to "m"
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { x: m2ScreenX - (dotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", opacity: 1, duration: 0.3, ease: "power2.out" },
+          { y: m2ScreenY - 120, opacity: 1, duration: 0.2, ease: "sine.inOut" },
+          { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#E55A3A", opacity: 1, duration: 0.25, ease: "power2.in" },
+          {
+            y: m2ScreenY,
+            scaleY: 0.8,
+            backgroundColor: "#C92924",
+            opacity: 1,
+            duration: 0.15,
+            ease: "bounce.out",
+            onComplete: () => {
+              if (svgM2RefEl) {
+                gsap.to(svgM2RefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          },
+          { scaleY: 1, opacity: 1, duration: 0.1 }
+        ]
+      }, "+=0.3");
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { backgroundColor: "#FEF0EB", y: m2ScreenY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+          { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
+        ]
+      }, "+=0.3");
+      
+      dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
+      
+      // Create final dot that lands on "i"
+      const finalDot = document.createElement("div");
+      finalDot.className = "final-i-dot-svg";
+      svgFinalDotRef.current = finalDot;
+      
+      heroSection.appendChild(finalDot);
+      
+      const finalDotSize = dotSize;
+      
+      // Set initial final dot position and make it visible
+      finalDot.style.width = `${finalDotSize}px`;
+      finalDot.style.height = `${finalDotSize}px`;
+      finalDot.style.borderRadius = "50%";
+      finalDot.style.backgroundColor = "#C92924";
+      finalDot.style.position = "fixed";
+      finalDot.style.zIndex = "1001";
+      finalDot.style.opacity = "1";
+      finalDot.style.left = "0px";
+      finalDot.style.top = "0px";
+      finalDot.style.display = "block";
+      finalDot.style.pointerEvents = "none";
+      
+      gsap.set(finalDot, {
+        x: iScreenX - (finalDotSize / 2),
+        y: -50,
+        rotation: 0,
+        scale: 1
+      });
+      
+      const finalDotTimeline = gsap.timeline();
+      
+      // Same motion as original dot's first movement on "i"
+      finalDotTimeline.to(finalDot, {
+        keyframes: [
+          { x: iScreenX - (finalDotSize / 2) - 5, duration: 0.2, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2) + 5, duration: 0.2, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2), duration: 0.2, ease: "power1.inOut" }
+        ]
+      });
+      
+      finalDotTimeline.to(finalDot, {
+        keyframes: [
+          { y: iScreenY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" },
+          { y: iScreenY + 30, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.15, ease: "power2.out" },
+          { 
+            y: iScreenY, 
+            scaleY: 1, 
+            backgroundColor: "#C92924",
+            duration: 0.2, 
+            ease: "power2.out",
+            onComplete: () => {
+              if (svgIRefEl) {
+                gsap.to(svgIRefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          }
+        ]
+      });
+      
+      // Keep the dot visible for a moment, then fade it out
+      finalDotTimeline.to(finalDot, {
+        duration: 0.5
+      });
+      
+      finalDotTimeline.to(finalDot, {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: () => {
+          if (finalDot && finalDot.parentNode) {
+            finalDot.style.display = "none";
+          }
+        }
+      });
+      
+      dotTimeline.add(finalDotTimeline);
+      
+      return dotTimeline;
+    };
+    
+    // Function to animate dot along Software Engineer letters
+    const buildSoftwareEngineerDotTimeline = () => {
+      if (!seEngineerTextRef.current || !numberSevenRef.current) return undefined;
+      
+      const svg = numberSevenRef.current;
+      const engineerText = seEngineerTextRef.current;
+      const seE1RefEl = seE1Ref.current;
+      const seN1RefEl = seN1Ref.current;
+      const seGRefEl = seGRef.current;
+      const seIRefEl = seIRef.current;
+      const seN2RefEl = seN2Ref.current;
+      const seE2RefEl = seE2Ref.current;
+      const seE3RefEl = seE3Ref.current;
+      const seR2RefEl = seR2Ref.current;
+      
+      if (!seE1RefEl || !seN1RefEl || !seGRefEl || !seIRefEl || !seN2RefEl || !seE2RefEl || !seE3RefEl || !seR2RefEl) return undefined;
+      
+      const svgRect = svg.getBoundingClientRect();
+      const engineerTextRect = engineerText.getBoundingClientRect();
+      const textX = parseFloat(engineerText.getAttribute("x") || "0");
+      const textY = parseFloat(engineerText.getAttribute("y") || "0");
+      const fontSize = parseFloat(engineerText.getAttribute("font-size") || window.getComputedStyle(engineerText).fontSize) || 50;
+      const fontFamily = engineerText.getAttribute("font-family") || '"Floralis Couture", cursive';
+      const letterSpacing = 0.05;
+      
+      const measureLetter = (letter: string, index: number) => {
+        const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tempText.setAttribute("font-size", `${fontSize}px`);
+        tempText.setAttribute("font-family", fontFamily);
+        tempText.setAttribute("letter-spacing", `${letterSpacing}em`);
+        tempText.setAttribute("x", textX.toString());
+        tempText.setAttribute("y", textY.toString());
+        tempText.setAttribute("text-anchor", "middle");
+        tempText.setAttribute("dominant-baseline", "middle");
+        tempText.textContent = letter;
+        tempText.style.visibility = "hidden";
+        svg.appendChild(tempText);
+        
+        const bbox = tempText.getBBox();
+        
+        let cumulativeX = 0;
+        const letters = ["e", "n", "g", "i", "n", "e", "e", "r"];
+        for (let i = 0; i < index; i++) {
+          const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          prevTemp.setAttribute("font-size", `${fontSize}px`);
+          prevTemp.setAttribute("font-family", fontFamily);
+          prevTemp.setAttribute("letter-spacing", `${letterSpacing}em`);
+          prevTemp.textContent = letters[i];
+          prevTemp.style.visibility = "hidden";
+          svg.appendChild(prevTemp);
+          const prevBbox = prevTemp.getBBox();
+          cumulativeX += prevBbox.width + (fontSize * letterSpacing);
+          svg.removeChild(prevTemp);
+        }
+        
+        svg.removeChild(tempText);
+        
+        return {
+          x: textX + cumulativeX - (engineerTextRect.width / 2),
+          y: textY,
+          width: bbox.width,
+          height: bbox.height,
+          centerX: textX + cumulativeX - (engineerTextRect.width / 2) + bbox.width / 2,
+          centerY: textY
+        };
+      };
+      
+      const e1Pos = measureLetter("e", 0);
+      const n1Pos = measureLetter("n", 1);
+      const gPos = measureLetter("g", 2);
+      const iPos = measureLetter("i", 3);
+      const n2Pos = measureLetter("n", 4);
+      const e2Pos = measureLetter("e", 5);
+      const e3Pos = measureLetter("e", 6);
+      const rPos = measureLetter("r", 7);
+      
+      // Get SVG transform to convert coordinates
+      const svgTransform = svg.getScreenCTM();
+      const scaleX = svgTransform ? svgTransform.a : 1;
+      const scaleY = svgTransform ? svgTransform.d : 1;
+      
+      const e1ScreenX = svgRect.left + (e1Pos.centerX * scaleX);
+      const e1ScreenY = svgRect.top + (e1Pos.centerY * scaleY);
+      const n1ScreenX = svgRect.left + (n1Pos.centerX * scaleX);
+      const n1ScreenY = svgRect.top + (n1Pos.centerY * scaleY);
+      const gScreenX = svgRect.left + (gPos.centerX * scaleX);
+      const gScreenY = svgRect.top + (gPos.centerY * scaleY);
+      const iScreenX = svgRect.left + (iPos.centerX * scaleX);
+      const iScreenY = svgRect.top + (iPos.centerY * scaleY);
+      const n2ScreenX = svgRect.left + (n2Pos.centerX * scaleX);
+      const n2ScreenY = svgRect.top + (n2Pos.centerY * scaleY);
+      const e2ScreenX = svgRect.left + (e2Pos.centerX * scaleX);
+      const e2ScreenY = svgRect.top + (e2Pos.centerY * scaleY);
+      const e3ScreenX = svgRect.left + (e3Pos.centerX * scaleX);
+      const e3ScreenY = svgRect.top + (e3Pos.centerY * scaleY);
+      const rScreenX = svgRect.left + (rPos.centerX * scaleX);
+      const rScreenY = svgRect.top + (rPos.centerY * scaleY);
+      
+      const originalDot = document.createElement("div");
+      originalDot.className = "original-i-dot-se";
+      
+      const heroSection = document.getElementById("hero");
+      if (!heroSection) return undefined;
+      heroSection.appendChild(originalDot);
+      
+      const dotSize = Math.max(iPos.width * 0.25, 20);
+      
+      gsap.set(originalDot, {
+        width: `${dotSize}px`,
+        height: `${dotSize}px`,
+        borderRadius: "50%",
+        backgroundColor: "#C92924",
+        position: "fixed",
+        zIndex: 1001,
+        opacity: 1,
+        left: 0,
+        top: 0,
+        x: iScreenX - (dotSize / 2),
+        y: iScreenY - (dotSize / 2),
+        rotation: 0,
+      });
+      
+      const dotTimeline = gsap.timeline();
+      
+      dotTimeline.set(seIRefEl, {
+        textContent: "ı",
+      });
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { 
+            scaleX: 1.2,
+            scaleY: 0.7,
+            duration: 0.2,
+            ease: "power2.out"
+          },
+          { 
+            y: iScreenY - 40,
+            scaleY: 0.9,
+            scaleX: 1.1,
+            duration: 0.5,
+            ease: "power4.out"
+          },
+          { 
+            x: n2ScreenX - (dotSize / 2),
+            y: n2ScreenY - 20,
+            scaleY: 0.75,
+            scaleX: 1,
+            backgroundColor: "#E55A3A",
+            duration: 0.3,
+            ease: "sine.inOut"
+          }
+        ]
+      });
+      
+      dotTimeline.to(seIRefEl, {
+        fill: "#C92924",
+        duration: 0.3,
+        ease: "power2.out"
+      }, "-=0.5");
+      
+      dotTimeline.to(originalDot, {
+        y: n2ScreenY + 5,
+        scaleY: 1.2,
+        backgroundColor: "#E55A3A",
+        duration: 0.2,
+        ease: "power2.in"
+      });
+      
+      dotTimeline.to(originalDot, {
+        y: n2ScreenY,
+        scaleY: 0.8,
+        backgroundColor: "#C92924",
+        duration: 0.15,
+        ease: "bounce.out",
+        onComplete: () => {
+          if (seN2RefEl) {
+            gsap.to(seN2RefEl, {
+              fill: "#C92924",
+              duration: 0.3,
+              ease: "power2.out",
+            });
+          }
+        }
+      });
+      
+      dotTimeline.to(originalDot, { 
+        scaleY: 1, 
+        duration: 0.1 
+      });
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { x: e2ScreenX - (dotSize / 2), y: e2ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
+          { y: e2ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          {
+            y: e2ScreenY,
+            scaleY: 0.8,
+            backgroundColor: "#C92924",
+            duration: 0.15,
+            ease: "bounce.out",
+            onComplete: () => {
+              if (seE2RefEl) {
+                gsap.to(seE2RefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          },
+          { scaleY: 1, duration: 0.1 }
+        ]
+      }, "+=0.2");
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { x: e3ScreenX - (dotSize / 2), y: e3ScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
+          { y: e3ScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          {
+            y: e3ScreenY,
+            scaleY: 0.8,
+            backgroundColor: "#C92924",
+            duration: 0.15,
+            ease: "bounce.out",
+            onComplete: () => {
+              if (seE3RefEl) {
+                gsap.to(seE3RefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          },
+          { scaleY: 1, duration: 0.1 }
+        ]
+      }, "+=0.2");
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { x: rScreenX - (dotSize / 2), y: rScreenY - 30, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.out" },
+          { y: rScreenY + 5, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.2, ease: "power2.in" },
+          {
+            y: rScreenY,
+            scaleY: 0.8,
+            backgroundColor: "#C92924",
+            duration: 0.15,
+            ease: "bounce.out",
+            onComplete: () => {
+              if (seR2RefEl) {
+                gsap.to(seR2RefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          },
+          { scaleY: 1, duration: 0.1 }
+        ]
+      }, "+=0.2");
+      
+      dotTimeline.to(originalDot, {
+        keyframes: [
+          { backgroundColor: "#FEF0EB", y: rScreenY - 20, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+          { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" }
+        ]
+      }, "+=0.3");
+      
+      dotTimeline.set(originalDot, { display: "none" }, "+=0.5");
+      
+      const finalDot = document.createElement("div");
+      finalDot.className = "final-i-dot-se";
+      seFinalDotRef.current = finalDot;
+      
+      heroSection.appendChild(finalDot);
+      
+      const finalDotSize = dotSize;
+      
+      gsap.set(finalDot, {
+        width: `${finalDotSize}px`,
+        height: `${finalDotSize}px`,
+        borderRadius: "50%",
+        backgroundColor: "#C92924",
+        position: "fixed",
+        zIndex: 1001,
+        opacity: 1,
+        left: 0,
+        top: 0,
+        x: iScreenX - (finalDotSize / 2),
+        y: -50,
+        rotation: 0,
+        scale: 1
+      });
+      
+      const finalDotTimeline = gsap.timeline();
+      
+      finalDotTimeline.to(finalDot, {
+        keyframes: [
+          { x: iScreenX - (finalDotSize / 2) - 3, duration: 0.15, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2) + 3, duration: 0.15, ease: "power1.inOut" },
+          { x: iScreenX - (finalDotSize / 2), duration: 0.15, ease: "power1.inOut" }
+        ]
+      });
+      
+      finalDotTimeline.to(finalDot, {
+        keyframes: [
+          { y: iScreenY + 40, backgroundColor: "#F9D5CC", duration: 0.3, ease: "power2.in" },
+          { y: iScreenY + 20, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.12, ease: "power2.out" },
+          { 
+            y: iScreenY, 
+            scaleY: 1, 
+            backgroundColor: "#C92924",
+            duration: 0.18, 
+            ease: "power2.out",
+            onComplete: () => {
+              if (seIRefEl) {
+                gsap.to(seIRefEl, {
+                  fill: "#C92924",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }
+            }
+          }
+        ]
+      });
+      
+      finalDotTimeline.to(finalDot, {
+        duration: 0.4
+      });
+      
+      finalDotTimeline.to(finalDot, {
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          if (finalDot && finalDot.parentNode) {
+            finalDot.style.display = "none";
+          }
+        }
+      });
+      
+      dotTimeline.add(finalDotTimeline);
+      
+      return dotTimeline;
     };
     
     // Handle window resize
@@ -1278,7 +1757,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         svg.style.width = `${newMariamWidth}px`;
         
         // Update position - top of SVG at PORTFOL bottom (no gap)
-        svg.style.top = `${newPortfolRect.bottom}px`;
+        svg.style.top = "auto";
+        svg.style.bottom = "0px"; // Keep anchored at bottom of viewport
         svg.style.height = `${newAvailableHeight}px`;
         
         // Update Mariam text
@@ -1286,14 +1766,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         if (textEl) {
           // Position x at left edge (edge to edge, no padding)
           textEl.setAttribute("x", "0");
-          textEl.setAttribute("y", "0"); // Top aligned with PORTFOL bottom (no gap)
-          textEl.setAttribute("dominant-baseline", "hanging");
+          textEl.setAttribute("y", `${newAvailableHeight}px`); // Start at bottom, will adjust
+          textEl.setAttribute("dominant-baseline", "baseline");
           textEl.setAttribute("text-anchor", "start");
           textEl.setAttribute("font-size", `${newFontSize}px`);
           textEl.setAttribute("letter-spacing", "0"); // No letter spacing
           // No text-transform - keep "Mariam" as is
           
-          // Adjust to ensure bottom-left reaches screen bottom-left
+          // Adjust to ensure bottom of text aligns with bottom of SVG (bottom of viewport)
           requestAnimationFrame(() => {
             try {
               const bbox = (textEl as SVGTextElement).getBBox();
@@ -1304,14 +1784,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                 const adjustedFontSize = newFontSize * scaleFactor;
                 textEl.setAttribute("font-size", `${adjustedFontSize}px`);
                 
-                // Re-measure and adjust y to align bottom-left
+                // Re-measure and adjust y to align bottom with bottom of SVG
                 requestAnimationFrame(() => {
                   try {
                     const newBbox = (textEl as SVGTextElement).getBBox();
-                    const textBottomY = newBbox.y + newBbox.height;
-                    if (textBottomY < newAvailableHeight) {
-                      const yOffset = newAvailableHeight - textBottomY;
-                      textEl.setAttribute("y", `${yOffset}px`);
+                    const textBottom = newBbox.y + newBbox.height;
+                    if (Math.abs(textBottom - newAvailableHeight) > 0.1) {
+                      const yAdjustment = newAvailableHeight - (newBbox.y + newBbox.height);
+                      textEl.setAttribute("y", yAdjustment.toString());
                     }
                 } catch (e) {
                   // Ignore
@@ -1412,7 +1892,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             const turningIdeasTextHeight = turningIdeasBbox.height; // This will be the vertical height when rotated
             
             // Calculate offset from stroke (small gap to prevent overlap)
-            const offsetFromStroke = 8; // pixels offset from the actual stroke
+            const offsetFromStroke = -16; // pixels offset from the actual stroke
             
             // Calculate center point of the stroke for rotation
             const strokeCenterY = leftStrokeStartY + (leftStrokeHeight / 2);
@@ -1442,7 +1922,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             const realLifeProductsTextHeight = realLifeProductsBbox.height; // This will be the vertical height when rotated
             
             // Calculate offset from stroke (small gap to prevent overlap)
-            const offsetFromStroke = 8; // pixels offset from the actual stroke
+            const offsetFromStroke = -16; // pixels offset from the actual stroke
             
             // Calculate center point of the stroke for rotation
             const strokeCenterY = rightStrokeStartY + (rightStrokeHeight / 2);
@@ -1515,105 +1995,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       <div ref={heroCoverRef} className="hero-cover">
    
 
-        {/* Mariam at Bottom */}
-        <div className="hero-heading-wrapper">
-          <h1
-            ref={headingRef}
-            className="hero-heading font-black text-[clamp(6rem,18vw,18rem)]"
-          >
-            <span className="hero-name">
-            <span className="hero-about-me">Turning ideas</span>
-
-              {/* Horizontal text paragraph on left of Mariam */}
-              {/* <div className="hero-left-text">
-                <p className="hero-left-paragraph">
-Turning ideas into real life products                </p>
-              </div> */}
-              <span className="hero-mar">
-                <span className="hero-m-wrapper">
-                  <span className="hero-about-me-up">into</span>
-                  <span ref={mLetterRef} className="hero-letter">M</span>
-                  <span className="hero-about-me-right">real life products</span>
-                </span>
-                <span ref={a1Ref} className="hero-letter">a</span>
-                <span ref={rRef} className="hero-letter hero-letter-r">
-                  r
-                </span>
-              </span>
-              <span ref={iamWrapperRef} className="hero-iam-wrapper">
-                {/* Software Engineer Text - positioned above "iam" as a sloped sign */}
-                <div ref={softwareEngineerWrapperRef} className="software-engineer-wrapper" style={{ transform: softwareEngineerTransform }}>
-                  <svg
-                    className="software-engineer-svg"
-                    width="700"
-                    height="250"
-                    style={{
-                      fontFamily: '"Floralis Couture", cursive',
-                      fontSize: softwareEngineerFontSize,
-                      overflow: "visible",
-                      pointerEvents: "none",
-                      opacity: 0
-                    }}
-                  >
-                    <text
-                      ref={softwareRef}
-                      x="290"
-                      y="110"
-                      textAnchor="middle"
-                      fill="#280B0B"
-                      fillOpacity="0"
-                      stroke="#280B0B"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeOpacity="0"
-                      style={{
-                        fontFamily: '"Floralis Couture", cursive',
-                        fontSize: softwareEngineerFontSize,
-                        letterSpacing: "0.05em",
-                        fontWeight: "normal"
-                      }}
-                    >
-                      software
-                    </text>
-                    <text
-                      ref={engineerRef}
-                      x="400"
-                      y="150"
-                      textAnchor="middle"
-                      fill="#280B0B"
-                      fillOpacity="0"
-                      stroke="#280B0B"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeOpacity="0"
-                      style={{
-                        fontFamily: '"Floralis Couture", cursive',
-                        fontSize: softwareEngineerFontSize,
-                        letterSpacing: "0.05em",
-                        fontWeight: "normal"
-                      }}
-                    >
-                      engineer
-                    </text>
-                  </svg>
-                </div>
-                <span ref={iamRef} className="hero-iam">
-                  <span className="hero-i-wrapper">
-                    <span ref={iRef} className="hero-letter hero-letter-i">
-                      i
-                    </span>
-                  </span>
-                  <span ref={amContainerRef} className="hero-am">
-                    <span ref={a2mRef} className="hero-letter">a</span>
-                    <span ref={mMariamRef} className="hero-letter">m</span>
-                  </span>
-                </span>
-              </span>
-            </span>
-          </h1>
-        </div>
       </div>
 
       {/* Yellow Frame with Repeating Text - Marquee Style */}
@@ -1664,6 +2045,7 @@ Turning ideas into real life products                </p>
         >
           {/* Mariam text - spans entire screen edge to edge */}
           <text
+            ref={svgMariamTextRef}
             className="hero-mariam-text"
             x="0"
             y="0"
@@ -1673,7 +2055,72 @@ Turning ideas into real life products                </p>
             dominantBaseline="hanging"
             style={{ letterSpacing: "0" }}
           >
-            Mariam
+            <tspan ref={svgMRef}>M</tspan>
+            <tspan ref={svgA1Ref}>a</tspan>
+            <tspan ref={svgRRef}>r</tspan>
+            <tspan ref={svgIRef}>i</tspan>
+            <tspan ref={svgA2Ref}>a</tspan>
+            <tspan ref={svgM2Ref}>m</tspan>
+          </text>
+          
+          {/* Software Engineer Text - positioned above "iam" part */}
+          <text
+            ref={seSoftwareTextRef}
+            className="hero-software-text"
+            x="0"
+            y="0"
+            fill="#280B0B"
+            fillOpacity="0"
+            stroke="#280B0B"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeOpacity="0"
+            fontFamily='"Floralis Couture", cursive'
+            textAnchor="middle"
+            dominantBaseline="middle"
+            style={{
+              letterSpacing: "0.05em",
+              fontWeight: "normal"
+            }}
+          >
+            <tspan ref={seSRef}>s</tspan>
+            <tspan ref={seORef}>o</tspan>
+            <tspan ref={seFRef}>f</tspan>
+            <tspan ref={seTRef}>t</tspan>
+            <tspan ref={seWRef}>w</tspan>
+            <tspan ref={seA1Ref}>a</tspan>
+            <tspan ref={seR1Ref}>r</tspan>
+            <tspan ref={seERef}>e</tspan>
+          </text>
+          <text
+            ref={seEngineerTextRef}
+            className="hero-engineer-text"
+            x="0"
+            y="0"
+            fill="#280B0B"
+            fillOpacity="0"
+            stroke="#280B0B"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeOpacity="0"
+            fontFamily='"Floralis Couture", cursive'
+            textAnchor="middle"
+            dominantBaseline="middle"
+            style={{
+              letterSpacing: "0.05em",
+              fontWeight: "normal"
+            }}
+          >
+            <tspan ref={seE1Ref}>e</tspan>
+            <tspan ref={seN1Ref}>n</tspan>
+            <tspan ref={seGRef}>g</tspan>
+            <tspan ref={seIRef}>i</tspan>
+            <tspan ref={seN2Ref}>n</tspan>
+            <tspan ref={seE2Ref}>e</tspan>
+            <tspan ref={seE3Ref}>e</tspan>
+            <tspan ref={seR2Ref}>r</tspan>
           </text>
           
           {/* TURNING IDEAS text on left stroke of M */}
