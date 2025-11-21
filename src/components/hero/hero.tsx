@@ -147,7 +147,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           width: `${dotSize}px`,
           height: `${dotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#DA451F",
+          backgroundColor: "#C92924",
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -203,7 +203,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           ]
         });
         dotTimeline.to(iRef.current, {
-          color: "#DA451F",
+          color: "#C92924",
           duration: 0.4,
           ease: "power2.out"
         }, "-=0.7");
@@ -218,7 +218,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         dotTimeline.to(originalDot, {
           y: a2CenterY + 10,
           scaleY: 1.2,
-          backgroundColor: "#DF4A2A",
+          backgroundColor: "#E55A3A",
           duration: 0.25,
           ease: "power2.in"
         });
@@ -226,13 +226,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         dotTimeline.to(originalDot, {
           y: a2CenterY,
           scaleY: 0.8,
-          backgroundColor: "#DA451F",
+          backgroundColor: "#C92924",
           duration: 0.15,
           ease: "bounce.out",
           onComplete: () => {
-            if (a2mRef.current) {
+                if (a2mRef.current) {
               gsap.to(a2mRef.current, {
-                color: "#DA451F",
+                color: "#C92924",
                 duration: 0.3,
                 ease: "power2.out",
                 onComplete: function() {
@@ -253,17 +253,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           keyframes: [
             { x: mCenterX - (dotSize / 2), y: mCenterY - 100, scaleY: 0.75, backgroundColor: "#E55A3A", duration: 0.3, ease: "power2.out" },
             { y: mCenterY - 120, duration: 0.2, ease: "sine.inOut" },
-            { y: mCenterY + 20, scaleY: 1.2, backgroundColor: "#DF4A2A", duration: 0.25, ease: "power2.in" },
+            { y: mCenterY + 20, scaleY: 1.2, backgroundColor: "#E55A3A", duration: 0.25, ease: "power2.in" },
             {
               y: mCenterY,
               scaleY: 0.8,
-              backgroundColor: "#DA451F",
+              backgroundColor: "#C92924",
               duration: 0.15,
               ease: "bounce.out",
               onComplete: () => {
                 if (mMariamRef.current) {
                   gsap.to(mMariamRef.current, {
-                    color: "#DA451F",
+                    color: "#C92924",
                     duration: 0.3,
                     ease: "power2.out",
                     onComplete: function() {
@@ -298,7 +298,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           width: `${finalDotSize}px`,
           height: `${finalDotSize}px`,
           borderRadius: "50%",
-          backgroundColor: "#DA451F",
+          backgroundColor: "#C92924",
           position: "absolute",
           zIndex: 1000,
           opacity: 1,
@@ -324,18 +324,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         finalDotTimeline.to(finalDot, {
           keyframes: [
             { y: iMariamCenterY + 60, backgroundColor: "#F9D5CC", duration: 0.4, ease: "power2.in" },
-            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#F4BAA8", duration: 0.15, ease: "power2.out" },
+            { y: iMariamCenterY + 30, scaleY: 0.7, backgroundColor: "#E55A3A", duration: 0.15, ease: "power2.out" },
             { 
               y: iMariamCenterY, 
               scaleY: 1, 
-              backgroundColor: "#DA451F",
+              backgroundColor: "#C92924",
               duration: 0.2, 
               ease: "power2.out",
               onComplete: () => {
                 // Land permanently on "i" - change the "i" color and make it stay
                 if (iRef.current) {
                   gsap.to(iRef.current, {
-                    color: "#DA451F",
+                    color: "#C92924",
                     duration: 0.3,
                     ease: "power2.out",
                     onComplete: function() {
@@ -890,9 +890,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   return (
     <section
       id="hero"
-      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#1e140b] relative overflow-hidden"
+      className="flex h-screen w-full flex-col items-center justify-center text-center text-[#280B0B] relative overflow-hidden"
       style={{
-        backgroundColor: "#F5ECE1",
+        backgroundColor: "#F9E7C9",
       }}
     >
       {/* SVG Filter for Liquid Glass Effect */}
@@ -970,9 +970,9 @@ Turning ideas into real life products                </p>
                       x="290"
                       y="110"
                       textAnchor="middle"
-                      fill="#1e140b"
+                      fill="#280B0B"
                       fillOpacity="0"
-                      stroke="#1e140b"
+                      stroke="#280B0B"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -991,9 +991,9 @@ Turning ideas into real life products                </p>
                       x="400"
                       y="150"
                       textAnchor="middle"
-                      fill="#1e140b"
+                      fill="#280B0B"
                       fillOpacity="0"
-                      stroke="#1e140b"
+                      stroke="#280B0B"
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -1037,7 +1037,7 @@ Turning ideas into real life products                </p>
               <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
               <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
               <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
-              <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#1e140b", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
+              <div className="hero-cover-title-line" style={{ display: "none", height: "1px", backgroundColor: "#280B0B", opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }} aria-hidden="true"></div>
               {/* Site Navigation - appears after portfolio animation, centered on the line */}
               {isPortfolioAnimationComplete && (
                 <nav ref={navRef} className="hero-site-navigation">
@@ -1112,7 +1112,7 @@ Turning ideas into real life products                </p>
           font-size: clamp(1rem, 2vw, 1.25rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
-          color: #1e140b;
+          color: #280B0B;
           margin: 0;
         }
 
@@ -1296,7 +1296,7 @@ Turning ideas into real life products                </p>
           font-weight: 700;
           letter-spacing: 0.06em;
           text-transform: uppercase;
-          color: #14110F;
+          color: #280B0B;
           transition: transform 0.3s ease, writing-mode 0.3s ease, opacity 0.3s ease;
           white-space: nowrap;
         }
@@ -1393,7 +1393,7 @@ Turning ideas into real life products                </p>
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.4em;
-          color: #1e140b;
+          color: #280B0B;
           opacity: 0.6;
           writing-mode: vertical-rl;
           text-orientation: mixed;
@@ -1423,7 +1423,7 @@ Turning ideas into real life products                </p>
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.4em;
-          color: #1e140b;
+          color: #280B0B;
           opacity: 0.6;
           white-space: nowrap;
           line-height: 1.2;
@@ -1442,7 +1442,7 @@ Turning ideas into real life products                </p>
           font-weight: 500;
           text-transform: uppercase;
           letter-spacing: 0.4em;
-          color: #1e140b;
+          color: #280B0B;
           opacity: 0.6;
           writing-mode: vertical-rl;
           text-orientation: mixed;
@@ -1496,7 +1496,7 @@ Turning ideas into real life products                </p>
           font-weight: 400;
           text-transform: lowercase;
           letter-spacing: 0.05em;
-          color: #1e140b;
+          color: #280B0B;
           text-decoration: none;
           opacity: 0.8;
           transition: opacity 0.2s ease;
@@ -1532,7 +1532,7 @@ Turning ideas into real life products                </p>
           font-size: clamp(0.75rem, 1.2vw, 0.95rem);
           font-weight: 400;
           line-height: 1.6;
-          color: #8B7355;
+          color: #280B0B;
           margin: 0;
           padding: 0;
           text-align: left;
@@ -1610,7 +1610,7 @@ Turning ideas into real life products                </p>
           display: inline-block;
           position: relative;
           transform-origin: bottom center;
-          color: #1e140b;
+          color: #280B0B;
           font-family: "Space Grotesk", "Inter", sans-serif;
         }
         
@@ -1644,7 +1644,7 @@ Turning ideas into real life products                </p>
 
         /* Final dot specific style */
         :global(.final-i-dot) {
-          background-color: #DA451F;
+          background-color: #C92924;
         }
 
         .hero-marquee {
@@ -1675,7 +1675,7 @@ Turning ideas into real life products                </p>
           display: inline-block;
           padding: 0 2rem;
           padding-right: 6rem;
-          color: #1A5632;
+          color: #280B0B;
           font-size: clamp(1.5rem, 3vw, 2.5rem);
           font-weight: 700;
           font-family: "Space Grotesk", "Inter", sans-serif;
@@ -1840,7 +1840,7 @@ Turning ideas into real life products                </p>
           display: inline-block;
           padding: 0 2rem;
           padding-right: 2rem;
-          color: #1A5632;
+          color: #280B0B;
           font-size: clamp(1.5rem, 1.5vw, 1.5rem);
           font-weight: 700;
           font-family: "Space Grotesk", "Inter", sans-serif;
@@ -1914,7 +1914,7 @@ Turning ideas into real life products                </p>
           font-size: clamp(3.5rem, 10vw, 6rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
-          color: #1e140b;
+          color: #280B0B;
           font-family: "Space Grotesk", "Inter", sans-serif;
           line-height: 1;
           display: inline-flex;
@@ -1938,7 +1938,7 @@ Turning ideas into real life products                </p>
           transform-origin: left center;
           position: absolute;
           height: 1px;
-          background-color: #1e140b;
+          background-color: #280B0B;
           opacity: 0.4;
           top: 50%;
           transform: translateY(-50%);
