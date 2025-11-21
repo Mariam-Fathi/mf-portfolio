@@ -8,7 +8,7 @@ import GalleryShowcase from "@/components/projects/projects";
 import { Skiper52 } from "@/components/Skiper52";
 import Contact from "@/components/Contact";
 
-type SectionId = "hero" | "work" | "certificates" | "experience" | "skills" | "contact";
+type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
@@ -102,14 +102,6 @@ export default function Home() {
             className={`content-section ${activeSection === "work" ? "active" : ""}`}
           >
             <GalleryShowcase />
-          </section>
-
-          {/* Skills Section */}
-          <section 
-            id="skills-content" 
-            className={`content-section ${activeSection === "skills" ? "active" : ""}`}
-          >
-            SKILLS SECTION
           </section>
 
           {/* Certificates Section */}

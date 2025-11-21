@@ -2235,7 +2235,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
                     <li><a href="#experience" onClick={(e) => { e.preventDefault(); onNavigate('experience'); }}>experience</a></li>
                     <li><a href="#work" onClick={(e) => { e.preventDefault(); onNavigate('work'); }}>projects</a></li>
                     <li><a href="#certificates" onClick={(e) => { e.preventDefault(); onNavigate('certificates'); }}>certificates</a></li>
-                    <li><a href="#skills" onClick={(e) => { e.preventDefault(); onNavigate('skills'); }}>skills</a></li>
                     <li><a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('contact'); }}>contact</a></li>
                   </ul>
                 </nav>

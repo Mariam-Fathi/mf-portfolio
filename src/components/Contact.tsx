@@ -289,7 +289,7 @@ const Contact: React.FC = () => {
           ref={textRef}
           className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] tracking-tight text-[#0F172A] cursor-pointer hover:scale-105 transition-transform duration-300"
         >
-          LET'S TALK
+          MEET ME
         </h1>
 
         <div ref={tilesRef} className="absolute inset-0 hidden lg:block">
