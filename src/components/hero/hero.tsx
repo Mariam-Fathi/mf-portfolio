@@ -5,9 +5,11 @@ import gsap from "gsap";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
+  onReady?: () => void;
+  isActive?: boolean;
 }
 
-const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
+const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const iRef = useRef<HTMLSpanElement | null>(null);
   const rRef = useRef<HTMLSpanElement | null>(null);
@@ -27,6 +29,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const [softwareEngineerFontSize, setSoftwareEngineerFontSize] = useState<string>("clamp(3rem, 6vw, 5rem)");
   const [softwareEngineerTransform, setSoftwareEngineerTransform] = useState<string>("");
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
+  const [isMariamReady, setIsMariamReady] = useState(false);
+  const [isSoftwareEngineerReady, setIsSoftwareEngineerReady] = useState(false);
+  const svgDotTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const seDotTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const softwareEngineerWrapperRef = useRef<HTMLDivElement | null>(null);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
@@ -134,13 +140,94 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     setIsAnimationComplete(true);
   }, []);
 
+  // Call onReady when all calculations are complete (not waiting for animations)
+  useEffect(() => {
+    // Only need Mariam and Software Engineer calculations to be ready
+    // Portfolio animation can happen after onReady is called
+    if (isMariamReady && isSoftwareEngineerReady && onReady) {
+      // Small delay to ensure all DOM updates are complete
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          onReady();
+        });
+      });
+    }
+  }, [isMariamReady, isSoftwareEngineerReady, onReady]);
+
+  // Cleanup animations when hero becomes inactive
+  useEffect(() => {
+    if (!isActive) {
+      // Kill dot animations when hero is not active
+      if (svgDotTimelineRef.current) {
+        svgDotTimelineRef.current.kill();
+        svgDotTimelineRef.current = null;
+      }
+      if (seDotTimelineRef.current) {
+        seDotTimelineRef.current.kill();
+        seDotTimelineRef.current = null;
+      }
+    }
+  }, [isActive]);
+
   // Removed HTML Mariam animations - now using only SVG Mariam
 
   // Removed font size calculation for HTML "iam" - now using SVG only
 
-  // Animate portfolio header on mount
+  // Calculate portfolWidth immediately on mount (needed for Mariam calculations)
   useEffect(() => {
     if (!portfolioHeaderRef.current) return;
+    
+    const calculatePortfolWidth = () => {
+      const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol") as HTMLElement;
+      if (portfolEl) {
+        // Force display to measure width
+        const originalDisplay = portfolEl.style.display;
+        portfolEl.style.display = "inline";
+        const portfolRect = portfolEl.getBoundingClientRect();
+        const portfolWidthValue = portfolRect.width;
+        portfolEl.style.display = originalDisplay;
+        
+        if (portfolWidthValue > 0) {
+          setPortfolWidth(portfolWidthValue);
+        }
+      }
+    };
+    
+    // Try to calculate immediately
+    calculatePortfolWidth();
+    
+    // Also try after a short delay in case elements aren't ready
+    const timeout = setTimeout(calculatePortfolWidth, 100);
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
+  // Animate portfolio header when hero becomes active
+  useEffect(() => {
+    if (!portfolioHeaderRef.current) return;
+    
+    if (!isActive) {
+      // Reset state and visual elements when hero becomes inactive
+      setIsPortfolioAnimationComplete(false);
+      
+      // Reset portfolio elements to initial state
+      const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
+      const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol") as HTMLElement;
+      const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i") as HTMLElement;
+      const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o") as HTMLElement;
+      const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line") as HTMLElement;
+      
+      if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+        // Reset to initial state
+        gsap.set(fullTextEl, { opacity: 1, display: "block" });
+        gsap.set([portfolEl, iEl, oEl], { opacity: 0, display: "none", x: 0, rotation: 0 });
+        gsap.set(lineEl, { opacity: 0, display: "none", width: 0, x: 0 });
+      }
+      return;
+    }
+    
+    // Reset animation state when hero becomes active
+    setIsPortfolioAnimationComplete(false);
 
     let tl: gsap.core.Timeline | null = null;
     let oElement: HTMLElement | null = null;
@@ -267,6 +354,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
         duration: 0.8,
         ease: "power2.inOut",
         transformOrigin: "center center",
+        delay: 1.1, // Slight delay before I starts its motion
         onStart: () => {
           // Simultaneously move O by the width of I (creating push effect)
           if (iWidth > 0) {
@@ -274,10 +362,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               x: iWidth,
               duration: 0.8,
               ease: "power2.inOut",
+              delay: 0.3, // Same delay for O movement to stay synchronized
             });
           }
         },
-      }, "-=0.2");
+      });
 
       // Step 4: Replace I with line
       // Store the original position of I before rotation for line positioning
@@ -362,7 +451,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           // Animate O movement and line expansion simultaneously
           gsap.to(oEl, {
             x: oFinalX,
-            duration: 1.2,
+            duration: 2.5,
             ease: "power2.out",
             onComplete: () => {
               animationComplete = true;
@@ -372,7 +461,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
           
           gsap.to(lineEl, {
             width: finalLineWidth,
-            duration: 1.2,
+            duration: 2.5,
             ease: "power2.out",
           });
         });
@@ -401,7 +490,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
     return () => {
       if (tl) tl.kill();
     };
-  }, []);
+  }, [isActive]);
 
   // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
@@ -665,24 +754,42 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               try {
                 positionTextsOnM(textElement as SVGTextElement, svg, fontSize);
                 
-                // Start dot animation after positioning is complete
-                // Wait a bit longer to ensure text is fully rendered and positioned
-                setTimeout(() => {
-                  const svgDotTimeline = buildSvgDotTimeline();
-                  if (svgDotTimeline) {
-                    // Start animation with a slight delay after positioning
-                    svgDotTimeline.play();
-                  }
-                }, 800);
+                // Mark Mariam as ready after positioning
+                setIsMariamReady(true);
+                
+                // Start dot animation after positioning is complete when hero is active
+                // Reduced delay to make text appear faster
+                if (isActive) {
+                  setTimeout(() => {
+                    // Kill previous timeline if it exists
+                    if (svgDotTimelineRef.current) {
+                      svgDotTimelineRef.current.kill();
+                    }
+                    const svgDotTimeline = buildSvgDotTimeline();
+                    if (svgDotTimeline) {
+                      svgDotTimelineRef.current = svgDotTimeline;
+                      // Start animation with a slight delay after positioning
+                      svgDotTimeline.play();
+                    }
+                  }, 100);
+                }
               } catch (e) {
                 // Ignore
+                setIsMariamReady(true); // Mark ready even on error
               }
             });
           });
         } catch (e) {
           // BBox might not be available immediately
+          setIsMariamReady(true); // Mark ready even on error
         }
       });
+    } else {
+      // If portfolWidth is 0, mark as ready after a short delay
+      setTimeout(() => {
+        setIsMariamReady(true);
+        setIsSoftwareEngineerReady(true);
+      }, 100);
     }
     
     // Function to position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes
@@ -944,8 +1051,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
             engineerText.setAttribute("dominant-baseline", "hanging");
             engineerText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${engineerY})`);
             
-            // Start handwriting animation after positioning
-            setTimeout(() => {
+            // Mark Software Engineer as ready after positioning
+            setIsSoftwareEngineerReady(true);
+            
+            // Start handwriting animation after positioning when hero is active
+            // Reduced delay to make text appear faster
+            if (isActive) {
+              setTimeout(() => {
               // Helper function to animate a text element
               const animateText = (textElement: SVGTextElement, delay: number = 0) => {
                 let bbox;
@@ -991,11 +1103,28 @@ const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
               
               animateText(softwareText, 0);
               animateText(engineerText, 0.3);
-            }, 300);
+              
+              // Start Software Engineer dot animation when hero is active
+              setTimeout(() => {
+                if (seDotTimelineRef.current) {
+                  seDotTimelineRef.current.kill();
+                }
+                const seDotTimeline = buildSoftwareEngineerDotTimeline();
+                if (seDotTimeline) {
+                  seDotTimelineRef.current = seDotTimeline;
+                  seDotTimeline.play();
+                }
+              }, 500); // Start after handwriting animation begins
+            }, 50);
+            }
+          } else {
+            // Mark as ready even if elements don't exist
+            setIsSoftwareEngineerReady(true);
           }
         }
       } catch (e) {
-        // Ignore errors
+        // Ignore errors but mark as ready
+        setIsSoftwareEngineerReady(true);
       }
     };
     

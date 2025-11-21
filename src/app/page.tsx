@@ -13,9 +13,32 @@ type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isHeroReady, setIsHeroReady] = useState(false);
   
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleHeroReady = useCallback(() => {
+    setIsHeroReady(true);
+    
+    // Animate hero entrance with cinematic blur fade in effect
+    if (heroRef.current) {
+      // Start with blur and hidden
+      gsap.set(heroRef.current, {
+        opacity: 0,
+        filter: "blur(15px)"
+      });
+      
+      // Fade in with blur out - same effect as preloader had
+      gsap.to(heroRef.current, {
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 0.8,
+        ease: "power2.out",
+        delay: 0.2, // Small delay for cinematic effect
+      });
+    }
+  }, []);
 
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
@@ -78,10 +101,20 @@ export default function Home() {
 
   return (
     <div className="portfolio-frame">
-      {/* HERO SECTION - Full screen when active */}
+      {/* HERO SECTION - Full screen when active, with cinematic blur entrance */}
       {activeSection === "hero" && (
-        <div ref={heroRef}>
-          <Hero onNavigate={(section: string) => handleNavigate(section as SectionId)} />
+        <div 
+          ref={heroRef}
+          style={{ 
+            opacity: isHeroReady ? 1 : 0,
+            visibility: isHeroReady ? 'visible' : 'hidden'
+          }}
+        >
+          <Hero 
+            onNavigate={(section: string) => handleNavigate(section as SectionId)}
+            onReady={handleHeroReady}
+            isActive={activeSection === "hero" && isHeroReady}
+          />
         </div>
       )}
 
