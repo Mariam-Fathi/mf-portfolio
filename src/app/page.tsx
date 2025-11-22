@@ -7,6 +7,7 @@ import { Skiper19 } from "@/components/Skiper19";
 import GalleryShowcase from "@/components/projects/projects";
 import { Skiper52 } from "@/components/Skiper52";
 import Contact from "@/components/Contact";
+import SectionNavigation from "@/components/SectionNavigation";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
 
@@ -79,29 +80,39 @@ export default function Home() {
 
     } else if (activeSection === "hero") {
       // First navigation away from hero - same blur effect as hero/preloader
-      const targetSection = document.getElementById(`${sectionId}-content`);
-      if (targetSection) {
-        // Set initial blur state - same as hero
-        gsap.set(targetSection, {
-          opacity: 0,
-          x: 0,
-          filter: "blur(15px)"
-        });
-      }
+      // Set section to active first so it becomes visible
+      setActiveSection(sectionId);
       
-      tl.to(`#${sectionId}-content`, {
-        opacity: 1,
-        x: 0,
-        filter: "blur(0px)",
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.2, // Same delay as hero
-        onStart: () => {
-          setActiveSection(sectionId);
-        },
-        onComplete: () => {
-          setIsTransitioning(false);
-        }
+      // Use double requestAnimationFrame to ensure the section is fully rendered before animating
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const targetSection = document.getElementById(`${sectionId}-content`);
+          if (targetSection) {
+            // Set initial blur state - same as hero
+            gsap.set(targetSection, {
+              opacity: 0,
+              x: 0,
+              filter: "blur(15px)",
+              display: "block",
+              clearProps: "transform" // Clear any transform that might interfere
+            });
+            
+            // Animate blur out
+            gsap.to(targetSection, {
+              opacity: 1,
+              x: 0,
+              filter: "blur(0px)",
+              duration: 0.8,
+              ease: "power2.out",
+              delay: 0.2, // Same delay as hero
+              onComplete: () => {
+                setIsTransitioning(false);
+              }
+            });
+          } else {
+            setIsTransitioning(false);
+          }
+        });
       });
 
     } else {
@@ -163,6 +174,12 @@ export default function Home() {
       {/* CONTENT SECTIONS - Only show when not on hero */}
       {activeSection !== "hero" && (
         <div className="content-container" ref={contentRef}>
+          {/* Section Navigation - appears on left side of all sections */}
+          <SectionNavigation 
+            onNavigate={(section: string) => handleNavigate(section as SectionId)}
+            currentSection={activeSection}
+          />
+
           {/* Experience Section */}
           <section 
             id="experience-content" 
@@ -229,14 +246,13 @@ export default function Home() {
           -ms-overflow-style: none;
           padding: 0;
           margin: 0;
+          filter: blur(15px); /* Initial blur state - same as hero/preloader */
         }
         .content-section::-webkit-scrollbar {
           display: none;
         }
 
         .content-section.active {
-          opacity: 1;
-          transform: translateX(0);
           display: block;
           overflow-y: auto;
           overflow-x: hidden;
@@ -244,6 +260,7 @@ export default function Home() {
           -ms-overflow-style: none;
           padding: 0;
           margin: 0;
+          /* Opacity, transform, and filter are controlled by GSAP animations */
         }
         .content-section.active::-webkit-scrollbar {
           display: none;
