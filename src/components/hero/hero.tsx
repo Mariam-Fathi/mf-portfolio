@@ -24,6 +24,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
   const [isDotAnimationComplete, setIsDotAnimationComplete] = useState(false);
+  const [isDotAnimationStarted, setIsDotAnimationStarted] = useState(false);
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
   const [isMariamReady, setIsMariamReady] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
@@ -570,7 +571,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => clearTimeout(timeout);
   }, []);
 
-  // Animate portfolio header when hero becomes active
+  // Animate portfolio header when dot animation starts
   useEffect(() => {
     if (!portfolioHeaderRef.current) return;
     
@@ -578,6 +579,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // Reset state and visual elements when hero becomes inactive
       setIsPortfolioAnimationComplete(false);
       setIsDotAnimationComplete(false);
+      setIsDotAnimationStarted(false);
       
       // Reset Engineer text to hidden state
       if (engineerTextRef.current) {
@@ -585,6 +587,35 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           opacity: 0,
           filter: "blur(10px)",
         });
+      }
+
+      // Reset TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text to hidden state
+      if (numberSevenRef.current) {
+        const svg = numberSevenRef.current;
+        const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+        const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+        const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+        const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+
+        if (turningIdeas) {
+          turningIdeas.setAttribute("opacity", "0");
+          turningIdeas.style.filter = "blur(10px)";
+        }
+
+        if (realLifeProducts) {
+          realLifeProducts.setAttribute("opacity", "0");
+          realLifeProducts.style.filter = "blur(10px)";
+        }
+
+        if (ideasText) {
+          ideasText.setAttribute("opacity", "0");
+          ideasText.style.filter = "blur(10px)";
+        }
+
+        if (intoText) {
+          intoText.setAttribute("opacity", "0");
+          intoText.style.filter = "blur(10px)";
+        }
       }
       
       // Reset portfolio elements to initial state
@@ -600,8 +631,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         gsap.set([portfolEl, iEl, oEl], { opacity: 0, display: "none", x: 0, rotation: 0 });
         gsap.set(lineEl, { opacity: 0, display: "none", width: 0, x: 0 });
       }
+      // Reset dot animation started state when hero becomes inactive
+      setIsDotAnimationStarted(false);
       return;
     }
+    
+    // Wait for dot animation to start before starting portfolio animation
+    if (!isDotAnimationStarted) return;
     
     // Reset portfolio animation state when hero becomes active
     setIsPortfolioAnimationComplete(false);
@@ -867,7 +903,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       if (tl) tl.kill();
     };
-  }, [isActive]);
+  }, [isActive, isDotAnimationStarted]);
 
   // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
@@ -933,9 +969,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isPortfolioAnimationComplete]);
 
-  // Trigger dot animation when portfolio animation completes and Mariam is ready
+  // Trigger dot animation when Mariam is ready (not waiting for portfolio)
   useEffect(() => {
-    if (!isActive || !isMariamReady || !isPortfolioAnimationComplete) return;
+    if (!isActive || !isMariamReady) return;
     
     // Wait a bit to ensure all refs are ready and DOM is fully rendered
     const timeoutId = setTimeout(() => {
@@ -950,6 +986,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               // Small delay to ensure dot is rendered before animation starts
               setTimeout(() => {
                 dotTimeline.play();
+                setIsDotAnimationStarted(true);
               }, 100);
             }
           });
@@ -962,6 +999,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             if (dotTimeline) {
               setTimeout(() => {
                 dotTimeline.play();
+                setIsDotAnimationStarted(true);
               }, 50);
             }
           });
@@ -972,22 +1010,72 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [isActive, isMariamReady, isPortfolioAnimationComplete]);
+  }, [isActive, isMariamReady]);
 
-  // Animate Engineer text to appear with blur effect after dot animation completes
+  // Animate Engineer text and text on M strokes to appear with blur effect after dot animation completes
   useEffect(() => {
-    if (!isDotAnimationComplete || !engineerTextRef.current) return;
-
-    const engineerText = engineerTextRef.current;
+    if (!isDotAnimationComplete) return;
 
     // Animate Engineer text with blur fade-in effect
-    gsap.to(engineerText, {
-      opacity: 1,
-      filter: "blur(0px)",
-      duration: 1.2,
-      ease: "power2.out",
-      delay: 0.3,
-    });
+    if (engineerTextRef.current) {
+      const engineerText = engineerTextRef.current;
+      gsap.to(engineerText, {
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1.2,
+        ease: "power2.out",
+        delay: 0.3,
+      });
+    }
+
+    // Animate TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text with blur fade-in effect
+    if (numberSevenRef.current) {
+      const svg = numberSevenRef.current;
+      const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+      const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+      const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+      const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+
+      if (turningIdeas) {
+        gsap.to(turningIdeas, {
+          opacity: 0.6,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.3,
+        });
+      }
+
+      if (realLifeProducts) {
+        gsap.to(realLifeProducts, {
+          opacity: 0.6,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.3,
+        });
+      }
+
+      if (ideasText) {
+        gsap.to(ideasText, {
+          opacity: 0.6,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.3,
+        });
+      }
+
+      if (intoText) {
+        gsap.to(intoText, {
+          opacity: 0.6,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power2.out",
+          delay: 0.3,
+        });
+      }
+    }
   }, [isDotAnimationComplete]);
 
 
@@ -1263,8 +1351,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           intoText.setAttribute("y", (mY + 100).toString());
           intoText.setAttribute("text-anchor", "end"); // Align to the right
           intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-          intoText.setAttribute("opacity", "0.6");
+          intoText.setAttribute("opacity", "0");
           intoText.setAttribute("fill", "#C92924");
+          intoText.style.filter = "blur(10px)";
           // No rotation - keep it horizontal
           intoText.setAttribute("transform", "");
         }
@@ -1286,8 +1375,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           ideasText.setAttribute("y", (mY + 100).toString());
           ideasText.setAttribute("text-anchor", "start"); // Align to the left
           ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-          ideasText.setAttribute("opacity", "0.6");
+          ideasText.setAttribute("opacity", "0");
           ideasText.setAttribute("fill", "#C92924");
+          ideasText.style.filter = "blur(10px)";
           // No rotation - keep it horizontal
           ideasText.setAttribute("transform", "");
         }
@@ -1323,8 +1413,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           turningIdeas.setAttribute("dominant-baseline", "middle"); // Center vertically
           // Rotate -90 degrees around the center of the stroke to make it vertical
           turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
-          turningIdeas.setAttribute("opacity", "0.6");
+          turningIdeas.setAttribute("opacity", "0");
           turningIdeas.setAttribute("fill", "#C92924");
+          turningIdeas.style.filter = "blur(10px)";
         }
         
         // Position "REAL LIFE PRODUCTS" on the right stroke of M (mirrored)
@@ -1353,8 +1444,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           realLifeProducts.setAttribute("dominant-baseline", "middle"); // Center vertically
           // Rotate 90 degrees around the center of the stroke to make it vertical
           realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
-          realLifeProducts.setAttribute("opacity", "0.6");
+          realLifeProducts.setAttribute("opacity", "0");
           realLifeProducts.setAttribute("fill", "#C92924");
+          realLifeProducts.style.filter = "blur(10px)";
         }
         
       } catch (e) {
@@ -1525,8 +1617,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             intoText.setAttribute("y", (mY + 100).toString());
             intoText.setAttribute("text-anchor", "end"); // Align to the right
             intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-            intoText.setAttribute("opacity", "0.6");
+            intoText.setAttribute("opacity", "0");
             intoText.setAttribute("fill", "#C92924");
+            intoText.style.filter = "blur(10px)";
             // No rotation - keep it horizontal
             intoText.setAttribute("transform", "");
           }
@@ -1548,8 +1641,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             ideasText.setAttribute("y", (mY + 100).toString());
             ideasText.setAttribute("text-anchor", "start"); // Align to the left
             ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-            ideasText.setAttribute("opacity", "0.6");
+            ideasText.setAttribute("opacity", "0");
             ideasText.setAttribute("fill", "#C92924");
+            ideasText.style.filter = "blur(10px)";
             // No rotation - keep it horizontal
             ideasText.setAttribute("transform", "");
           }
@@ -1585,8 +1679,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             turningIdeas.setAttribute("dominant-baseline", "middle"); // Center vertically
             // Rotate -90 degrees around the center of the stroke to make it vertical
             turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
-            turningIdeas.setAttribute("opacity", "0.6");
+            turningIdeas.setAttribute("opacity", "0");
             turningIdeas.setAttribute("fill", "#C92924");
+            turningIdeas.style.filter = "blur(10px)";
           }
           
           // Position "REAL LIFE PRODUCTS" on the right stroke of M (mirrored)
@@ -1615,8 +1710,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             realLifeProducts.setAttribute("dominant-baseline", "middle"); // Center vertically
             // Rotate 90 degrees around the center of the stroke to make it vertical
             realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
-            realLifeProducts.setAttribute("opacity", "0.6");
+            realLifeProducts.setAttribute("opacity", "0");
             realLifeProducts.setAttribute("fill", "#C92924");
+            realLifeProducts.style.filter = "blur(10px)";
           }
         } catch (e) {
           // Ignore errors
@@ -1752,8 +1848,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="middle"
             fontSize="12px"
             fontWeight="500"
-            opacity="0.6"
-            style={{ letterSpacing: "0.4em" }}
+            opacity="0"
+            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
           >
             TURNING
           </text>
@@ -1769,8 +1865,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="hanging"
             fontSize="12px"
             fontWeight="500"
-            opacity="0.6"
-            style={{ letterSpacing: "0.4em" }}
+            opacity="0"
+            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
           >
             IDEAS
           </text>
@@ -1786,8 +1882,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="middle"
             fontSize="12px"
             fontWeight="500"
-            opacity="0.6"
-            style={{ letterSpacing: "0.4em" }}
+            opacity="0"
+            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
           >
             REAL LIFE PRODUCTS
           </text>
@@ -1803,8 +1899,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="middle"
             fontSize="12px"
             fontWeight="500"
-            opacity="0.6"
-            style={{ letterSpacing: "0.4em" }}
+            opacity="0"
+            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
           >
             INTO
           </text>
