@@ -17,9 +17,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const a2mRef = useRef<HTMLSpanElement | null>(null);
   const mMariamRef = useRef<HTMLSpanElement | null>(null);
   const amContainerRef = useRef<HTMLSpanElement | null>(null);
-  const softwareEngineerRef = useRef<SVGTextElement | null>(null);
-  const softwareRef = useRef<SVGTextElement | null>(null);
-  const engineerRef = useRef<SVGTextElement | null>(null);
   const iamWrapperRef = useRef<HTMLSpanElement | null>(null);
   const iamRef = useRef<HTMLSpanElement | null>(null);
   const mLetterRef = useRef<HTMLSpanElement | null>(null);
@@ -27,12 +24,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [isPortfolioAnimationComplete, setIsPortfolioAnimationComplete] = useState(false);
   const [isDotAnimationComplete, setIsDotAnimationComplete] = useState(false);
-  const [softwareEngineerFontSize, setSoftwareEngineerFontSize] = useState<string>("clamp(3rem, 6vw, 5rem)");
-  const [softwareEngineerTransform, setSoftwareEngineerTransform] = useState<string>("");
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
   const [isMariamReady, setIsMariamReady] = useState(false);
-  const [isSoftwareEngineerReady, setIsSoftwareEngineerReady] = useState(false);
-  const softwareEngineerWrapperRef = useRef<HTMLDivElement | null>(null);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
   const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
@@ -46,27 +39,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const svgM2Ref = useRef<SVGTSpanElement | null>(null);
   const svgMariamTextRef = useRef<SVGTextElement | null>(null);
   const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
-  // Refs for Software Engineer SVG letters
-  const softwareEngineerSvgRef = useRef<SVGSVGElement | null>(null);
-  const seSRef = useRef<SVGTSpanElement | null>(null);
-  const seORef = useRef<SVGTSpanElement | null>(null);
-  const seFRef = useRef<SVGTSpanElement | null>(null);
-  const seTRef = useRef<SVGTSpanElement | null>(null);
-  const seWRef = useRef<SVGTSpanElement | null>(null);
-  const seA1Ref = useRef<SVGTSpanElement | null>(null);
-  const seR1Ref = useRef<SVGTSpanElement | null>(null);
-  const seERef = useRef<SVGTSpanElement | null>(null);
-  const seE1Ref = useRef<SVGTSpanElement | null>(null);
-  const seN1Ref = useRef<SVGTSpanElement | null>(null);
-  const seGRef = useRef<SVGTSpanElement | null>(null);
-  const seIRef = useRef<SVGTSpanElement | null>(null);
-  const seN2Ref = useRef<SVGTSpanElement | null>(null);
-  const seE2Ref = useRef<SVGTSpanElement | null>(null);
-  const seE3Ref = useRef<SVGTSpanElement | null>(null);
-  const seR2Ref = useRef<SVGTSpanElement | null>(null);
-  const seSoftwareTextRef = useRef<SVGTextElement | null>(null);
-  const seEngineerTextRef = useRef<SVGTextElement | null>(null);
-  const seFinalDotRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -95,20 +67,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           if (svgFinalDotRef.current) {
             svgFinalDotRef.current.style.display = "none";
             }
-        }
-      });
-    }
-    // Hide Software Engineer final dot if it exists
-    if (seFinalDotRef.current && seFinalDotRef.current.style.display !== "none") {
-      gsap.to(seFinalDotRef.current, {
-        opacity: 0,
-        scale: 0,
-                duration: 0.3,
-        ease: "power2.in",
-              onComplete: () => {
-          if (seFinalDotRef.current) {
-            seFinalDotRef.current.style.display = "none";
-          }
         }
       });
     }
@@ -554,9 +512,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
   // Call onReady when all calculations are complete (not waiting for animations)
   useEffect(() => {
-    // Only need Mariam and Software Engineer calculations to be ready
+    // Only need Mariam calculations to be ready
     // Portfolio animation can happen after onReady is called
-    if (isMariamReady && isSoftwareEngineerReady && onReady) {
+    if (isMariamReady && onReady) {
       // Small delay to ensure all DOM updates are complete
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -564,7 +522,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       });
     }
-  }, [isMariamReady, isSoftwareEngineerReady, onReady]);
+  }, [isMariamReady, onReady]);
 
 
   // Removed HTML Mariam animations - now using only SVG Mariam
@@ -996,37 +954,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     };
   }, [isActive, isMariamReady, isPortfolioAnimationComplete]);
 
-  // Animate software engineer to appear with blur effect when dot animation completes
-  useEffect(() => {
-    if (!isDotAnimationComplete) return;
-    
-    const softwareText = seSoftwareTextRef.current;
-    const engineerText = seEngineerTextRef.current;
-    
-    if (softwareText && engineerText) {
-      // Animate both texts to appear with blur-to-clear effect
-      // Use GSAP to animate filter via style attribute
-      gsap.to([softwareText, engineerText], {
-        fillOpacity: 1,
-        opacity: 1,
-        duration: 1.2,
-        ease: "power2.out",
-        stagger: 0.1, // Slight delay between software and engineer
-        onUpdate: function() {
-          // Animate blur from 10px to 0px
-          const progress = this.progress();
-          const blurValue = 10 * (1 - progress);
-          if (softwareText) softwareText.style.filter = `blur(${blurValue}px)`;
-          if (engineerText) engineerText.style.filter = `blur(${blurValue}px)`;
-        },
-        onComplete: function() {
-          // Ensure blur is completely removed
-          if (softwareText) softwareText.style.filter = "blur(0px)";
-          if (engineerText) engineerText.style.filter = "blur(0px)";
-        }
-      });
-    }
-  }, [isDotAnimationComplete]);
 
   // Position and size the SVG number 7 directly below PORTFOL
   useEffect(() => {
@@ -1219,7 +1146,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             });
           }
           
-          // Position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes
+          // Position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes
           // Wait for Mariam text to be fully rendered and positioned
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -1243,11 +1170,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // If portfolWidth is 0, mark as ready after a short delay
       setTimeout(() => {
         setIsMariamReady(true);
-        setIsSoftwareEngineerReady(true);
       }, 100);
     }
     
-    // Function to position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes
+    // Function to position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes
     const positionTextsOnM = (mariamTextElement: SVGTextElement, svg: SVGSVGElement, mariamFontSize: number) => {
       try {
         // Get the actual "Mariam" text bbox
@@ -1291,15 +1217,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         // Bottom of the entire "Mariam" text bounding box
         const mariamBottom = mariamBbox.y + mariamBbox.height;
         
-        // Position "INTO" at the center of M
+        // Position "INTO" on the horizontal stroke at the top right of M
         const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
         if (intoText) {
-          intoText.setAttribute("x", mCenterX.toString());
-          intoText.setAttribute("y", mCenterY.toString());
-          intoText.setAttribute("text-anchor", "middle");
-          intoText.setAttribute("dominant-baseline", "middle");
+          // Position on the top horizontal stroke, on the right side
+          // Offset from the right edge to position it along the horizontal stroke
+          const offsetFromRight = -24; // pixels offset from the right edge
+          intoText.setAttribute("x", (mRightX + offsetFromRight).toString());
+          intoText.setAttribute("y", (mY + 100).toString());
+          intoText.setAttribute("text-anchor", "end"); // Align to the right
+          intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
           intoText.setAttribute("opacity", "0.6");
-          intoText.setAttribute("fill", "#280B0B");
+          intoText.setAttribute("fill", "#C92924");
+          // No rotation - keep it horizontal
+          intoText.setAttribute("transform", "");
         }
         
         // Calculate exact stroke dimensions for the M
@@ -1309,12 +1240,28 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         const leftStrokeHeight = mActualHeight; // Full height of the stroke
         const leftStrokeX = mX; // X position of left vertical stroke
         
+        // Position "IDEAS" on the horizontal stroke at the top left of M (mirroring INTO)
+        const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+        if (ideasText) {
+          // Position on the top horizontal stroke, on the left side
+          // Offset from the left edge to position it along the horizontal stroke (mirroring INTO)
+          const offsetFromLeft = 24; // pixels offset from the left edge (mirroring the right offset)
+          ideasText.setAttribute("x", (leftStrokeX + offsetFromLeft).toString());
+          ideasText.setAttribute("y", (mY + 100).toString());
+          ideasText.setAttribute("text-anchor", "start"); // Align to the left
+          ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
+          ideasText.setAttribute("opacity", "0.6");
+          ideasText.setAttribute("fill", "#C92924");
+          // No rotation - keep it horizontal
+          ideasText.setAttribute("transform", "");
+        }
+        
         const rightStrokeStartY = mY; // Top of right vertical stroke
         const rightStrokeEndY = mActualBottom; // Bottom of right vertical stroke
         const rightStrokeHeight = mActualHeight; // Full height of the stroke
         const rightStrokeX = mRightX; // X position of right vertical stroke
         
-        // Position "TURNING IDEAS" on the left stroke of M
+        // Position "TURNING" on the left stroke of M
         const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
         if (turningIdeas) {
           // Measure the text height (width when rotated -90 degrees)
@@ -1334,14 +1281,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Position text to span exactly along the stroke height
           // X position: left edge of stroke minus offset
           // Y position: center of stroke (so when rotated, it spans the full height)
-          turningIdeas.setAttribute("x", (leftStrokeX + offsetFromStroke).toString());
+          turningIdeas.setAttribute("x", (leftStrokeX + offsetFromStroke + 150).toString());
           turningIdeas.setAttribute("y", strokeCenterY.toString());
           turningIdeas.setAttribute("text-anchor", "middle"); // Center horizontally when rotated
           turningIdeas.setAttribute("dominant-baseline", "middle"); // Center vertically
           // Rotate -90 degrees around the center of the stroke to make it vertical
           turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
           turningIdeas.setAttribute("opacity", "0.6");
-          turningIdeas.setAttribute("fill", "#280B0B");
+          turningIdeas.setAttribute("fill", "#C92924");
         }
         
         // Position "REAL LIFE PRODUCTS" on the right stroke of M (mirrored)
@@ -1364,182 +1311,22 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Position text to span exactly along the stroke height
           // X position: right edge of stroke plus offset
           // Y position: center of stroke (so when rotated, it spans the full height)
-          realLifeProducts.setAttribute("x", (rightStrokeX + offsetFromStroke).toString());
-          realLifeProducts.setAttribute("y", strokeCenterY.toString());
+          realLifeProducts.setAttribute("x", (rightStrokeX + offsetFromStroke - 70).toString());
+          realLifeProducts.setAttribute("y", strokeCenterY.toString() );
           realLifeProducts.setAttribute("text-anchor", "middle"); // Center horizontally when rotated
           realLifeProducts.setAttribute("dominant-baseline", "middle"); // Center vertically
           // Rotate 90 degrees around the center of the stroke to make it vertical
           realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
           realLifeProducts.setAttribute("opacity", "0.6");
-          realLifeProducts.setAttribute("fill", "#280B0B");
+          realLifeProducts.setAttribute("fill", "#C92924");
         }
         
-        // Position "software engineer" above the "iam" part (i-a-m letters)
-        const softwareText = seSoftwareTextRef.current;
-        const engineerText = seEngineerTextRef.current;
-        
-        if (softwareText && engineerText) {
-          // Measure the "iam" part (i-a-m letters) of Mariam
-          const measureIam = () => {
-            const tempIam = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            tempIam.setAttribute("font-size", `${mariamFontSize}px`);
-            tempIam.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
-            tempIam.setAttribute("font-weight", "700");
-            tempIam.setAttribute("letter-spacing", "0");
-            tempIam.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
-            tempIam.setAttribute("y", mariamTextElement.getAttribute("y") || "0");
-            tempIam.setAttribute("dominant-baseline", mariamTextElement.getAttribute("dominant-baseline") || "hanging");
-            tempIam.setAttribute("text-anchor", "start");
-            tempIam.textContent = "iam";
-            tempIam.style.visibility = "hidden";
-            svg.appendChild(tempIam);
-            
-            const iamBbox = tempIam.getBBox();
-            svg.removeChild(tempIam);
-            
-            // Calculate position of "iam" relative to "Mariam"
-            // "iam" starts after "Mar" (M-a-r)
-            const measureMar = () => {
-              const tempMar = document.createElementNS("http://www.w3.org/2000/svg", "text");
-              tempMar.setAttribute("font-size", `${mariamFontSize}px`);
-              tempMar.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
-              tempMar.setAttribute("font-weight", "700");
-              tempMar.setAttribute("letter-spacing", "0");
-              tempMar.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
-              tempMar.setAttribute("y", mariamTextElement.getAttribute("y") || "0");
-              tempMar.setAttribute("dominant-baseline", mariamTextElement.getAttribute("dominant-baseline") || "hanging");
-              tempMar.setAttribute("text-anchor", "start");
-              tempMar.textContent = "Mar";
-              tempMar.style.visibility = "hidden";
-              svg.appendChild(tempMar);
-              
-              const marBbox = tempMar.getBBox();
-              svg.removeChild(tempMar);
-              return marBbox;
-            };
-            
-            const marBbox = measureMar();
-            const iamStartX = marBbox.x + marBbox.width;
-            const iamCenterX = iamStartX + iamBbox.width / 2;
-            const iamTop = iamBbox.y;
-            
-            return {
-              centerX: iamCenterX,
-              top: iamTop,
-              width: iamBbox.width,
-              height: iamBbox.height
-            };
-          };
-          
-          const iamPos = measureIam();
-          
-          // Calculate font size for software engineer to match iam width (70% of iam width)
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-          if (context) {
-            context.font = '100px "Floralis Couture", cursive';
-            const softwareMetrics = context.measureText("software");
-            const engineerMetrics = context.measureText("engineer");
-            const baseWidth = Math.max(softwareMetrics.width, engineerMetrics.width);
-            const ratio = (iamPos.width / baseWidth) * 0.7;
-            const targetFontSize = 100 * ratio;
-            
-            // Set font size
-            const fontSizeInRem = targetFontSize / 16;
-            const minSize = Math.max(1.2, fontSizeInRem * 0.7);
-            const maxSize = Math.min(6, fontSizeInRem * 1.2);
-            const vwSize = (targetFontSize / window.innerWidth) * 100;
-            const fontSizeValue = `clamp(${minSize.toFixed(2)}rem, ${vwSize.toFixed(2)}vw, ${maxSize.toFixed(2)}rem)`;
-            
-            setSoftwareEngineerFontSize(fontSizeValue);
-            
-            // Position software engineer exactly on top of "iam" with rotation
-            const fixedRotation = -8; // -8 degree slope
-            
-            // Get the actual bounding box of "iam" to position exactly above it
-            const iamActualTop = iamPos.top; // Top of "iam" letters
-            const iamActualBottom = iamPos.top + iamPos.height; // Bottom of "iam" letters
-            
-            // Measure software text to center it
-            const tempSoftware = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            tempSoftware.setAttribute("font-size", `${targetFontSize}px`);
-            tempSoftware.setAttribute("font-family", '"Floralis Couture", cursive');
-            tempSoftware.setAttribute("letter-spacing", "0.05em");
-            tempSoftware.textContent = "software";
-            tempSoftware.style.visibility = "hidden";
-            svg.appendChild(tempSoftware);
-            const softwareBbox = tempSoftware.getBBox();
-            svg.removeChild(tempSoftware);
-            
-            const tempEngineer = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            tempEngineer.setAttribute("font-size", `${targetFontSize}px`);
-            tempEngineer.setAttribute("font-family", '"Floralis Couture", cursive');
-            tempEngineer.setAttribute("letter-spacing", "0.05em");
-            tempEngineer.textContent = "engineer";
-            tempEngineer.style.visibility = "hidden";
-            svg.appendChild(tempEngineer);
-            const engineerBbox = tempEngineer.getBBox();
-            svg.removeChild(tempEngineer);
-            
-            // Position "software" on top of "iam" and "engineer" below "software"
-            // Both centered with "iam"
-            const spacing = 0; // Space between "software" and "engineer"
-            const gapFromIam = 0; // Space between "engineer" and "iam"
-            
-            // "engineer" positioned above "iam" with gap
-            const engineerY = iamActualTop - gapFromIam +130;
-            // "software" positioned above "engineer" with spacing
-            const softwareY = engineerY - engineerBbox.height + 200;
-            
-            // Position software text - centered with iam
-            softwareText.setAttribute("x", iamPos.centerX.toString());
-            softwareText.setAttribute("y", softwareY.toString());
-            softwareText.setAttribute("font-size", fontSizeValue);
-            softwareText.setAttribute("text-anchor", "middle");
-            softwareText.setAttribute("dominant-baseline", "hanging");
-            softwareText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${softwareY})`);
-            
-            // Position engineer text - centered with iam (same x as software)
-            engineerText.setAttribute("x", iamPos.centerX.toString());
-            engineerText.setAttribute("y", engineerY.toString());
-            engineerText.setAttribute("font-size", fontSizeValue);
-            engineerText.setAttribute("text-anchor", "middle");
-            engineerText.setAttribute("dominant-baseline", "hanging");
-            engineerText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${engineerY})`);
-            
-            // Mark Software Engineer as ready after positioning
-            setIsSoftwareEngineerReady(true);
-            
-            // Set text to be hidden initially (will animate in when dot finishes)
-            if (softwareText && engineerText) {
-              // Set initial state with blur via style attribute for SVG elements
-              softwareText.style.filter = "blur(10px)";
-              engineerText.style.filter = "blur(10px)";
-              gsap.set(softwareText, {
-                fillOpacity: 0,
-                strokeOpacity: 0,
-                opacity: 0
-              });
-              gsap.set(engineerText, {
-                fillOpacity: 0,
-                strokeOpacity: 0,
-                opacity: 0
-              });
-            }
-          } else {
-            // Mark as ready even if elements don't exist
-            setIsSoftwareEngineerReady(true);
-          }
-        }
       } catch (e) {
-        // Ignore errors but mark as ready
-        setIsSoftwareEngineerReady(true);
+        // Ignore errors
       }
     };
     
     // buildDotTimeline is now defined outside this useEffect
-    
-    // Software Engineer dot animation removed - only handwriting animation exists
     
     // Handle window resize
     const handleResize = () => {
@@ -1634,7 +1421,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               });
             }
             
-            // Position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes
+            // Position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes
             requestAnimationFrame(() => {
               try {
                 positionTextsOnM(textEl as SVGTextElement, svg, newFontSize);
@@ -1648,7 +1435,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
       
-      // Function to position "TURNING IDEAS" and "REAL LIFE PRODUCTS" on the M strokes (for resize handler)
+      // Function to position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes (for resize handler)
       const positionTextsOnM = (mariamTextElement: SVGTextElement, svg: SVGSVGElement, mariamFontSize: number) => {
         try {
           // Get the actual "Mariam" text bbox
@@ -1692,15 +1479,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Bottom of the entire "Mariam" text bounding box
           const mariamBottom = mariamBbox.y + mariamBbox.height;
           
-          // Position "INTO" at the center of M
+          // Position "INTO" on the horizontal stroke at the top right of M
           const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
           if (intoText) {
-            intoText.setAttribute("x", mCenterX.toString());
-            intoText.setAttribute("y", mCenterY.toString());
-            intoText.setAttribute("text-anchor", "middle");
-            intoText.setAttribute("dominant-baseline", "middle");
+            // Position on the top horizontal stroke, on the right side
+            // Offset from the right edge to position it along the horizontal stroke
+            const offsetFromRight = -24; // pixels offset from the right edge
+            intoText.setAttribute("x", (mRightX + offsetFromRight).toString());
+            intoText.setAttribute("y", (mY + 100).toString());
+            intoText.setAttribute("text-anchor", "end"); // Align to the right
+            intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
             intoText.setAttribute("opacity", "0.6");
-            intoText.setAttribute("fill", "#280B0B");
+            intoText.setAttribute("fill", "#C92924");
+            // No rotation - keep it horizontal
+            intoText.setAttribute("transform", "");
           }
           
           // Calculate exact stroke dimensions for the M
@@ -1710,12 +1502,28 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           const leftStrokeHeight = mActualHeight; // Full height of the stroke
           const leftStrokeX = mX; // X position of left vertical stroke
           
+          // Position "IDEAS" on the horizontal stroke at the top left of M (mirroring INTO)
+          const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+          if (ideasText) {
+            // Position on the top horizontal stroke, on the left side
+            // Offset from the left edge to position it along the horizontal stroke (mirroring INTO)
+            const offsetFromLeft = 24; // pixels offset from the left edge (mirroring the right offset)
+            ideasText.setAttribute("x", (leftStrokeX + offsetFromLeft).toString());
+            ideasText.setAttribute("y", (mY + 100).toString());
+            ideasText.setAttribute("text-anchor", "start"); // Align to the left
+            ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
+            ideasText.setAttribute("opacity", "0.6");
+            ideasText.setAttribute("fill", "#C92924");
+            // No rotation - keep it horizontal
+            ideasText.setAttribute("transform", "");
+          }
+          
           const rightStrokeStartY = mY; // Top of right vertical stroke
           const rightStrokeEndY = mActualBottom; // Bottom of right vertical stroke
           const rightStrokeHeight = mActualHeight; // Full height of the stroke
           const rightStrokeX = mRightX; // X position of right vertical stroke
           
-          // Position "TURNING IDEAS" on the left stroke of M
+          // Position "TURNING" on the left stroke of M
           const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
           if (turningIdeas) {
             // Measure the text height (width when rotated -90 degrees)
@@ -1735,14 +1543,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Position text to span exactly along the stroke height
             // X position: left edge of stroke minus offset
             // Y position: center of stroke (so when rotated, it spans the full height)
-            turningIdeas.setAttribute("x", (leftStrokeX - offsetFromStroke).toString());
+            turningIdeas.setAttribute("x", (leftStrokeX - offsetFromStroke + 150).toString());
             turningIdeas.setAttribute("y", strokeCenterY.toString());
             turningIdeas.setAttribute("text-anchor", "middle"); // Center horizontally when rotated
             turningIdeas.setAttribute("dominant-baseline", "middle"); // Center vertically
             // Rotate -90 degrees around the center of the stroke to make it vertical
             turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
             turningIdeas.setAttribute("opacity", "0.6");
-            turningIdeas.setAttribute("fill", "#280B0B");
+            turningIdeas.setAttribute("fill", "#C92924");
           }
           
           // Position "REAL LIFE PRODUCTS" on the right stroke of M (mirrored)
@@ -1772,7 +1580,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Rotate 90 degrees around the center of the stroke to make it vertical
             realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
             realLifeProducts.setAttribute("opacity", "0.6");
-            realLifeProducts.setAttribute("fill", "#280B0B");
+            realLifeProducts.setAttribute("fill", "#C92924");
           }
         } catch (e) {
           // Ignore errors
@@ -1897,76 +1705,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             <tspan ref={svgM2Ref}>m</tspan>
           </text>
           
-          {/* Software Engineer Text - positioned above "iam" part */}
-          <text
-            ref={seSoftwareTextRef}
-            className="hero-software-text"
-            x="0"
-            y="0"
-            fill="#280B0B"
-            fillOpacity="0"
-            stroke="#280B0B"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity="0"
-            fontFamily='"Floralis Couture", cursive'
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{
-              letterSpacing: "0.05em",
-              fontWeight: "normal",
-              filter: "blur(10px)",
-              opacity: 0
-            }}
-          >
-            <tspan ref={seSRef}>s</tspan>
-            <tspan ref={seORef}>o</tspan>
-            <tspan ref={seFRef}>f</tspan>
-            <tspan ref={seTRef}>t</tspan>
-            <tspan ref={seWRef}>w</tspan>
-            <tspan ref={seA1Ref}>a</tspan>
-            <tspan ref={seR1Ref}>r</tspan>
-            <tspan ref={seERef}>e</tspan>
-          </text>
-          <text
-            ref={seEngineerTextRef}
-            className="hero-engineer-text"
-            x="0"
-            y="0"
-            fill="#280B0B"
-            fillOpacity="0"
-            stroke="#280B0B"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeOpacity="0"
-            fontFamily='"Floralis Couture", cursive'
-            textAnchor="middle"
-            dominantBaseline="middle"
-            style={{
-              letterSpacing: "0.05em",
-              fontWeight: "normal",
-              filter: "blur(10px)",
-              opacity: 0
-            }}
-          >
-            <tspan ref={seE1Ref}>e</tspan>
-            <tspan ref={seN1Ref}>n</tspan>
-            <tspan ref={seGRef}>g</tspan>
-            <tspan ref={seIRef}>i</tspan>
-            <tspan ref={seN2Ref}>n</tspan>
-            <tspan ref={seE2Ref}>e</tspan>
-            <tspan ref={seE3Ref}>e</tspan>
-            <tspan ref={seR2Ref}>r</tspan>
-          </text>
-          
-          {/* TURNING IDEAS text on left stroke of M */}
+          {/* TURNING text on left stroke of M */}
           <text
             className="hero-turning-ideas"
             x="0"
             y="0"
-            fill="#280B0B"
+            fill="#C92924"
             fontFamily='"Space Grotesk", "Inter", sans-serif'
             textAnchor="middle"
             dominantBaseline="middle"
@@ -1975,7 +1719,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             opacity="0.6"
             style={{ letterSpacing: "0.4em" }}
           >
-            TURNING IDEAS
+            TURNING
+          </text>
+          
+          {/* IDEAS text on horizontal stroke of M (mirroring INTO) */}
+          <text
+            className="hero-ideas-text"
+            x="0"
+            y="0"
+            fill="#C92924"
+            fontFamily='"Space Grotesk", "Inter", sans-serif'
+            textAnchor="start"
+            dominantBaseline="hanging"
+            fontSize="12px"
+            fontWeight="500"
+            opacity="0.6"
+            style={{ letterSpacing: "0.4em" }}
+          >
+            IDEAS
           </text>
           
           {/* REAL LIFE PRODUCTS text on right stroke of M */}
@@ -1983,7 +1744,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             className="hero-real-life-products"
             x="0"
             y="0"
-            fill="#280B0B"
+            fill="#C92924"
             fontFamily='"Space Grotesk", "Inter", sans-serif'
             textAnchor="middle"
             dominantBaseline="middle"
@@ -2000,7 +1761,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             className="hero-into-text"
             x="0"
             y="0"
-            fill="#280B0B"
+            fill="#C92924"
             fontFamily='"Space Grotesk", "Inter", sans-serif'
             textAnchor="middle"
             dominantBaseline="middle"
@@ -2014,7 +1775,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         </svg>
       )}
 
-
+      {/* Engineer text - bottom right, white, on top layer */}
+      <div
+        className="hero-engineer-text"
+        style={{
+          position: "fixed",
+          bottom: "0rem",
+          right: "2rem",
+          color: "#280B0B",
+          fontFamily: '"Karolina", cursive',
+          fontSize: "clamp(3rem, 22vw, 22rem)",
+          zIndex: 400,
+          pointerEvents: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+         Engineer
+      </div>
+      
 
       <style jsx>{`
         .hero-heading {
@@ -2091,32 +1869,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           overflow: visible;
         }
 
-        .software-engineer-wrapper {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: auto;
-          height: auto;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          z-index: 10;
-          transform-origin: center center;
-          pointer-events: none;
-          overflow: visible;
-        }
-
-        @media (max-width: 768px) {
-          .software-engineer-wrapper {
-            /* Keep same positioning on mobile */
-          }
-        }
-
-        .software-engineer-svg {
-          width: auto;
-          height: auto;
-          overflow: visible;
-        }
 
         @media (max-width: 768px) {
           .hero-heading-wrapper {
@@ -2528,25 +2280,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           position: relative;
         }
 
-        .software-engineer-wrapper {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: auto;
-          height: auto;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-          z-index: 10;
-          transform-origin: center center;
-          pointer-events: none;
-        }
-
-        @media (max-width: 768px) {
-          .software-engineer-wrapper {
-            /* Keep same positioning on mobile */
-          }
-        }
 
 
         .hero-am {
@@ -2896,6 +2629,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           opacity: 0.4;
           top: 50%;
           transform: translateY(-50%);
+        }
+
+        .hero-engineer-text {
+          font-family: "Karolina", cursive;
+          color: white;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          user-select: none;
+        }
+
+        @media (max-width: 768px) {
+          .hero-engineer-text {
+            bottom: 1rem;
+            right: 1rem;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+          }
         }
       `}</style>
     </section>

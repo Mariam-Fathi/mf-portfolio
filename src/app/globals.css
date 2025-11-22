@@ -8,6 +8,33 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Handwritten";
+    src: url("/fonts/handwritten_3/Handwritten.woff2") format("woff2"),
+         url("/fonts/handwritten_3/Handwritten.woff") format("woff"),
+         url("/fonts/handwritten_3/Handwritten.ttf") format("truetype"),
+         url("/fonts/handwritten_3/Handwritten.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "A Day in September";
+    src: url("/fonts/a_day_in_september/ADayinSeptember.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Karolina";
+    src: url("/fonts/karolina_2/Karolina.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
     --font-default: "Momo Trust Display", "Stack Sans", sans-serif;
