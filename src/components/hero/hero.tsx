@@ -99,6 +99,42 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     setIsAnimationComplete(true);
   }, []);
 
+  // Hide dot when hero becomes inactive
+  useEffect(() => {
+    if (!isActive) {
+      // Immediately hide all dots without animation
+      // Kill any GSAP animations on the dots first
+      // Hide the final dot if it exists
+      if (finalDotRef.current) {
+        gsap.killTweensOf(finalDotRef.current);
+        finalDotRef.current.style.setProperty('display', 'none', 'important');
+        finalDotRef.current.style.setProperty('opacity', '0', 'important');
+        finalDotRef.current.style.setProperty('visibility', 'hidden', 'important');
+        finalDotRef.current.style.setProperty('z-index', '-1', 'important');
+      }
+      // Hide SVG final dot if it exists
+      if (svgFinalDotRef.current) {
+        gsap.killTweensOf(svgFinalDotRef.current);
+        svgFinalDotRef.current.style.setProperty('display', 'none', 'important');
+        svgFinalDotRef.current.style.setProperty('opacity', '0', 'important');
+        svgFinalDotRef.current.style.setProperty('visibility', 'hidden', 'important');
+        svgFinalDotRef.current.style.setProperty('z-index', '-1', 'important');
+      }
+      // Also hide any dots that might still be visible in the DOM
+      const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
+      dots.forEach((dot) => {
+        const htmlDot = dot as HTMLElement;
+        if (htmlDot) {
+          gsap.killTweensOf(htmlDot);
+          htmlDot.style.setProperty('display', 'none', 'important');
+          htmlDot.style.setProperty('opacity', '0', 'important');
+          htmlDot.style.setProperty('visibility', 'hidden', 'important');
+          htmlDot.style.setProperty('z-index', '-1', 'important');
+        }
+      });
+    }
+  }, [isActive]);
+
   // Function to animate dot along SVG Mariam letters
   const buildDotTimeline = () => {
     if (!svgMariamTextRef.current || !numberSevenRef.current) return undefined;

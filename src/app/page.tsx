@@ -44,6 +44,21 @@ export default function Home() {
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
     
+    // Hide any dots when navigating away from hero
+    if (activeSection === "hero" && sectionId !== "hero") {
+      const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
+      dots.forEach((dot) => {
+        const htmlDot = dot as HTMLElement;
+        if (htmlDot) {
+          gsap.killTweensOf(htmlDot);
+          htmlDot.style.setProperty('display', 'none', 'important');
+          htmlDot.style.setProperty('opacity', '0', 'important');
+          htmlDot.style.setProperty('visibility', 'hidden', 'important');
+          htmlDot.style.setProperty('z-index', '-1', 'important');
+        }
+      });
+    }
+    
     setIsTransitioning(true);
     const tl = gsap.timeline();
 
