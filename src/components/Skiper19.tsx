@@ -13,7 +13,7 @@ const experienceItems = [
     toDate: "Present",
     position: 0.2, // Position along path (0-1) - left side (moved slightly right to avoid edge)
     side: "above", // "above" or "below" the path
-    color: "#66BB6A", // Green from color palette
+    color: "#C92924", // Fire Red from color palette
   },
   {
     number: "02",
@@ -24,7 +24,7 @@ const experienceItems = [
     toDate: "Jul 2025",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#FF8C00", // Orange from color palette
+    color: "#822621", // Rum Punch from color palette
   },
 ];
 
@@ -38,7 +38,7 @@ const Skiper19 = () => {
   return (
     <section
       ref={ref}
-      className="mx-auto relative flex h-screen w-screen flex-col items-center overflow-visible bg-[#F5ECE1] px-4 text-[#1F3A4B]"
+      className="mx-auto relative flex h-screen w-screen flex-col items-center overflow-visible bg-[#F9E7C9] px-4 text-[#1F3A4B]"
     >
       {/* Horizontal curved path container - positioned at center with more height for items above/below */}
       <div className="absolute top-1/2 left-0 w-full h-full -translate-y-1/2 pointer-events-none overflow-visible">
@@ -63,14 +63,14 @@ const Skiper19 = () => {
               pathRef={pathRef}
               scrollYProgress={scrollYProgress}
               position={item.position}
-              color={item.color}
+              color="#F9E7C9"
               delay={0}
             />
             <PathPoint
               pathRef={pathRef}
               scrollYProgress={scrollYProgress}
               position={item.position}
-              color={item.color}
+              color="#F9E7C9"
               delay={0.3}
             />
           </React.Fragment>
@@ -118,7 +118,7 @@ const LinePath = React.forwardRef<
       <motion.path
         ref={ref}
         d={pathD}
-        stroke="#00BCD4"
+        stroke="#280B0B"
         strokeWidth="4"
         fill="none"
         pathLength="1"
