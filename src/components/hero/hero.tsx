@@ -191,7 +191,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const m2ScreenX = m2Rect.left + m2Rect.width / 2;
     const m2ScreenY = m2Rect.top + m2Rect.height / 2;
     
-    const dotSize = Math.max(iRect.width * 0.3, 42);
+    const dotSize = Math.max(iRect.width * 0.35, 48);
     
     // Debug: Log positions to verify they're reasonable
     console.log('Position calculations (using tspan getBoundingClientRect):', {
