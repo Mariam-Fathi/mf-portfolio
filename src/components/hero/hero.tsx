@@ -39,6 +39,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const svgM2Ref = useRef<SVGTSpanElement | null>(null);
   const svgMariamTextRef = useRef<SVGTextElement | null>(null);
   const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
+  const engineerTextRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -190,7 +191,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const m2ScreenX = m2Rect.left + m2Rect.width / 2;
     const m2ScreenY = m2Rect.top + m2Rect.height / 2;
     
-    const dotSize = Math.max(iRect.width * 0.25, 35);
+    const dotSize = Math.max(iRect.width * 0.3, 42);
     
     // Debug: Log positions to verify they're reasonable
     console.log('Position calculations (using tspan getBoundingClientRect):', {
@@ -488,16 +489,27 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       ]
     });
     
-    // Vanish (fade out and scale down) - same as previous
+    // Keep dot fixed at final position instead of vanishing
     finalDotTimeline.to(finalDot, {
-      opacity: 0,
-      scale: 0.8,
-      duration: 0.4,
-      ease: "power2.in",
+      opacity: 1,
+      scale: 1,
+      duration: 0,
+      ease: "none",
       force3D: true,
       onComplete: () => {
-        if (finalDot && finalDot.parentNode) {
-          finalDot.style.display = "none";
+        // Ensure dot stays visible and fixed at final position on "i"
+        if (finalDot) {
+          finalDot.style.opacity = "1";
+          finalDot.style.visibility = "visible";
+          finalDot.style.display = "block";
+          // Keep it fixed at the final position on "i"
+          gsap.set(finalDot, {
+            x: iScreenX - (finalDotSize / 2),
+            y: iScreenY,
+            scale: 1,
+            opacity: 1,
+            immediateRender: true
+          });
         }
         // Mark dot animation as complete
         setIsDotAnimationComplete(true);
@@ -566,6 +578,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // Reset state and visual elements when hero becomes inactive
       setIsPortfolioAnimationComplete(false);
       setIsDotAnimationComplete(false);
+      
+      // Reset Engineer text to hidden state
+      if (engineerTextRef.current) {
+        gsap.set(engineerTextRef.current, {
+          opacity: 0,
+          filter: "blur(10px)",
+        });
+      }
       
       // Reset portfolio elements to initial state
       const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
@@ -953,6 +973,22 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       clearTimeout(timeoutId);
     };
   }, [isActive, isMariamReady, isPortfolioAnimationComplete]);
+
+  // Animate Engineer text to appear with blur effect after dot animation completes
+  useEffect(() => {
+    if (!isDotAnimationComplete || !engineerTextRef.current) return;
+
+    const engineerText = engineerTextRef.current;
+
+    // Animate Engineer text with blur fade-in effect
+    gsap.to(engineerText, {
+      opacity: 1,
+      filter: "blur(0px)",
+      duration: 1.2,
+      ease: "power2.out",
+      delay: 0.3,
+    });
+  }, [isDotAnimationComplete]);
 
 
   // Position and size the SVG number 7 directly below PORTFOL
@@ -1777,6 +1813,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
       {/* Engineer text - bottom right, white, on top layer */}    
       <div
+        ref={engineerTextRef}
         className="hero-engineer-text"
         style={{
           position: "fixed",
@@ -1788,6 +1825,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           zIndex: 400,
           pointerEvents: "none",
           whiteSpace: "nowrap",
+          opacity: 0,
+          filter: "blur(10px)",
         }}
       >
          Engineer
