@@ -4,6 +4,7 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/utils";
+import { ExternalLink } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -238,7 +239,7 @@ export default function GalleryShowcase({
                     "overflow-hidden"
                   )}
                       style={{
-                        background: colors.background,
+                        background: index === 0 ? "#9BCCD0" : colors.background,
                       }}
                     >
                   {/* Links Section - Magazine Style (Above the line) */}
@@ -246,8 +247,10 @@ export default function GalleryShowcase({
                     <div className="mb-6 md:mb-8 relative">
                       <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-end">
                         {project.links.map((link, linkIndex) => {
-                          // Consistent styling for all links
-                          const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70";
+                          // Link color matches the number color
+                          const linkColor = index === 0 ? "#C92924" : colors.headline;
+                          // Consistent styling for all links with underline
+                          const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1";
 
                           // Handle grouped links (like Kaggle Notebooks)
                           if (link.isGrouped && link.groupedLinks) {
@@ -255,8 +258,8 @@ export default function GalleryShowcase({
                             return (
                               <div
                                 key={linkIndex}
-                                className={linkClassName}
-                                style={{ color: colors.link }}
+                                className="text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
+                                style={{ color: linkColor }}
                               >
                                 <span>{prefix}: </span>
                                 {link.groupedLinks.map((groupedLink, idx) => (
@@ -265,9 +268,11 @@ export default function GalleryShowcase({
                                       href={groupedLink.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="transition-opacity hover:opacity-70"
+                                      className="transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                                      style={{ color: linkColor }}
                                     >
                                       [{idx + 1}]
+                                      <ExternalLink className="w-3 h-3" />
                                     </a>
                                     {idx < link.groupedLinks!.length - 1 && ", "}
                                   </React.Fragment>
@@ -283,9 +288,10 @@ export default function GalleryShowcase({
                               target="_blank"
                               rel="noopener noreferrer"
                               className={linkClassName}
-                              style={{ color: colors.link }}
+                              style={{ color: linkColor }}
                             >
                               {link.name}
+                              <ExternalLink className="w-3 h-3" />
                             </a>
                           );
                         })}
@@ -311,8 +317,8 @@ export default function GalleryShowcase({
                               fontFamily:
                                 '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
-                              WebkitTextStroke: `1px ${colors.headlineStroke}`,
-                              color: colors.headline,
+                              WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
+                              color: index === 0 ? "#C92924" : colors.headline,
                         fontSize: "clamp(8rem, 25vw, 20rem)",
                               lineHeight: 1,
                         transform: "translateY(8%)",
@@ -339,7 +345,7 @@ export default function GalleryShowcase({
                       {/* Project Title */}
                             <h3
                         className="text-lg md:text-2xl lg:text-3xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
-                              style={{ color: colors.headline }}
+                              style={{ color: index === 0 ? "#C92924" : colors.headline }}
                             >
                               {project.title}
                             </h3>
