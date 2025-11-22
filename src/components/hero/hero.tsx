@@ -1775,7 +1775,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         </svg>
       )}
 
-      {/* Engineer text - bottom right, white, on top layer */}
+      {/* Engineer text - bottom right, white, on top layer */}    
       <div
         className="hero-engineer-text"
         style={{
@@ -1783,7 +1783,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           bottom: "0rem",
           right: "2rem",
           color: "#280B0B",
-          fontFamily: '"Karolina", cursive',
+          fontFamily: '"Miserable Emillia", cursive',
           fontSize: "clamp(3rem, 22vw, 22rem)",
           zIndex: 400,
           pointerEvents: "none",
@@ -2632,7 +2632,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
 
         .hero-engineer-text {
-          font-family: "Karolina", cursive;
+          font-family: "Miserable Emillia", cursive;
           color: white;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
