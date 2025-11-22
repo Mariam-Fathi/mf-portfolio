@@ -628,12 +628,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Reset portfolio animation state when hero becomes active
     setIsPortfolioAnimationComplete(false);
 
-    // Wait for dot animation to complete before starting portfolio animation
-    if (!isDotAnimationComplete) {
-      // Dot animation hasn't completed yet, wait for it
-      return;
-    }
-
     let tl: gsap.core.Timeline | null = null;
     let oElement: HTMLElement | null = null;
     let lineElement: HTMLElement | null = null;
@@ -895,7 +889,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       if (tl) tl.kill();
     };
-  }, [isActive, isDotAnimationComplete]);
+  }, [isActive]);
 
   // Position navigation at the end of the line between PORTFOL and O
   useEffect(() => {
@@ -961,9 +955,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isPortfolioAnimationComplete]);
 
-  // Trigger dot animation when isActive and isMariamReady are true
+  // Trigger dot animation when portfolio animation completes and Mariam is ready
   useEffect(() => {
-    if (!isActive || !isMariamReady) return;
+    if (!isActive || !isMariamReady || !isPortfolioAnimationComplete) return;
     
     // Wait a bit to ensure all refs are ready and DOM is fully rendered
     const timeoutId = setTimeout(() => {
@@ -1000,7 +994,39 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [isActive, isMariamReady]);
+  }, [isActive, isMariamReady, isPortfolioAnimationComplete]);
+
+  // Animate software engineer to appear with blur effect when dot animation completes
+  useEffect(() => {
+    if (!isDotAnimationComplete) return;
+    
+    const softwareText = seSoftwareTextRef.current;
+    const engineerText = seEngineerTextRef.current;
+    
+    if (softwareText && engineerText) {
+      // Animate both texts to appear with blur-to-clear effect
+      // Use GSAP to animate filter via style attribute
+      gsap.to([softwareText, engineerText], {
+        fillOpacity: 1,
+        opacity: 1,
+        duration: 1.2,
+        ease: "power2.out",
+        stagger: 0.1, // Slight delay between software and engineer
+        onUpdate: function() {
+          // Animate blur from 10px to 0px
+          const progress = this.progress();
+          const blurValue = 10 * (1 - progress);
+          if (softwareText) softwareText.style.filter = `blur(${blurValue}px)`;
+          if (engineerText) engineerText.style.filter = `blur(${blurValue}px)`;
+        },
+        onComplete: function() {
+          // Ensure blur is completely removed
+          if (softwareText) softwareText.style.filter = "blur(0px)";
+          if (engineerText) engineerText.style.filter = "blur(0px)";
+        }
+      });
+    }
+  }, [isDotAnimationComplete]);
 
   // Position and size the SVG number 7 directly below PORTFOL
   useEffect(() => {
@@ -1407,7 +1433,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           
           const iamPos = measureIam();
           
-          // Calculate font size for software engineer to match iam width (60% of iam width)
+          // Calculate font size for software engineer to match iam width (70% of iam width)
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
           if (context) {
@@ -1415,20 +1441,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             const softwareMetrics = context.measureText("software");
             const engineerMetrics = context.measureText("engineer");
             const baseWidth = Math.max(softwareMetrics.width, engineerMetrics.width);
-            const ratio = (iamPos.width / baseWidth) * 0.6;
+            const ratio = (iamPos.width / baseWidth) * 0.7;
             const targetFontSize = 100 * ratio;
             
             // Set font size
             const fontSizeInRem = targetFontSize / 16;
-            const minSize = Math.max(1.5, fontSizeInRem * 0.7);
-            const maxSize = Math.min(6, fontSizeInRem * 1.3);
+            const minSize = Math.max(1.2, fontSizeInRem * 0.7);
+            const maxSize = Math.min(6, fontSizeInRem * 1.2);
             const vwSize = (targetFontSize / window.innerWidth) * 100;
             const fontSizeValue = `clamp(${minSize.toFixed(2)}rem, ${vwSize.toFixed(2)}vw, ${maxSize.toFixed(2)}rem)`;
             
             setSoftwareEngineerFontSize(fontSizeValue);
             
             // Position software engineer exactly on top of "iam" with rotation
-            const fixedRotation = 0; // -8 degree slope
+            const fixedRotation = -8; // -8 degree slope
             
             // Get the actual bounding box of "iam" to position exactly above it
             const iamActualTop = iamPos.top; // Top of "iam" letters
@@ -1455,16 +1481,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             const engineerBbox = tempEngineer.getBBox();
             svg.removeChild(tempEngineer);
             
-            // Calculate total height of both lines
-            const totalHeight = softwareBbox.height + engineerBbox.height;
+            // Position "software" on top of "iam" and "engineer" below "software"
+            // Both centered with "iam"
+            const spacing = 0; // Space between "software" and "engineer"
+            const gapFromIam = 0; // Space between "engineer" and "iam"
             
-            // Position exactly on top of "iam" - align bottom of "engineer" with top of "iam"
-            // Use negative spacing to achieve exact positioning (can overlap if needed)
-            const spacing = -120; // Negative spacing for exact positioning (adjust as needed for overlap)
-            const engineerY = iamActualTop - spacing;
-            const softwareY = engineerY - engineerBbox.height +200;
+            // "engineer" positioned above "iam" with gap
+            const engineerY = iamActualTop - gapFromIam +130;
+            // "software" positioned above "engineer" with spacing
+            const softwareY = engineerY - engineerBbox.height + 200;
             
-            // Position software text
+            // Position software text - centered with iam
             softwareText.setAttribute("x", iamPos.centerX.toString());
             softwareText.setAttribute("y", softwareY.toString());
             softwareText.setAttribute("font-size", fontSizeValue);
@@ -1472,8 +1499,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             softwareText.setAttribute("dominant-baseline", "hanging");
             softwareText.setAttribute("transform", `rotate(${fixedRotation} ${iamPos.centerX} ${softwareY})`);
             
-            // Position engineer text
-            engineerText.setAttribute("x", (iamPos.centerX+100).toString());
+            // Position engineer text - centered with iam (same x as software)
+            engineerText.setAttribute("x", iamPos.centerX.toString());
             engineerText.setAttribute("y", engineerY.toString());
             engineerText.setAttribute("font-size", fontSizeValue);
             engineerText.setAttribute("text-anchor", "middle");
@@ -1483,17 +1510,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Mark Software Engineer as ready after positioning
             setIsSoftwareEngineerReady(true);
             
-            // Set text to be visible immediately (no animation)
+            // Set text to be hidden initially (will animate in when dot finishes)
             if (softwareText && engineerText) {
+              // Set initial state with blur via style attribute for SVG elements
+              softwareText.style.filter = "blur(10px)";
+              engineerText.style.filter = "blur(10px)";
               gsap.set(softwareText, {
-                fillOpacity: 1,
+                fillOpacity: 0,
                 strokeOpacity: 0,
-                opacity: 1
+                opacity: 0
               });
               gsap.set(engineerText, {
-                fillOpacity: 1,
+                fillOpacity: 0,
                 strokeOpacity: 0,
-                opacity: 1
+                opacity: 0
               });
             }
           } else {
@@ -1874,7 +1904,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             x="0"
             y="0"
             fill="#280B0B"
-            fillOpacity="1"
+            fillOpacity="0"
             stroke="#280B0B"
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -1885,7 +1915,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="middle"
             style={{
               letterSpacing: "0.05em",
-              fontWeight: "normal"
+              fontWeight: "normal",
+              filter: "blur(10px)",
+              opacity: 0
             }}
           >
             <tspan ref={seSRef}>s</tspan>
@@ -1903,7 +1935,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             x="0"
             y="0"
             fill="#280B0B"
-            fillOpacity="1"
+            fillOpacity="0"
             stroke="#280B0B"
             strokeWidth="2.5"
             strokeLinecap="round"
@@ -1914,7 +1946,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             dominantBaseline="middle"
             style={{
               letterSpacing: "0.05em",
-              fontWeight: "normal"
+              fontWeight: "normal",
+              filter: "blur(10px)",
+              opacity: 0
             }}
           >
             <tspan ref={seE1Ref}>e</tspan>
