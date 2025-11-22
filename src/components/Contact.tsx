@@ -287,7 +287,11 @@ const Contact: React.FC = () => {
       <div className="relative flex min-h-screen w-full items-center justify-center">
         <h1 
           ref={textRef}
-          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] tracking-tight text-[#0F172A] cursor-pointer hover:scale-105 transition-transform duration-300"
+          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] tracking-tight cursor-pointer hover:scale-105 transition-transform duration-300"
+          style={{
+            fontFamily: '"Space Grotesk", "Inter", sans-serif',
+            color: "#280B0B"
+          }}
         >
           MEET ME
         </h1>
@@ -307,11 +311,14 @@ const Contact: React.FC = () => {
                   <Icon className="h-7 w-7" stroke={1.7} />
                 </span>
 
-                <span className="contact-text-glass flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ color: "#0F172A" }}>
-                  <span className="text-xs uppercase tracking-wide text-black/60">
+                <span className="contact-text-glass flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ 
+                  fontFamily: '"Space Grotesk", "Inter", sans-serif',
+                  color: "#280B0B" 
+                }}>
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>
                     {label}
                   </span>
-                  <span className="text-sm font-semibold">{caption}</span>
+                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
                 </span>
               </a>
             ),
@@ -330,11 +337,14 @@ const Contact: React.FC = () => {
               <span className="contact-icon-glass-mobile flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
                 <Icon className="h-6 w-6" stroke={1.7} />
               </span>
-              <span className="contact-text-glass-mobile flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ color: "#0F172A" }}>
-                <span className="text-xs uppercase tracking-wide text-black/60">
+              <span className="contact-text-glass-mobile flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ 
+                fontFamily: '"Space Grotesk", "Inter", sans-serif',
+                color: "#280B0B" 
+              }}>
+                <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>
                   {label}
                 </span>
-                <span className="text-sm font-semibold">{caption}</span>
+                <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
               </span>
             </a>
           ))}

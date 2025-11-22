@@ -13,18 +13,18 @@ const experienceItems = [
     toDate: "Present",
     position: 0.2, // Position along path (0-1) - left side (moved slightly right to avoid edge)
     side: "above", // "above" or "below" the path
-    color: "#C92924", // Fire Red from color palette
+    color: "#9BCCD0", // Light blue color
   },
   {
     number: "02",
     title: "Software Engineer",
     company: "Dracode",
     type: "Freelance Project",
-    fromDate: "Mar 2025",
-    toDate: "Jul 2025",
+    fromDate: "Sep 2025",
+    toDate: "Present",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#822621", // Rum Punch from color palette
+    color: "#C92924", // Fire Red from color palette
   },
 ];
 
@@ -63,14 +63,14 @@ const Skiper19 = () => {
               pathRef={pathRef}
               scrollYProgress={scrollYProgress}
               position={item.position}
-              color="#F9E7C9"
+              color={item.color}
               delay={0}
             />
             <PathPoint
               pathRef={pathRef}
               scrollYProgress={scrollYProgress}
               position={item.position}
-              color="#F9E7C9"
+              color={item.color}
               delay={0.3}
             />
           </React.Fragment>
@@ -126,7 +126,7 @@ const LinePath = React.forwardRef<
         strokeLinejoin="round"
         style={{
           pathLength,
-          strokeDasharray: "1",
+          strokeDasharray: "0.08 0.04",
           strokeDashoffset,
         }}
       />
@@ -499,7 +499,6 @@ const PathPoint = ({
             transform: "translate(-50%, -50%)",
             left: "50%",
             top: "50%",
-            boxShadow: `0 0 12px ${color}`,
           }}
         />
       </div>
