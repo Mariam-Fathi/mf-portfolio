@@ -1,0 +1,13 @@
+If you want the full version and license for commercial use,
+you can purchase here :
+
+https://staircaselab.com/product/handwritten/
+
+File include : 
+
+1. Handwritten.otf
+2. Handwrittenttf
+3. Handwritten.woff
+4. Handwritten Italic.otf
+5. Handwritten Italic.ttf
+6. Handwritten Italic.woff
