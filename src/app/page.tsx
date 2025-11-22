@@ -55,17 +55,47 @@ export default function Home() {
         ease: "power2.in",
         onComplete: () => {
           setActiveSection("hero");
-          setIsTransitioning(false);
+          // Add blur effect when returning to hero
+          if (heroRef.current) {
+            gsap.set(heroRef.current, {
+              opacity: 0,
+              filter: "blur(15px)"
+            });
+            gsap.to(heroRef.current, {
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.8,
+              ease: "power2.out",
+              delay: 0.2,
+              onComplete: () => {
+                setIsTransitioning(false);
+              }
+            });
+          } else {
+            setIsTransitioning(false);
+          }
         }
       });
 
     } else if (activeSection === "hero") {
-      // First navigation away from hero
+      // First navigation away from hero - same blur effect as hero/preloader
+      const targetSection = document.getElementById(`${sectionId}-content`);
+      if (targetSection) {
+        // Set initial blur state - same as hero
+        gsap.set(targetSection, {
+          opacity: 0,
+          x: 0,
+          filter: "blur(15px)"
+        });
+      }
+      
       tl.to(`#${sectionId}-content`, {
         opacity: 1,
         x: 0,
-        duration: 0.6,
+        filter: "blur(0px)",
+        duration: 0.8,
         ease: "power2.out",
+        delay: 0.2, // Same delay as hero
         onStart: () => {
           setActiveSection(sectionId);
         },
@@ -75,7 +105,7 @@ export default function Home() {
       });
 
     } else {
-      // Switching between non-hero sections
+      // Switching between non-hero sections - same blur effect as hero/preloader
       tl.to(`.content-section.active`, {
         opacity: 0,
         x: 100,
@@ -83,11 +113,23 @@ export default function Home() {
         ease: "power2.in"
       });
 
+      const targetSection = document.getElementById(`${sectionId}-content`);
+      if (targetSection) {
+        // Set initial blur state - same as hero
+        gsap.set(targetSection, {
+          opacity: 0,
+          x: 0,
+          filter: "blur(15px)"
+        });
+      }
+
       tl.to(`#${sectionId}-content`, {
         opacity: 1,
         x: 0,
-        duration: 0.6,
+        filter: "blur(0px)",
+        duration: 0.8,
         ease: "power2.out",
+        delay: 0.2, // Same delay as hero
         onStart: () => {
           setActiveSection(sectionId);
         },
