@@ -3,9 +3,9 @@
 import React, { useCallback, useRef, useState } from "react";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
-import { Skiper19 } from "@/components/Skiper19";
+import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
-import { Skiper52 } from "@/components/Skiper52";
+import { Certificates } from "@/components/Certificates";
 import Contact from "@/components/Contact";
 import SectionNavigation from "@/components/SectionNavigation";
 
@@ -200,7 +200,7 @@ export default function Home() {
             id="experience-content" 
             className={`content-section ${activeSection === "experience" ? "active" : ""}`}
           >
-            <Skiper19/>
+            <Experience/>
           </section>
 
           {/* Work Section */}
@@ -216,7 +216,7 @@ export default function Home() {
             id="certificates-content" 
             className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
           >
-            <Skiper52/>
+            <Certificates/>
           </section>
 
           {/* Contact Section */}

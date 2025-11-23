@@ -49,7 +49,7 @@ const certificates = [
   },
 ];
 
-const Skiper52 = () => {
+const Certificates = () => {
   // Divide the whole viewport into 3 equal sections
   const sectionHeight = "33.333vh";
 
@@ -67,7 +67,7 @@ const Skiper52 = () => {
   );
 };
 
-export { Skiper52 };
+export { Certificates };
 
 const CertificateSection = ({
   certificate,
@@ -177,3 +177,4 @@ const CertificateSection = ({
     </motion.div>
   );
 };
+

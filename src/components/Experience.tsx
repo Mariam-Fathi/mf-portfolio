@@ -28,7 +28,7 @@ const experienceItems = [
   },
 ];
 
-const Skiper19 = () => {
+const Experience = () => {
   const ref = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
   const { scrollYProgress } = useScroll({
@@ -80,7 +80,7 @@ const Skiper19 = () => {
   );
 };
 
-export { Skiper19 };
+export { Experience };
 
 const LinePath = React.forwardRef<
   SVGPathElement,
@@ -507,10 +507,10 @@ const PathPoint = ({
 };
 
 /**
- * Skiper 19 — React + framer motion
+ * Experience Section — React + framer motion
  * Inspired by and adapted from https://comgio.ai/
  * We respect the original creators. This is an inspired rebuild with our own taste and does not claim any ownership.
- * These animations aren’t associated with the comgio.ai . They’re independent recreations meant to study interaction design
+ * These animations aren't associated with the comgio.ai . They're independent recreations meant to study interaction design
  *
  * License & Usage:
  * - Free to use and modify in both personal and commercial projects.
@@ -523,3 +523,4 @@ const PathPoint = ({
  * Website: https://gxuri.in
  * Twitter: https://x.com/Gur__vi
  */
+
