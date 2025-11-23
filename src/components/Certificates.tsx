@@ -128,14 +128,7 @@ const CertificateSection = ({
         height: sectionHeight,
       }}
     >
-      {/* Platform Info - Top position based on certificate */}
-      <div className={`absolute top-6 md:top-8 z-10 ${(certificate as any).infoPosition === "bottom-right" ? "right-6 md:right-8" : "left-6 md:left-8"}`}>
-        <div className="text-[#1e140b] text-xs md:text-sm">
-          <p className="font-medium uppercase tracking-wider">
-            {certificate.platform}
-          </p>
-        </div>
-      </div>
+
 
       {/* Certificate Link - Bottom position based on certificate */}
       {certificate.link && (
