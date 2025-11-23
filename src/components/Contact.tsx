@@ -250,7 +250,7 @@ const Contact: React.FC = () => {
   return (
     <section
       id="contact"
-      className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F5ECE1] text-[#111827]"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F9E7C9] text-[#111827]"
     >
       {/* SVG Filter for Liquid Glass Effect */}
       <svg width="0" height="0" style={{ position: "absolute" }}>

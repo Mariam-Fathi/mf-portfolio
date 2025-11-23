@@ -41,7 +41,7 @@ const projects: Project[] = [
   },
   {
     id: "smart-key",
-    title: "Smart Key Hospitality Applications",
+    title: "Smart Key",
     role: "Lead Mobile Engineer | Tarqia",
     description:
       "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
@@ -51,7 +51,7 @@ const projects: Project[] = [
   },
   {
     id: "sales-ai",
-    title: "AI-Powered Cost Estimation Tool",
+    title: "DraEstimator",
     role: "Full-Stack Developer | Dracode",
     description:
       "Internal tool leveraging Hugging Face pre-trained models to analyze project descriptions and generate instant cost estimates. Achieved 85% accuracy and reduced quotation time from days to minutes, addressing critical sales bottleneck in home services application. The solution streamlines the sales process by automating complex estimation workflows and providing real-time pricing insights.",
@@ -61,7 +61,7 @@ const projects: Project[] = [
   },
   {
     id: "home-services",
-    title: "Home Services Platform",
+    title: "Sanae3y pro",
     role: "Full-Stack Developer | Dracode",
     description:
       "Interactive multi-role application (client, worker, shop) with real-time order management, Google Maps integration, and WebSocket-based live tracking. Features Indrive-like on-demand service booking with real-time updates across all user roles. The platform enables seamless coordination between customers, service providers, and merchants with instant notifications and location tracking.",
@@ -71,7 +71,7 @@ const projects: Project[] = [
   },
   {
     id: "homi",
-    title: "Homi: Full-Stack PropTech Platform & Data Engineering Discovery",
+    title: "Homi",
     role: "Full-Stack Developer & Data Engineer | Self-Directed",
     description:
       "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard providing business intelligence through revenue metrics, user engagement, and property performance visualizations. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
@@ -251,6 +251,7 @@ export default function GalleryShowcase({
                           const linkColor = index === 0 ? "#C92924" : colors.headline;
                           // Consistent styling for all links with underline
                           const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1";
+                          const linkStyle = { fontFamily: '"Space Grotesk", "Inter", sans-serif' };
 
                           // Handle grouped links (like Kaggle Notebooks)
                           if (link.isGrouped && link.groupedLinks) {
@@ -259,7 +260,7 @@ export default function GalleryShowcase({
                               <div
                                 key={linkIndex}
                                 className="text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
-                                style={{ color: linkColor }}
+                                style={{ color: linkColor, ...linkStyle }}
                               >
                                 <span>{prefix}: </span>
                                 {link.groupedLinks.map((groupedLink, idx) => (
@@ -269,7 +270,7 @@ export default function GalleryShowcase({
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
-                                      style={{ color: linkColor }}
+                                      style={{ color: linkColor, ...linkStyle }}
                                     >
                                       [{idx + 1}]
                                       <ExternalLink className="w-3 h-3" />
@@ -288,7 +289,7 @@ export default function GalleryShowcase({
                               target="_blank"
                               rel="noopener noreferrer"
                               className={linkClassName}
-                              style={{ color: linkColor }}
+                              style={{ color: linkColor, ...linkStyle }}
                             >
                               {link.name}
                               <ExternalLink className="w-3 h-3" />
@@ -319,7 +320,7 @@ export default function GalleryShowcase({
                               fontWeight: 900,
                               WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
                               color: index === 0 ? "#C92924" : colors.headline,
-                        fontSize: "clamp(8rem, 25vw, 20rem)",
+                        fontSize: "clamp(12rem, 35vw, 28rem)",
                               lineHeight: 1,
                         transform: "translateY(8%)",
                             } as React.CSSProperties}
@@ -331,7 +332,7 @@ export default function GalleryShowcase({
                           <div
                       className="flex flex-col gap-3 md:gap-4 text-left flex-1"
                             style={{
-                              fontFamily: '"Inter", sans-serif',
+                              fontFamily: '"Space Grotesk", "Inter", sans-serif',
                       }}
                     >
                       {/* Role */}
@@ -344,7 +345,7 @@ export default function GalleryShowcase({
 
                       {/* Project Title */}
                             <h3
-                        className="text-lg md:text-2xl lg:text-3xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
+                        className="text-2xl md:text-4xl lg:text-5xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
                               style={{ color: index === 0 ? "#C92924" : colors.headline }}
                             >
                               {project.title}
