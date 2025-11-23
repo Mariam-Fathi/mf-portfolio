@@ -82,7 +82,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
         .section-nav-links button {
           background: none;
           border: none;
-          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
           font-size: clamp(0.6rem, 0.8vw, 0.75rem);
           font-weight: 300;
           text-transform: lowercase;
