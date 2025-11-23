@@ -41,6 +41,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const svgMariamTextRef = useRef<SVGTextElement | null>(null);
   const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
   const engineerTextRef = useRef<HTMLDivElement | null>(null);
+  const bottomFrameTextRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -625,6 +626,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
 
+      // Reset bottom frame text to hidden state
+      if (bottomFrameTextRef.current) {
+        gsap.set(bottomFrameTextRef.current, {
+          opacity: 0,
+          filter: "blur(10px)",
+        });
+      }
+
       // Reset TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text to hidden state
       if (numberSevenRef.current) {
         const svg = numberSevenRef.current;
@@ -1064,6 +1073,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     }
 
+    // Animate bottom frame text with blur fade-in effect (same as engineer)
+    if (bottomFrameTextRef.current) {
+      const bottomFrameText = bottomFrameTextRef.current;
+      gsap.to(bottomFrameText, {
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1.2,
+        ease: "power2.out",
+        delay: 0.3,
+      });
+    }
+
     // Animate TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text with blur fade-in effect
     if (numberSevenRef.current) {
       const svg = numberSevenRef.current;
@@ -1133,7 +1154,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     // Calculate the required height: from PORTFOL bottom to screen bottom
     const screenHeight = window.innerHeight;
-    const availableHeight = screenHeight - portfolBottom;
+    const bottomFrameHeight = 50; // Height of bottom frame
+    const availableHeight = screenHeight - portfolBottom - bottomFrameHeight;
     
     // Use canvas to measure text and find font size where horizontal stroke of "7" matches portfolWidth
     const canvas = document.createElement("canvas");
@@ -1192,12 +1214,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     svg.setAttribute("width", `${mariamWidth}px`);
     svg.setAttribute("height", `${mariamHeight}px`);
     
-    // Position SVG so its BOTTOM edge is at screen bottom
-    // This ensures Mariam is anchored at the bottom of the viewport
+    // Position SVG so its BOTTOM edge is at top of bottom frame (50px from bottom)
+    // This ensures Mariam lands on the bottom frame
     svg.style.position = "fixed";
     svg.style.left = "0px";
     svg.style.top = "auto";
-    svg.style.bottom = "0px"; // Anchor SVG at bottom of viewport
+    svg.style.bottom = "50px"; // Anchor SVG at top of bottom frame
     svg.style.margin = "0";
     svg.style.padding = "0";
     svg.style.height = `${mariamHeight}px`; // Explicit height
@@ -1500,7 +1522,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         const newPortfolRect = portfolElement.getBoundingClientRect();
         const newScreenHeight = window.innerHeight;
-        const newAvailableHeight = newScreenHeight - newPortfolRect.bottom;
+        const bottomFrameHeight = 50; // Height of bottom frame
+        const newAvailableHeight = newScreenHeight - newPortfolRect.bottom - bottomFrameHeight;
         
         // Recalculate font size for MARIAM to span screen width
         const newTempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -1544,7 +1567,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         // Update position - top of SVG at PORTFOL bottom (no gap)
         svg.style.top = "auto";
-        svg.style.bottom = "0px"; // Keep anchored at bottom of viewport
+        svg.style.bottom = "50px"; // Keep anchored at top of bottom frame
         svg.style.height = `${newAvailableHeight}px`;
         
         // Update Mariam text
@@ -1838,6 +1861,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         {/* Left marquee */}
    
 
+        {/* Bottom marquee */}
+        <div className="hero-frame-marquee hero-frame-marquee-bottom">
+          <div 
+            ref={bottomFrameTextRef}
+            className="hero-frame-marquee-text hero-frame-marquee-text-fixed"
+            style={{ opacity: 0, filter: "blur(10px)" }}
+          >
+            turning ideas into real life product
+          </div>
+        </div>
+
       </div>
 
       {/* SVG Number 7 - positioned directly below PORTFOL */}
@@ -1871,74 +1905,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             <tspan ref={svgIRef}>ı</tspan>
             <tspan ref={svgA2Ref}>a</tspan>
             <tspan ref={svgM2Ref}>m</tspan>
-          </text>
-          
-          {/* TURNING text on left stroke of M */}
-          <text
-            className="hero-turning-ideas"
-            x="0"
-            y="0"
-            fill="#C92924"
-            fontFamily='"Space Grotesk", "Inter", sans-serif'
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="12px"
-            fontWeight="500"
-            opacity="0"
-            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
-          >
-            TURNING
-          </text>
-          
-          {/* IDEAS text on horizontal stroke of M (mirroring INTO) */}
-          <text
-            className="hero-ideas-text"
-            x="0"
-            y="0"
-            fill="#C92924"
-            fontFamily='"Space Grotesk", "Inter", sans-serif'
-            textAnchor="start"
-            dominantBaseline="hanging"
-            fontSize="12px"
-            fontWeight="500"
-            opacity="0"
-            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
-          >
-            IDEAS
-          </text>
-          
-          {/* REAL LIFE PRODUCTS text on right stroke of M */}
-          <text
-            className="hero-real-life-products"
-            x="0"
-            y="0"
-            fill="#C92924"
-            fontFamily='"Space Grotesk", "Inter", sans-serif'
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="12px"
-            fontWeight="500"
-            opacity="0"
-            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
-          >
-            REAL LIFE PRODUCTS
-          </text>
-          
-          {/* INTO text at center of M */}
-          <text
-            className="hero-into-text"
-            x="0"
-            y="0"
-            fill="#C92924"
-            fontFamily='"Space Grotesk", "Inter", sans-serif'
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="12px"
-            fontWeight="500"
-            opacity="0"
-            style={{ letterSpacing: "0.4em", filter: "blur(10px)" }}
-          >
-            INTO
           </text>
         </svg>
       )}
@@ -2633,7 +2599,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           bottom: 0;
           left: 0;
           right: 0;
-          height: 100px;
+          height: 50px;
           border-radius: 0;
           padding-right: 2rem;
         }
@@ -2718,6 +2684,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           text-orientation: mixed;
           padding: 2rem 0;
           padding-bottom: 6rem;
+        }
+
+        .hero-frame-marquee-text-fixed {
+          position: absolute;
+          right: 2rem;
+          top: 50%;
+          transform: translateY(-50%);
+          animation: none !important;
+          white-space: nowrap;
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
         }
 
         @keyframes frame-marquee-scroll-horizontal {
