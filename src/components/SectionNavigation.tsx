@@ -19,11 +19,11 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
   return (
     <>
       <nav className="section-navigation">
-        <div className="section-nav-lines">
+        {/* <div className="section-nav-lines">
           <div className="section-nav-line"></div>
           <div className="section-nav-line"></div>
           <div className="section-nav-line"></div>
-        </div>
+        </div> */}
         <ul className="section-nav-links">
           {sections.map((section) => (
             <li key={section.id}>
@@ -44,17 +44,17 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
         .section-navigation {
           position: fixed;
           left: 2rem;
-          top: 2rem;
+          top: 0rem;
           z-index: 100;
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           align-items: flex-start;
           gap: 1.5rem;
         }
 
         .section-nav-lines {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           gap: 0.5rem;
         }
 
@@ -70,7 +70,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
           margin: 0;
           padding: 0;
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           gap: 0.75rem;
         }
 

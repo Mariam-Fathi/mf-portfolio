@@ -2602,6 +2602,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           height: 50px;
           border-radius: 0;
           padding-right: 2rem;
+          border-top: 1px solid #280B0B;
         }
 
         .hero-frame-marquee-right {
