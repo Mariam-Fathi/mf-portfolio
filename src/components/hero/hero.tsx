@@ -152,7 +152,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
     const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
     const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
-    const fontFamily = svgMariamText.getAttribute("font-family") || '"Space Grotesk", "Inter", sans-serif';
+    const fontFamily = svgMariamText.getAttribute("font-family") || '"Momo Trust Display", "Stack Sans", sans-serif';
     const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
     
     // Get actual letter positions by measuring with temporary text elements
@@ -221,14 +221,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Calculate screen positions directly from the tspan elements
     // For "i", the dot should be at 25% from top of the letter (where it starts)
     const iScreenX = iRect.left + iRect.width / 2;
-    const iScreenY = iRect.top + iRect.height * 0.25; // Dot position on "i"
+    const iScreenY = iRect.top + iRect.height * 0.19; // Dot position on "i"
     const iCenterY = iRect.top + iRect.height / 2; // Center of "i" for jump calculations
     const a2ScreenX = a2Rect.left + a2Rect.width / 2;
     const a2ScreenY = a2Rect.top + a2Rect.height / 2;
     const m2ScreenX = m2Rect.left + m2Rect.width / 2;
     const m2ScreenY = m2Rect.top + m2Rect.height / 2;
     
-    const dotSize = Math.max(iRect.width * 0.35, 48);
+    const dotSize = Math.max(iRect.width * 0.5, 64);
     
     // Debug: Log positions to verify they're reasonable
     console.log('Position calculations (using tspan getBoundingClientRect):', {
@@ -1141,7 +1141,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     if (!context) return;
     
     // Set font properties to match PORTFOL exactly
-    context.font = `700 ${portfolFontSize}px "Space Grotesk", "Inter", sans-serif`;
+    context.font = `700 ${portfolFontSize}px "Momo Trust Display", "Stack Sans", sans-serif`;
     context.letterSpacing = "0.15em";
     
     // Measure "Mariam" to calculate font size that spans edge to edge of screen
@@ -1155,7 +1155,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
     tempText.setAttribute("font-size", "200px");
-    tempText.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+    tempText.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
     tempText.setAttribute("font-weight", "700");
     tempText.setAttribute("letter-spacing", "0"); // No letter spacing
     tempText.textContent = "Mariam"; // Only first letter capital
@@ -1219,7 +1219,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       
       // Apply font styling - NO letter-spacing, only first letter capital
       textElement.setAttribute("font-size", `${fontSize}px`);
-      textElement.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+      textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
       textElement.setAttribute("font-weight", "700");
       textElement.setAttribute("letter-spacing", "0"); // No letter spacing
       // No text-transform - keep "Mariam" as is (only first letter capital)
@@ -1345,7 +1345,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         // Place it in the actual SVG to get accurate measurements
         const tempM = document.createElementNS("http://www.w3.org/2000/svg", "text");
         tempM.setAttribute("font-size", `${mariamFontSize}px`);
-        tempM.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+        tempM.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
         tempM.setAttribute("font-weight", "700");
         tempM.setAttribute("letter-spacing", "0");
         tempM.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
@@ -1512,7 +1512,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         const newTempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
         newTempText.setAttribute("font-size", "200px");
-        newTempText.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+        newTempText.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
         newTempText.setAttribute("font-weight", "700");
         newTempText.setAttribute("letter-spacing", "0"); // No letter spacing
         newTempText.textContent = "Mariam"; // Only first letter capital
@@ -1611,7 +1611,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Place it in the actual SVG to get accurate measurements
           const tempM = document.createElementNS("http://www.w3.org/2000/svg", "text");
           tempM.setAttribute("font-size", `${mariamFontSize}px`);
-          tempM.setAttribute("font-family", '"Space Grotesk", "Inter", sans-serif');
+          tempM.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
           tempM.setAttribute("font-weight", "700");
           tempM.setAttribute("letter-spacing", "0");
           tempM.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
@@ -1860,7 +1860,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             x="0"
             y="0"
             fill="#280B0B"
-            fontFamily='"Space Grotesk", "Inter", sans-serif'
+            fontFamily='"Momo Trust Display", "Stack Sans", sans-serif'
             textAnchor="start"
             dominantBaseline="hanging"
             style={{ letterSpacing: "0" }}
@@ -2345,7 +2345,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           position: absolute;
           display: flex;
           align-items: center;
-          font-family: "Space Grotesk", "Inter", monospace;
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
           opacity: 0;
           z-index: 30;
           white-space: nowrap;
@@ -2747,7 +2747,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           align-items: flex-start;
           justify-content: center;
           gap: 0.5rem;
-          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
           width: 100%;
           padding: 0 1rem;
           margin: 0;
@@ -2773,7 +2773,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #280B0B;
-          font-family: "Space Grotesk", "Inter", sans-serif;
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
           line-height: 1;
           display: inline-flex;
           align-items: center;
