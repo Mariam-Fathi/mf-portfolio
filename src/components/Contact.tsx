@@ -287,13 +287,14 @@ const Contact: React.FC = () => {
       <div className="relative flex min-h-screen w-full items-center justify-center">
         <h1 
           ref={textRef}
-          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] tracking-tight cursor-pointer hover:scale-105 transition-transform duration-300"
+          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] cursor-pointer hover:scale-105 transition-transform duration-300"
           style={{
-            fontFamily: '"Space Grotesk", "Inter", sans-serif',
-            color: "#280B0B"
+            fontFamily: '"A Day in September", cursive',
+            color: "#280B0B",
+            letterSpacing: "0.1em"
           }}
         >
-          MEET ME
+          LET'S TALK
         </h1>
 
         <div ref={tilesRef} className="absolute inset-0 hidden lg:block">

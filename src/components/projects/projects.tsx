@@ -29,6 +29,16 @@ type ProjectsProps = {
 
 const projects: Project[] = [
   {
+    id: "smart-key",
+    title: "Smart Key",
+    role: "Lead Mobile Engineer | Tarqia",
+    description:
+      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
+    links: [
+      { name: "App on Play Store", url: "#" },
+    ],
+  },
+  {
     id: "personality-ai",
     title: "Multimodal Personality Analysis System",
     role: "AI Research Lead | Benha University",
@@ -37,16 +47,6 @@ const projects: Project[] = [
     links: [
       { name: "Graduation Project Book PDF", url: "#" },
       { name: "GitHub Repository", url: "#" },
-    ],
-  },
-  {
-    id: "smart-key",
-    title: "Smart Key",
-    role: "Lead Mobile Engineer | Tarqia",
-    description:
-      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
-    links: [
-      { name: "App on Play Store", url: "#" },
     ],
   },
   {
@@ -235,7 +235,7 @@ export default function GalleryShowcase({
                     cardRefs.current[index] = el;
                   }}
                   className={cn(
-                    "absolute top-0 left-0 right-0 h-full w-full p-6 md:p-8 lg:p-12 flex flex-col",
+                    "absolute top-0 left-0 right-0 h-full w-full px-6 md:px-8 lg:px-12 pt-6 md:pt-8 lg:pt-12 flex flex-col",
                     "overflow-hidden"
                   )}
                       style={{
@@ -320,7 +320,7 @@ export default function GalleryShowcase({
                               fontWeight: 900,
                               WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
                               color: index === 0 ? "#C92924" : colors.headline,
-                        fontSize: "clamp(12rem, 35vw, 28rem)",
+                        fontSize: "clamp(16rem, 40vw, 35rem)",
                               lineHeight: 1,
                         transform: "translateY(8%)",
                             } as React.CSSProperties}
@@ -330,7 +330,7 @@ export default function GalleryShowcase({
 
                     {/* Text Section - Aligned with number's right edge */}
                           <div
-                      className="flex flex-col gap-3 md:gap-4 text-left flex-1"
+                      className="flex flex-col gap-3 md:gap-4 text-left flex-1 pb-6"
                             style={{
                               fontFamily: '"Space Grotesk", "Inter", sans-serif',
                       }}
@@ -345,8 +345,11 @@ export default function GalleryShowcase({
 
                       {/* Project Title */}
                             <h3
-                        className="text-2xl md:text-4xl lg:text-5xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
-                              style={{ color: index === 0 ? "#C92924" : colors.headline }}
+                        className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
+                              style={{ 
+                                fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
+                                color: index === 0 ? "#C92924" : colors.headline 
+                              }}
                             >
                               {project.title}
                             </h3>
