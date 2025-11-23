@@ -1219,7 +1219,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     svg.style.position = "fixed";
     svg.style.left = "0px";
     svg.style.top = "auto";
-    svg.style.bottom = "50px"; // Anchor SVG at top of bottom frame
+    svg.style.bottom = "8px"; // Anchor SVG at top of bottom frame
     svg.style.margin = "0";
     svg.style.padding = "0";
     svg.style.height = `${mariamHeight}px`; // Explicit height
@@ -1567,7 +1567,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         // Update position - top of SVG at PORTFOL bottom (no gap)
         svg.style.top = "auto";
-        svg.style.bottom = "50px"; // Keep anchored at top of bottom frame
+        svg.style.bottom = "8px"; // Keep anchored at top of bottom frame
         svg.style.height = `${newAvailableHeight}px`;
         
         // Update Mariam text
@@ -1863,12 +1863,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         {/* Bottom marquee */}
         <div className="hero-frame-marquee hero-frame-marquee-bottom">
-          <div 
-            ref={bottomFrameTextRef}
-            className="hero-frame-marquee-text hero-frame-marquee-text-fixed"
-            style={{ opacity: 0, filter: "blur(10px)" }}
-          >
-            turning ideas into real life product
+          <div className="hero-frame-marquee-content">
+            <div 
+              ref={bottomFrameTextRef}
+              className="hero-frame-marquee-text"
+              style={{ opacity: 0, filter: "blur(10px)" }}
+            >
+              turning ideas into real life product
+            </div>
+            <div className="hero-frame-marquee-text">
+              turning ideas into real life product
+            </div>
+            <div className="hero-frame-marquee-text">
+              turning ideas into real life product
+            </div>
           </div>
         </div>
 
@@ -2599,7 +2607,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           bottom: 0;
           left: 0;
           right: 0;
-          height: 50px;
+          height: 0px;
           border-radius: 0;
           padding-right: 2rem;
           border-top: 1px solid #280B0B;
@@ -2664,10 +2672,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         .hero-frame-marquee-text {
           display: inline-block;
           padding: 0 2rem;
-          padding-right: 2rem;
+          // padding-right: 2rem;
           color: #280B0B;
-          font-size: clamp(1.5rem, 1.5vw, 1.5rem);
-          font-weight: 700;
+          font-size: clamp(1rem, 1vw, 1rem);
+          font-weight: 400;
           font-family: "Space Grotesk", "Inter", sans-serif;
           letter-spacing: 0.1em;
           text-rendering: optimizeLegibility;
@@ -2687,15 +2695,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           padding-bottom: 6rem;
         }
 
-        .hero-frame-marquee-text-fixed {
-          position: absolute;
-          right: 2rem;
-          top: 50%;
-          transform: translateY(-50%);
-          animation: none !important;
-          white-space: nowrap;
-          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
-        }
 
         @keyframes frame-marquee-scroll-horizontal {
           0% {
