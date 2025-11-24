@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { setHeroNavigationY } from "@/utils/navigationPosition";
 
@@ -155,11 +156,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Set immediately
     setEngineerZIndex();
     
-    // Use MutationObserver to watch for when the dot is added to the DOM
+    // Use MutationObserver to watch for when the dot is added/updated in the DOM
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
+        // Watch for added nodes
         mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1) { // Element node
+          if (node.nodeType === 1) {
             const element = node as HTMLElement;
             if (element.classList?.contains('final-i-dot-svg')) {
               // Dot was just added, ensure engineer text is above it
@@ -170,17 +172,47 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             }
           }
         });
+        
+        // Watch for attribute changes on the dot (when it becomes visible)
+        if (mutation.type === 'attributes' && mutation.target) {
+          const target = mutation.target as HTMLElement;
+          if (target.classList?.contains('final-i-dot-svg')) {
+            if (mutation.attributeName === 'style' || 
+                target.style.display !== 'none' || 
+                target.style.opacity !== '0') {
+              // Dot visibility changed, ensure engineer text is above
+              requestAnimationFrame(() => {
+                setEngineerZIndex();
+                requestAnimationFrame(setEngineerZIndex);
+              });
+            }
+          }
+        }
       });
     });
     
-    // Observe body for added nodes
+    // Observe body for added nodes and attribute changes
     observer.observe(document.body, {
       childList: true,
-      subtree: false
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
     
-    // Also set it periodically to catch any timing issues
-    const interval = setInterval(setEngineerZIndex, 50);
+    // Also watch for any dot elements that might already exist
+    const checkExistingDot = () => {
+      const existingDot = document.querySelector('.final-i-dot-svg') as HTMLElement;
+      if (existingDot && existingDot.style.display !== 'none' && existingDot.style.opacity !== '0') {
+        setEngineerZIndex();
+      }
+    };
+    
+    // Check immediately and periodically
+    checkExistingDot();
+    const interval = setInterval(() => {
+      setEngineerZIndex();
+      checkExistingDot();
+    }, 50);
     
     return () => {
       observer.disconnect();
@@ -254,8 +286,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               finalDot.style.borderRadius = "50%";
               finalDot.style.backgroundColor = "#C92924";
               finalDot.style.position = "fixed";
-              finalDot.style.zIndex = "100";
-              finalDot.style.setProperty('z-index', '100', 'important');
+              finalDot.style.zIndex = "1";
+              finalDot.style.setProperty('z-index', '1', 'important');
               finalDot.style.opacity = "1";
               finalDot.style.display = "block";
               finalDot.style.visibility = "visible";
@@ -473,16 +505,41 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     finalDot.style.borderRadius = "50%";
     finalDot.style.backgroundColor = "#C92924";
     finalDot.style.position = "fixed";
-    finalDot.style.zIndex = "100";
-    finalDot.style.setProperty('z-index', '100', 'important');
+    // Set dot z-index to be lower than engineer text
+    finalDot.style.zIndex = "1";
+    finalDot.style.setProperty('z-index', '1', 'important');
     
     // Ensure engineer text is always above the dot - set immediately after dot creation
-    requestAnimationFrame(() => {
+    const forceEngineerAboveDot = () => {
       if (engineerTextRef.current) {
         engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
         engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
       }
-      // Set again on next frame to be absolutely sure
+      // Also ensure dot stays at lower z-index
+      if (finalDot) {
+        finalDot.style.setProperty('z-index', '100', 'important');
+      }
+    };
+    
+    requestAnimationFrame(() => {
+      forceEngineerAboveDot();
+      requestAnimationFrame(() => {
+        forceEngineerAboveDot();
+        requestAnimationFrame(forceEngineerAboveDot);
+      });
+    });
+    
+    // Also set after delays
+    setTimeout(forceEngineerAboveDot, 10);
+    setTimeout(forceEngineerAboveDot, 50);
+    setTimeout(forceEngineerAboveDot, 100);
+    finalDot.style.opacity = "1";
+    finalDot.style.left = "0px";
+    finalDot.style.top = "0px";
+    finalDot.style.display = "block";
+    
+    // Force engineer text z-index after dot is fully set up
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (engineerTextRef.current) {
           engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
@@ -490,10 +547,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
       });
     });
-    finalDot.style.opacity = "1";
-    finalDot.style.left = "0px";
-    finalDot.style.top = "0px";
-    finalDot.style.display = "block";
     finalDot.style.visibility = "visible";
     finalDot.style.pointerEvents = "none";
     finalDot.style.transformOrigin = "center center";
@@ -1413,7 +1466,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 scale: 1,
                 opacity: 1,
                 immediateRender: true,
-                force3D: true
+                force3D: true,
+                onComplete: () => {
+                  // Force engineer text z-index after dot is positioned
+                  if (engineerTextRef.current) {
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                }
+              });
+              
+              // Also set immediately
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  if (engineerTextRef.current) {
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                });
               });
             }
           });
@@ -1457,8 +1527,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               finalDot.style.borderRadius = "50%";
               finalDot.style.backgroundColor = "#C92924";
               finalDot.style.position = "fixed";
-              finalDot.style.zIndex = "100";
-              finalDot.style.setProperty('z-index', '100', 'important');
+              finalDot.style.zIndex = "1";
+              finalDot.style.setProperty('z-index', '1', 'important');
               finalDot.style.opacity = "1";
               finalDot.style.display = "block";
               finalDot.style.visibility = "visible";
@@ -1550,6 +1620,48 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     };
   }, [isActive, isMariamReady]);
 
+  // Ensure engineer text is always above dot whenever dot animation completes or starts
+  useEffect(() => {
+    if (!isDotAnimationComplete && !isDotAnimationStarted) return;
+    
+    const forceEngineerAbove = () => {
+      // First, ensure dot is at lower z-index
+      const dot = document.querySelector('.final-i-dot-svg') as HTMLElement;
+      if (dot) {
+        dot.style.setProperty('z-index', '1', 'important');
+      }
+      
+      // Then ensure engineer text is above
+      if (engineerTextRef.current) {
+        engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+        engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+      }
+    };
+    
+    // Set immediately and multiple times
+    forceEngineerAbove();
+    requestAnimationFrame(() => {
+      forceEngineerAbove();
+      requestAnimationFrame(() => {
+        forceEngineerAbove();
+        requestAnimationFrame(forceEngineerAbove);
+      });
+    });
+    
+    // Set after delays to catch any late updates
+    setTimeout(forceEngineerAbove, 10);
+    setTimeout(forceEngineerAbove, 50);
+    setTimeout(forceEngineerAbove, 100);
+    setTimeout(forceEngineerAbove, 200);
+    setTimeout(forceEngineerAbove, 500);
+    setTimeout(forceEngineerAbove, 1000);
+    
+    // Also set up an interval to continuously ensure it
+    const interval = setInterval(forceEngineerAbove, 100);
+    
+    return () => clearInterval(interval);
+  }, [isDotAnimationComplete, isDotAnimationStarted]);
+
   // Animate Engineer text and text on M strokes to appear with blur effect after dot animation completes
   useEffect(() => {
     if (!isDotAnimationComplete) return;
@@ -1558,10 +1670,25 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     if (animationEverCompleted) {
       // Restore Engineer text immediately
       if (engineerTextRef.current) {
+        const engineerText = engineerTextRef.current;
         // Ensure engineer text is always on top layer above the dot
-        engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
-        engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
-        gsap.set(engineerTextRef.current, {
+        const forceZIndex = () => {
+          engineerText.style.setProperty('z-index', '10000', 'important');
+          engineerText.style.setProperty('position', 'fixed', 'important');
+          // Also ensure dot is below
+          const dot = document.querySelector('.final-i-dot-svg') as HTMLElement;
+          if (dot) {
+            dot.style.setProperty('z-index', '1', 'important');
+          }
+        };
+        
+        forceZIndex();
+        requestAnimationFrame(() => {
+          forceZIndex();
+          requestAnimationFrame(forceZIndex);
+        });
+        
+        gsap.set(engineerText, {
           opacity: 1,
           filter: "blur(0px)",
         });
@@ -1602,37 +1729,81 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Animate Engineer text with blur fade-in effect (first time only)
     if (engineerTextRef.current) {
       const engineerText = engineerTextRef.current;
-      // Ensure engineer text is always on top layer above the dot - set multiple times
-      engineerText.style.setProperty('z-index', '10000', 'important');
-      engineerText.style.setProperty('position', 'fixed', 'important');
       
-      // Set again after a short delay to ensure it's above any dots created
-      setTimeout(() => {
+      // Force engineer text to be above dot - set aggressively before animation
+      const forceZIndex = () => {
+        // First ensure dot is below
+        const dot = document.querySelector('.final-i-dot-svg') as HTMLElement;
+        if (dot) {
+          dot.style.setProperty('z-index', '1', 'important');
+        }
+        // Then ensure engineer text is above
         engineerText.style.setProperty('z-index', '10000', 'important');
         engineerText.style.setProperty('position', 'fixed', 'important');
-      }, 50);
+      };
       
-      // Set when animation starts
-      const originalOnStart = gsap.to(engineerText, {
+      // Set immediately and multiple times BEFORE animation starts
+      forceZIndex();
+      requestAnimationFrame(() => {
+        forceZIndex();
+        requestAnimationFrame(() => {
+          forceZIndex();
+          requestAnimationFrame(forceZIndex);
+        });
+      });
+      
+      // Set again after delays
+      setTimeout(forceZIndex, 10);
+      setTimeout(forceZIndex, 50);
+      setTimeout(forceZIndex, 100);
+      
+      // Move engineer text to body to ensure it's on top (z-index handles stacking)
+      if (engineerText.parentElement !== document.body) {
+        try {
+          // Remove from current parent first to avoid conflicts
+          if (engineerText.parentElement) {
+            engineerText.parentElement.removeChild(engineerText);
+          }
+          // Append to body
+          document.body.appendChild(engineerText);
+        } catch (error) {
+          // If removal fails, try to append anyway (might already be detached)
+          try {
+            document.body.appendChild(engineerText);
+          } catch (e) {
+            // Element might already be in body or detached, just set z-index
+            console.warn('Could not move engineer text to body:', e);
+          }
+        }
+      }
+      
+      // Create a timeline that ensures z-index is set throughout
+      const engineerTimeline = gsap.timeline();
+      
+      // Set z-index BEFORE opacity animation
+      engineerTimeline.call(forceZIndex);
+      engineerTimeline.to(engineerText, {
         opacity: 1,
         filter: "blur(0px)",
         duration: 1.2,
         ease: "power2.out",
         delay: 0.3,
+        onStart: forceZIndex,
+        onUpdate: forceZIndex,
+        onComplete: () => {
+          forceZIndex();
+          // Set one more time after animation completes
+          requestAnimationFrame(() => {
+            forceZIndex();
+            requestAnimationFrame(forceZIndex);
+          });
+        },
       });
       
-      // Ensure z-index is set when animation starts
-      setTimeout(() => {
-        engineerText.style.setProperty('z-index', '10000', 'important');
-        engineerText.style.setProperty('position', 'fixed', 'important');
-      }, 300);
-      gsap.to(engineerText, {
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 1.2,
-        ease: "power2.out",
-        delay: 0.3,
-      });
+      // Also set during and after animation
+      setTimeout(forceZIndex, 300);
+      setTimeout(forceZIndex, 600);
+      setTimeout(forceZIndex, 1500);
     }
 
 
@@ -2532,26 +2703,50 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         </svg>
       )}
 
-      {/* Engineer text - bottom right, white, on top layer */}    
-      <div
-        ref={engineerTextRef}
-        className="hero-engineer-text"
-        style={{
-          position: "fixed",
-          bottom: "100px",
-          right: "clamp(0.5rem, 2vw, 2rem)",
-          color: "#280B0B",
-          fontFamily: '"Miserable Emillia", cursive',
-          fontSize: "clamp(2rem, 15vw, 11rem)",
-          zIndex: 10000,
-          pointerEvents: "none",
-          whiteSpace: "nowrap",
-          opacity: 0,
-          filter: "blur(10px)",
-        }}
-      >
-       Software  Engineer
-      </div>
+      {/* Engineer text - bottom right, white, on top layer - rendered via Portal to body */}
+      {typeof document !== 'undefined' && createPortal(
+        <div
+          ref={(el) => {
+            engineerTextRef.current = el;
+            // Set z-index immediately when element is mounted
+            if (el) {
+              requestAnimationFrame(() => {
+                el.style.setProperty('z-index', '10000', 'important');
+                el.style.setProperty('position', 'fixed', 'important');
+                
+                // Also ensure dot is below
+                const dot = document.querySelector('.final-i-dot-svg');
+                if (dot) {
+                  (dot as HTMLElement).style.setProperty('z-index', '1', 'important');
+                }
+                
+                // Set again on next frame to be sure
+                requestAnimationFrame(() => {
+                  el.style.setProperty('z-index', '10000', 'important');
+                  el.style.setProperty('position', 'fixed', 'important');
+                });
+              });
+            }
+          }}
+          className="hero-engineer-text"
+          style={{
+            position: "fixed",
+            bottom: "100px",
+            right: "clamp(0.5rem, 2vw, 2rem)",
+            color: "#280B0B",
+            fontFamily: '"Miserable Emillia", cursive',
+            fontSize: "clamp(2rem, 15vw, 11rem)",
+            zIndex: 10000,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+            opacity: 0,
+            filter: "blur(10px)",
+          }}
+        >
+         Software  Engineer
+        </div>,
+        document.body
+      )}
       
 
       <style jsx>{`
@@ -3313,6 +3508,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           user-select: none;
           z-index: 10000 !important;
           position: fixed !important;
+          isolation: isolate;
+        }
+        
+        /* Ensure engineer text is always above dot - higher specificity */
+        div.hero-engineer-text[style*="position"] {
+          z-index: 10000 !important;
+          position: fixed !important;
+        }
+        
+        /* Override any inline styles that might interfere */
+        div.hero-engineer-text {
+          z-index: 10000 !important;
         }
 
         @media (max-width: 768px) {
