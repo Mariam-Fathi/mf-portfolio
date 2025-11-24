@@ -260,8 +260,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
       });
     } else {
-      // When hero becomes active again, restore dot if animation was completed
-      if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+      // When hero becomes active again, restore dot if positions are calculated
+      // Even if animation didn't complete, we should show elements at their final positions
+      if (memoizedPositions && positionsCalculated) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (svgMariamTextRef.current && numberSevenRef.current && 
@@ -341,6 +342,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               // Mark animation as complete so text animations can run
               setIsDotAnimationComplete(true);
               setIsDotAnimationStarted(true);
+              
+              // Also restore engineer text and SVG text elements to final visible state
+              // This ensures they appear even if animation didn't complete before navigation
+              if (!isMobileScreen()) {
+                requestAnimationFrame(() => {
+                  // Restore engineer text
+                  if (engineerTextRef.current) {
+                    gsap.set(engineerTextRef.current, {
+                      opacity: 1,
+                      filter: "blur(0px)",
+                      immediateRender: true,
+                    });
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                  
+                  // Restore SVG text elements (TURNING, REAL LIFE PRODUCTS, IDEAS, INTO)
+                  if (numberSevenRef.current) {
+                    const svg = numberSevenRef.current;
+                    const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+                    const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+                    const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+                    const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+                    
+                    if (turningIdeas) {
+                      gsap.set(turningIdeas, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (realLifeProducts) {
+                      gsap.set(realLifeProducts, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (ideasText) {
+                      gsap.set(ideasText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (intoText) {
+                      gsap.set(intoText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                  }
+                });
+              }
               }
             }
           });
@@ -1042,8 +1098,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Wait for dot animation to start before starting portfolio animation
     if (!isDotAnimationStarted) return;
     
-    // If portfolio animation was already completed, restore final positions without replaying
-    if (memoizedPortfolioData && portfolioCalculated && portfolioAnimationEverCompleted) {
+    // If portfolio data is already calculated, restore final positions without replaying
+    // Even if animation didn't complete, we should show elements at their final positions
+    if (memoizedPortfolioData && portfolioCalculated) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -1606,8 +1663,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     window.addEventListener('resize', handleResize);
     
-    // If positions are already calculated and animation was completed, just position the dot at final position
-    if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+    // If positions are already calculated, just position the dot at final position
+    // Even if animation didn't complete, we should show elements at their final positions
+    if (memoizedPositions && positionsCalculated) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -1689,6 +1747,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               // Mark animation as complete so text animations can run
               setIsDotAnimationComplete(true);
               setIsDotAnimationStarted(true);
+              
+              // Also restore engineer text and SVG text elements to final visible state
+              // This ensures they appear even if animation didn't complete before navigation
+              if (!isMobileScreen()) {
+                requestAnimationFrame(() => {
+                  // Restore engineer text
+                  if (engineerTextRef.current) {
+                    gsap.set(engineerTextRef.current, {
+                      opacity: 1,
+                      filter: "blur(0px)",
+                      immediateRender: true,
+                    });
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                  
+                  // Restore SVG text elements (TURNING, REAL LIFE PRODUCTS, IDEAS, INTO)
+                  if (numberSevenRef.current) {
+                    const svg = numberSevenRef.current;
+                    const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+                    const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+                    const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+                    const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+                    
+                    if (turningIdeas) {
+                      gsap.set(turningIdeas, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (realLifeProducts) {
+                      gsap.set(realLifeProducts, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (ideasText) {
+                      gsap.set(ideasText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (intoText) {
+                      gsap.set(intoText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                  }
+                });
+              }
             }
           }
         });
@@ -2116,19 +2229,60 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     if (!isMobileScreen()) return;
     
-    // Prevent scrolling on body
-    const originalOverflow = document.body.style.overflow;
-    const originalOverflowY = document.body.style.overflowY;
-    const originalHeight = document.body.style.height;
+    // Prevent scrolling on body and html
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalBodyOverflowY = document.body.style.overflowY;
+    const originalBodyHeight = document.body.style.height;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalHtmlOverflowY = document.documentElement.style.overflowY;
+    const originalHtmlHeight = document.documentElement.style.height;
     
     document.body.style.overflow = 'hidden';
     document.body.style.overflowY = 'hidden';
     document.body.style.height = '100vh';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '0';
+    document.body.style.left = '0';
+    
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overflowY = 'hidden';
+    document.documentElement.style.height = '100vh';
+    
+    // Prevent scroll with touch events
+    const preventScroll = (e: TouchEvent) => {
+      // Allow scrolling within the hero section if needed, but prevent body scroll
+      const target = e.target as HTMLElement;
+      if (target.closest('#hero')) {
+        // Allow touch events within hero
+        return;
+      }
+      e.preventDefault();
+    };
+    
+    // Prevent scroll with wheel events
+    const preventWheel = (e: WheelEvent) => {
+      e.preventDefault();
+    };
+    
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventWheel, { passive: false });
     
     return () => {
-      document.body.style.overflow = originalOverflow;
-      document.body.style.overflowY = originalOverflowY;
-      document.body.style.height = originalHeight;
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.overflowY = originalBodyOverflowY;
+      document.body.style.height = originalBodyHeight;
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.documentElement.style.overflowY = originalHtmlOverflowY;
+      document.documentElement.style.height = originalHtmlHeight;
+      
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventWheel);
     };
   }, []);
 
@@ -2591,285 +2745,154 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     // buildDotTimeline is now defined outside this useEffect
     
-    // Handle window resize
+    // Handle window resize with debounce
+    let resizeTimeout: NodeJS.Timeout | null = null;
+    
     const handleResize = () => {
-      if (portfolWidth > 0 && portfolElement) {
-        const svg = numberSevenRef.current;
-        if (!svg) return;
-        
-        // Clear memoized data on resize to force recalculation
-        mariamSvgCalculated = false;
-        memoizedMariamSvgData = null;
-        
-        const newPortfolRect = portfolElement.getBoundingClientRect();
-        const newScreenHeight = window.innerHeight;
-        const newScreenWidth = window.innerWidth;
-        // No bottom frame, so use full height from PORTFOL to screen bottom
-        const newAvailableHeight = newScreenHeight - newPortfolRect.bottom;
-        
-        // Recalculate font size for MARIAM to span screen width
-        const newTempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        newTempSvg.style.position = "absolute";
-        newTempSvg.style.visibility = "hidden";
-        newTempSvg.style.width = "2000px";
-        newTempSvg.style.height = "2000px";
-        document.body.appendChild(newTempSvg);
-        
-        const newTempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        newTempText.setAttribute("font-size", "200px");
-        newTempText.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
-        newTempText.setAttribute("font-weight", "700");
-        newTempText.setAttribute("letter-spacing", "0"); // No letter spacing
-        newTempText.textContent = "Mariam"; // Only first letter capital
-        newTempSvg.appendChild(newTempText);
-        
-        const newTempBbox = newTempText.getBBox();
-        const newBaseTextWidth = newTempBbox.width;
-        const newBaseFontSize = 200;
-        const newWidthPerFontSize = newBaseTextWidth / newBaseFontSize;
-        
-        // Use the newScreenWidth already calculated above
-        const newTargetWidth = newScreenWidth - 2; // Small margin to prevent clipping of last "m"
-        const newFontSize = newTargetWidth / newWidthPerFontSize;
-        
-        document.body.removeChild(newTempSvg);
-        
-        context.font = `700 ${newFontSize}px "Space Grotesk", "Inter", sans-serif`;
-        context.letterSpacing = "0"; // No letter spacing
-        const newFinalMetrics = context.measureText("Mariam");
-        const newTextWidth = newFinalMetrics.width;
-        const newMariamWidth = newScreenWidth;
-        
-        // Update dimensions with padding to prevent clipping
-        const newPadding = 10;
-        svg.setAttribute("height", `${newAvailableHeight}px`);
-        svg.setAttribute("width", `${newMariamWidth}px`);
-        svg.setAttribute("viewBox", `-${newPadding} 0 ${newMariamWidth + newPadding * 2} ${newAvailableHeight}`);
-        svg.style.width = `${newMariamWidth}px`;
-        
-        // Update position - top of SVG at PORTFOL bottom (no gap)
-        svg.style.top = "auto";
-        svg.style.bottom = "0px"; // Anchor SVG at bottom of screen
-        svg.style.height = `${newAvailableHeight}px`;
-        
-        // Update Mariam text
-        const textEl = svg.querySelector(".hero-mariam-text");
-        if (textEl) {
-          // Position x at left edge (edge to edge, no padding)
-          textEl.setAttribute("x", "0");
-          textEl.setAttribute("y", `${newAvailableHeight}px`); // Start at bottom, will adjust
-          textEl.setAttribute("dominant-baseline", "baseline");
-          textEl.setAttribute("text-anchor", "start");
-          textEl.setAttribute("font-size", `${newFontSize}px`);
-          textEl.setAttribute("letter-spacing", "0"); // No letter spacing
-          // No text-transform - keep "Mariam" as is
-          
-          // Adjust to ensure bottom of text aligns with bottom of SVG (bottom of viewport)
-          requestAnimationFrame(() => {
-            try {
-              const bbox = (textEl as SVGTextElement).getBBox();
-              const actualTextHeight = bbox.height;
-              
-              if (actualTextHeight < newAvailableHeight) {
-                const scaleFactor = newAvailableHeight / actualTextHeight;
-                const adjustedFontSize = newFontSize * scaleFactor;
-                textEl.setAttribute("font-size", `${adjustedFontSize}px`);
-                
-                // Re-measure and adjust y to align bottom with bottom of SVG
-                requestAnimationFrame(() => {
-                  try {
-                    const newBbox = (textEl as SVGTextElement).getBBox();
-                    const textBottom = newBbox.y + newBbox.height;
-                    if (Math.abs(textBottom - newAvailableHeight) > 0.1) {
-                      const yAdjustment = newAvailableHeight - (newBbox.y + newBbox.height);
-                      textEl.setAttribute("y", yAdjustment.toString());
-                    }
-                } catch (e) {
-                  // Ignore
-                }
-              });
-            }
-            
-            // Position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes
-            requestAnimationFrame(() => {
-              try {
-                positionTextsOnM(textEl as SVGTextElement, svg, newFontSize);
-              } catch (e) {
-                // Ignore
-              }
-            });
-          } catch (e) {
-            // BBox might not be available immediately
-          }
-        });
+      // Clear previous timeout
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
       }
       
-      // Function to position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes (for resize handler)
-      const positionTextsOnM = (mariamTextElement: SVGTextElement, svg: SVGSVGElement, mariamFontSize: number) => {
-        try {
-          // Get the actual "Mariam" text bbox
-          const mariamBbox = mariamTextElement.getBBox();
-          const mX = mariamBbox.x; // X position of "M" (left edge - left vertical stroke)
-          
-          // Measure the "M" character dimensions in the same SVG context
-          // Create a temporary text element with the same attributes as the Mariam text
-          // Place it in the actual SVG to get accurate measurements
-          const tempM = document.createElementNS("http://www.w3.org/2000/svg", "text");
-          tempM.setAttribute("font-size", `${mariamFontSize}px`);
-          tempM.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
-          tempM.setAttribute("font-weight", "700");
-          tempM.setAttribute("letter-spacing", "0");
-          tempM.setAttribute("x", mariamTextElement.getAttribute("x") || "0");
-          tempM.setAttribute("y", mariamTextElement.getAttribute("y") || "0");
-          tempM.setAttribute("dominant-baseline", mariamTextElement.getAttribute("dominant-baseline") || "hanging");
-          tempM.setAttribute("text-anchor", "start");
-          tempM.textContent = "M";
-          tempM.style.visibility = "hidden";
-          svg.appendChild(tempM);
-          
-          // getBBox() will force a measurement
-          const mBbox = tempM.getBBox();
-          const mWidth = mBbox.width;
-          // Get the actual visual bounds of the M character
-          const mActualTop = mBbox.y; // Actual top of M character
-          const mActualBottom = mBbox.y + mBbox.height; // Actual bottom of M character
-          const mActualHeight = mBbox.height; // Actual visual height of M
-          
-          // Remove the temporary element
-          svg.removeChild(tempM);
-          
-          // Calculate M's position - use the actual measured bounds
-          const mY = mActualTop; // Actual top of M character (visual top of strokes)
-          const mBottom = mActualBottom; // Actual bottom of M character (visual bottom of strokes)
-          const mCenterY = mY + mActualHeight / 2; // Center of the M (vertically centered on actual visual bounds)
-          const mCenterX = mX + mWidth / 2; // Center of the M (horizontally centered on the M character)
-          const mRightX = mX + mWidth; // Right edge of M (right vertical stroke)
-          
-          // Bottom of the entire "Mariam" text bounding box
-          const mariamBottom = mariamBbox.y + mariamBbox.height;
-          
-          // Position "INTO" on the horizontal stroke at the top right of M
-          const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
-          if (intoText) {
-            // Position on the top horizontal stroke, on the right side
-            // Offset from the right edge to position it along the horizontal stroke
-            const offsetFromRight = -24; // pixels offset from the right edge
-            intoText.setAttribute("x", (mRightX + offsetFromRight).toString());
-            intoText.setAttribute("y", (mY + 100).toString());
-            intoText.setAttribute("text-anchor", "end"); // Align to the right
-            intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-            intoText.setAttribute("opacity", "0");
-            intoText.setAttribute("fill", "#C92924");
-            intoText.style.filter = "blur(10px)";
-            // No rotation - keep it horizontal
-            intoText.setAttribute("transform", "");
+      // Debounce resize handler (300ms delay)
+      resizeTimeout = setTimeout(() => {
+        // Skip recalculation on mobile - use memoized data if available
+        if (isMobileScreen()) {
+          // On mobile, only recalculate if screen size actually changed significantly
+          if (memoizedMariamSvgData) {
+            const currentWidth = window.innerWidth;
+            const currentHeight = window.innerHeight;
+            // Only recalculate if screen size changed by more than 100px (to avoid scroll artifacts)
+            if (Math.abs(currentWidth - memoizedMariamSvgData.screenWidth) < 100 &&
+                Math.abs(currentHeight - memoizedMariamSvgData.screenHeight) < 100) {
+              return; // Skip recalculation for small changes (likely scroll artifacts)
+            }
+          } else {
+            // If no memoized data, allow calculation but only once
+            // This will be handled by the main calculation logic
           }
-          
-          // Calculate exact stroke dimensions for the M
-          // The vertical strokes of M go from top to bottom
-          const leftStrokeStartY = mY; // Top of left vertical stroke
-          const leftStrokeEndY = mActualBottom; // Bottom of left vertical stroke
-          const leftStrokeHeight = mActualHeight; // Full height of the stroke
-          const leftStrokeX = mX; // X position of left vertical stroke
-          
-          // Position "IDEAS" on the horizontal stroke at the top left of M (mirroring INTO)
-          const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
-          if (ideasText) {
-            // Position on the top horizontal stroke, on the left side
-            // Offset from the left edge to position it along the horizontal stroke (mirroring INTO)
-            const offsetFromLeft = 24; // pixels offset from the left edge (mirroring the right offset)
-            ideasText.setAttribute("x", (leftStrokeX + offsetFromLeft).toString());
-            ideasText.setAttribute("y", (mY + 100).toString());
-            ideasText.setAttribute("text-anchor", "start"); // Align to the left
-            ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
-            ideasText.setAttribute("opacity", "0");
-            ideasText.setAttribute("fill", "#C92924");
-            ideasText.style.filter = "blur(10px)";
-            // No rotation - keep it horizontal
-            ideasText.setAttribute("transform", "");
-          }
-          
-          const rightStrokeStartY = mY; // Top of right vertical stroke
-          const rightStrokeEndY = mActualBottom; // Bottom of right vertical stroke
-          const rightStrokeHeight = mActualHeight; // Full height of the stroke
-          const rightStrokeX = mRightX; // X position of right vertical stroke
-          
-          // Position "TURNING" on the left stroke of M
-          const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
-          if (turningIdeas) {
-            // Measure the text height (width when rotated -90 degrees)
-            // First, set it temporarily to measure
-            turningIdeas.setAttribute("x", "0");
-            turningIdeas.setAttribute("y", "0");
-            turningIdeas.setAttribute("opacity", "0");
-            const turningIdeasBbox = turningIdeas.getBBox();
-            const turningIdeasTextHeight = turningIdeasBbox.height; // This will be the vertical height when rotated
-            
-            // Calculate offset from stroke (small gap to prevent overlap)
-            const offsetFromStroke = -16; // pixels offset from the actual stroke
-            
-            // Calculate center point of the stroke for rotation
-            const strokeCenterY = leftStrokeStartY + (leftStrokeHeight / 2);
-            
-            // Position text to span exactly along the stroke height
-            // X position: left edge of stroke minus offset
-            // Y position: center of stroke (so when rotated, it spans the full height)
-            turningIdeas.setAttribute("x", (leftStrokeX - offsetFromStroke + 150).toString());
-            turningIdeas.setAttribute("y", strokeCenterY.toString());
-            turningIdeas.setAttribute("text-anchor", "middle"); // Center horizontally when rotated
-            turningIdeas.setAttribute("dominant-baseline", "middle"); // Center vertically
-            // Rotate -90 degrees around the center of the stroke to make it vertical
-            turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
-            turningIdeas.setAttribute("opacity", "0");
-            turningIdeas.setAttribute("fill", "#C92924");
-            turningIdeas.style.filter = "blur(10px)";
-          }
-          
-          // Position "REAL LIFE PRODUCTS" on the right stroke of M (mirrored)
-          const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
-          if (realLifeProducts) {
-            // Measure the text height (width when rotated 90 degrees)
-            // First, set it temporarily to measure
-            realLifeProducts.setAttribute("x", "0");
-            realLifeProducts.setAttribute("y", "0");
-            realLifeProducts.setAttribute("opacity", "0");
-            const realLifeProductsBbox = realLifeProducts.getBBox();
-            const realLifeProductsTextHeight = realLifeProductsBbox.height; // This will be the vertical height when rotated
-            
-            // Calculate offset from stroke (small gap to prevent overlap)
-            const offsetFromStroke = -16; // pixels offset from the actual stroke
-            
-            // Calculate center point of the stroke for rotation
-            const strokeCenterY = rightStrokeStartY + (rightStrokeHeight / 2);
-            
-            // Position text to span exactly along the stroke height
-            // X position: right edge of stroke plus offset
-            // Y position: center of stroke (so when rotated, it spans the full height)
-            realLifeProducts.setAttribute("x", (rightStrokeX + offsetFromStroke).toString());
-            realLifeProducts.setAttribute("y", strokeCenterY.toString());
-            realLifeProducts.setAttribute("text-anchor", "middle"); // Center horizontally when rotated
-            realLifeProducts.setAttribute("dominant-baseline", "middle"); // Center vertically
-            // Rotate 90 degrees around the center of the stroke to make it vertical
-            realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
-            realLifeProducts.setAttribute("opacity", "0");
-            realLifeProducts.setAttribute("fill", "#C92924");
-            realLifeProducts.style.filter = "blur(10px)";
-          }
-        } catch (e) {
-          // Ignore errors
         }
-      };
         
-        // Recalculate if portfolWidth changes
-        if (newPortfolRect.width !== portfolWidth) {
-          setPortfolWidth(newPortfolRect.width);
+        if (portfolWidth > 0 && portfolElement) {
+          const svg = numberSevenRef.current;
+          if (!svg) return;
+          
+          // Clear memoized data on resize to force recalculation
+          mariamSvgCalculated = false;
+          memoizedMariamSvgData = null;
+          
+          const newPortfolRect = portfolElement.getBoundingClientRect();
+          const newScreenHeight = window.innerHeight;
+          const newScreenWidth = window.innerWidth;
+          // No bottom frame, so use full height from PORTFOL to screen bottom
+          const newAvailableHeight = newScreenHeight - newPortfolRect.bottom;
+          
+          // Recalculate font size for MARIAM to span screen width
+          const newTempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          newTempSvg.style.position = "absolute";
+          newTempSvg.style.visibility = "hidden";
+          newTempSvg.style.width = "2000px";
+          newTempSvg.style.height = "2000px";
+          document.body.appendChild(newTempSvg);
+          
+          const newTempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          newTempText.setAttribute("font-size", "200px");
+          newTempText.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
+          newTempText.setAttribute("font-weight", "700");
+          newTempText.setAttribute("letter-spacing", "0"); // No letter spacing
+          newTempText.textContent = "Mariam"; // Only first letter capital
+          newTempSvg.appendChild(newTempText);
+          
+          const newTempBbox = newTempText.getBBox();
+          const newBaseTextWidth = newTempBbox.width;
+          const newBaseFontSize = 200;
+          const newWidthPerFontSize = newBaseTextWidth / newBaseFontSize;
+          
+          // Use the newScreenWidth already calculated above
+          const newTargetWidth = newScreenWidth - 2; // Small margin to prevent clipping of last "m"
+          const newFontSize = newTargetWidth / newWidthPerFontSize;
+          
+          document.body.removeChild(newTempSvg);
+          
+          context.font = `700 ${newFontSize}px "Space Grotesk", "Inter", sans-serif`;
+          context.letterSpacing = "0"; // No letter spacing
+          const newFinalMetrics = context.measureText("Mariam");
+          const newTextWidth = newFinalMetrics.width;
+          const newMariamWidth = newScreenWidth;
+          
+          // Update dimensions with padding to prevent clipping
+          const newPadding = 10;
+          svg.setAttribute("height", `${newAvailableHeight}px`);
+          svg.setAttribute("width", `${newMariamWidth}px`);
+          svg.setAttribute("viewBox", `-${newPadding} 0 ${newMariamWidth + newPadding * 2} ${newAvailableHeight}`);
+          svg.style.width = `${newMariamWidth}px`;
+          
+          // Update position - top of SVG at PORTFOL bottom (no gap)
+          svg.style.top = "auto";
+          svg.style.bottom = "0px"; // Anchor SVG at bottom of screen
+          svg.style.height = `${newAvailableHeight}px`;
+          
+          // Update Mariam text
+          const textEl = svg.querySelector(".hero-mariam-text");
+          if (textEl) {
+            // Position x at left edge (edge to edge, no padding)
+            textEl.setAttribute("x", "0");
+            textEl.setAttribute("y", `${newAvailableHeight}px`); // Start at bottom, will adjust
+            textEl.setAttribute("dominant-baseline", "baseline");
+            textEl.setAttribute("text-anchor", "start");
+            textEl.setAttribute("font-size", `${newFontSize}px`);
+            textEl.setAttribute("letter-spacing", "0"); // No letter spacing
+            // No text-transform - keep "Mariam" as is
+            
+            // Adjust to ensure bottom of text aligns with bottom of SVG (bottom of viewport)
+            requestAnimationFrame(() => {
+              try {
+                const bbox = (textEl as SVGTextElement).getBBox();
+                const actualTextHeight = bbox.height;
+                
+                if (actualTextHeight < newAvailableHeight) {
+                  const scaleFactor = newAvailableHeight / actualTextHeight;
+                  const adjustedFontSize = newFontSize * scaleFactor;
+                  textEl.setAttribute("font-size", `${adjustedFontSize}px`);
+                  
+                  // Re-measure and adjust y to align bottom with bottom of SVG
+                  requestAnimationFrame(() => {
+                    try {
+                      const newBbox = (textEl as SVGTextElement).getBBox();
+                      const textBottom = newBbox.y + newBbox.height;
+                      if (Math.abs(textBottom - newAvailableHeight) > 0.1) {
+                        const yAdjustment = newAvailableHeight - (newBbox.y + newBbox.height);
+                        textEl.setAttribute("y", yAdjustment.toString());
+                      }
+                    } catch (e) {
+                      // Ignore
+                    }
+                  });
+                }
+                
+                // Position "TURNING", "IDEAS", and "REAL LIFE PRODUCTS" on the M strokes
+                requestAnimationFrame(() => {
+                  try {
+                    positionTextsOnM(textEl as SVGTextElement, svg, newFontSize);
+                  } catch (e) {
+                    // Ignore
+                  }
+                });
+              } catch (e) {
+                // BBox might not be available immediately
+              }
+            });
+          }
         }
-      }
+      }, 300); // 300ms debounce delay
     };
     
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
     };
   }, [portfolWidth]);
 
