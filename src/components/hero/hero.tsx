@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { setHeroNavigationY } from "@/utils/navigationPosition";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
@@ -1275,6 +1276,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       
       // Line is at 50% of container height, position navigation vertically centered on the line
       const lineY = containerRect.height * 0.5 - 24; // 50% of container
+      
+      // Store navigation Y position (absolute position relative to viewport) for use in other sections
+      // Calculate absolute Y position: container top + lineY
+      setHeroNavigationY(containerRect.top + lineY);
       
       // Position navigation at the end of the line, aligned to the right
       if (navRef.current) {
