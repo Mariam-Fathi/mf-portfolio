@@ -117,6 +117,20 @@ const CertificateSection = ({
     return {};
   };
 
+  // Determine which side to use for mobile full title (use the vertical word's side)
+  const getMobileVerticalSide = () => {
+    if (pos1 === "right-vertical" || pos2 === "right-vertical") {
+      return "right";
+    }
+    if (pos1 === "left-vertical" || pos2 === "left-vertical") {
+      return "left";
+    }
+    return "right"; // default
+  };
+
+  const mobileSide = getMobileVerticalSide();
+  const fullTitle = certificate.words.join(" ");
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -145,12 +159,26 @@ const CertificateSection = ({
         </div>
       )}
 
-      {/* Title Words - Positioned in opposite corners */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* Mobile: Full Title Vertical - One Side Only */}
+      <div className={`absolute lg:hidden top-1/2 -translate-y-1/2 ${mobileSide === "right" ? "right-4" : "left-4"} pointer-events-none max-h-full overflow-visible`}>
+        <span 
+          className="text-[#1e140b] font-bold text-xl sm:text-2xl uppercase tracking-tighter block"
+          style={{
+            writingMode: "vertical-rl" as const,
+            textOrientation: "mixed" as const,
+            maxHeight: "90vh",
+          }}
+        >
+          {fullTitle}
+        </span>
+      </div>
+
+      {/* Desktop: Title Words - Positioned in opposite corners */}
+      <div className="absolute inset-0 pointer-events-none hidden lg:block">
         {/* First Word */}
         <div className={`absolute ${getPositionClasses(pos1)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={getTextStyle(pos1)}
           >
             {word1}
@@ -160,7 +188,7 @@ const CertificateSection = ({
         {/* Second Word */}
         <div className={`absolute ${getPositionClasses(pos2)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={getTextStyle(pos2)}
           >
             {word2}
