@@ -29,19 +29,9 @@ type ProjectsProps = {
 
 const projects: Project[] = [
   {
-    id: "smart-key",
-    title: "Smart Key",
-    role: "Lead Mobile Engineer | Tarqia",
-    description:
-      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
-    links: [
-      { name: "App on Play Store", url: "#" },
-    ],
-  },
-  {
     id: "personality-ai",
-    title: "Multimodal Personality Analysis System",
-    role: "AI Research Lead | Benha University",
+    title: "Personality Analysis",
+    role: "AI Research Lead",
     description:
       "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction. Built web application (Node.js, MongoDB) for demonstration and candidate assessment interface.",
     links: [
@@ -50,29 +40,9 @@ const projects: Project[] = [
     ],
   },
   {
-    id: "sales-ai",
-    title: "DraEstimator",
-    role: "Full-Stack Developer | Dracode",
-    description:
-      "Internal tool leveraging Hugging Face pre-trained models to analyze project descriptions and generate instant cost estimates. Achieved 85% accuracy and reduced quotation time from days to minutes, addressing critical sales bottleneck in home services application. The solution streamlines the sales process by automating complex estimation workflows and providing real-time pricing insights.",
-    links: [
-      { name: "Demo Video", url: "#" },
-    ],
-  },
-  {
-    id: "home-services",
-    title: "Sanae3y pro",
-    role: "Full-Stack Developer | Dracode",
-    description:
-      "Interactive multi-role application (client, worker, shop) with real-time order management, Google Maps integration, and WebSocket-based live tracking. Features Indrive-like on-demand service booking with real-time updates across all user roles. The platform enables seamless coordination between customers, service providers, and merchants with instant notifications and location tracking.",
-    links: [
-      { name: "Demo Video", url: "#" },
-    ],
-  },
-  {
     id: "homi",
     title: "Homi",
-    role: "Full-Stack Developer & Data Engineer | Self-Directed",
+    role: "Full-Stack Developer & Data Engineer",
     description:
       "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard providing business intelligence through revenue metrics, user engagement, and property performance visualizations. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
     links: [
@@ -84,6 +54,36 @@ const projects: Project[] = [
       { name: "App on Play Store", url: "#" },
       { name: "Dashboard Link", url: "#" },
       { name: "Demo Video", url: "#" },
+    ],
+  },
+  {
+    id: "home-services",
+    title: "Sanae3y pro",
+    role: "Full-Stack Developer",
+    description:
+      "Interactive multi-role application (client, worker, shop) with real-time order management, Google Maps integration, and WebSocket-based live tracking. Features Indrive-like on-demand service booking with real-time updates across all user roles. The platform enables seamless coordination between customers, service providers, and merchants with instant notifications and location tracking.",
+    links: [
+      { name: "Demo Video", url: "#" },
+    ],
+  },
+  {
+    id: "sales-ai",
+    title: "Estimator",
+    role: "Full-Stack Developer",
+    description:
+      "Internal tool leveraging Hugging Face pre-trained models to analyze project descriptions and generate instant cost estimates. Achieved 85% accuracy and reduced quotation time from days to minutes, addressing critical sales bottleneck in home services application. The solution streamlines the sales process by automating complex estimation workflows and providing real-time pricing insights.",
+    links: [
+      { name: "Demo Video", url: "#" },
+    ],
+  },
+  {
+    id: "smart-key",
+    title: "Smart Key",
+    role: "Lead Mobile Engineer",
+    description:
+      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
+    links: [
+      { name: "App on Play Store", url: "#" },
     ],
   },
 ];

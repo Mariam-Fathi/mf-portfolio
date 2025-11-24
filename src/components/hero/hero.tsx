@@ -87,7 +87,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const svgMariamTextRef = useRef<SVGTextElement | null>(null);
   const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
   const engineerTextRef = useRef<HTMLDivElement | null>(null);
-  const bottomFrameTextRef = useRef<HTMLDivElement | null>(null);
 
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
@@ -144,6 +143,49 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     // Set animation complete immediately since we removed HTML Mariam
     setIsAnimationComplete(true);
+    
+    // Ensure engineer text is always on top layer above the dot
+    const setEngineerZIndex = () => {
+      if (engineerTextRef.current) {
+        engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+        engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+      }
+    };
+    
+    // Set immediately
+    setEngineerZIndex();
+    
+    // Use MutationObserver to watch for when the dot is added to the DOM
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === 1) { // Element node
+            const element = node as HTMLElement;
+            if (element.classList?.contains('final-i-dot-svg')) {
+              // Dot was just added, ensure engineer text is above it
+              requestAnimationFrame(() => {
+                setEngineerZIndex();
+                requestAnimationFrame(setEngineerZIndex);
+              });
+            }
+          }
+        });
+      });
+    });
+    
+    // Observe body for added nodes
+    observer.observe(document.body, {
+      childList: true,
+      subtree: false
+    });
+    
+    // Also set it periodically to catch any timing issues
+    const interval = setInterval(setEngineerZIndex, 50);
+    
+    return () => {
+      observer.disconnect();
+      clearInterval(interval);
+    };
   }, []);
 
   // Hide dot when hero becomes inactive, restore when active again
@@ -205,14 +247,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 }
               }
               
-              // Ensure dot is visible and positioned at final location
+            // Ensure dot is visible and positioned at final location
+            if (pos) {
               finalDot.style.width = `${pos.finalDotSize}px`;
               finalDot.style.height = `${pos.finalDotSize}px`;
               finalDot.style.borderRadius = "50%";
               finalDot.style.backgroundColor = "#C92924";
               finalDot.style.position = "fixed";
-              finalDot.style.zIndex = "999999";
-              finalDot.style.setProperty('z-index', '999999', 'important');
+              finalDot.style.zIndex = "100";
+              finalDot.style.setProperty('z-index', '100', 'important');
               finalDot.style.opacity = "1";
               finalDot.style.display = "block";
               finalDot.style.visibility = "visible";
@@ -229,20 +272,36 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 force3D: true
               });
               
-              // Color the letters if they aren't already colored
-              if (svgIRef.current) {
-                gsap.set(svgIRef.current, { fill: "#C92924" });
-              }
-              if (svgA2Ref.current) {
-                gsap.set(svgA2Ref.current, { fill: "#C92924" });
-              }
-              if (svgM2Ref.current) {
-                gsap.set(svgM2Ref.current, { fill: "#C92924" });
-              }
+                // Color the letters if they aren't already colored
+                if (svgIRef.current) {
+                  gsap.set(svgIRef.current, { fill: "#C92924" });
+                }
+                if (svgA2Ref.current) {
+                  gsap.set(svgA2Ref.current, { fill: "#C92924" });
+                }
+                if (svgM2Ref.current) {
+                  gsap.set(svgM2Ref.current, { fill: "#C92924" });
+                }
+              
+              // Ensure engineer text is always above the dot - set immediately after dot positioning
+              requestAnimationFrame(() => {
+                if (engineerTextRef.current) {
+                  engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                  engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                }
+                // Set again on next frame to be absolutely sure
+                requestAnimationFrame(() => {
+                  if (engineerTextRef.current) {
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                });
+              });
               
               // Mark animation as complete so text animations can run
               setIsDotAnimationComplete(true);
               setIsDotAnimationStarted(true);
+              }
             }
           });
         });
@@ -414,8 +473,23 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     finalDot.style.borderRadius = "50%";
     finalDot.style.backgroundColor = "#C92924";
     finalDot.style.position = "fixed";
-    finalDot.style.zIndex = "999999";
-    finalDot.style.setProperty('z-index', '999999', 'important');
+    finalDot.style.zIndex = "100";
+    finalDot.style.setProperty('z-index', '100', 'important');
+    
+    // Ensure engineer text is always above the dot - set immediately after dot creation
+    requestAnimationFrame(() => {
+      if (engineerTextRef.current) {
+        engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+        engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+      }
+      // Set again on next frame to be absolutely sure
+      requestAnimationFrame(() => {
+        if (engineerTextRef.current) {
+          engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+          engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+        }
+      });
+    });
     finalDot.style.opacity = "1";
     finalDot.style.left = "0px";
     finalDot.style.top = "0px";
@@ -801,13 +875,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
 
-      // Only reset bottom frame text if animation wasn't completed
-      if (!animationEverCompleted && bottomFrameTextRef.current) {
-        gsap.set(bottomFrameTextRef.current, {
-          opacity: 0,
-          filter: "blur(10px)",
-        });
-      }
 
       // Only reset SVG text elements if animation wasn't completed
       if (!animationEverCompleted && numberSevenRef.current) {
@@ -889,16 +956,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               opacity: 0,
               rotation: 90,
             });
-            gsap.set(oEl, {
-              x: data.oFinalX,
-            });
-            gsap.set(lineEl, {
-              display: "block",
-              opacity: 1,
-              x: data.iOriginalPosition,
-              width: data.lineFinalWidth,
-              transformOrigin: "left center",
-            });
+            if (data) {
+              gsap.set(oEl, {
+                x: data.oFinalX,
+              });
+              gsap.set(lineEl, {
+                display: "block",
+                opacity: 1,
+                x: data.iOriginalPosition,
+                width: data.lineFinalWidth,
+                transformOrigin: "left center",
+              });
+            }
             
             // Mark as complete immediately
             setIsPortfolioAnimationComplete(true);
@@ -940,16 +1009,18 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               opacity: 0,
               rotation: 90,
             });
-            gsap.set(oEl, {
-              x: data.oFinalX,
-            });
-            gsap.set(lineEl, {
-              display: "block",
-              opacity: 1,
-              x: data.iOriginalPosition,
-              width: data.lineFinalWidth,
-              transformOrigin: "left center",
-            });
+            if (data) {
+              gsap.set(oEl, {
+                x: data.oFinalX,
+              });
+              gsap.set(lineEl, {
+                display: "block",
+                opacity: 1,
+                x: data.iOriginalPosition,
+                width: data.lineFinalWidth,
+                transformOrigin: "left center",
+              });
+            }
             
             // Mark as complete immediately
             setIsPortfolioAnimationComplete(true);
@@ -1320,6 +1391,38 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     if (!isActive || !isMariamReady) return;
     
+    // Handle window resize - clear memoized positions to force recalculation
+    const handleResize = () => {
+      positionsCalculated = false;
+      memoizedPositions = null;
+      // Recalculate positions if animation was completed
+      if (animationEverCompleted && svgMariamTextRef.current && numberSevenRef.current && 
+          svgIRef.current && svgA2Ref.current && svgM2Ref.current) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Rebuild timeline to recalculate positions
+            const dotTimeline = buildDotTimeline();
+            if (dotTimeline && svgFinalDotRef.current && memoizedPositions) {
+              const pos = memoizedPositions;
+              // Update dot size and position
+              svgFinalDotRef.current.style.width = `${pos.finalDotSize}px`;
+              svgFinalDotRef.current.style.height = `${pos.finalDotSize}px`;
+              gsap.set(svgFinalDotRef.current, {
+                x: pos.iScreenX - (pos.finalDotSize / 2),
+                y: pos.iScreenY,
+                scale: 1,
+                opacity: 1,
+                immediateRender: true,
+                force3D: true
+              });
+            }
+          });
+        });
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
     // If positions are already calculated and animation was completed, just position the dot at final position
     if (memoizedPositions && positionsCalculated && animationEverCompleted) {
       // Use requestAnimationFrame to ensure DOM is ready
@@ -1348,43 +1451,60 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             }
             
             // Ensure dot is visible and positioned at final location
-            finalDot.style.width = `${pos.finalDotSize}px`;
-            finalDot.style.height = `${pos.finalDotSize}px`;
-            finalDot.style.borderRadius = "50%";
-            finalDot.style.backgroundColor = "#C92924";
-            finalDot.style.position = "fixed";
-            finalDot.style.zIndex = "999999";
-            finalDot.style.setProperty('z-index', '999999', 'important');
-            finalDot.style.opacity = "1";
-            finalDot.style.display = "block";
-            finalDot.style.visibility = "visible";
-            finalDot.style.pointerEvents = "none";
-            finalDot.style.transformOrigin = "center center";
-            
-            // Position at final location immediately
-            gsap.set(finalDot, {
-              x: pos.iScreenX - (pos.finalDotSize / 2),
-              y: pos.iScreenY,
-              scale: 1,
-              opacity: 1,
-              immediateRender: true,
-              force3D: true
-            });
-            
-            // Color the letters if they aren't already colored
-            if (svgIRef.current) {
-              gsap.set(svgIRef.current, { fill: "#C92924" });
+            if (pos) {
+              finalDot.style.width = `${pos.finalDotSize}px`;
+              finalDot.style.height = `${pos.finalDotSize}px`;
+              finalDot.style.borderRadius = "50%";
+              finalDot.style.backgroundColor = "#C92924";
+              finalDot.style.position = "fixed";
+              finalDot.style.zIndex = "100";
+              finalDot.style.setProperty('z-index', '100', 'important');
+              finalDot.style.opacity = "1";
+              finalDot.style.display = "block";
+              finalDot.style.visibility = "visible";
+              finalDot.style.pointerEvents = "none";
+              finalDot.style.transformOrigin = "center center";
+              
+              // Position at final location immediately
+              gsap.set(finalDot, {
+                x: pos.iScreenX - (pos.finalDotSize / 2),
+                y: pos.iScreenY,
+                scale: 1,
+                opacity: 1,
+                immediateRender: true,
+                force3D: true
+              });
+              
+              // Color the letters if they aren't already colored
+              if (svgIRef.current) {
+                gsap.set(svgIRef.current, { fill: "#C92924" });
+              }
+              if (svgA2Ref.current) {
+                gsap.set(svgA2Ref.current, { fill: "#C92924" });
+              }
+              if (svgM2Ref.current) {
+                gsap.set(svgM2Ref.current, { fill: "#C92924" });
+              }
+              
+              // Ensure engineer text is always above the dot - set immediately after dot positioning
+              requestAnimationFrame(() => {
+                if (engineerTextRef.current) {
+                  engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                  engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                }
+                // Set again on next frame to be absolutely sure
+                requestAnimationFrame(() => {
+                  if (engineerTextRef.current) {
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                });
+              });
+              
+              // Mark animation as complete so text animations can run
+              setIsDotAnimationComplete(true);
+              setIsDotAnimationStarted(true);
             }
-            if (svgA2Ref.current) {
-              gsap.set(svgA2Ref.current, { fill: "#C92924" });
-            }
-            if (svgM2Ref.current) {
-              gsap.set(svgM2Ref.current, { fill: "#C92924" });
-            }
-            
-            // Mark animation as complete so text animations can run
-            setIsDotAnimationComplete(true);
-            setIsDotAnimationStarted(true);
           }
         });
       });
@@ -1438,19 +1558,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     if (animationEverCompleted) {
       // Restore Engineer text immediately
       if (engineerTextRef.current) {
+        // Ensure engineer text is always on top layer above the dot
+        engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+        engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
         gsap.set(engineerTextRef.current, {
           opacity: 1,
           filter: "blur(0px)",
         });
       }
 
-      // Restore bottom frame text immediately
-      if (bottomFrameTextRef.current) {
-        gsap.set(bottomFrameTextRef.current, {
-          opacity: 1,
-          filter: "blur(0px)",
-        });
-      }
 
       // Restore SVG text elements immediately
       if (numberSevenRef.current) {
@@ -1486,6 +1602,30 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Animate Engineer text with blur fade-in effect (first time only)
     if (engineerTextRef.current) {
       const engineerText = engineerTextRef.current;
+      // Ensure engineer text is always on top layer above the dot - set multiple times
+      engineerText.style.setProperty('z-index', '10000', 'important');
+      engineerText.style.setProperty('position', 'fixed', 'important');
+      
+      // Set again after a short delay to ensure it's above any dots created
+      setTimeout(() => {
+        engineerText.style.setProperty('z-index', '10000', 'important');
+        engineerText.style.setProperty('position', 'fixed', 'important');
+      }, 50);
+      
+      // Set when animation starts
+      const originalOnStart = gsap.to(engineerText, {
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 1.2,
+        ease: "power2.out",
+        delay: 0.3,
+      });
+      
+      // Ensure z-index is set when animation starts
+      setTimeout(() => {
+        engineerText.style.setProperty('z-index', '10000', 'important');
+        engineerText.style.setProperty('position', 'fixed', 'important');
+      }, 300);
       gsap.to(engineerText, {
         opacity: 1,
         filter: "blur(0px)",
@@ -1495,17 +1635,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     }
 
-    // Animate bottom frame text with blur fade-in effect (same as engineer)
-    if (bottomFrameTextRef.current) {
-      const bottomFrameText = bottomFrameTextRef.current;
-      gsap.to(bottomFrameText, {
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 1.2,
-        ease: "power2.out",
-        delay: 0.3,
-      });
-    }
 
     // Animate TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text with blur fade-in effect
     if (numberSevenRef.current) {
@@ -1596,7 +1725,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       svg.style.position = "fixed";
       svg.style.left = "0px";
       svg.style.top = "auto";
-      svg.style.bottom = "8px";
+      svg.style.bottom = "0px"; // Consistent with fresh calculation
       svg.style.margin = "0";
       svg.style.padding = "0";
       svg.style.height = `${mariamHeight}px`;
@@ -1631,8 +1760,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Calculate the required height: from PORTFOL bottom to screen bottom
     screenHeight = window.innerHeight;
     screenWidth = window.innerWidth;
-    const bottomFrameHeight = 50; // Height of bottom frame
-    const availableHeight = screenHeight - portfolBottom - bottomFrameHeight;
+    // No bottom frame, so use full height from PORTFOL to screen bottom
+    const availableHeight = screenHeight - portfolBottom;
     
     // Use canvas to measure text and find font size where horizontal stroke of "7" matches portfolWidth
     const canvas = document.createElement("canvas");
@@ -1690,12 +1819,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     svg.setAttribute("width", `${mariamWidth}px`);
     svg.setAttribute("height", `${mariamHeight}px`);
     
-    // Position SVG so its BOTTOM edge is at top of bottom frame (50px from bottom)
-    // This ensures Mariam lands on the bottom frame
+    // Position SVG at bottom of screen
     svg.style.position = "fixed";
     svg.style.left = "0px";
     svg.style.top = "auto";
-    svg.style.bottom = "8px"; // Anchor SVG at top of bottom frame
+    svg.style.bottom = "0px"; // Anchor SVG at bottom of screen
     svg.style.margin = "0";
     svg.style.padding = "0";
     svg.style.height = `${mariamHeight}px`; // Explicit height
@@ -2024,10 +2152,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         const svg = numberSevenRef.current;
         if (!svg) return;
         
+        // Clear memoized data on resize to force recalculation
+        mariamSvgCalculated = false;
+        memoizedMariamSvgData = null;
+        
         const newPortfolRect = portfolElement.getBoundingClientRect();
         const newScreenHeight = window.innerHeight;
-        const bottomFrameHeight = 50; // Height of bottom frame
-        const newAvailableHeight = newScreenHeight - newPortfolRect.bottom - bottomFrameHeight;
+        const newScreenWidth = window.innerWidth;
+        // No bottom frame, so use full height from PORTFOL to screen bottom
+        const newAvailableHeight = newScreenHeight - newPortfolRect.bottom;
         
         // Recalculate font size for MARIAM to span screen width
         const newTempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -2050,7 +2183,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         const newBaseFontSize = 200;
         const newWidthPerFontSize = newBaseTextWidth / newBaseFontSize;
         
-        const newScreenWidth = window.innerWidth;
+        // Use the newScreenWidth already calculated above
         const newTargetWidth = newScreenWidth - 2; // Small margin to prevent clipping of last "m"
         const newFontSize = newTargetWidth / newWidthPerFontSize;
         
@@ -2071,7 +2204,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         // Update position - top of SVG at PORTFOL bottom (no gap)
         svg.style.top = "auto";
-        svg.style.bottom = "8px"; // Keep anchored at top of bottom frame
+        svg.style.bottom = "0px"; // Anchor SVG at bottom of screen
         svg.style.height = `${newAvailableHeight}px`;
         
         // Update Mariam text
@@ -2362,28 +2495,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           </div>
         </div>
 
-        {/* Left marquee */}
-   
-
-        {/* Bottom marquee */}
-        <div className="hero-frame-marquee hero-frame-marquee-bottom">
-          <div className="hero-frame-marquee-content">
-            <div 
-              ref={bottomFrameTextRef}
-              className="hero-frame-marquee-text"
-              style={{ opacity: 0, filter: "blur(10px)" }}
-            >
-              turning ideas into real life product
-            </div>
-            <div className="hero-frame-marquee-text">
-              turning ideas into real life product
-            </div>
-            <div className="hero-frame-marquee-text">
-              turning ideas into real life product
-            </div>
-          </div>
-        </div>
-
       </div>
 
       {/* SVG Number 7 - positioned directly below PORTFOL */}
@@ -2427,19 +2538,19 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         className="hero-engineer-text"
         style={{
           position: "fixed",
-          bottom: "0rem",
-          right: "2rem",
+          bottom: "100px",
+          right: "clamp(0.5rem, 2vw, 2rem)",
           color: "#280B0B",
           fontFamily: '"Miserable Emillia", cursive',
-          fontSize: "clamp(3rem, 22vw, 22rem)",
-          zIndex: 400,
+          fontSize: "clamp(2rem, 15vw, 11rem)",
+          zIndex: 10000,
           pointerEvents: "none",
           whiteSpace: "nowrap",
           opacity: 0,
           filter: "blur(10px)",
         }}
       >
-         Engineer
+       Software  Engineer
       </div>
       
 
@@ -2510,7 +2621,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           align-items: flex-end;
           width: 100%;
           height: 100%;
-          padding: 100px 0 0 100px;
+          padding: clamp(1rem, 8vw, 6.25rem) 0 0 clamp(1rem, 8vw, 6.25rem);
           padding-bottom: 0;
           position: absolute;
           inset: 0;
@@ -2523,7 +2634,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           .hero-heading-wrapper {
             justify-content: flex-end;
             align-items: flex-end;
-            padding: 100px 0 0 100px;
+            padding: clamp(1rem, 5vw, 3rem) 0 0 clamp(1rem, 5vw, 3rem);
             padding-bottom: 0;
             width: 100%;
             height: 100%;
@@ -3084,9 +3195,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           top: 0;
           left: 0;
           right: 0;
-          height: 100px;
+          height: clamp(60px, 8vw, 100px);
           border-radius: 0;
-          padding-right: 2rem;
+          padding-right: clamp(1rem, 2vw, 2rem);
           position: relative;
           overflow: visible;
         }
@@ -3107,53 +3218,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           z-index: 1;
         }
 
-        .hero-frame-marquee-bottom {
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 0px;
-          border-radius: 0;
-          padding-right: 2rem;
-          border-top: 1px solid #280B0B;
-        }
-
-        .hero-frame-marquee-right {
-          right: 0;
-          top: 100px;
-          bottom: 100px;
-          width: 100px;
-          border-radius: 0;
-          justify-content: center;
-          padding-bottom: 2rem;
-        }
-
-        .hero-frame-marquee-left {
-          left: 0;
-          top: 100px;
-          bottom: 0px;
-          width: 50px;
-          border-radius: 0;
-          justify-content: center;
-          padding-bottom: 2rem;
-        }
-
-        @media (max-width: 768px) {
-          .hero-frame-marquee-top,
-          .hero-frame-marquee-bottom {
-            height: 100px;
-            border-radius: 0;
-          }
-          .hero-frame-marquee-right {
-            top: 100px;
-            bottom: 100px;
-            width: 100px;
-          }
-          .hero-frame-marquee-left {
-            top: 100px;
-            bottom: 100px;
-            width: 100px;
-          }
-        }
 
         .hero-frame-marquee-content {
           display: flex;
@@ -3167,56 +3231,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           z-index: 10;
         }
 
-        .hero-frame-marquee-content-vertical {
-          flex-direction: column;
-          height: fit-content;
-          animation: frame-marquee-scroll-vertical 30s linear infinite;
-        }
-
-        .hero-frame-marquee-text {
-          display: inline-block;
-          padding: 0 2rem;
-          // padding-right: 2rem;
-          color: #280B0B;
-          font-size: clamp(1rem, 1vw, 1rem);
-          font-weight: 400;
-          font-family: "Space Grotesk", "Inter", sans-serif;
-          letter-spacing: 0.1em;
-          text-rendering: optimizeLegibility;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          vertical-align: baseline;
-          flex-shrink: 0;
-          writing-mode: horizontal-tb;
-          position: relative;
-          z-index: 10;
-        }
-
-        .hero-frame-marquee-content-vertical .hero-frame-marquee-text {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          padding: 2rem 0;
-          padding-bottom: 6rem;
-        }
-
-
-        @keyframes frame-marquee-scroll-horizontal {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-33.333%);
-          }
-        }
-
-        @keyframes frame-marquee-scroll-vertical {
-          0% {
-            transform: translateY(-33.333%);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
 
         /* Portfolio Header in Top Frame */
         .hero-frame-marquee-top .hero-cover-header {
@@ -3249,7 +3263,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         .hero-cover-title-portfol,
         .hero-cover-title-i,
         .hero-cover-title-o {
-          font-size: clamp(3.5rem, 10vw, 6rem);
+          font-size: clamp(2rem, 8vw, 6rem);
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: #280B0B;
@@ -3258,7 +3272,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           display: inline-flex;
           align-items: center;
           white-space: nowrap;
-          height: 100px;
+          height: clamp(60px, 8vw, 100px);
+        }
+        
+        @media (max-width: 768px) {
+          .hero-cover-title-full,
+          .hero-cover-title-portfol,
+          .hero-cover-title-i,
+          .hero-cover-title-o {
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            height: clamp(50px, 12vw, 80px);
+          }
         }
 
         .hero-cover-title-i {
@@ -3287,13 +3311,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           color: white;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
+          z-index: 10000 !important;
+          position: fixed !important;
         }
 
         @media (max-width: 768px) {
           .hero-engineer-text {
-            bottom: 1rem;
-            right: 1rem;
-            font-size: clamp(2.5rem, 6vw, 4rem);
+            bottom: clamp(0.5rem, 2vw, 1rem);
+            right: clamp(0.5rem, 2vw, 1rem);
+            font-size: clamp(1.5rem, 8vw, 4rem);
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .hero-engineer-text {
+            font-size: clamp(1.2rem, 6vw, 2.5rem);
           }
         }
       `}</style>
