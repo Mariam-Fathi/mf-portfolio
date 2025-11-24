@@ -2070,7 +2070,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // textBBox.y + textBBox.height is the bottom of the text
       // The text's baseline is at the bottom of the SVG (y = mariamHeight in SVG)
       // So: text top in screen = SVG bottom - (viewBox.height - textBBox.y) * scaleY
-      const textTopInScreen = svgRect.bottom - ((viewBox.height - textBBox.y) * scaleY);
+      const mariamTopInScreen = svgRect.bottom - ((viewBox.height - textBBox.y) * scaleY);
+      
+      // Get engineer text height to position it directly above Mariam
+      const engineerTextHeight = engineerTextRef.current ? engineerTextRef.current.getBoundingClientRect().height : 0;
+      
+      // Position engineer text directly above Mariam with minimal gap
+      const engineerTopInScreen = mariamTopInScreen - engineerTextHeight - 4; // 4px minimal gap
       
       // Calculate the right edge of Mariam text (where "m" ends) to shift engineer text towards it
       const scaleX = viewBox.width > 0 ? svgRect.width / viewBox.width : 1;
@@ -2081,9 +2087,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       const distanceFromRight = screenWidth - mariamTextRight;
       const rightPosition = Math.max(0.3, distanceFromRight * 0.15); // Shift 15% of the way towards "m", min 0.3rem
       
-      // Position engineer text at the top of Mariam with no gap, shifted towards "m"
+      // Position engineer text directly above Mariam, shifted towards "m"
       if (engineerTextRef.current) {
-        engineerTextRef.current.style.setProperty('top', `${textTopInScreen}px`, 'important');
+        engineerTextRef.current.style.setProperty('top', `${engineerTopInScreen}px`, 'important');
         engineerTextRef.current.style.setProperty('bottom', 'auto', 'important');
         engineerTextRef.current.style.setProperty('right', `${rightPosition}rem`, 'important');
         engineerTextRef.current.style.setProperty('transform', 'translateY(0)', 'important');
@@ -2105,6 +2111,26 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       window.removeEventListener('resize', positionEngineerText);
     };
   }, [isMariamReady, isDotAnimationComplete]);
+
+  // Prevent body scrolling on mobile
+  useEffect(() => {
+    if (!isMobileScreen()) return;
+    
+    // Prevent scrolling on body
+    const originalOverflow = document.body.style.overflow;
+    const originalOverflowY = document.body.style.overflowY;
+    const originalHeight = document.body.style.height;
+    
+    document.body.style.overflow = 'hidden';
+    document.body.style.overflowY = 'hidden';
+    document.body.style.height = '100vh';
+    
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.overflowY = originalOverflowY;
+      document.body.style.height = originalHeight;
+    };
+  }, []);
 
   // Position and size the SVG number 7 directly below PORTFOL
   useEffect(() => {
@@ -2853,6 +2879,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       className="flex h-screen w-full flex-col items-center justify-center text-center text-[#280B0B] relative overflow-hidden"
       style={{
         backgroundColor: "#F9E7C9",
+        ...(isMobileScreen() && {
+          overflowY: 'hidden',
+          height: '100vh',
+          maxHeight: '100vh',
+        }),
       }}
     >
       {/* SVG Filter for Liquid Glass Effect */}
