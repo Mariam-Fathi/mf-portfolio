@@ -35,8 +35,7 @@ const projects: Project[] = [
     description:
       "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction. Built web application (Node.js, MongoDB) for demonstration and candidate assessment interface.",
     links: [
-      { name: "Graduation Project Book PDF", url: "#" },
-      { name: "GitHub Repository", url: "#" },
+      { name: "Graduation Thesis", url: "#" },
     ],
   },
   {
