@@ -2,12 +2,58 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { setHeroNavigationY } from "@/utils/navigationPosition";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
   onReady?: () => void;
   isActive?: boolean;
 }
+
+// Module-level storage for positions that persist across component unmounts/remounts
+// These will only be reset on hard reload (page refresh)
+let memoizedPositions: {
+  iScreenX: number;
+  iScreenY: number;
+  iCenterY: number;
+  a2ScreenX: number;
+  a2ScreenY: number;
+  m2ScreenX: number;
+  m2ScreenY: number;
+  dotSize: number;
+  finalDotSize: number;
+} | null = null;
+
+let positionsCalculated = false;
+let animationEverCompleted = false;
+
+// Module-level storage for portfolio positions and calculations
+let memoizedPortfolioData: {
+  portfolWidth: number;
+  oFinalX: number;
+  lineFinalWidth: number;
+  iOriginalPosition: number;
+  oStartX: number;
+  iWidth: number;
+  containerWidth: number;
+} | null = null;
+
+let portfolioCalculated = false;
+let portfolioAnimationEverCompleted = false;
+
+// Module-level storage for SVG Mariam positioning
+let memoizedMariamSvgData: {
+  fontSize: number;
+  mariamWidth: number;
+  mariamHeight: number;
+  portfolBottom: number;
+  portfolLeft: number;
+  portfolFontSize: number;
+  screenWidth: number;
+  screenHeight: number;
+} | null = null;
+
+let mariamSvgCalculated = false;
 
 const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
@@ -100,7 +146,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     setIsAnimationComplete(true);
   }, []);
 
-  // Hide dot when hero becomes inactive
+  // Hide dot when hero becomes inactive, restore when active again
   useEffect(() => {
     if (!isActive) {
       // Immediately hide all dots without animation
@@ -133,6 +179,74 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           htmlDot.style.setProperty('z-index', '-1', 'important');
         }
       });
+    } else {
+      // When hero becomes active again, restore dot if animation was completed
+      if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (svgMariamTextRef.current && numberSevenRef.current && 
+                svgIRef.current && svgA2Ref.current && svgM2Ref.current) {
+              const pos = memoizedPositions;
+              
+              // Check if dot already exists in DOM, otherwise create it
+              let finalDot = svgFinalDotRef.current;
+              if (!finalDot) {
+                // Try to find existing dot in DOM
+                const existingDot = document.querySelector('.final-i-dot-svg') as HTMLDivElement;
+                if (existingDot) {
+                  svgFinalDotRef.current = existingDot;
+                  finalDot = existingDot;
+                } else {
+                  // Create new dot element
+                  finalDot = document.createElement("div");
+                  finalDot.className = "final-i-dot-svg";
+                  svgFinalDotRef.current = finalDot;
+                  document.body.appendChild(finalDot);
+                }
+              }
+              
+              // Ensure dot is visible and positioned at final location
+              finalDot.style.width = `${pos.finalDotSize}px`;
+              finalDot.style.height = `${pos.finalDotSize}px`;
+              finalDot.style.borderRadius = "50%";
+              finalDot.style.backgroundColor = "#C92924";
+              finalDot.style.position = "fixed";
+              finalDot.style.zIndex = "999999";
+              finalDot.style.setProperty('z-index', '999999', 'important');
+              finalDot.style.opacity = "1";
+              finalDot.style.display = "block";
+              finalDot.style.visibility = "visible";
+              finalDot.style.pointerEvents = "none";
+              finalDot.style.transformOrigin = "center center";
+              
+              // Position at final location immediately
+              gsap.set(finalDot, {
+                x: pos.iScreenX - (pos.finalDotSize / 2),
+                y: pos.iScreenY,
+                scale: 1,
+                opacity: 1,
+                immediateRender: true,
+                force3D: true
+              });
+              
+              // Color the letters if they aren't already colored
+              if (svgIRef.current) {
+                gsap.set(svgIRef.current, { fill: "#C92924" });
+              }
+              if (svgA2Ref.current) {
+                gsap.set(svgA2Ref.current, { fill: "#C92924" });
+              }
+              if (svgM2Ref.current) {
+                gsap.set(svgM2Ref.current, { fill: "#C92924" });
+              }
+              
+              // Mark animation as complete so text animations can run
+              setIsDotAnimationComplete(true);
+              setIsDotAnimationStarted(true);
+            }
+          });
+        });
+      }
     }
   }, [isActive]);
 
@@ -148,98 +262,140 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     if (!svgIRefEl || !svgA2RefEl || !svgM2RefEl) return undefined;
     
-    // Get the text element's position and font properties
-    const textRect = svgMariamText.getBBox();
-    const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
-    const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
-    const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
-    const fontFamily = svgMariamText.getAttribute("font-family") || '"Momo Trust Display", "Stack Sans", sans-serif';
-    const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
+    // Use memoized positions if available, otherwise calculate and store them
+    let iScreenX: number;
+    let iScreenY: number;
+    let iCenterY: number;
+    let a2ScreenX: number;
+    let a2ScreenY: number;
+    let m2ScreenX: number;
+    let m2ScreenY: number;
+    let dotSize: number;
+    let finalDotSize: number;
     
-    // Get actual letter positions by measuring with temporary text elements
-    // that match the exact positioning of the tspan elements
-    const measureLetter = (letter: string, index: number) => {
-      const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      tempText.setAttribute("font-size", `${fontSize}px`);
-      tempText.setAttribute("font-family", fontFamily);
-      tempText.setAttribute("font-weight", "700");
-      tempText.setAttribute("letter-spacing", "0");
-      tempText.setAttribute("x", textX.toString());
-      tempText.setAttribute("y", textY.toString());
-      tempText.setAttribute("dominant-baseline", dominantBaseline);
-      tempText.setAttribute("text-anchor", "start");
-      tempText.textContent = letter;
-      tempText.style.visibility = "hidden";
-      svg.appendChild(tempText);
+    if (memoizedPositions && positionsCalculated) {
+      // Use memoized positions
+      const pos = memoizedPositions;
+      iScreenX = pos.iScreenX;
+      iScreenY = pos.iScreenY;
+      iCenterY = pos.iCenterY;
+      a2ScreenX = pos.a2ScreenX;
+      a2ScreenY = pos.a2ScreenY;
+      m2ScreenX = pos.m2ScreenX;
+      m2ScreenY = pos.m2ScreenY;
+      dotSize = pos.dotSize;
+      finalDotSize = pos.finalDotSize;
       
-      const bbox = tempText.getBBox();
-      // Calculate cumulative x position by measuring all previous letters
-      let cumulativeX = 0;
-      for (let i = 0; i < index; i++) {
-        const prevLetter = ["M", "a", "r", "i", "a", "m"][i];
-        const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        prevTemp.setAttribute("font-size", `${fontSize}px`);
-        prevTemp.setAttribute("font-family", fontFamily);
-        prevTemp.setAttribute("font-weight", "700");
-        prevTemp.setAttribute("letter-spacing", "0");
-        prevTemp.setAttribute("x", textX.toString());
-        prevTemp.setAttribute("y", textY.toString());
-        prevTemp.setAttribute("dominant-baseline", dominantBaseline);
-        prevTemp.setAttribute("text-anchor", "start");
-        prevTemp.textContent = prevLetter;
-        prevTemp.style.visibility = "hidden";
-        svg.appendChild(prevTemp);
-        const prevBbox = prevTemp.getBBox();
-        cumulativeX += prevBbox.width;
-        svg.removeChild(prevTemp);
-      }
+      console.log('Using memoized positions:', pos);
+    } else {
+      // Calculate positions (only on first mount/hard reload)
+      const textRect = svgMariamText.getBBox();
+      const textX = parseFloat(svgMariamText.getAttribute("x") || "0");
+      const textY = parseFloat(svgMariamText.getAttribute("y") || "0");
+      const fontSize = parseFloat(svgMariamText.getAttribute("font-size") || window.getComputedStyle(svgMariamText).fontSize) || 200;
+      const fontFamily = svgMariamText.getAttribute("font-family") || '"Momo Trust Display", "Stack Sans", sans-serif';
+      const dominantBaseline = svgMariamText.getAttribute("dominant-baseline") || "baseline";
       
-      svg.removeChild(tempText);
-      
-      return {
-        x: textX + cumulativeX,
-        y: textY + bbox.y,
-        width: bbox.width,
-        height: bbox.height,
-        centerX: textX + cumulativeX + bbox.width / 2,
-        centerY: textY + bbox.y + bbox.height / 2
+      // Get actual letter positions by measuring with temporary text elements
+      // that match the exact positioning of the tspan elements
+      const measureLetter = (letter: string, index: number) => {
+        const tempText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        tempText.setAttribute("font-size", `${fontSize}px`);
+        tempText.setAttribute("font-family", fontFamily);
+        tempText.setAttribute("font-weight", "700");
+        tempText.setAttribute("letter-spacing", "0");
+        tempText.setAttribute("x", textX.toString());
+        tempText.setAttribute("y", textY.toString());
+        tempText.setAttribute("dominant-baseline", dominantBaseline);
+        tempText.setAttribute("text-anchor", "start");
+        tempText.textContent = letter;
+        tempText.style.visibility = "hidden";
+        svg.appendChild(tempText);
+        
+        const bbox = tempText.getBBox();
+        // Calculate cumulative x position by measuring all previous letters
+        let cumulativeX = 0;
+        for (let i = 0; i < index; i++) {
+          const prevLetter = ["M", "a", "r", "i", "a", "m"][i];
+          const prevTemp = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          prevTemp.setAttribute("font-size", `${fontSize}px`);
+          prevTemp.setAttribute("font-family", fontFamily);
+          prevTemp.setAttribute("font-weight", "700");
+          prevTemp.setAttribute("letter-spacing", "0");
+          prevTemp.setAttribute("x", textX.toString());
+          prevTemp.setAttribute("y", textY.toString());
+          prevTemp.setAttribute("dominant-baseline", dominantBaseline);
+          prevTemp.setAttribute("text-anchor", "start");
+          prevTemp.textContent = prevLetter;
+          prevTemp.style.visibility = "hidden";
+          svg.appendChild(prevTemp);
+          const prevBbox = prevTemp.getBBox();
+          cumulativeX += prevBbox.width;
+          svg.removeChild(prevTemp);
+        }
+        
+        svg.removeChild(tempText);
+        
+        return {
+          x: textX + cumulativeX,
+          y: textY + bbox.y,
+          width: bbox.width,
+          height: bbox.height,
+          centerX: textX + cumulativeX + bbox.width / 2,
+          centerY: textY + bbox.y + bbox.height / 2
+        };
       };
-    };
-    
-    // Measure positions for i, a, m (letters 3, 4, 5 in "Mariam")
-    const iPos = measureLetter("i", 3);
-    const a2Pos = measureLetter("a", 4);
-    const m2Pos = measureLetter("m", 5);
-    
-    if (!iPos || !a2Pos || !m2Pos) return undefined;
-    
-    // Use the actual tspan elements' getBoundingClientRect() for accurate screen positions
-    // This is much simpler and more accurate than manual coordinate conversion
-    const iRect = svgIRefEl.getBoundingClientRect();
-    const a2Rect = svgA2RefEl.getBoundingClientRect();
-    const m2Rect = svgM2RefEl.getBoundingClientRect();
-    
-    // Calculate screen positions directly from the tspan elements
-    // For "i", the dot should be at 25% from top of the letter (where it starts)
-    const iScreenX = iRect.left + iRect.width / 2;
-    const iScreenY = iRect.top + iRect.height * 0.19; // Dot position on "i"
-    const iCenterY = iRect.top + iRect.height / 2; // Center of "i" for jump calculations
-    const a2ScreenX = a2Rect.left + a2Rect.width / 2;
-    const a2ScreenY = a2Rect.top + a2Rect.height / 2;
-    const m2ScreenX = m2Rect.left + m2Rect.width / 2;
-    const m2ScreenY = m2Rect.top + m2Rect.height / 2;
-    
-    const dotSize = Math.max(iRect.width * 0.5, 64);
-    
-    // Debug: Log positions to verify they're reasonable
-    console.log('Position calculations (using tspan getBoundingClientRect):', {
-      iRect: { left: iRect.left, top: iRect.top, width: iRect.width, height: iRect.height },
-      iScreen: { x: iScreenX, y: iScreenY },
-      a2Screen: { x: a2ScreenX, y: a2ScreenY },
-      m2Screen: { x: m2ScreenX, y: m2ScreenY },
-      windowHeight: window.innerHeight,
-      dotSize
-    });
+      
+      // Measure positions for i, a, m (letters 3, 4, 5 in "Mariam")
+      const iPos = measureLetter("i", 3);
+      const a2Pos = measureLetter("a", 4);
+      const m2Pos = measureLetter("m", 5);
+      
+      if (!iPos || !a2Pos || !m2Pos) return undefined;
+      
+      // Use the actual tspan elements' getBoundingClientRect() for accurate screen positions
+      // This is much simpler and more accurate than manual coordinate conversion
+      const iRect = svgIRefEl.getBoundingClientRect();
+      const a2Rect = svgA2RefEl.getBoundingClientRect();
+      const m2Rect = svgM2RefEl.getBoundingClientRect();
+      
+      // Calculate screen positions directly from the tspan elements
+      // For "i", the dot should be at 25% from top of the letter (where it starts)
+      iScreenX = iRect.left + iRect.width / 2;
+      iScreenY = iRect.top + iRect.height * 0.19; // Dot position on "i"
+      iCenterY = iRect.top + iRect.height / 2; // Center of "i" for jump calculations
+      a2ScreenX = a2Rect.left + a2Rect.width / 2;
+      a2ScreenY = a2Rect.top + a2Rect.height / 2;
+      m2ScreenX = m2Rect.left + m2Rect.width / 2;
+      m2ScreenY = m2Rect.top + m2Rect.height / 2;
+      
+      dotSize = Math.max(iRect.width * 0.5, 64);
+      finalDotSize = dotSize;
+      
+      // Store positions in module-level variable for future use (persists across unmounts)
+      memoizedPositions = {
+        iScreenX,
+        iScreenY,
+        iCenterY,
+        a2ScreenX,
+        a2ScreenY,
+        m2ScreenX,
+        m2ScreenY,
+        dotSize,
+        finalDotSize
+      };
+      positionsCalculated = true;
+      
+      // Debug: Log positions to verify they're reasonable
+      console.log('Position calculations (using tspan getBoundingClientRect) - STORED:', {
+        iRect: { left: iRect.left, top: iRect.top, width: iRect.width, height: iRect.height },
+        iScreen: { x: iScreenX, y: iScreenY },
+        a2Screen: { x: a2ScreenX, y: a2ScreenY },
+        m2Screen: { x: m2ScreenX, y: m2ScreenY },
+        windowHeight: window.innerHeight,
+        dotSize
+      });
+    }
     
     // Create timeline - original dot removed, only using final dot
     const dotTimeline = gsap.timeline({ immediateRender: true, paused: true });
@@ -251,8 +407,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     // Append to body to ensure it's above all other elements
     document.body.appendChild(finalDot);
-    
-    const finalDotSize = dotSize;
     
     // Set initial final dot position and make it visible
     finalDot.style.width = `${finalDotSize}px`;
@@ -551,6 +705,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
         // Mark dot animation as complete
         setIsDotAnimationComplete(true);
+        animationEverCompleted = true;
       }
     }, "+=0.5");
     
@@ -583,6 +738,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     if (!portfolioHeaderRef.current) return;
     
+    // Use memoized portfolWidth if available
+    if (memoizedPortfolioData && portfolioCalculated && memoizedPortfolioData.portfolWidth > 0) {
+      setPortfolWidth(memoizedPortfolioData.portfolWidth);
+      return;
+    }
+    
     const calculatePortfolWidth = () => {
       const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol") as HTMLElement;
       if (portfolEl) {
@@ -595,6 +756,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         
         if (portfolWidthValue > 0) {
           setPortfolWidth(portfolWidthValue);
+          // Store in memoized data
+          if (!memoizedPortfolioData) {
+            memoizedPortfolioData = {
+              portfolWidth: portfolWidthValue,
+              oFinalX: 0,
+              lineFinalWidth: 0,
+              iOriginalPosition: 0,
+              oStartX: 0,
+              iWidth: 0,
+              containerWidth: 0
+            };
+          } else {
+            memoizedPortfolioData.portfolWidth = portfolWidthValue;
+          }
         }
       }
     };
@@ -618,24 +793,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       setIsDotAnimationComplete(false);
       setIsDotAnimationStarted(false);
       
-      // Reset Engineer text to hidden state
-      if (engineerTextRef.current) {
+      // Only reset Engineer text if animation wasn't completed (to allow restoration later)
+      if (!animationEverCompleted && engineerTextRef.current) {
         gsap.set(engineerTextRef.current, {
           opacity: 0,
           filter: "blur(10px)",
         });
       }
 
-      // Reset bottom frame text to hidden state
-      if (bottomFrameTextRef.current) {
+      // Only reset bottom frame text if animation wasn't completed
+      if (!animationEverCompleted && bottomFrameTextRef.current) {
         gsap.set(bottomFrameTextRef.current, {
           opacity: 0,
           filter: "blur(10px)",
         });
       }
 
-      // Reset TURNING, REAL LIFE PRODUCTS, IDEAS, and INTO text to hidden state
-      if (numberSevenRef.current) {
+      // Only reset SVG text elements if animation wasn't completed
+      if (!animationEverCompleted && numberSevenRef.current) {
         const svg = numberSevenRef.current;
         const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
         const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
@@ -663,26 +838,126 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
       }
       
-      // Reset portfolio elements to initial state
-      const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
-      const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol") as HTMLElement;
-      const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i") as HTMLElement;
-      const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o") as HTMLElement;
-      const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line") as HTMLElement;
-      
-      if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
-        // Reset to initial state
-        gsap.set(fullTextEl, { opacity: 1, display: "block" });
-        gsap.set([portfolEl, iEl, oEl], { opacity: 0, display: "none", x: 0, rotation: 0 });
-        gsap.set(lineEl, { opacity: 0, display: "none", width: 0, x: 0 });
+      // Only reset portfolio elements if animation wasn't completed (to allow restoration later)
+      // Don't reset if animation was already completed - we'll restore it when active again
+      if (!portfolioAnimationEverCompleted) {
+        const fullTextEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-full") as HTMLElement;
+        const portfolEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-portfol") as HTMLElement;
+        const iEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-i") as HTMLElement;
+        const oEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-o") as HTMLElement;
+        const lineEl = portfolioHeaderRef.current.querySelector(".hero-cover-title-line") as HTMLElement;
+        
+        if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+          // Reset to initial state
+          gsap.set(fullTextEl, { opacity: 1, display: "block" });
+          gsap.set([portfolEl, iEl, oEl], { opacity: 0, display: "none", x: 0, rotation: 0 });
+          gsap.set(lineEl, { opacity: 0, display: "none", width: 0, x: 0 });
+        }
       }
       // Reset dot animation started state when hero becomes inactive
       setIsDotAnimationStarted(false);
       return;
     }
     
+    // When hero becomes active again, restore portfolio if animation was completed
+    if (isActive && memoizedPortfolioData && portfolioCalculated && portfolioAnimationEverCompleted) {
+      // Restore portfolio immediately when active
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const fullTextEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-full") as HTMLElement;
+          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol") as HTMLElement;
+          const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i") as HTMLElement;
+          const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o") as HTMLElement;
+          const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line") as HTMLElement;
+          
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+            // Hide full text and show split elements
+            fullTextEl.style.display = "none";
+            portfolEl.style.display = "inline";
+            iEl.style.display = "none"; // I is replaced by line
+            oEl.style.display = "inline";
+            lineEl.style.display = "block";
+            
+            // Restore final positions
+            const data = memoizedPortfolioData;
+            gsap.set([portfolEl, oEl], {
+              display: "inline",
+              opacity: 1,
+            });
+            gsap.set(iEl, {
+              display: "none",
+              opacity: 0,
+              rotation: 90,
+            });
+            gsap.set(oEl, {
+              x: data.oFinalX,
+            });
+            gsap.set(lineEl, {
+              display: "block",
+              opacity: 1,
+              x: data.iOriginalPosition,
+              width: data.lineFinalWidth,
+              transformOrigin: "left center",
+            });
+            
+            // Mark as complete immediately
+            setIsPortfolioAnimationComplete(true);
+          }
+        });
+      });
+    }
+    
     // Wait for dot animation to start before starting portfolio animation
     if (!isDotAnimationStarted) return;
+    
+    // If portfolio animation was already completed, restore final positions without replaying
+    if (memoizedPortfolioData && portfolioCalculated && portfolioAnimationEverCompleted) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const fullTextEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-full") as HTMLElement;
+          const portfolEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfol") as HTMLElement;
+          const iEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-i") as HTMLElement;
+          const oEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-o") as HTMLElement;
+          const lineEl = portfolioHeaderRef.current?.querySelector(".hero-cover-title-line") as HTMLElement;
+          
+          if (fullTextEl && portfolEl && iEl && oEl && lineEl) {
+            // Hide full text and show split elements
+            fullTextEl.style.display = "none";
+            portfolEl.style.display = "inline";
+            iEl.style.display = "none"; // I is replaced by line
+            oEl.style.display = "inline";
+            lineEl.style.display = "block";
+            
+            // Restore final positions
+            const data = memoizedPortfolioData;
+            gsap.set([portfolEl, oEl], {
+              display: "inline",
+              opacity: 1,
+            });
+            gsap.set(iEl, {
+              display: "none",
+              opacity: 0,
+              rotation: 90,
+            });
+            gsap.set(oEl, {
+              x: data.oFinalX,
+            });
+            gsap.set(lineEl, {
+              display: "block",
+              opacity: 1,
+              x: data.iOriginalPosition,
+              width: data.lineFinalWidth,
+              transformOrigin: "left center",
+            });
+            
+            // Mark as complete immediately
+            setIsPortfolioAnimationComplete(true);
+          }
+        });
+      });
+      return;
+    }
     
     // Reset portfolio animation state when hero becomes active
     setIsPortfolioAnimationComplete(false);
@@ -906,6 +1181,28 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Ensure line width is positive and doesn't exceed container
           const finalLineWidth = Math.max(0, Math.min(lineFinalWidth, maxWidth));
           
+          // Store calculated positions in memoized data
+          if (!memoizedPortfolioData) {
+            memoizedPortfolioData = {
+              portfolWidth: portfolWidthValue,
+              oFinalX: oFinalX,
+              lineFinalWidth: finalLineWidth,
+              iOriginalPosition: iOriginalPosition,
+              oStartX: oStartX,
+              iWidth: iWidth,
+              containerWidth: containerRect.width
+            };
+          } else {
+            memoizedPortfolioData.oFinalX = oFinalX;
+            memoizedPortfolioData.lineFinalWidth = finalLineWidth;
+            memoizedPortfolioData.iOriginalPosition = iOriginalPosition;
+            memoizedPortfolioData.oStartX = oStartX;
+            memoizedPortfolioData.iWidth = iWidth;
+            memoizedPortfolioData.containerWidth = containerRect.width;
+            memoizedPortfolioData.portfolWidth = portfolWidthValue;
+          }
+          portfolioCalculated = true;
+          
           // Animate O movement and line expansion simultaneously
           gsap.to(oEl, {
             x: oFinalX,
@@ -914,6 +1211,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             onComplete: () => {
               animationComplete = true;
               setIsPortfolioAnimationComplete(true);
+              portfolioAnimationEverCompleted = true;
             },
           });
           
@@ -979,6 +1277,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // Line is at 50% of container height, position navigation vertically centered on the line
       const lineY = containerRect.height * 0.5 - 24; // 50% of container
       
+      // Store navigation Y position (absolute position relative to viewport) for use in other sections
+      // Calculate absolute Y position: container top + lineY
+      setHeroNavigationY(containerRect.top + lineY);
+      
       // Position navigation at the end of the line, aligned to the right
       if (navRef.current) {
         navRef.current.style.top = `${lineY}px`;
@@ -1017,6 +1319,77 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   // Trigger dot animation when Mariam is ready (not waiting for portfolio)
   useEffect(() => {
     if (!isActive || !isMariamReady) return;
+    
+    // If positions are already calculated and animation was completed, just position the dot at final position
+    if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          // Restore dot at final position without replaying animation
+          if (svgMariamTextRef.current && numberSevenRef.current && 
+              svgIRef.current && svgA2Ref.current && svgM2Ref.current) {
+            const pos = memoizedPositions;
+            
+            // Check if dot already exists in DOM, otherwise create it
+            let finalDot = svgFinalDotRef.current;
+            if (!finalDot) {
+              // Try to find existing dot in DOM
+              const existingDot = document.querySelector('.final-i-dot-svg') as HTMLDivElement;
+              if (existingDot) {
+                svgFinalDotRef.current = existingDot;
+                finalDot = existingDot;
+              } else {
+                // Create new dot element
+                finalDot = document.createElement("div");
+                finalDot.className = "final-i-dot-svg";
+                svgFinalDotRef.current = finalDot;
+                document.body.appendChild(finalDot);
+              }
+            }
+            
+            // Ensure dot is visible and positioned at final location
+            finalDot.style.width = `${pos.finalDotSize}px`;
+            finalDot.style.height = `${pos.finalDotSize}px`;
+            finalDot.style.borderRadius = "50%";
+            finalDot.style.backgroundColor = "#C92924";
+            finalDot.style.position = "fixed";
+            finalDot.style.zIndex = "999999";
+            finalDot.style.setProperty('z-index', '999999', 'important');
+            finalDot.style.opacity = "1";
+            finalDot.style.display = "block";
+            finalDot.style.visibility = "visible";
+            finalDot.style.pointerEvents = "none";
+            finalDot.style.transformOrigin = "center center";
+            
+            // Position at final location immediately
+            gsap.set(finalDot, {
+              x: pos.iScreenX - (pos.finalDotSize / 2),
+              y: pos.iScreenY,
+              scale: 1,
+              opacity: 1,
+              immediateRender: true,
+              force3D: true
+            });
+            
+            // Color the letters if they aren't already colored
+            if (svgIRef.current) {
+              gsap.set(svgIRef.current, { fill: "#C92924" });
+            }
+            if (svgA2Ref.current) {
+              gsap.set(svgA2Ref.current, { fill: "#C92924" });
+            }
+            if (svgM2Ref.current) {
+              gsap.set(svgM2Ref.current, { fill: "#C92924" });
+            }
+            
+            // Mark animation as complete so text animations can run
+            setIsDotAnimationComplete(true);
+            setIsDotAnimationStarted(true);
+          }
+        });
+      });
+      return;
+    }
     
     // Wait a bit to ensure all refs are ready and DOM is fully rendered
     const timeoutId = setTimeout(() => {
@@ -1061,7 +1434,56 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     if (!isDotAnimationComplete) return;
 
-    // Animate Engineer text with blur fade-in effect
+    // If animation was already completed, restore text immediately without animation
+    if (animationEverCompleted) {
+      // Restore Engineer text immediately
+      if (engineerTextRef.current) {
+        gsap.set(engineerTextRef.current, {
+          opacity: 1,
+          filter: "blur(0px)",
+        });
+      }
+
+      // Restore bottom frame text immediately
+      if (bottomFrameTextRef.current) {
+        gsap.set(bottomFrameTextRef.current, {
+          opacity: 1,
+          filter: "blur(0px)",
+        });
+      }
+
+      // Restore SVG text elements immediately
+      if (numberSevenRef.current) {
+        const svg = numberSevenRef.current;
+        const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+        const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+        const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+        const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+
+        if (turningIdeas) {
+          turningIdeas.setAttribute("opacity", "0.6");
+          turningIdeas.style.filter = "blur(0px)";
+        }
+
+        if (realLifeProducts) {
+          realLifeProducts.setAttribute("opacity", "0.6");
+          realLifeProducts.style.filter = "blur(0px)";
+        }
+
+        if (ideasText) {
+          ideasText.setAttribute("opacity", "0.6");
+          ideasText.style.filter = "blur(0px)";
+        }
+
+        if (intoText) {
+          intoText.setAttribute("opacity", "0.6");
+          intoText.style.filter = "blur(0px)";
+        }
+      }
+      return; // Skip animation
+    }
+
+    // Animate Engineer text with blur fade-in effect (first time only)
     if (engineerTextRef.current) {
       const engineerText = engineerTextRef.current;
       gsap.to(engineerText, {
@@ -1145,15 +1567,70 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     if (!portfolElement) return;
     
+    // Use memoized SVG data if available
+    let fontSize: number = 0;
+    let mariamWidth: number = 0;
+    let mariamHeight: number = 0;
+    let portfolBottom: number = 0;
+    let portfolLeft: number = 0;
+    let portfolFontSize: number = 0;
+    let screenWidth: number = 0;
+    let screenHeight: number = 0;
+    
+    if (memoizedMariamSvgData && mariamSvgCalculated) {
+      // Use memoized values
+      fontSize = memoizedMariamSvgData.fontSize;
+      mariamWidth = memoizedMariamSvgData.mariamWidth;
+      mariamHeight = memoizedMariamSvgData.mariamHeight;
+      portfolBottom = memoizedMariamSvgData.portfolBottom;
+      portfolLeft = memoizedMariamSvgData.portfolLeft;
+      portfolFontSize = memoizedMariamSvgData.portfolFontSize;
+      screenWidth = memoizedMariamSvgData.screenWidth;
+      screenHeight = memoizedMariamSvgData.screenHeight;
+      
+      // Apply memoized values directly
+      const padding = 10;
+      svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
+      svg.setAttribute("width", `${mariamWidth}px`);
+      svg.setAttribute("height", `${mariamHeight}px`);
+      svg.style.position = "fixed";
+      svg.style.left = "0px";
+      svg.style.top = "auto";
+      svg.style.bottom = "8px";
+      svg.style.margin = "0";
+      svg.style.padding = "0";
+      svg.style.height = `${mariamHeight}px`;
+      svg.style.width = `${mariamWidth}px`;
+      svg.style.overflow = "visible";
+      
+      // Update text element with memoized values
+      const textElement = svg.querySelector(".hero-mariam-text");
+      if (textElement) {
+        textElement.setAttribute("x", "0");
+        textElement.setAttribute("y", `${mariamHeight}px`);
+        textElement.setAttribute("dominant-baseline", "baseline");
+        textElement.setAttribute("text-anchor", "start");
+        textElement.setAttribute("dx", "0");
+        textElement.setAttribute("font-size", `${fontSize}px`);
+        textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
+        textElement.setAttribute("font-weight", "700");
+        textElement.setAttribute("letter-spacing", "0");
+      }
+      
+      return; // Skip recalculation
+    }
+    
+    // Calculate values (first time only)
     // Get PORTFOL element position and styling
     const portfolRect = portfolElement.getBoundingClientRect();
-    const portfolBottom = portfolRect.bottom;
-    const portfolLeft = portfolRect.left;
+    portfolBottom = portfolRect.bottom;
+    portfolLeft = portfolRect.left;
     const portfolStyle = window.getComputedStyle(portfolElement);
-    const portfolFontSize = parseFloat(portfolStyle.fontSize);
+    portfolFontSize = parseFloat(portfolStyle.fontSize);
     
     // Calculate the required height: from PORTFOL bottom to screen bottom
-    const screenHeight = window.innerHeight;
+    screenHeight = window.innerHeight;
+    screenWidth = window.innerWidth;
     const bottomFrameHeight = 50; // Height of bottom frame
     const availableHeight = screenHeight - portfolBottom - bottomFrameHeight;
     
@@ -1192,10 +1669,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     // Calculate font size so "Mariam" spans edge to edge of screen
     // Use slightly smaller target to ensure last letter isn't cut off
-    const screenWidth = window.innerWidth;
     const targetWidth = screenWidth - 2; // Small margin to prevent clipping of last "m"
     const widthPerFontSize = baseTextWidth / baseFontSize;
-    let fontSize = targetWidth / widthPerFontSize;
+    fontSize = targetWidth / widthPerFontSize;
     
     // Get final text metrics
     context.font = `700 ${fontSize}px "Space Grotesk", "Inter", sans-serif`;
@@ -1206,8 +1682,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Calculate SVG dimensions - make it span the full screen width
     // Add small padding to viewBox to prevent clipping of the last letter
     const padding = 10; // Small padding to prevent clipping
-    const mariamWidth = screenWidth;
-    const mariamHeight = availableHeight;
+    mariamWidth = screenWidth;
+    mariamHeight = availableHeight;
     
     // Set SVG viewBox with padding to prevent clipping, but keep width at full screen
     svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
@@ -1274,8 +1750,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           
           // Calculate scale factors for both width (edge to edge) and height (to bottom)
           // Use a slightly smaller target width to ensure the last letter isn't cut off
-          const targetWidth = screenWidth - 2; // Small margin to prevent clipping
-          const widthScaleFactor = targetWidth / actualTextWidth;
+          const targetWidthForScale = screenWidth - 2; // Small margin to prevent clipping
+          const widthScaleFactor = targetWidthForScale / actualTextWidth;
           const heightScaleFactor = mariamHeight / actualTextHeight;
           
           // Prioritize width (edge to edge) but ensure height fits too
@@ -1284,7 +1760,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           
           if (finalScaleFactor > 1.01 || finalScaleFactor < 0.99) { // Only adjust if significantly different
             const adjustedFontSize = fontSize * finalScaleFactor;
+            fontSize = adjustedFontSize; // Update fontSize with adjusted value
             textElement.setAttribute("font-size", `${adjustedFontSize}px`);
+            
+            // Store memoized SVG data after final fontSize is determined
+            memoizedMariamSvgData = {
+              fontSize: adjustedFontSize,
+              mariamWidth,
+              mariamHeight,
+              portfolBottom,
+              portfolLeft,
+              portfolFontSize,
+              screenWidth,
+              screenHeight
+            };
+            mariamSvgCalculated = true;
             
             // Re-measure after font size adjustment
             requestAnimationFrame(() => {
@@ -1312,6 +1802,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           } else {
             // Font size is correct, just ensure positioning
             textElement.setAttribute("x", "0");
+            
+            // Store memoized SVG data
+            memoizedMariamSvgData = {
+              fontSize,
+              mariamWidth,
+              mariamHeight,
+              portfolBottom,
+              portfolLeft,
+              portfolFontSize,
+              screenWidth,
+              screenHeight
+            };
+            mariamSvgCalculated = true;
+            
             // Ensure bottom alignment
             requestAnimationFrame(() => {
               try {
