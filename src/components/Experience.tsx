@@ -38,10 +38,68 @@ const Experience = () => {
   return (
     <section
       ref={ref}
-      className="mx-auto relative flex h-screen w-screen flex-col items-center overflow-visible bg-[#F9E7C9] px-4 text-[#1F3A4B]"
+      className="mx-auto relative flex h-auto lg:h-screen w-screen flex-col items-center overflow-visible bg-[#F9E7C9] px-4 text-[#1F3A4B] py-12 lg:py-0"
     >
-      {/* Horizontal curved path container - positioned at center with more height for items above/below */}
-      <div className="absolute top-1/2 left-0 w-full h-full -translate-y-1/2 pointer-events-none overflow-visible">
+      {/* Mobile: Vertical Timeline Layout */}
+      <div className="w-full max-w-2xl lg:hidden py-8">
+        {experienceItems.map((item, index) => (
+          <motion.div
+            key={index}
+            className="relative mb-12 last:mb-0"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.5, delay: index * 0.2 }}
+          >
+            {/* Timeline line connector */}
+            {index < experienceItems.length - 1 && (
+              <div
+                className="absolute left-6 top-16 bottom-0 w-0.5"
+                style={{ backgroundColor: item.color, opacity: 0.3 }}
+              />
+            )}
+            
+            {/* Timeline dot */}
+            <div className="absolute left-0 top-2">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: item.color }}
+              >
+                <span className="text-white text-xs font-bold">{item.number}</span>
+              </div>
+            </div>
+
+            {/* Content card */}
+            <div className="ml-16 pt-2">
+              {/* Company Name */}
+              <h2
+                className="text-4xl md:text-5xl font-bold leading-tight mb-4"
+                style={{ color: item.color }}
+              >
+                {item.company}
+              </h2>
+
+              {/* Title and Type */}
+              <div className="mb-3">
+                <p className="text-base font-semibold uppercase" style={{ color: item.color }}>
+                  {item.title}
+                </p>
+                <p className="text-sm uppercase opacity-80" style={{ color: item.color }}>
+                  {item.type}
+                </p>
+              </div>
+
+              {/* Dates */}
+              <div className="text-sm uppercase" style={{ color: item.color }}>
+                <p>{item.fromDate} - {item.toDate}</p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Desktop: Horizontal curved path container - positioned at center with more height for items above/below */}
+      <div className="hidden lg:block absolute top-1/2 left-0 w-full h-full -translate-y-1/2 pointer-events-none overflow-visible">
         <LinePath
           ref={pathRef}
           scrollYProgress={scrollYProgress}
