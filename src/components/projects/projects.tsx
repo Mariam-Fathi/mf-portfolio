@@ -309,27 +309,10 @@ export default function GalleryShowcase({
                   />
 
                   {/* Content Section - Aligned with number's right edge */}
-                  <div className="flex-1 flex items-end gap-6 md:gap-8">
-                    {/* Big Project Number - Bottom Left */}
-                    <div
-                      className="select-none leading-none tracking-tight flex-shrink-0"
-                            style={{
-                              fontFamily:
-                                '"Momo Trust Display", "Stack Sans", sans-serif',
-                              fontWeight: 900,
-                              WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
-                              color: index === 0 ? "#C92924" : colors.headline,
-                        fontSize: "clamp(16rem, 40vw, 35rem)",
-                              lineHeight: 1,
-                        transform: "translateY(8%)",
-                            } as React.CSSProperties}
-                          >
-                            {String(index + 1).padStart(2, "0")}
-                          </div>
-
-                    {/* Text Section - Aligned with number's right edge */}
+                  <div className="flex-1 flex flex-col lg:flex-row lg:items-end gap-6 md:gap-8">
+                    {/* Text Section - Top on mobile, right on desktop */}
                           <div
-                      className="flex flex-col gap-3 md:gap-4 text-left flex-1 pb-6"
+                      className="flex flex-col gap-3 md:gap-4 text-left flex-1 pb-6 lg:pb-6 order-1 lg:order-2"
                             style={{
                               fontFamily: '"Space Grotesk", "Inter", sans-serif',
                       }}
@@ -361,6 +344,22 @@ export default function GalleryShowcase({
                               {project.description}
                             </p>
                     </div>
+
+                    {/* Big Project Number - Below text on mobile, left on desktop */}
+                    <div
+                      className="select-none leading-none tracking-tight flex-shrink-0 order-2 lg:order-1 lg:translate-y-[8%]"
+                            style={{
+                              fontFamily:
+                                '"Momo Trust Display", "Stack Sans", sans-serif',
+                              fontWeight: 900,
+                              WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
+                              color: index === 0 ? "#C92924" : colors.headline,
+                        fontSize: "clamp(16rem, 40vw, 35rem)",
+                              lineHeight: 1,
+                            } as React.CSSProperties}
+                          >
+                            {String(index + 1).padStart(2, "0")}
+                          </div>
                   </div>
                 </div>
               );
