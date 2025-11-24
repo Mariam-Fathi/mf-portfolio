@@ -260,8 +260,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
       });
     } else {
-      // When hero becomes active again, restore dot if animation was completed
-      if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+      // When hero becomes active again, restore dot if positions are calculated
+      // Even if animation didn't complete, we should show elements at their final positions
+      if (memoizedPositions && positionsCalculated) {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (svgMariamTextRef.current && numberSevenRef.current && 
@@ -341,6 +342,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               // Mark animation as complete so text animations can run
               setIsDotAnimationComplete(true);
               setIsDotAnimationStarted(true);
+              
+              // Also restore engineer text and SVG text elements to final visible state
+              // This ensures they appear even if animation didn't complete before navigation
+              if (!isMobileScreen()) {
+                requestAnimationFrame(() => {
+                  // Restore engineer text
+                  if (engineerTextRef.current) {
+                    gsap.set(engineerTextRef.current, {
+                      opacity: 1,
+                      filter: "blur(0px)",
+                      immediateRender: true,
+                    });
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                  
+                  // Restore SVG text elements (TURNING, REAL LIFE PRODUCTS, IDEAS, INTO)
+                  if (numberSevenRef.current) {
+                    const svg = numberSevenRef.current;
+                    const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+                    const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+                    const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+                    const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+                    
+                    if (turningIdeas) {
+                      gsap.set(turningIdeas, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (realLifeProducts) {
+                      gsap.set(realLifeProducts, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (ideasText) {
+                      gsap.set(ideasText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (intoText) {
+                      gsap.set(intoText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                  }
+                });
+              }
               }
             }
           });
@@ -1042,8 +1098,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Wait for dot animation to start before starting portfolio animation
     if (!isDotAnimationStarted) return;
     
-    // If portfolio animation was already completed, restore final positions without replaying
-    if (memoizedPortfolioData && portfolioCalculated && portfolioAnimationEverCompleted) {
+    // If portfolio data is already calculated, restore final positions without replaying
+    // Even if animation didn't complete, we should show elements at their final positions
+    if (memoizedPortfolioData && portfolioCalculated) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -1606,8 +1663,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     
     window.addEventListener('resize', handleResize);
     
-    // If positions are already calculated and animation was completed, just position the dot at final position
-    if (memoizedPositions && positionsCalculated && animationEverCompleted) {
+    // If positions are already calculated, just position the dot at final position
+    // Even if animation didn't complete, we should show elements at their final positions
+    if (memoizedPositions && positionsCalculated) {
       // Use requestAnimationFrame to ensure DOM is ready
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -1689,6 +1747,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               // Mark animation as complete so text animations can run
               setIsDotAnimationComplete(true);
               setIsDotAnimationStarted(true);
+              
+              // Also restore engineer text and SVG text elements to final visible state
+              // This ensures they appear even if animation didn't complete before navigation
+              if (!isMobileScreen()) {
+                requestAnimationFrame(() => {
+                  // Restore engineer text
+                  if (engineerTextRef.current) {
+                    gsap.set(engineerTextRef.current, {
+                      opacity: 1,
+                      filter: "blur(0px)",
+                      immediateRender: true,
+                    });
+                    engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+                    engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+                  }
+                  
+                  // Restore SVG text elements (TURNING, REAL LIFE PRODUCTS, IDEAS, INTO)
+                  if (numberSevenRef.current) {
+                    const svg = numberSevenRef.current;
+                    const turningIdeas = svg.querySelector(".hero-turning-ideas") as SVGTextElement;
+                    const realLifeProducts = svg.querySelector(".hero-real-life-products") as SVGTextElement;
+                    const ideasText = svg.querySelector(".hero-ideas-text") as SVGTextElement;
+                    const intoText = svg.querySelector(".hero-into-text") as SVGTextElement;
+                    
+                    if (turningIdeas) {
+                      gsap.set(turningIdeas, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (realLifeProducts) {
+                      gsap.set(realLifeProducts, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (ideasText) {
+                      gsap.set(ideasText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                    if (intoText) {
+                      gsap.set(intoText, {
+                        opacity: 0.6,
+                        filter: "blur(0px)",
+                        immediateRender: true,
+                      });
+                    }
+                  }
+                });
+              }
             }
           }
         });
