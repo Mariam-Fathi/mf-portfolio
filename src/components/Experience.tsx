@@ -19,7 +19,7 @@ const experienceItems = [
     number: "02",
     title: "Software Engineer",
     company: "Dracode",
-    type: "Freelance Project",
+    type: "Contractor ",
     fromDate: "Sep 2025",
     toDate: "Present",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
