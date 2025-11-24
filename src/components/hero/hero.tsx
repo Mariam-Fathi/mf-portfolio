@@ -89,6 +89,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const svgFinalDotRef = useRef<HTMLDivElement | null>(null);
   const engineerTextRef = useRef<HTMLDivElement | null>(null);
 
+  // Helper function to check if it's mobile/small screen
+  const isMobileScreen = () => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 1024; // lg breakpoint
+  };
+
   // Handler to hide dot before navigation
   const handleNavigate = (section: string) => {
     // Hide the final dot if it exists
@@ -281,8 +287,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               
             // Ensure dot is visible and positioned at final location
             if (pos) {
-              finalDot.style.width = `${pos.finalDotSize}px`;
-              finalDot.style.height = `${pos.finalDotSize}px`;
+              // Apply mobile size reduction if on mobile
+              const currentDotSize = isMobileScreen() ? Math.min(pos.finalDotSize * 0.6, 40) : pos.finalDotSize;
+              finalDot.style.width = `${currentDotSize}px`;
+              finalDot.style.height = `${currentDotSize}px`;
               finalDot.style.borderRadius = "50%";
               finalDot.style.backgroundColor = "#C92924";
               finalDot.style.position = "fixed";
@@ -296,7 +304,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               
               // Position at final location immediately
               gsap.set(finalDot, {
-                x: pos.iScreenX - (pos.finalDotSize / 2),
+                x: pos.iScreenX - (currentDotSize / 2),
                 y: pos.iScreenY,
                 scale: 1,
                 opacity: 1,
@@ -460,7 +468,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       m2ScreenX = m2Rect.left + m2Rect.width / 2;
       m2ScreenY = m2Rect.top + m2Rect.height / 2;
       
-      dotSize = Math.max(iRect.width * 0.5, 64);
+      // Smaller dot size on mobile screens
+      const baseDotSize = Math.max(iRect.width * 0.5, 64);
+      dotSize = isMobileScreen() ? Math.min(baseDotSize * 0.6, 40) : baseDotSize;
       finalDotSize = dotSize;
       
       // Store positions in module-level variable for future use (persists across unmounts)
@@ -1158,6 +1168,99 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       oElement = oEl; // Store for resize handler
       lineElement = lineEl; // Store for resize handler
 
+      // Skip animations on mobile - set to final state immediately
+      if (isMobileScreen()) {
+        // Hide full text and show split text
+        fullTextElement.style.display = "none";
+        portfolElement.style.display = "inline";
+        portfolElement.style.opacity = "1";
+        portfolElement.style.visibility = "visible";
+        iElement.style.display = "none"; // Hide I on mobile
+        oEl.style.display = "inline";
+        oEl.style.opacity = "1";
+        oEl.style.visibility = "visible";
+        lineEl.style.display = "block";
+        lineEl.style.opacity = "1";
+        lineEl.style.visibility = "visible";
+        
+        // Set final positions immediately - use multiple frames to ensure visibility
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const containerRect = portfolioHeaderRef.current?.getBoundingClientRect();
+            if (containerRect) {
+              const padding = window.innerWidth < 768 ? 16 : 32;
+              const absoluteEndPosition = containerRect.width - padding;
+              
+              // Force reflow to ensure elements are measured
+              void portfolElement.offsetWidth;
+              void oEl.offsetWidth;
+              
+              // Get positions after elements are displayed
+              const oRect = oEl.getBoundingClientRect();
+              const oWidth = oRect.width;
+              const oFinalLeftEdge = absoluteEndPosition - (oWidth / 2);
+              
+              // Get PORTFOL end position for line start
+              const portfolRect = portfolElement.getBoundingClientRect();
+              const lEndPosition = portfolRect.right - containerRect.left;
+              
+              // Line starts after PORTFOL and ends before O
+              const lineStartX = lEndPosition + 8; // Small gap after PORTFOL
+              const lineEndPosition = oFinalLeftEdge - 8; // Small gap before O
+              const finalLineWidth = Math.max(0, lineEndPosition - lineStartX);
+              
+              // Position O at final location
+              const oStartX = oRect.left - containerRect.left;
+              const oFinalX = oFinalLeftEdge - oStartX;
+              
+              // Set styles directly to ensure visibility
+              portfolElement.style.opacity = "1";
+              portfolElement.style.visibility = "visible";
+              portfolElement.style.display = "inline";
+              
+              oEl.style.opacity = "1";
+              oEl.style.visibility = "visible";
+              oEl.style.display = "inline";
+              
+              lineEl.style.opacity = "1";
+              lineEl.style.visibility = "visible";
+              lineEl.style.display = "block";
+              
+              gsap.set(oEl, { x: oFinalX, opacity: 1 });
+              
+              // Ensure line is positioned at 50% vertically (centered)
+              // Use CSS for positioning to avoid conflicts
+              lineEl.style.top = "50%";
+              lineEl.style.position = "absolute";
+              lineEl.style.left = `${lineStartX}px`;
+              lineEl.style.width = `${finalLineWidth}px`;
+              lineEl.style.opacity = "1";
+              lineEl.style.display = "block";
+              lineEl.style.transform = "translateY(-50%)";
+              lineEl.style.zIndex = "1"; // Keep line below navigation
+              
+              // Use GSAP for opacity only
+              gsap.set(lineEl, { 
+                opacity: 1,
+                display: "block"
+              });
+              
+              // Ensure all elements are visible with GSAP as well
+              gsap.set([portfolElement, oEl, lineEl], { 
+                opacity: 1, 
+                visibility: "visible",
+                display: "auto"
+              });
+              
+              // Mark as complete
+              setIsPortfolioAnimationComplete(true);
+              portfolioAnimationEverCompleted = true;
+            }
+          });
+        });
+        return;
+      }
+
       // Create smooth motion graphics timeline
       tl = gsap.timeline({ delay: 0 });
 
@@ -1399,17 +1502,25 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       const lineEndX = lineX + lineWidth; // End of the line
       
       // Line is at 50% of container height, position navigation vertically centered on the line
-      const lineY = containerRect.height * 0.5 - 24; // 50% of container
+      // Use original calculation to match other sections
+      const lineY = containerRect.height * 0.5 - 24; // 50% of container minus offset
       
       // Store navigation Y position (absolute position relative to viewport) for use in other sections
       // Calculate absolute Y position: container top + lineY
-      setHeroNavigationY(containerRect.top + lineY);
+      const absoluteLineY = containerRect.top + lineY;
+      setHeroNavigationY(absoluteLineY);
       
-      // Position navigation at the end of the line, aligned to the right
+      // Position navigation at the end of the line, aligned to the right with no gap
+      // Hero nav uses position: absolute, so we use lineY (relative to container)
+      // Other sections use position: fixed with absoluteLineY (absolute viewport position)
+      // They should match: containerRect.top + lineY = absoluteLineY
       if (navRef.current) {
         navRef.current.style.top = `${lineY}px`;
         navRef.current.style.left = `${lineEndX}px`;
         navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
+        navRef.current.style.zIndex = '101'; // Ensure navigation is above the line
+        navRef.current.style.marginLeft = '0'; // Ensure no gap
+        navRef.current.style.paddingLeft = '0'; // Ensure no gap
         // Fade in after positioning
         navRef.current.style.opacity = '1';
       }
@@ -1457,11 +1568,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             const dotTimeline = buildDotTimeline();
             if (dotTimeline && svgFinalDotRef.current && memoizedPositions) {
               const pos = memoizedPositions;
+              // Apply mobile size reduction if on mobile
+              const currentDotSize = isMobileScreen() ? Math.min(pos.finalDotSize * 0.6, 40) : pos.finalDotSize;
               // Update dot size and position
-              svgFinalDotRef.current.style.width = `${pos.finalDotSize}px`;
-              svgFinalDotRef.current.style.height = `${pos.finalDotSize}px`;
+              svgFinalDotRef.current.style.width = `${currentDotSize}px`;
+              svgFinalDotRef.current.style.height = `${currentDotSize}px`;
               gsap.set(svgFinalDotRef.current, {
-                x: pos.iScreenX - (pos.finalDotSize / 2),
+                x: pos.iScreenX - (currentDotSize / 2),
                 y: pos.iScreenY,
                 scale: 1,
                 opacity: 1,
@@ -1522,8 +1635,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             
             // Ensure dot is visible and positioned at final location
             if (pos) {
-              finalDot.style.width = `${pos.finalDotSize}px`;
-              finalDot.style.height = `${pos.finalDotSize}px`;
+              // Apply mobile size reduction if on mobile
+              const currentDotSize = isMobileScreen() ? Math.min(pos.finalDotSize * 0.6, 40) : pos.finalDotSize;
+              finalDot.style.width = `${currentDotSize}px`;
+              finalDot.style.height = `${currentDotSize}px`;
               finalDot.style.borderRadius = "50%";
               finalDot.style.backgroundColor = "#C92924";
               finalDot.style.position = "fixed";
@@ -1537,7 +1652,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               
               // Position at final location immediately
               gsap.set(finalDot, {
-                x: pos.iScreenX - (pos.finalDotSize / 2),
+                x: pos.iScreenX - (currentDotSize / 2),
                 y: pos.iScreenY,
                 scale: 1,
                 opacity: 1,
@@ -1581,6 +1696,71 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       return;
     }
     
+    // Skip animations on mobile - set to final state immediately
+    if (isMobileScreen()) {
+      const timeoutId = setTimeout(() => {
+        if (svgMariamTextRef.current && numberSevenRef.current && 
+            svgIRef.current && svgA2Ref.current && svgM2Ref.current) {
+          // Build timeline to calculate positions (but don't play it)
+          const dotTimeline = buildDotTimeline();
+          if (dotTimeline && memoizedPositions) {
+            const pos = memoizedPositions;
+            
+            // Get the final dot (created by buildDotTimeline)
+            let finalDot = svgFinalDotRef.current;
+            if (!finalDot) {
+              finalDot = document.createElement("div");
+              finalDot.className = "final-i-dot-svg";
+              svgFinalDotRef.current = finalDot;
+              document.body.appendChild(finalDot);
+            }
+            
+            // Set dot to final state immediately - ensure smaller size on mobile
+            const mobileDotSize = isMobileScreen() ? Math.min(pos.finalDotSize * 0.6, 40) : pos.finalDotSize;
+            finalDot.style.width = `${mobileDotSize}px`;
+            finalDot.style.height = `${mobileDotSize}px`;
+            finalDot.style.borderRadius = "50%";
+            finalDot.style.backgroundColor = "#C92924";
+            finalDot.style.position = "fixed";
+            finalDot.style.zIndex = "1";
+            finalDot.style.opacity = "1";
+            finalDot.style.display = "block";
+            finalDot.style.visibility = "visible";
+            finalDot.style.pointerEvents = "none";
+            
+            gsap.set(finalDot, {
+              x: pos.iScreenX - (mobileDotSize / 2),
+              y: pos.iScreenY,
+              scale: 1,
+              opacity: 1,
+              immediateRender: true,
+              force3D: true
+            });
+            
+            // Color the letters immediately
+            if (svgIRef.current) gsap.set(svgIRef.current, { fill: "#C92924" });
+            if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: "#C92924" });
+            if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: "#C92924" });
+            
+            // Ensure engineer text is above dot
+            if (engineerTextRef.current) {
+              engineerTextRef.current.style.setProperty('z-index', '10000', 'important');
+              engineerTextRef.current.style.setProperty('position', 'fixed', 'important');
+            }
+            
+            // Mark as complete
+            setIsDotAnimationComplete(true);
+            setIsDotAnimationStarted(true);
+            animationEverCompleted = true;
+          }
+        }
+      }, 200);
+      
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+
     // Wait a bit to ensure all refs are ready and DOM is fully rendered
     const timeoutId = setTimeout(() => {
       // Double-check that all required refs are available
@@ -1666,8 +1846,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   useEffect(() => {
     if (!isDotAnimationComplete) return;
 
-    // If animation was already completed, restore text immediately without animation
-    if (animationEverCompleted) {
+    // Skip animations on mobile - set to final state immediately
+    if (isMobileScreen() || animationEverCompleted) {
       // Restore Engineer text immediately
       if (engineerTextRef.current) {
         const engineerText = engineerTextRef.current;
@@ -1857,6 +2037,74 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
   }, [isDotAnimationComplete]);
 
+  // Position engineer text at top of Mariam on mobile
+  useEffect(() => {
+    if (!isMobileScreen() || !isMariamReady || !engineerTextRef.current || !numberSevenRef.current) return;
+    
+    const positionEngineerText = () => {
+      if (!engineerTextRef.current || !numberSevenRef.current) return;
+      
+      const svg = numberSevenRef.current;
+      const mariamTextElement = svg.querySelector('.hero-mariam-text') as SVGTextElement;
+      
+      if (!mariamTextElement) return;
+      
+      // Get SVG's screen position (it's positioned at bottom: 0)
+      const svgRect = svg.getBoundingClientRect();
+      
+      // Get text's bounding box in SVG coordinates
+      let textBBox;
+      try {
+        textBBox = mariamTextElement.getBBox();
+      } catch (e) {
+        return; // Can't get bbox, skip
+      }
+      
+      // Get SVG viewBox for coordinate conversion
+      const viewBox = svg.viewBox.baseVal;
+      const svgHeight = svgRect.height;
+      const scaleY = viewBox.height > 0 ? svgHeight / viewBox.height : 1;
+      
+      // SVG is positioned at bottom: 0, so svgRect.bottom = window.innerHeight
+      // textBBox.y is the top of the text in SVG coordinates (relative to viewBox top)
+      // textBBox.y + textBBox.height is the bottom of the text
+      // The text's baseline is at the bottom of the SVG (y = mariamHeight in SVG)
+      // So: text top in screen = SVG bottom - (viewBox.height - textBBox.y) * scaleY
+      const textTopInScreen = svgRect.bottom - ((viewBox.height - textBBox.y) * scaleY);
+      
+      // Calculate the right edge of Mariam text (where "m" ends) to shift engineer text towards it
+      const scaleX = viewBox.width > 0 ? svgRect.width / viewBox.width : 1;
+      const mariamTextRight = svgRect.left + ((textBBox.x + textBBox.width) * scaleX);
+      const screenWidth = window.innerWidth;
+      // Shift slightly towards the "m" - position closer to the right edge of Mariam
+      // Use a small percentage (15%) for a subtle shift
+      const distanceFromRight = screenWidth - mariamTextRight;
+      const rightPosition = Math.max(0.3, distanceFromRight * 0.15); // Shift 15% of the way towards "m", min 0.3rem
+      
+      // Position engineer text at the top of Mariam with no gap, shifted towards "m"
+      if (engineerTextRef.current) {
+        engineerTextRef.current.style.setProperty('top', `${textTopInScreen}px`, 'important');
+        engineerTextRef.current.style.setProperty('bottom', 'auto', 'important');
+        engineerTextRef.current.style.setProperty('right', `${rightPosition}rem`, 'important');
+        engineerTextRef.current.style.setProperty('transform', 'translateY(0)', 'important');
+      }
+    };
+    
+    // Position immediately and on resize
+    requestAnimationFrame(() => {
+      positionEngineerText();
+      // Also position after delays to ensure SVG is fully rendered
+      setTimeout(positionEngineerText, 100);
+      setTimeout(positionEngineerText, 300);
+      setTimeout(positionEngineerText, 500);
+    });
+    
+    window.addEventListener('resize', positionEngineerText);
+    
+    return () => {
+      window.removeEventListener('resize', positionEngineerText);
+    };
+  }, [isMariamReady, isDotAnimationComplete]);
 
   // Position and size the SVG number 7 directly below PORTFOL
   useEffect(() => {
@@ -2735,7 +2983,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             right: "clamp(0.5rem, 2vw, 2rem)",
             color: "#280B0B",
             fontFamily: '"Miserable Emillia", cursive',
-            fontSize: "clamp(2rem, 15vw, 11rem)",
+            fontSize: isMobileScreen() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 15vw, 11rem)",
             zIndex: 10000,
             pointerEvents: "none",
             whiteSpace: "nowrap",
@@ -3524,15 +3772,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         @media (max-width: 768px) {
           .hero-engineer-text {
-            bottom: clamp(0.5rem, 2vw, 1rem);
-            right: clamp(0.5rem, 2vw, 1rem);
-            font-size: clamp(1.5rem, 8vw, 4rem);
+            bottom: auto !important;
+            font-size: clamp(1.5rem, 5vw, 3.5rem) !important;
+            /* top and right will be set by JavaScript */
           }
         }
         
         @media (max-width: 480px) {
           .hero-engineer-text {
-            font-size: clamp(1.2rem, 6vw, 2.5rem);
+            font-size: clamp(1.2rem, 4.5vw, 2.8rem) !important;
           }
         }
       `}</style>
