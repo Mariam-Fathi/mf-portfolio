@@ -38,10 +38,10 @@ const Experience = () => {
   return (
     <section
       ref={ref}
-      className="mx-auto relative flex h-auto lg:h-screen w-screen flex-col items-center overflow-visible bg-[#F9E7C9] px-4 text-[#1F3A4B] py-12 lg:py-0"
+      className="mx-auto relative flex h-screen lg:h-screen w-screen flex-col items-center justify-center overflow-visible bg-[#F9E7C9] px-4 text-[#1F3A4B] lg:py-0"
     >
       {/* Mobile: Vertical Timeline Layout */}
-      <div className="w-full max-w-2xl lg:hidden py-8">
+      <div className="w-full max-w-2xl lg:hidden">
         {experienceItems.map((item, index) => (
           <motion.div
             key={index}
