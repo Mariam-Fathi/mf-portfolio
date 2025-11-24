@@ -89,28 +89,41 @@ const Contact: React.FC = () => {
     // Playful text animation - bouncy and energetic
     if (textRef.current) {
       const text = textRef.current;
-      const textContent = text.textContent || '';
-      text.innerHTML = '';
+      // Get all child elements (spans and br)
+      const children = Array.from(text.children);
       
-      // Create spans for each character with random initial positions
-      textContent.split('').forEach((char, index) => {
-        const span = document.createElement('span');
-        span.textContent = char === ' ' ? '\u00A0' : char;
-        span.style.display = 'inline-block';
-        span.style.opacity = '0';
+      // Process each child element
+      children.forEach((child) => {
+        // Skip br elements
+        if (child.tagName === 'BR') return;
         
-        // Random starting positions for playful effect
-        const randomX = (Math.random() - 0.5) * 200;
-        const randomY = (Math.random() - 0.5) * 200;
-        const randomRotation = (Math.random() - 0.5) * 360;
-        const randomScale = Math.random() * 0.5 + 0.5;
+        const textContent = child.textContent || '';
+        const originalHTML = child.innerHTML;
+        child.innerHTML = '';
         
-        span.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(${randomScale})`;
-        text.appendChild(span);
+        // Create spans for each character
+        textContent.split('').forEach((char) => {
+          const span = document.createElement('span');
+          span.textContent = char;
+          span.style.display = 'inline-block';
+          span.style.opacity = '0';
+          
+          // Random starting positions for playful effect
+          const randomX = (Math.random() - 0.5) * 200;
+          const randomY = (Math.random() - 0.5) * 200;
+          const randomRotation = (Math.random() - 0.5) * 360;
+          const randomScale = Math.random() * 0.5 + 0.5;
+          
+          span.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(${randomScale})`;
+          child.appendChild(span);
+        });
       });
+      
+      // Get all character spans for animation
+      const allSpans = Array.from(text.querySelectorAll('span'));
 
       // Bouncy character animation
-      gsap.to(text.children, {
+      gsap.to(allSpans, {
         opacity: 1,
         x: 0,
         y: 0,
@@ -126,7 +139,7 @@ const Contact: React.FC = () => {
 
       // Add wobbly text effect on hover
       text.addEventListener('mouseenter', () => {
-        gsap.to(text.children, {
+        gsap.to(allSpans, {
           rotation: () => gsap.utils.random(-10, 10),
           y: () => gsap.utils.random(-5, 5),
           x: () => gsap.utils.random(-3, 3),
@@ -137,7 +150,7 @@ const Contact: React.FC = () => {
       });
 
       text.addEventListener('mouseleave', () => {
-        gsap.to(text.children, {
+        gsap.to(allSpans, {
           rotation: 0,
           y: 0,
           x: 0,
@@ -287,14 +300,17 @@ const Contact: React.FC = () => {
       <div className="relative flex min-h-screen w-full items-center justify-center">
         <h1 
           ref={textRef}
-          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(6rem,20vw,24rem)] cursor-pointer hover:scale-105 transition-transform duration-300"
+          className="relative z-10 w-full text-center font-black uppercase leading-[0.78] text-[clamp(3rem,12vw,24rem)] md:text-[clamp(6rem,20vw,24rem)] cursor-pointer hover:scale-105 transition-transform duration-300"
           style={{
             fontFamily: '"A Day in September", cursive',
             color: "#280B0B",
             letterSpacing: "0.1em"
           }}
         >
-          LET'S TALK
+          <span className="inline-block">LET'S</span>
+          <span className="hidden md:inline"> </span>
+          <br className="md:hidden" />
+          <span className="inline-block">TALK</span>
         </h1>
 
         <div ref={tilesRef} className="absolute inset-0 hidden lg:block">

@@ -85,25 +85,25 @@ const CertificateSection = ({
   const getPositionClasses = (position: string) => {
     switch (position) {
       case "top-left":
-        return "top-6 md:top-8 left-6 md:left-8";
+        return "top-4 md:top-8 left-4 md:left-8";
       case "top-right":
-        return "top-6 md:top-8 right-6 md:right-8";
+        return "top-4 md:top-8 right-4 md:right-8";
       case "bottom-left":
-        return "bottom-6 md:bottom-8 left-6 md:left-8";
+        return "bottom-4 md:bottom-8 left-4 md:left-8";
       case "bottom-right":
-        return "bottom-6 md:bottom-8 right-6 md:right-8";
+        return "bottom-4 md:bottom-8 right-4 md:right-8";
       case "right-vertical":
-        return "top-1/2 -translate-y-1/2 right-6 md:right-8";
+        return "bottom-16 sm:bottom-20 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 right-4 md:right-8";
       case "left-vertical":
-        return "top-1/2 -translate-y-1/2 left-6 md:left-8";
+        return "bottom-16 sm:bottom-20 lg:bottom-auto lg:top-1/2 lg:-translate-y-1/2 left-4 md:left-8";
       case "bottom-right-shifted":
-        return "bottom-6 md:bottom-8 right-32 md:right-28";
+        return "bottom-4 md:bottom-8 right-4 md:right-28";
       case "bottom-right-same-right":
-        return "bottom-6 md:bottom-8 right-32 md:right-28";
+        return "bottom-4 md:bottom-8 right-4 md:right-28";
       case "bottom-left-shifted":
-        return "bottom-6 md:bottom-8 left-32 md:left-28";
+        return "bottom-4 md:bottom-8 left-4 md:left-28";
       default:
-        return "top-6 md:top-8 left-6 md:left-8";
+        return "top-4 md:top-8 left-4 md:left-8";
     }
   };
 
@@ -132,7 +132,7 @@ const CertificateSection = ({
 
       {/* Certificate Link - Bottom position based on certificate */}
       {certificate.link && (
-        <div className={`absolute bottom-6 md:bottom-8 z-10 ${(certificate as any).infoPosition === "bottom-right" ? "right-6 md:right-8" : "left-6 md:left-8"}`}>
+        <div className={`absolute bottom-4 md:bottom-8 z-10 ${(certificate as any).infoPosition === "bottom-right" ? "right-4 md:right-8" : "left-4 md:left-8"}`}>
           <a
             href={certificate.link}
             target="_blank"
@@ -150,7 +150,7 @@ const CertificateSection = ({
         {/* First Word */}
         <div className={`absolute ${getPositionClasses(pos1)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-4xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            className="text-[#1e140b] font-bold text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={getTextStyle(pos1)}
           >
             {word1}
@@ -160,7 +160,7 @@ const CertificateSection = ({
         {/* Second Word */}
         <div className={`absolute ${getPositionClasses(pos2)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-4xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            className="text-[#1e140b] font-bold text-2xl sm:text-3xl md:text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={getTextStyle(pos2)}
           >
             {word2}
