@@ -13,7 +13,7 @@ const experienceItems = [
     toDate: "Present",
     position: 0.2, // Position along path (0-1) - left side (moved slightly right to avoid edge)
     side: "above", // "above" or "below" the path
-    color: "#9BCCD0", // Light blue color
+    color: "#280B0B", // Light blue color
   },
   {
     number: "02",
@@ -24,7 +24,7 @@ const experienceItems = [
     toDate: "Present",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#C92924", // Fire Red from color palette
+    color: "#6B2138", // Fire Red from color palette
   },
 ];
 
@@ -176,7 +176,7 @@ const LinePath = React.forwardRef<
       <motion.path
         ref={ref}
         d={pathD}
-        stroke="#280B0B"
+        stroke="#B7D9FF"
         strokeWidth="4"
         fill="none"
         pathLength="1"

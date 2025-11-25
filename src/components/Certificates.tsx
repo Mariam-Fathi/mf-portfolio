@@ -5,33 +5,41 @@ import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 
 const certificates = [
-  {
-    id: "data-engineering",
-    title: "DATA ENGINEERING",
-    words: ["DATA", "ENGINEERING"],
-    platform: "DeepLearning.AI",
-    link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    bgColor: "#FBBA16", // Yellow
-    // DATA right vertical, ENGINEERING bottom-right (shifted)
-    positions: {
-      word1: { position: "right-vertical" },
-      word2: { position: "bottom-right-shifted" },
-    },
-    infoPosition: "bottom-left", // Default position
-  },
+
   {
     id: "time-series",
     title: "TIME SERIES",
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    bgColor: "#E2B2B4", // Pink
     // TIME left vertical (opposite of DATA), SERIES bottom-left-shifted (opposite of ENGINEERING)
+
+    // bgColor: "#B7D9FF", // Light Blue
+    textColor: "#B7D9FF", // Text color for this certificate
+    bgColor: "#6B2138", // Yellow
+
+    // TIME and SERIES horizontal as one sentence (mirrored - bottom-right)
     positions: {
-      word1: { position: "left-vertical" },
-      word2: { position: "bottom-left-shifted" },
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-right", // Move info to opposite side
+    infoPosition: "bottom-right", // Link on bottom-right
+  },
+  {
+    id: "data-engineering",
+    title: "DATA ENGINEERING",
+    words: ["DATA", "ENGINEERING"],
+    platform: "DeepLearning.AI",
+    link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
+    bgColor: "#B7D9FF", // Pink
+    textColor: "#6B2138", // Text color for this certificate
+    positions: {
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
+    },
+    infoPosition: "bottom-left", // Link on bottom-left
+    // DATA and ENGINEERING horizontal as one sentence
+
   },
   {
     id: "computer-vision",
@@ -39,13 +47,17 @@ const certificates = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#9BCCD0", // Light Blue
-    // VISION same as DATA (right vertical), COMPUTER same right as ENGINEERING but regular bottom (no bottom shift)
+    textColor: "#280B0B", // Text color for this certificate
+    bgColor: "#F9E7C9", // Yellow// Text color for this certificate
+
+ 
+
+    // COMPUTER and VISION horizontal as one sentence (mirrored back - bottom-left)
     positions: {
-      word1: { position: "bottom-right-same-right" }, // COMPUTER (same right position, regular bottom)
-      word2: { position: "right-vertical" }, // VISION
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-left", // Default position
+    infoPosition: "bottom-right", // Link on bottom-right (mirrored back)
   },
 ];
 
@@ -102,6 +114,8 @@ const CertificateSection = ({
         return "bottom-4 md:bottom-8 right-4 md:right-28";
       case "bottom-left-shifted":
         return "bottom-4 md:bottom-8 left-4 md:left-28";
+      case "top-left-next":
+        return "top-4 md:top-8 left-4 md:left-8"; // Same as top-left, will be positioned relative to word1
       default:
         return "top-4 md:top-8 left-4 md:left-8";
     }
@@ -151,7 +165,8 @@ const CertificateSection = ({
             href={certificate.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[#1e140b] hover:opacity-70 transition-opacity text-xs"
+            className="inline-flex items-center gap-1 hover:opacity-70 transition-opacity text-xs"
+            style={{ color: certificate.textColor }}
           >
             <span>View Certificate</span>
             <ExternalLink className="w-3 h-3" />
@@ -162,8 +177,9 @@ const CertificateSection = ({
       {/* Mobile: Full Title Vertical - One Side Only */}
       <div className={`absolute lg:hidden top-1/2 -translate-y-1/2 ${mobileSide === "right" ? "right-4" : "left-4"} pointer-events-none max-h-full overflow-visible`}>
         <span 
-          className="text-[#1e140b] font-bold text-xl sm:text-2xl uppercase tracking-tighter block"
+          className="font-bold text-xl sm:text-2xl uppercase tracking-tighter block"
           style={{
+            color: certificate.textColor,
             writingMode: "vertical-rl" as const,
             textOrientation: "mixed" as const,
             maxHeight: "90vh",
@@ -173,23 +189,23 @@ const CertificateSection = ({
         </span>
       </div>
 
-      {/* Desktop: Title Words - Positioned in opposite corners */}
+      {/* Desktop: Title Words - Horizontal sentence for all certificates */}
       <div className="absolute inset-0 pointer-events-none hidden lg:block">
-        {/* First Word */}
-        <div className={`absolute ${getPositionClasses(pos1)}`}>
+        {/* First (time-series) and third (computer-vision): bottom-left, second (data-engineering): bottom-right */}
+        <div className={`absolute ${getPositionClasses(certificate.id === "data-engineering" ? "bottom-right" : "bottom-left")} flex items-center gap-2`}>
           <span 
-            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
-            style={getTextStyle(pos1)}
+            className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            style={{
+              color: certificate.textColor,
+            }}
           >
             {word1}
           </span>
-        </div>
-
-        {/* Second Word */}
-        <div className={`absolute ${getPositionClasses(pos2)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
-            style={getTextStyle(pos2)}
+            className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            style={{
+              color: certificate.textColor,
+            }}
           >
             {word2}
           </span>

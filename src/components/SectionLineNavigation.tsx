@@ -12,9 +12,10 @@ interface SectionLineNavigationProps {
 const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigate, currentSection }) => {
   const lineRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const oRef = useRef<HTMLSpanElement>(null);
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [lineData, setLineData] = useState<{ lineY: number; lineEndX: number; lineWidth: number } | null>(null);
+  const [lineData, setLineData] = useState<{ lineY: number; lineEndX: number; lineWidth: number; oPositionX: number } | null>(null);
 
   const sections = [
     { id: "hero", label: "home" },
@@ -26,38 +27,71 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
 
   useEffect(() => {
     // Get line data from hero
-    const data = getHeroLineData();
-    if (data) {
-      setLineData(data);
-    } else {
-      // Retry if data not available yet
-      const timeout = setTimeout(() => {
-        const retryData = getHeroLineData();
-        if (retryData) {
-          setLineData(retryData);
+    const getData = () => {
+      const data = getHeroLineData();
+      if (data) {
+        console.log('SectionLineNavigation: Got line data', data);
+        setLineData(data);
+        return true;
+      }
+      return false;
+    };
+    
+    if (!getData()) {
+      // Retry if data not available yet - keep retrying until we get it
+      let retries = 0;
+      const maxRetries = 20; // Try for 2 seconds
+      const interval = setInterval(() => {
+        retries++;
+        if (getData() || retries >= maxRetries) {
+          clearInterval(interval);
         }
       }, 100);
-      return () => clearTimeout(timeout);
+      return () => clearInterval(interval);
     }
   }, []);
 
   useEffect(() => {
-    if (!lineData || !lineRef.current || !navRef.current) return;
-
-    // If already animated, just ensure navigation is visible
-    if (hasAnimated) {
-      gsap.set(navRef.current, { opacity: 1, display: "flex" });
-      gsap.set(lineRef.current, { opacity: 0.4, width: 150 });
+    if (!lineData || !lineRef.current || !navRef.current || !oRef.current) {
+      console.log('SectionLineNavigation: Missing refs or data', { lineData, lineRef: !!lineRef.current, navRef: !!navRef.current, oRef: !!oRef.current });
       return;
     }
 
-    // Set initial positions
+    // Use hero line end X position to expand line exactly like hero (before O)
+    const targetLineWidth = lineData.lineEndX; // Line expands to this position (before O)
     const lineY = lineData.lineY;
-    const targetLineWidth = 150; // Slightly expand the line (enough to be visible, but not too much)
-    const gap = 10; // Small gap between line end and navigation
-    const navX = targetLineWidth + gap;
+    // Center links in the space between top of viewport and the line
+    const navY = lineY / 2; // Center between top (0) and line (lineY)
+    // Navigation should be at the right end of the line (where O is)
+    // Use oPositionX if available, otherwise use lineEndX (line end position)
+    const navFinalX = lineData.oPositionX || lineData.lineEndX; // O's position (where navigation should be)
 
-    // Position line at left edge, same Y as hero
+    // If already animated, just ensure O and navigation are visible at final position
+    if (hasAnimated) {
+      gsap.set(oRef.current, {
+        left: navFinalX, // O at final position
+        opacity: 1,
+        display: "inline-flex", // Match hero
+        alignItems: "center", // Match hero
+        transform: "translateY(-50%)", // Center vertically with line (exact alignment)
+      });
+      gsap.set(navRef.current, { 
+        opacity: 1, 
+        display: "flex",
+        visibility: "visible",
+        left: navFinalX, // At final position (where O is)
+        top: navY, // Center between top of viewport and line
+        transform: "translate(-100%, -50%)", // Align right edge like hero
+      });
+      gsap.set(lineRef.current, { 
+        opacity: 0.4, 
+        width: targetLineWidth,
+        transform: "translateY(-50%)" // Maintain vertical centering
+      });
+      return;
+    }
+
+    // Position line at left edge, same Y as hero (exact same positioning as hero line)
     gsap.set(lineRef.current, {
       position: "fixed",
       left: 0,
@@ -66,23 +100,58 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       height: "1px",
       backgroundColor: "#280B0B",
       opacity: 0,
+      transform: "translateY(-50%)", // Center vertically like hero line (top: 50%, translateY(-50%))
       transformOrigin: "left center",
       zIndex: 10,
     });
 
-    // Position navigation at the end of the line (initially hidden)
+    // Position O at start (left edge, where line begins) - will move along with line
+    // Match hero O exactly: same font size, same alignment with line
+    gsap.set(oRef.current, {
+      position: "fixed",
+      left: 0, // Start at left edge (where line starts)
+      top: lineY,
+      transform: "translateY(-50%)", // Center vertically - same as line (exact alignment)
+      opacity: 1, // O is visible from start (like hero)
+      display: "inline-flex", // Match hero: inline-flex
+      alignItems: "center", // Match hero: align-items center
+      visibility: "visible",
+      zIndex: 20,
+      immediateRender: true,
+    });
+    
+    // Position navigation at O's final position (hidden initially, appears after O reaches end)
+    // Center links in the space between top of viewport and the line
+    if (navRef.current) {
+      navRef.current.style.position = "fixed";
+      navRef.current.style.left = `${navFinalX}px`;
+      navRef.current.style.top = `${navY}px`;
+      navRef.current.style.transform = "translate(-100%, -50%)";
+      navRef.current.style.opacity = "0"; // Force hidden during animation
+      navRef.current.style.display = "flex";
+      navRef.current.style.visibility = "visible";
+      navRef.current.style.zIndex = "30";
+      navRef.current.style.pointerEvents = "none"; // Disable during animation
+      // Force opacity 0 to prevent any visibility during animation
+      navRef.current.style.setProperty('opacity', '0', 'important');
+    }
+    
     gsap.set(navRef.current, {
       position: "fixed",
-      left: navX,
-      top: lineY,
-      transform: "translate(0, -50%)", // Align left edge, center vertically
-      opacity: 0,
+      left: navFinalX, // Position at O's final position (right end) - stays here, doesn't move
+      top: navY, // Center between top of viewport and line
+      transform: "translate(-100%, -50%)", // Align right edge to line end, center vertically (like hero)
+      opacity: 0, // Hidden initially - appears after O reaches end
+      display: "flex", // Ensure it's displayed
+      visibility: "visible",
       zIndex: 30,
+      pointerEvents: "none", // Disable during animation
+      immediateRender: true, // Force immediate render
     });
 
     // Kill any existing animations
-    gsap.killTweensOf([lineRef.current, navRef.current]);
-
+    gsap.killTweensOf([lineRef.current, navRef.current, oRef.current]);
+    
     // Create animation timeline
     const tl = gsap.timeline({
       onComplete: () => {
@@ -90,25 +159,46 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         setHasAnimated(true);
         // Keep navigation visible after animation
         if (navRef.current) {
-          gsap.set(navRef.current, { opacity: 1, display: "flex" });
+          gsap.set(navRef.current, { 
+            opacity: 1, 
+            display: "flex",
+            visibility: "visible"
+          });
         }
       },
     });
 
-    // Step 1: Line expands from left edge (same animation style as hero)
+    // Step 1: Line expands from left edge to end (exactly like hero, 2.5 seconds)
+    // Step 2: O moves along with line expansion (same duration, simultaneous)
     tl.to(lineRef.current, {
       width: targetLineWidth,
       opacity: 0.4,
       duration: 2.5,
       ease: "power2.out",
     });
-
-    // Step 2: Navigation appears at the end of the line (slightly before line completes)
-    tl.to(navRef.current, {
-      opacity: 1,
-      duration: 0.5,
+    
+    // O moves along with line expansion (like hero)
+    tl.to(oRef.current, {
+      left: navFinalX, // Move to final position (where O should be)
+      duration: 2.5,
       ease: "power2.out",
-    }, "-=0.8"); // Start before line completes
+    }, 0); // Start at same time as line expansion
+    
+    // Step 3: Navigation appears at O's position AFTER O reaches end
+    // Just like hero: navigation appears after portfolio animation completes
+    // Wait until line and O animation complete, then fade in navigation
+    tl.to(navRef.current, {
+      opacity: 1, // Fade in at final position
+      top: navY, // Center between top of viewport and line
+      duration: 0.6,
+      ease: "power2.out",
+      onStart: () => {
+        // Enable pointer events when appearing
+        if (navRef.current) {
+          navRef.current.style.pointerEvents = "auto";
+        }
+      },
+    }, "+=0.3"); // Start after line and O animation complete (2.5s + delay to ensure they're done)
 
     // Cleanup function
     return () => {
@@ -127,11 +217,29 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       if (updatedData) {
         setLineData(updatedData);
       }
+      
+      // Update line width and navigation position on resize to match hero line
+      if (lineRef.current && navRef.current && hasAnimated) {
+        const updatedLineData = getHeroLineData();
+        if (updatedLineData) {
+          const targetLineWidth = updatedLineData.lineEndX;
+          const navX = updatedLineData.oPositionX || updatedLineData.lineEndX;
+          const navY = updatedLineData.lineY / 2; // Center between top of viewport and line
+          gsap.set(lineRef.current, { 
+            width: targetLineWidth,
+            transform: "translateY(-50%)" // Maintain vertical centering
+          });
+          gsap.set(navRef.current, { 
+            left: navX,
+            top: navY // Center between top of viewport and line
+          });
+        }
+      }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [lineData]);
+  }, [lineData, hasAnimated]);
 
   if (!lineData) {
     return null; // Don't render until we have line data
@@ -141,6 +249,9 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     <>
       {/* Line expanding from left */}
       <div ref={lineRef} className="section-line" />
+
+      {/* O letter - moves along with line expansion */}
+      <span ref={oRef} className="section-line-o" aria-label="Navigation menu toggle">O</span>
 
       {/* Navigation menu */}
       <nav ref={navRef} className="section-line-navigation">
@@ -164,6 +275,28 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       <style jsx>{`
         .section-line {
           pointer-events: none;
+        }
+
+        .section-line-o {
+          font-family: "Momo Trust Display", "Stack Sans", sans-serif;
+          font-size: clamp(2rem, 8vw, 6rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #280B0B;
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          white-space: nowrap;
+          height: clamp(60px, 8vw, 100px);
+          pointer-events: none;
+          user-select: none;
+        }
+        
+        @media (max-width: 768px) {
+          .section-line-o {
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            height: clamp(50px, 12vw, 80px);
+          }
         }
 
         .section-line-navigation {

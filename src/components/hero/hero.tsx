@@ -293,7 +293,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               finalDot.style.width = `${currentDotSize}px`;
               finalDot.style.height = `${currentDotSize}px`;
               finalDot.style.borderRadius = "50%";
-              finalDot.style.backgroundColor = "#C92924";
+              finalDot.style.backgroundColor = "#6B2138";
               finalDot.style.position = "fixed";
               finalDot.style.zIndex = "1";
               finalDot.style.setProperty('z-index', '1', 'important');
@@ -315,13 +315,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               
                 // Color the letters if they aren't already colored
                 if (svgIRef.current) {
-                  gsap.set(svgIRef.current, { fill: "#C92924" });
+                  gsap.set(svgIRef.current, { fill: "#6B2138" });
                 }
                 if (svgA2Ref.current) {
-                  gsap.set(svgA2Ref.current, { fill: "#C92924" });
+                  gsap.set(svgA2Ref.current, { fill: "#6B2138" });
                 }
                 if (svgM2Ref.current) {
-                  gsap.set(svgM2Ref.current, { fill: "#C92924" });
+                  gsap.set(svgM2Ref.current, { fill: "#6B2138" });
                 }
               
               // Ensure engineer text is always above the dot - set immediately after dot positioning
@@ -403,7 +403,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
     }
-  }, [isActive]);
+  }, [isActive, isDotAnimationComplete]);
 
   // Function to animate dot along SVG Mariam letters
   const buildDotTimeline = () => {
@@ -569,7 +569,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     finalDot.style.width = `${finalDotSize}px`;
     finalDot.style.height = `${finalDotSize}px`;
     finalDot.style.borderRadius = "50%";
-    finalDot.style.backgroundColor = "#C92924";
+    finalDot.style.backgroundColor = "#6B2138";
     finalDot.style.position = "fixed";
     // Set dot z-index to be lower than engineer text
     finalDot.style.zIndex = "1";
@@ -652,7 +652,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       keyframes: [
         { 
           y: iScreenY + 60, 
-          backgroundColor: "#C92924", 
+          backgroundColor: "#6B2138", 
           opacity: 1, 
           duration: 0.4, 
           ease: "power2.in",
@@ -660,7 +660,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Color "i" when dot first hits
             if (svgIRefEl) {
               gsap.to(svgIRefEl, {
-                fill: "#C92924",
+                fill: "#6B2138",
                 duration: 0.3,
                 ease: "power2.out",
               });
@@ -670,7 +670,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         { 
           y: iScreenY + 30, 
           scaleY: 0.7, 
-          backgroundColor: "#C92924", 
+          backgroundColor: "#6B2138", 
           opacity: 1, 
           duration: 0.15, 
           ease: "power2.out"
@@ -678,7 +678,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         { 
           y: iScreenY, 
           scaleY: 1, 
-          backgroundColor: "#C92924",
+          backgroundColor: "#6B2138",
           opacity: 1,
           duration: 0.2, 
           ease: "power2.out"
@@ -714,7 +714,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           y: a2ScreenY - 50,
           scaleY: 0.75,
           scaleX: 1,
-          backgroundColor: "#C92924",
+          backgroundColor: "#6B2138",
           duration: 0.4,
           ease: "sine.inOut",
           force3D: true
@@ -733,7 +733,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     finalDotTimeline.to(finalDot, {
       y: a2ScreenY + 10,
       scaleY: 1.2,
-      backgroundColor: "#C92924",
+      backgroundColor: "#6B2138",
       opacity: 1,
       duration: 0.25,
       ease: "power2.in",
@@ -743,7 +743,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     finalDotTimeline.to(finalDot, {
       y: a2ScreenY,
       scaleY: 0.8,
-      backgroundColor: "#C92924",
+      backgroundColor: "#6B2138",
       opacity: 1,
       duration: 0.15,
       ease: "bounce.out",
@@ -751,7 +751,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       onComplete: () => {
         if (svgA2RefEl) {
           gsap.to(svgA2RefEl, {
-            fill: "#C92924",
+            fill: "#6B2138",
             duration: 0.3,
             ease: "power2.out",
           });
@@ -768,13 +768,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     // Continue with the rest of the animation to "m"
     finalDotTimeline.to(finalDot, {
       keyframes: [
-        { x: m2ScreenX - (finalDotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#C92924", duration: 0.3, ease: "power2.out", force3D: true },
+        { x: m2ScreenX - (finalDotSize / 2), y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: "#6B2138", duration: 0.3, ease: "power2.out", force3D: true },
         { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut", force3D: true },
-        { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#C92924", duration: 0.25, ease: "power2.in", force3D: true },
+        { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: "#6B2138", duration: 0.25, ease: "power2.in", force3D: true },
         {
           y: m2ScreenY,
           scaleY: 0.8,
-          backgroundColor: "#C92924",
+          backgroundColor: "#6B2138",
           opacity: 1,
           duration: 0.15,
           ease: "bounce.out",
@@ -782,7 +782,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           onComplete: () => {
             if (svgM2RefEl) {
               gsap.to(svgM2RefEl, {
-                fill: "#C92924",
+                fill: "#6B2138",
                 duration: 0.3,
                 ease: "power2.out",
               });
@@ -837,7 +837,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       keyframes: [
         { 
           y: iScreenY + 60, 
-          backgroundColor: "#C92924", 
+          backgroundColor: "#6B2138", 
           opacity: 1, 
           duration: 0.4, 
           ease: "power2.in",
@@ -846,7 +846,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         { 
           y: iScreenY + 30, 
           scaleY: 0.7, 
-          backgroundColor: "#C92924", 
+          backgroundColor: "#6B2138", 
           opacity: 1, 
           duration: 0.15, 
           ease: "power2.out",
@@ -855,7 +855,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         { 
           y: iScreenY, 
           scaleY: 1, 
-          backgroundColor: "#C92924",
+          backgroundColor: "#6B2138",
           opacity: 1,
           duration: 0.2, 
           ease: "power2.out",
@@ -864,7 +864,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Change "i" color at the last fall
             if (svgIRefEl) {
               gsap.to(svgIRefEl, {
-                fill: "#C92924",
+                fill: "#6B2138",
                 duration: 0.3,
                 ease: "power2.out",
               });
@@ -1558,29 +1558,43 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       const lineWidth = lineRect.width;
       const lineEndX = lineX + lineWidth; // End of the line
       
-      // Line is at 50% of container height, position navigation vertically centered on the line
-      // Use original calculation to match other sections
-      const lineY = containerRect.height * 0.5 - 24; // 50% of container minus offset
+      // Line is at 50% of container height with translateY(-50%), so its center is at 50% of container
+      // Get the actual center Y position of the line (lineRect.top + lineRect.height/2)
+      const lineCenterY = lineRect.top + lineRect.height / 2; // Actual center of the line
       
       // Store navigation Y position (absolute position relative to viewport) for use in other sections
-      // Calculate absolute Y position: container top + lineY
-      const absoluteLineY = containerRect.top + lineY;
+      // Use the actual line center position
+      const absoluteLineY = lineCenterY;
       setHeroNavigationY(absoluteLineY);
       
       // Store line data for use in other sections (absolute viewport positions)
       const absoluteLineEndX = containerRect.left + lineEndX;
+      
+      // Get O's actual position (where navigation should be)
+      const oElForPosition = portfolioHeaderRef.current?.querySelector('.hero-cover-title-o') as HTMLElement;
+      let oPositionX = absoluteLineEndX; // Default to line end if O not found
+      if (oElForPosition) {
+        const oRect = oElForPosition.getBoundingClientRect();
+        oPositionX = oRect.left; // O's left edge absolute position
+      }
+      
       setHeroLineData({
-        lineY: absoluteLineY,
-        lineEndX: absoluteLineEndX,
+        lineY: absoluteLineY, // This is now the actual center Y position of the line
+        lineEndX: absoluteLineEndX, // Line ends here (before O)
         lineWidth: lineWidth,
+        oPositionX: oPositionX, // O's position (where navigation should be)
       });
       
       // Position navigation at the end of the line, aligned to the right with no gap
-      // Hero nav uses position: absolute, so we use lineY (relative to container)
+      // Hero nav uses position: absolute, so we calculate relative position from absolute
       // Other sections use position: fixed with absoluteLineY (absolute viewport position)
-      // They should match: containerRect.top + lineY = absoluteLineY
+      // Center links in the space between top of viewport and the line
+      // Calculate absolute Y position (center between 0 and lineY)
+      const navAbsoluteY = absoluteLineY / 2; // Center between top (0) and line (absoluteLineY)
+      // Convert to relative position for hero (absolute - container top)
+      const navRelativeY = navAbsoluteY - containerRect.top;
       if (navRef.current) {
-        navRef.current.style.top = `${lineY}px`;
+        navRef.current.style.top = `${navRelativeY}px`;
         navRef.current.style.left = `${lineEndX}px`;
         navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
         navRef.current.style.zIndex = '101'; // Ensure navigation is above the line
@@ -1706,7 +1720,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               finalDot.style.width = `${currentDotSize}px`;
               finalDot.style.height = `${currentDotSize}px`;
               finalDot.style.borderRadius = "50%";
-              finalDot.style.backgroundColor = "#C92924";
+              finalDot.style.backgroundColor = "#6B2138";
               finalDot.style.position = "fixed";
               finalDot.style.zIndex = "1";
               finalDot.style.setProperty('z-index', '1', 'important');
@@ -1728,13 +1742,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               
               // Color the letters if they aren't already colored
               if (svgIRef.current) {
-                gsap.set(svgIRef.current, { fill: "#C92924" });
+                gsap.set(svgIRef.current, { fill: "#6B2138" });
               }
               if (svgA2Ref.current) {
-                gsap.set(svgA2Ref.current, { fill: "#C92924" });
+                gsap.set(svgA2Ref.current, { fill: "#6B2138" });
               }
               if (svgM2Ref.current) {
-                gsap.set(svgM2Ref.current, { fill: "#C92924" });
+                gsap.set(svgM2Ref.current, { fill: "#6B2138" });
               }
               
               // Ensure engineer text is always above the dot - set immediately after dot positioning
@@ -1841,7 +1855,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             finalDot.style.width = `${mobileDotSize}px`;
             finalDot.style.height = `${mobileDotSize}px`;
             finalDot.style.borderRadius = "50%";
-            finalDot.style.backgroundColor = "#C92924";
+            finalDot.style.backgroundColor = "#6B2138";
             finalDot.style.position = "fixed";
             finalDot.style.zIndex = "1";
             finalDot.style.opacity = "1";
@@ -1859,9 +1873,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             });
             
             // Color the letters immediately
-            if (svgIRef.current) gsap.set(svgIRef.current, { fill: "#C92924" });
-            if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: "#C92924" });
-            if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: "#C92924" });
+            if (svgIRef.current) gsap.set(svgIRef.current, { fill: "#6B2138" });
+            if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: "#6B2138" });
+            if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: "#6B2138" });
             
             // Ensure engineer text is above dot
             if (engineerTextRef.current) {
@@ -1969,9 +1983,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
     // Skip animations on mobile - set to final state immediately
     if (isMobileScreen()) {
-      // Restore Engineer text immediately on mobile
+      // Restore Engineer text immediately on mobile - ensure it shows full text
       if (engineerTextRef.current) {
         const engineerText = engineerTextRef.current;
+        // Ensure text is fully displayed (restore from typewriter animation)
+        if (!engineerText.textContent || engineerText.textContent.trim() === '') {
+          engineerText.textContent = "Software  Engineer";
+        }
         // Ensure engineer text is always on top layer above the dot
         const forceZIndex = () => {
           engineerText.style.setProperty('z-index', '10000', 'important');
@@ -2372,48 +2390,64 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const mobileBottomPadding = isMobileScreen() ? 40 : 0; // Increased padding for mobile browser UI
     
     if (memoizedMariamSvgData && mariamSvgCalculated) {
-      // Use memoized values
-      fontSize = memoizedMariamSvgData.fontSize;
-      mariamWidth = memoizedMariamSvgData.mariamWidth;
-      mariamHeight = memoizedMariamSvgData.mariamHeight;
-      portfolBottom = memoizedMariamSvgData.portfolBottom;
-      portfolLeft = memoizedMariamSvgData.portfolLeft;
-      portfolFontSize = memoizedMariamSvgData.portfolFontSize;
-      screenWidth = memoizedMariamSvgData.screenWidth;
-      screenHeight = memoizedMariamSvgData.screenHeight;
+      // Use memoized values, but on mobile always recalculate when hero becomes active
+      // to ensure correct positioning with current viewport
+      const currentScreenHeight = getViewportHeight();
+      const currentScreenWidth = window.innerWidth;
       
-      // Apply memoized values directly
-      const padding = 10;
-      svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
-      svg.setAttribute("width", `${mariamWidth}px`);
-      svg.setAttribute("height", `${mariamHeight}px`);
-      svg.style.position = "fixed";
-      svg.style.left = "0px";
-      svg.style.top = "auto";
-      // On mobile, add bottom padding to prevent cropping by browser UI
-      const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
-      svg.style.bottom = `${bottomOffset}px`;
-      svg.style.margin = "0";
-      svg.style.padding = "0";
-      svg.style.height = `${mariamHeight}px`;
-      svg.style.width = `${mariamWidth}px`;
-      svg.style.overflow = "visible";
+      // On mobile, always recalculate when hero is active to ensure correct positioning
+      // On desktop, use memoized if screen size hasn't changed significantly
+      // Force recalculation on mobile when returning to hero to get fresh viewport measurements
+      const shouldRecalculate = isMobileScreen() && isActive;
       
-      // Update text element with memoized values
-      const textElement = svg.querySelector(".hero-mariam-text");
-      if (textElement) {
-        textElement.setAttribute("x", "0");
-        textElement.setAttribute("y", `${mariamHeight}px`);
-        textElement.setAttribute("dominant-baseline", "baseline");
-        textElement.setAttribute("text-anchor", "start");
-        textElement.setAttribute("dx", "0");
-        textElement.setAttribute("font-size", `${fontSize}px`);
-        textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
-        textElement.setAttribute("font-weight", "700");
-        textElement.setAttribute("letter-spacing", "0");
+      if (!shouldRecalculate && (
+        Math.abs(currentScreenHeight - memoizedMariamSvgData.screenHeight) <= 50 &&
+        Math.abs(currentScreenWidth - memoizedMariamSvgData.screenWidth) <= 50
+      )) {
+        // Use memoized values directly
+        fontSize = memoizedMariamSvgData.fontSize;
+        mariamWidth = memoizedMariamSvgData.mariamWidth;
+        mariamHeight = memoizedMariamSvgData.mariamHeight;
+        portfolBottom = memoizedMariamSvgData.portfolBottom;
+        portfolLeft = memoizedMariamSvgData.portfolLeft;
+        portfolFontSize = memoizedMariamSvgData.portfolFontSize;
+        screenWidth = memoizedMariamSvgData.screenWidth;
+        screenHeight = memoizedMariamSvgData.screenHeight;
+        
+        // Apply memoized values directly
+        const padding = 10;
+        svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
+        svg.setAttribute("width", `${mariamWidth}px`);
+        svg.setAttribute("height", `${mariamHeight}px`);
+        svg.style.position = "fixed";
+        svg.style.left = "0px";
+        svg.style.top = "auto";
+        // On mobile, add bottom padding to prevent cropping by browser UI
+        const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
+        svg.style.bottom = `${bottomOffset}px`;
+        svg.style.margin = "0";
+        svg.style.padding = "0";
+        svg.style.height = `${mariamHeight}px`;
+        svg.style.width = `${mariamWidth}px`;
+        svg.style.overflow = "visible";
+        
+        // Update text element with memoized values
+        const textElement = svg.querySelector(".hero-mariam-text");
+        if (textElement) {
+          textElement.setAttribute("x", "0");
+          textElement.setAttribute("y", `${mariamHeight}px`);
+          textElement.setAttribute("dominant-baseline", "baseline");
+          textElement.setAttribute("text-anchor", "start");
+          textElement.setAttribute("dx", "0");
+          textElement.setAttribute("font-size", `${fontSize}px`);
+          textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
+          textElement.setAttribute("font-weight", "700");
+          textElement.setAttribute("letter-spacing", "0");
+        }
+        
+        return; // Skip recalculation
       }
-      
-      return; // Skip recalculation
+      // If screen size changed, fall through to recalculate below
     }
     
     // Calculate values (first time only)
@@ -2732,7 +2766,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           intoText.setAttribute("text-anchor", "end"); // Align to the right
           intoText.setAttribute("dominant-baseline", "hanging"); // Align to the top
           intoText.setAttribute("opacity", "0");
-          intoText.setAttribute("fill", "#C92924");
+          intoText.setAttribute("fill", "#6B2138");
           intoText.style.filter = "blur(10px)";
           // No rotation - keep it horizontal
           intoText.setAttribute("transform", "");
@@ -2756,7 +2790,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           ideasText.setAttribute("text-anchor", "start"); // Align to the left
           ideasText.setAttribute("dominant-baseline", "hanging"); // Align to the top
           ideasText.setAttribute("opacity", "0");
-          ideasText.setAttribute("fill", "#C92924");
+          ideasText.setAttribute("fill", "#6B2138");
           ideasText.style.filter = "blur(10px)";
           // No rotation - keep it horizontal
           ideasText.setAttribute("transform", "");
@@ -2794,7 +2828,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Rotate -90 degrees around the center of the stroke to make it vertical
           turningIdeas.setAttribute("transform", `rotate(-90 ${leftStrokeX - offsetFromStroke} ${strokeCenterY})`);
           turningIdeas.setAttribute("opacity", "0");
-          turningIdeas.setAttribute("fill", "#C92924");
+          turningIdeas.setAttribute("fill", "#6B2138");
           turningIdeas.style.filter = "blur(10px)";
         }
         
@@ -2825,7 +2859,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Rotate 90 degrees around the center of the stroke to make it vertical
           realLifeProducts.setAttribute("transform", `rotate(90 ${rightStrokeX + offsetFromStroke} ${strokeCenterY})`);
           realLifeProducts.setAttribute("opacity", "0");
-          realLifeProducts.setAttribute("fill", "#C92924");
+          realLifeProducts.setAttribute("fill", "#6B2138");
           realLifeProducts.style.filter = "blur(10px)";
         }
         
@@ -2985,7 +3019,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         clearTimeout(resizeTimeout);
       }
     };
-  }, [portfolWidth]);
+  }, [portfolWidth, isActive]); // Recalculate when hero becomes active (especially on mobile)
 
   return (
     <section
@@ -3679,7 +3713,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         /* Final dot specific style */
         :global(.final-i-dot) {
-          background-color: #C92924;
+          background-color: #6B2138;
         }
 
         .hero-marquee {
@@ -3896,7 +3930,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         .hero-engineer-text {
           font-family: "Miserable Emillia", cursive;
-          color: white;
+          color: #280B0B;
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
           z-index: 10000 !important;

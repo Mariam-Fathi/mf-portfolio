@@ -1,10 +1,11 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/utils";
 import { ExternalLink } from "lucide-react";
+import { getHeroLineData } from "@/utils/navigationPosition";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -29,50 +30,19 @@ type ProjectsProps = {
 
 const projects: Project[] = [
   {
-    id: "personality-ai",
-    title: "Personality Analysis",
-    role: "AI Research Lead",
-    description:
-      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction. Built web application (Node.js, MongoDB) for demonstration and candidate assessment interface.",
-    links: [
-      { name: "Graduation Thesis", url: "#" },
-    ],
-  },
-  {
     id: "homi",
     title: "Homi",
     role: "Full-Stack Developer & Data Engineer",
     description:
-      "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard providing business intelligence through revenue metrics, user engagement, and property performance visualizations. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
+      "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard for business intelligence. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
     links: [
+      { name: "Expo App", url: "#" },
+      { name: "Dashboard", url: "#" },
       { name: "Kaggle Notebooks: [1], [2], [3]", url: "#", isGrouped: true, groupedLinks: [
         { name: "Real Estate Data Discovery Analysis", url: "#" },
         { name: "38.19% SUSPICIOUS RECORDS", url: "#" },
         { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
       ]},
-      { name: "App on Play Store", url: "#" },
-      { name: "Dashboard Link", url: "#" },
-      { name: "Demo Video", url: "#" },
-    ],
-  },
-  {
-    id: "home-services",
-    title: "Sanae3y pro",
-    role: "Full-Stack Developer",
-    description:
-      "Interactive multi-role application (client, worker, shop) with real-time order management, Google Maps integration, and WebSocket-based live tracking. Features Indrive-like on-demand service booking with real-time updates across all user roles. The platform enables seamless coordination between customers, service providers, and merchants with instant notifications and location tracking.",
-    links: [
-      { name: "Demo Video", url: "#" },
-    ],
-  },
-  {
-    id: "sales-ai",
-    title: "Estimator",
-    role: "Full-Stack Developer",
-    description:
-      "Internal tool leveraging Hugging Face pre-trained models to analyze project descriptions and generate instant cost estimates. Achieved 85% accuracy and reduced quotation time from days to minutes, addressing critical sales bottleneck in home services application. The solution streamlines the sales process by automating complex estimation workflows and providing real-time pricing insights.",
-    links: [
-      { name: "Demo Video", url: "#" },
     ],
   },
   {
@@ -80,38 +50,87 @@ const projects: Project[] = [
     title: "Smart Key",
     role: "Lead Mobile Engineer",
     description:
-      "A production-deployed IoT solution replacing traditional key cards with smartphone-based access control for hotels. Delivered cross-platform React Native applications for guests and staff, successfully deployed at Almadiafa Hotel and enabling enterprise contracts with Long Beach Resort. The platform transforms the complete guest journey from reservation to checkout with secure, seamless keyless access across all properties.",
+      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
     links: [
-      { name: "App on Play Store", url: "#" },
+      { name: "Play Store", url: "#" },
+      { name: "App Store", url: "#" },
+    ],
+  },
+  {
+    id: "home-services",
+    title: "Sanae3y Pro",
+    role: "Full-Stack Developer",
+    description:
+      "Multi-role marketplace application (client, worker, shop) with real-time order management, WebSocket-based live chat, and Google Maps integration. Features on-demand service booking with instant notifications and location tracking, enabling seamless coordination between customers, service providers, and merchants. The platform transforms service delivery through real-time communication and intelligent routing capabilities.",
+    links: [
+      { name: "Demo", url: "#" },
+    ],
+  },
+  {
+    id: "sales-ai",
+    title: "Estimator",
+    role: "Full-Stack Developer",
+    description:
+      "Internal tool using Hugging Face pre-trained models for instant cost estimation. Achieved 85% accuracy, reducing quotation time from days to minutes. Associated with Dracode, addressing critical sales bottleneck by automating complex estimation workflows and providing real-time pricing insights. Streamlines the sales process through intelligent automation and data-driven decision support.",
+    links: [
+      { name: "Demo", url: "#" },
+    ],
+  },
+  {
+    id: "personality-ai",
+    title: "Multimodal Personality Analysis",
+    role: "AI Research Lead",
+    description:
+      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
+    links: [
+      { name: "Graduation Thesis", url: "#" },
+    ],
+  },
+  {
+    id: "iot-portal",
+    title: "Smart Key Operational Portal",
+    role: "Full-Stack Developer",
+    description:
+      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
+    links: [
+      { name: "Demo", url: "#" },
     ],
   },
 ];
 
-// Color palettes from the image: blue/yellow, cream/orange, dark green/pink
+// Color palette: [6B2138, B7D9FF, 280B0B, F9E7C9] with balanced distribution
 const cardPalette = [
   {
-    background: "#3B9EFF", // Bright blue
-    headline: "#FFE500", // Yellow
-    headlineStroke: "#FFE500",
-    body: "#FFFFFF", // White
-    link: "#FFFFFF", // White
-    accent: "#FF6B9D", // Pink starburst
+    background: "#6B2138", // Dark burgundy
+    headline: "#B7D9FF", // Light blue
+    headlineStroke: "#B7D9FF",
+    body: "#FFFFFF", // White (readable on dark background)
+    link: "#B7D9FF", // Light blue
+    accent: "#F9E7C9", // Cream
   },
   {
-    background: "#F5F0E8", // Cream/off-white
-    headline: "#FF6B35", // Orange
-    headlineStroke: "#FF6B35",
-    body: "#251B28", // Dark text
-    link: "#251B28", // Dark text
-    accent: "#3B9EFF", // Blue starburst
+    background: "#B7D9FF", // Light blue
+    headline: "#6B2138", // Dark burgundy
+    headlineStroke: "#6B2138",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#6B2138", // Dark burgundy
+    accent: "#280B0B", // Dark brown
   },
   {
-    background: "#1A4D3A", // Dark green
-    headline: "#FFB6C1", // Pink
-    headlineStroke: "#FFB6C1",
-    body: "#FFFFFF", // White
-    link: "#FFFFFF", // White
-    accent: "#FFE500", // Yellow starburst
+    background: "#280B0B", // Dark brown
+    headline: "#F9E7C9", // Cream
+    headlineStroke: "#F9E7C9",
+    body: "#FFFFFF", // White (readable on dark background)
+    link: "#F9E7C9", // Cream
+    accent: "#B7D9FF", // Light blue
+  },
+  {
+    background: "#F9E7C9", // Cream
+    headline: "#280B0B", // Dark brown
+    headlineStroke: "#280B0B",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#280B0B", // Dark brown
+    accent: "#6B2138", // Dark burgundy
   },
 ];
 
@@ -120,6 +139,26 @@ export default function GalleryShowcase({
 }: ProjectsProps) {
   const container = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [linksYPosition, setLinksYPosition] = useState<number | null>(null);
+  
+  // Get navigation Y position to align project links (centered between top and line)
+  useEffect(() => {
+    const updateLinksPosition = () => {
+      const lineData = getHeroLineData();
+      if (lineData) {
+        // Center links in the space between top of viewport and the line (same as nav links)
+        const navY = lineData.lineY / 2;
+        setLinksYPosition(navY);
+      }
+    };
+    
+    // Initial load
+    updateLinksPosition();
+    
+    // Update on resize
+    window.addEventListener("resize", updateLinksPosition);
+    return () => window.removeEventListener("resize", updateLinksPosition);
+  }, []);
 
   useGSAP(
     () => {
@@ -238,19 +277,28 @@ export default function GalleryShowcase({
                     "overflow-hidden"
                   )}
                       style={{
-                        background: index === 0 ? "#9BCCD0" : colors.background,
+                        background: colors.background,
                       }}
                     >
-                  {/* Links Section - Magazine Style (Above the line) */}
+                  {/* Links Section - Aligned with navigation Y position */}
                   {project.links.length > 0 && (
-                    <div className="mb-6 md:mb-8 relative">
-                      <div className="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-end">
+                    <div
+                      className="absolute left-6 md:left-8 lg:left-12 flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-start"
+                      style={{
+                        position: linksYPosition !== null ? "fixed" : "absolute",
+                        top: linksYPosition !== null ? `${linksYPosition}px` : undefined,
+                        transform: linksYPosition !== null ? "translateY(-50%)" : undefined,
+                        zIndex: 20,
+                      }}
+                    >
                         {project.links.map((link, linkIndex) => {
-                          // Link color matches the number color
-                          const linkColor = index === 0 ? "#C92924" : colors.headline;
-                          // Consistent styling for all links with underline
-                          const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1";
-                          const linkStyle = { fontFamily: '"Space Grotesk", "Inter", sans-serif' };
+                          // Link color matches the headline color
+                          const linkColor = colors.headline;
+                          // Consistent styling for all links - same size as nav links
+                          const linkClassName = "project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
+                          const linkStyle = { 
+                            fontFamily: '"Space Grotesk", "Inter", sans-serif',
+                          };
 
                           // Handle grouped links (like Kaggle Notebooks)
                           if (link.isGrouped && link.groupedLinks) {
@@ -258,7 +306,7 @@ export default function GalleryShowcase({
                             return (
                               <div
                                 key={linkIndex}
-                                className="text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
+                                className="project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
                                 style={{ color: linkColor, ...linkStyle }}
                               >
                                 <span>{prefix}: </span>
@@ -268,7 +316,7 @@ export default function GalleryShowcase({
                                       href={groupedLink.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                                      className="project-link transition-opacity hover:opacity-70 inline-flex items-center gap-1"
                                       style={{ color: linkColor, ...linkStyle }}
                                     >
                                       [{idx + 1}]
@@ -295,18 +343,9 @@ export default function GalleryShowcase({
                             </a>
                           );
                         })}
-                      </div>
                     </div>
                   )}
 
-                  {/* Line Separator */}
-                  <div
-                    className="h-px w-full mb-6 md:mb-8"
-                    style={{
-                      backgroundColor: colors.link,
-                      opacity: 0.4,
-                    }}
-                  />
 
                   {/* Content Section - Aligned with number's right edge */}
                   <div className="flex-1 flex flex-col lg:flex-row lg:items-end gap-6 md:gap-8">
@@ -330,7 +369,7 @@ export default function GalleryShowcase({
                         className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
                               style={{ 
                                 fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-                                color: index === 0 ? "#C92924" : colors.headline 
+                                color: colors.headline 
                               }}
                             >
                               {project.title}
@@ -352,8 +391,8 @@ export default function GalleryShowcase({
                               fontFamily:
                                 '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
-                              WebkitTextStroke: `1px ${index === 0 ? "#C92924" : colors.headlineStroke}`,
-                              color: index === 0 ? "#C92924" : colors.headline,
+                              WebkitTextStroke: `1px ${colors.headlineStroke}`,
+                              color: colors.headline,
                         fontSize: "clamp(16rem, 40vw, 35rem)",
                               lineHeight: 1,
                             } as React.CSSProperties}
@@ -367,6 +406,16 @@ export default function GalleryShowcase({
           </div>
         </div>
       </div>
+      <style jsx>{`
+        .project-link {
+          font-size: clamp(0.4rem, 0.6vw, 0.55rem);
+        }
+        @media (min-width: 768px) {
+          .project-link {
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+          }
+        }
+      `}</style>
     </section>
   );
 }

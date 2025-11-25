@@ -316,7 +316,7 @@ const Contact: React.FC = () => {
                   fontFamily: '"Space Grotesk", "Inter", sans-serif',
                   color: "#280B0B" 
                 }}>
-                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "#6B2138" }}>
                     {label}
                   </span>
                   <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
