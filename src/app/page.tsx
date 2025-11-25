@@ -8,6 +8,7 @@ import GalleryShowcase from "@/components/projects/projects";
 import { Certificates } from "@/components/Certificates";
 import Contact from "@/components/Contact";
 import SectionNavigation from "@/components/SectionNavigation";
+import SectionLineNavigation from "@/components/SectionLineNavigation";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
 
@@ -189,8 +190,8 @@ export default function Home() {
       {/* CONTENT SECTIONS - Only show when not on hero */}
       {activeSection !== "hero" && (
         <div className="content-container" ref={contentRef}>
-          {/* Section Navigation - appears on left side of all sections */}
-          <SectionNavigation 
+          {/* Section Line Navigation - line from left edge with O morphing into nav */}
+          <SectionLineNavigation 
             onNavigate={(section: string) => handleNavigate(section as SectionId)}
             currentSection={activeSection}
           />
