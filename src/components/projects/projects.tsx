@@ -30,16 +30,6 @@ type ProjectsProps = {
 
 const projects: Project[] = [
   {
-    id: "personality-ai",
-    title: "Multimodal Personality Analysis",
-    role: "AI Research Lead",
-    description:
-      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
-    links: [
-      { name: "Graduation Thesis", url: "#" },
-    ],
-  },
-  {
     id: "homi",
     title: "Homi",
     role: "Full-Stack Developer & Data Engineer",
@@ -47,10 +37,7 @@ const projects: Project[] = [
       "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard for business intelligence. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
     links: [
       { name: "Expo App", url: "#" },
-      { name: "App Demo", url: "#" },
-      { name: "App GitHub", url: "#" },
-      { name: "Dashboard Live Demo", url: "#" },
-      { name: "Dashboard GitHub", url: "#" },
+      { name: "Dashboard", url: "#" },
       { name: "Kaggle Notebooks: [1], [2], [3]", url: "#", isGrouped: true, groupedLinks: [
         { name: "Real Estate Data Discovery Analysis", url: "#" },
         { name: "38.19% SUSPICIOUS RECORDS", url: "#" },
@@ -70,11 +57,11 @@ const projects: Project[] = [
     ],
   },
   {
-    id: "iot-portal",
-    title: "Smart Key Operational Portal",
+    id: "home-services",
+    title: "Sanae3y Pro",
     role: "Full-Stack Developer",
     description:
-      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
+      "Multi-role marketplace application (client, worker, shop) with real-time order management, WebSocket-based live chat, and Google Maps integration. Features on-demand service booking with instant notifications and location tracking, enabling seamless coordination between customers, service providers, and merchants. The platform transforms service delivery through real-time communication and intelligent routing capabilities.",
     links: [
       { name: "Demo", url: "#" },
     ],
@@ -90,44 +77,60 @@ const projects: Project[] = [
     ],
   },
   {
-    id: "home-services",
-    title: "Sanae3y Pro",
+    id: "personality-ai",
+    title: "Multimodal Personality Analysis",
+    role: "AI Research Lead",
+    description:
+      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
+    links: [
+      { name: "Graduation Thesis", url: "#" },
+    ],
+  },
+  {
+    id: "iot-portal",
+    title: "Smart Key Operational Portal",
     role: "Full-Stack Developer",
     description:
-      "Multi-role marketplace application (client, worker, shop) with real-time order management, WebSocket-based live chat, and Google Maps integration. Features on-demand service booking with instant notifications and location tracking, enabling seamless coordination between customers, service providers, and merchants. The platform transforms service delivery through real-time communication and intelligent routing capabilities.",
+      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
     links: [
-      { name: "Work in Progress Demo", url: "#" },
+      { name: "Demo", url: "#" },
     ],
   },
 ];
 
-// Color palettes from the image: blue/yellow, cream/orange, dark green/pink
+// Color palette: [6B2138, B7D9FF, 280B0B, F9E7C9] with balanced distribution
 const cardPalette = [
   {
-    background: "#F0C987", // Dark green
-    headline: "#280B0B", // Yellow
-    headlineStroke: "#280B0B",
-    body: "#FFFFFF", // White
-    link: "#FFFFFF", // White
-    accent: "#FFE500", // Yellow starburst
-  },
-
-
-  {
-    background: "#B7D9FF", // Dark green
-    headline: "#6B2138", // Pink
-    headlineStroke: "#6B2138",
-    body: "#FFFFFF", // White
-    link: "#FFFFFF", // White
-    accent: "#FFE500", // Yellow starburst
-  },
-  {
-    background: "#6B2138", // Dark green
-    headline: "#B7D9FF", // Pink
+    background: "#6B2138", // Dark burgundy
+    headline: "#B7D9FF", // Light blue
     headlineStroke: "#B7D9FF",
-    body: "#FFFFFF", // White
-    link: "#FFFFFF", // White
-    accent: "#FFE500", // Yellow starburst
+    body: "#FFFFFF", // White (readable on dark background)
+    link: "#B7D9FF", // Light blue
+    accent: "#F9E7C9", // Cream
+  },
+  {
+    background: "#B7D9FF", // Light blue
+    headline: "#6B2138", // Dark burgundy
+    headlineStroke: "#6B2138",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#6B2138", // Dark burgundy
+    accent: "#280B0B", // Dark brown
+  },
+  {
+    background: "#280B0B", // Dark brown
+    headline: "#F9E7C9", // Cream
+    headlineStroke: "#F9E7C9",
+    body: "#FFFFFF", // White (readable on dark background)
+    link: "#F9E7C9", // Cream
+    accent: "#B7D9FF", // Light blue
+  },
+  {
+    background: "#F9E7C9", // Cream
+    headline: "#280B0B", // Dark brown
+    headlineStroke: "#280B0B",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#280B0B", // Dark brown
+    accent: "#6B2138", // Dark burgundy
   },
 ];
 
@@ -274,7 +277,7 @@ export default function GalleryShowcase({
                     "overflow-hidden"
                   )}
                       style={{
-                        background: index === 0 ? "#B7D9FF" : colors.background,
+                        background: colors.background,
                       }}
                     >
                   {/* Links Section - Aligned with navigation Y position */}
@@ -289,8 +292,8 @@ export default function GalleryShowcase({
                       }}
                     >
                         {project.links.map((link, linkIndex) => {
-                          // Link color matches the number color
-                          const linkColor = index === 0 ? "#6B2138" : colors.headline;
+                          // Link color matches the headline color
+                          const linkColor = colors.headline;
                           // Consistent styling for all links - same size as nav links
                           const linkClassName = "project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
                           const linkStyle = { 
@@ -366,7 +369,7 @@ export default function GalleryShowcase({
                         className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
                               style={{ 
                                 fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-                                color: index === 0 ? "#6B2138" : colors.headline 
+                                color: colors.headline 
                               }}
                             >
                               {project.title}
@@ -388,8 +391,8 @@ export default function GalleryShowcase({
                               fontFamily:
                                 '"Momo Trust Display", "Stack Sans", sans-serif',
                               fontWeight: 900,
-                              WebkitTextStroke: `1px ${index === 0 ? "#6B2138" : colors.headlineStroke}`,
-                              color: index === 0 ? "#6B2138" : colors.headline,
+                              WebkitTextStroke: `1px ${colors.headlineStroke}`,
+                              color: colors.headline,
                         fontSize: "clamp(16rem, 40vw, 35rem)",
                               lineHeight: 1,
                             } as React.CSSProperties}
