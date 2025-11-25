@@ -145,7 +145,7 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
           }
 
           .section-nav-links button {
-            font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+            font-size: clamp(0.4rem, 0.6vw, 0.55rem);
           }
         }
       `}</style>

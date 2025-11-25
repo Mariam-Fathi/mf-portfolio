@@ -2361,6 +2361,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     let screenWidth: number = 0;
     let screenHeight: number = 0;
     
+    // Calculate mobile bottom padding to prevent cropping
+    const mobileBottomPadding = isMobileScreen() ? 20 : 0;
+    
     if (memoizedMariamSvgData && mariamSvgCalculated) {
       // Use memoized values
       fontSize = memoizedMariamSvgData.fontSize;
@@ -2380,7 +2383,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       svg.style.position = "fixed";
       svg.style.left = "0px";
       svg.style.top = "auto";
-      svg.style.bottom = "0px"; // Consistent with fresh calculation
+      // On mobile, add bottom padding to prevent cropping by browser UI
+      const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
+      svg.style.bottom = `${bottomOffset}px`;
       svg.style.margin = "0";
       svg.style.padding = "0";
       svg.style.height = `${mariamHeight}px`;
@@ -2416,7 +2421,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     screenHeight = window.innerHeight;
     screenWidth = window.innerWidth;
     // No bottom frame, so use full height from PORTFOL to screen bottom
-    const availableHeight = screenHeight - portfolBottom;
+    // On mobile, account for browser UI and ensure text isn't cropped
+    // mobileBottomPadding is already defined above
+    const availableHeight = screenHeight - portfolBottom - mobileBottomPadding;
     
     // Use canvas to measure text and find font size where horizontal stroke of "7" matches portfolWidth
     const canvas = document.createElement("canvas");
@@ -2478,7 +2485,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     svg.style.position = "fixed";
     svg.style.left = "0px";
     svg.style.top = "auto";
-    svg.style.bottom = "0px"; // Anchor SVG at bottom of screen
+    // On mobile, add bottom padding to prevent cropping by browser UI
+    const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
+    svg.style.bottom = `${bottomOffset}px`; // Anchor SVG at bottom of screen with mobile offset
     svg.style.margin = "0";
     svg.style.padding = "0";
     svg.style.height = `${mariamHeight}px`; // Explicit height
@@ -3527,11 +3536,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         @media (max-width: 768px) {
           .hero-nav-links {
-            gap: 1rem;
+            gap: 0.75rem;
           }
           
           .hero-nav-links a {
-            font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+            font-size: clamp(0.4rem, 0.6vw, 0.55rem);
           }
         }
 
