@@ -3158,7 +3158,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           className="hero-engineer-text"
           style={{
             position: "fixed",
-            bottom: "200px",
+            bottom: "220px",
             right: "clamp(0.5rem, 2vw, 2rem)",
             color: "#280B0B",
             fontFamily: '"Comforter Brush", cursive',
