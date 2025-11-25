@@ -14,12 +14,12 @@ const certificates = [
     bgColor: "#F9E7C9", // Pink
     textColor: "#280B0B", // Text color for this certificate
 
-    // DATA right vertical, ENGINEERING bottom-right (shifted)
+    // DATA and ENGINEERING horizontal as one sentence
     positions: {
-      word1: { position: "right-vertical" },
-      word2: { position: "bottom-right-shifted" },
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-left", // Default position
+    infoPosition: "bottom-right", // Link on bottom-right
   },
   {
     id: "time-series",
@@ -33,11 +33,12 @@ const certificates = [
     // bgColor: "#B7D9FF", // Light Blue
 
 
+    // TIME and SERIES horizontal as one sentence (mirrored - bottom-right)
     positions: {
-      word1: { position: "left-vertical" },
-      word2: { position: "bottom-left-shifted" },
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-right", // Move info to opposite side
+    infoPosition: "bottom-left", // Link on bottom-left (mirrored)
   },
   {
     id: "computer-vision",
@@ -50,12 +51,12 @@ const certificates = [
 
     bgColor: "#6B2138", // Yellow
 
-    // VISION same as DATA (right vertical), COMPUTER same right as ENGINEERING but regular bottom (no bottom shift)
+    // COMPUTER and VISION horizontal as one sentence (mirrored back - bottom-left)
     positions: {
-      word1: { position: "bottom-right-same-right" }, // COMPUTER (same right position, regular bottom)
-      word2: { position: "right-vertical" }, // VISION
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-left", // Default position
+    infoPosition: "bottom-right", // Link on bottom-right (mirrored back)
   },
 ];
 
@@ -112,6 +113,8 @@ const CertificateSection = ({
         return "bottom-4 md:bottom-8 right-4 md:right-28";
       case "bottom-left-shifted":
         return "bottom-4 md:bottom-8 left-4 md:left-28";
+      case "top-left-next":
+        return "top-4 md:top-8 left-4 md:left-8"; // Same as top-left, will be positioned relative to word1
       default:
         return "top-4 md:top-8 left-4 md:left-8";
     }
@@ -185,28 +188,22 @@ const CertificateSection = ({
         </span>
       </div>
 
-      {/* Desktop: Title Words - Positioned in opposite corners */}
+      {/* Desktop: Title Words - Horizontal sentence for all certificates */}
       <div className="absolute inset-0 pointer-events-none hidden lg:block">
-        {/* First Word */}
-        <div className={`absolute ${getPositionClasses(pos1)}`}>
+        {/* First and third: bottom-left, second: bottom-right (mirrored) */}
+        <div className={`absolute ${getPositionClasses(certificate.id === "time-series" ? "bottom-right" : "bottom-left")} flex items-center gap-2`}>
           <span 
             className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={{
               color: certificate.textColor,
-              ...getTextStyle(pos1)
             }}
           >
             {word1}
           </span>
-        </div>
-
-        {/* Second Word */}
-        <div className={`absolute ${getPositionClasses(pos2)}`}>
           <span 
             className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={{
               color: certificate.textColor,
-              ...getTextStyle(pos2)
             }}
           >
             {word2}

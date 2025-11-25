@@ -136,40 +136,23 @@ export default function GalleryShowcase({
 }: ProjectsProps) {
   const container = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const linksRef = useRef<HTMLDivElement | null>(null);
   const [linksYPosition, setLinksYPosition] = useState<number | null>(null);
-  const [lineSeparatorY, setLineSeparatorY] = useState<number | null>(null);
   
-  // Get navigation Y position to align project links and calculate line separator position
+  // Get navigation Y position to align project links
   useEffect(() => {
     const updateLinksPosition = () => {
       const lineData = getHeroLineData();
       if (lineData) {
         setLinksYPosition(lineData.lineY);
-        
-        // Calculate line separator position: below links
-        // Use requestAnimationFrame to ensure links are positioned first
-        requestAnimationFrame(() => {
-          if (linksRef.current) {
-            const linksRect = linksRef.current.getBoundingClientRect();
-            const linksBottom = linksRect.bottom;
-            // Position line separator below links with a gap (matching mb-6 md:mb-8 spacing)
-            const gap = window.innerWidth >= 768 ? 32 : 24; // md:mb-8 = 32px, mb-6 = 24px
-            setLineSeparatorY(linksBottom + gap);
-          }
-        });
       }
     };
     
     // Initial load
-    const timeout = setTimeout(updateLinksPosition, 100);
+    updateLinksPosition();
     
     // Update on resize
     window.addEventListener("resize", updateLinksPosition);
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener("resize", updateLinksPosition);
-    };
+    return () => window.removeEventListener("resize", updateLinksPosition);
   }, []);
 
   useGSAP(
@@ -295,7 +278,6 @@ export default function GalleryShowcase({
                   {/* Links Section - Aligned with navigation Y position */}
                   {project.links.length > 0 && (
                     <div 
-                      ref={index === 0 ? linksRef : null}
                       className="absolute right-6 md:right-8 lg:right-12 flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-end"
                       style={{
                         position: linksYPosition !== null ? "fixed" : "absolute",
@@ -357,19 +339,6 @@ export default function GalleryShowcase({
                     </div>
                   )}
 
-                  {/* Line Separator - Below links with same margin from top */}
-                  <div
-                    className="h-px w-full"
-                    style={{
-                      position: lineSeparatorY !== null ? "fixed" : "absolute",
-                      top: lineSeparatorY !== null ? `${lineSeparatorY}px` : undefined,
-                      left: "0",
-                      right: "0",
-                      backgroundColor: colors.link,
-                      opacity: 0.4,
-                      zIndex: 15,
-                    }}
-                  />
 
                   {/* Content Section - Aligned with number's right edge */}
                   <div className="flex-1 flex flex-col lg:flex-row lg:items-end gap-6 md:gap-8">

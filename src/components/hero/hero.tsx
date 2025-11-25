@@ -1569,10 +1569,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       
       // Store line data for use in other sections (absolute viewport positions)
       const absoluteLineEndX = containerRect.left + lineEndX;
+      
+      // Get O's actual position (where navigation should be)
+      const oElForPosition = portfolioHeaderRef.current?.querySelector('.hero-cover-title-o') as HTMLElement;
+      let oPositionX = absoluteLineEndX; // Default to line end if O not found
+      if (oElForPosition) {
+        const oRect = oElForPosition.getBoundingClientRect();
+        oPositionX = oRect.left; // O's left edge absolute position
+      }
+      
       setHeroLineData({
         lineY: absoluteLineY, // This is now the actual center Y position of the line
-        lineEndX: absoluteLineEndX,
+        lineEndX: absoluteLineEndX, // Line ends here (before O)
         lineWidth: lineWidth,
+        oPositionX: oPositionX, // O's position (where navigation should be)
       });
       
       // Position navigation at the end of the line, aligned to the right with no gap
