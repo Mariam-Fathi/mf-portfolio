@@ -105,7 +105,7 @@ const cardPalette = [
     headline: "#F9E7C9", // Light blue
     headlineStroke: "#F9E7C9",
     body: "#FFFFFF", // White (readable on dark background)
-    link: "#B7D9FF", // Light blue
+    link: "#F9E7C9", // Light blue
     accent: "#F9E7C9", // Cream
   },
   {
