@@ -48,8 +48,8 @@ const certificates = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
     
-    bgColor: "#F9E7C9", // Pink
-    textColor: "#6A0610", // Text color for this certificate
+    bgColor: "#8A9EA7", // Pink
+    textColor: "#280B0B", // Text color for this certificate
    
 
  
