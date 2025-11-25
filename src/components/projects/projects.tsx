@@ -291,9 +291,11 @@ export default function GalleryShowcase({
                         {project.links.map((link, linkIndex) => {
                           // Link color matches the number color
                           const linkColor = index === 0 ? "#6B2138" : colors.headline;
-                          // Consistent styling for all links with underline
-                          const linkClassName = "text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1";
-                          const linkStyle = { fontFamily: '"Space Grotesk", "Inter", sans-serif' };
+                          // Consistent styling for all links - same size as nav links
+                          const linkClassName = "project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
+                          const linkStyle = { 
+                            fontFamily: '"Space Grotesk", "Inter", sans-serif',
+                          };
 
                           // Handle grouped links (like Kaggle Notebooks)
                           if (link.isGrouped && link.groupedLinks) {
@@ -301,7 +303,7 @@ export default function GalleryShowcase({
                             return (
                               <div
                                 key={linkIndex}
-                                className="text-[10px] md:text-xs uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
+                                className="project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
                                 style={{ color: linkColor, ...linkStyle }}
                               >
                                 <span>{prefix}: </span>
@@ -311,7 +313,7 @@ export default function GalleryShowcase({
                                       href={groupedLink.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="transition-opacity hover:opacity-70 underline decoration-1 underline-offset-2 inline-flex items-center gap-1"
+                                      className="project-link transition-opacity hover:opacity-70 inline-flex items-center gap-1"
                                       style={{ color: linkColor, ...linkStyle }}
                                     >
                                       [{idx + 1}]
@@ -401,6 +403,16 @@ export default function GalleryShowcase({
           </div>
         </div>
       </div>
+      <style jsx>{`
+        .project-link {
+          font-size: clamp(0.4rem, 0.6vw, 0.55rem);
+        }
+        @media (min-width: 768px) {
+          .project-link {
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+          }
+        }
+      `}</style>
     </section>
   );
 }

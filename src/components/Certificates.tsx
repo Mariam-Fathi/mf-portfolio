@@ -5,22 +5,7 @@ import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 
 const certificates = [
-  {
-    id: "data-engineering",
-    title: "DATA ENGINEERING",
-    words: ["DATA", "ENGINEERING"],
-    platform: "DeepLearning.AI",
-    link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    bgColor: "#F9E7C9", // Pink
-    textColor: "#280B0B", // Text color for this certificate
 
-    // DATA and ENGINEERING horizontal as one sentence
-    positions: {
-      word1: { position: "top-left" },
-      word2: { position: "top-left-next" }, // Next to word1 horizontally
-    },
-    infoPosition: "bottom-right", // Link on bottom-right
-  },
   {
     id: "time-series",
     title: "TIME SERIES",
@@ -28,17 +13,33 @@ const certificates = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     // TIME left vertical (opposite of DATA), SERIES bottom-left-shifted (opposite of ENGINEERING)
-    bgColor: "#B7D9FF", // Pink
-    textColor: "#6B2138", // Text color for this certificate
-    // bgColor: "#B7D9FF", // Light Blue
 
+    // bgColor: "#B7D9FF", // Light Blue
+    textColor: "#B7D9FF", // Text color for this certificate
+    bgColor: "#6B2138", // Yellow
 
     // TIME and SERIES horizontal as one sentence (mirrored - bottom-right)
     positions: {
       word1: { position: "top-left" },
       word2: { position: "top-left-next" }, // Next to word1 horizontally
     },
-    infoPosition: "bottom-left", // Link on bottom-left (mirrored)
+    infoPosition: "bottom-right", // Link on bottom-right
+  },
+  {
+    id: "data-engineering",
+    title: "DATA ENGINEERING",
+    words: ["DATA", "ENGINEERING"],
+    platform: "DeepLearning.AI",
+    link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
+    bgColor: "#B7D9FF", // Pink
+    textColor: "#6B2138", // Text color for this certificate
+    positions: {
+      word1: { position: "top-left" },
+      word2: { position: "top-left-next" }, // Next to word1 horizontally
+    },
+    infoPosition: "bottom-left", // Link on bottom-left
+    // DATA and ENGINEERING horizontal as one sentence
+
   },
   {
     id: "computer-vision",
@@ -46,10 +47,10 @@ const certificates = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
- 
     textColor: "#B7D9FF", // Text color for this certificate
+    bgColor: "#6B2138", // Yellow// Text color for this certificate
 
-    bgColor: "#6B2138", // Yellow
+ 
 
     // COMPUTER and VISION horizontal as one sentence (mirrored back - bottom-left)
     positions: {
@@ -190,8 +191,8 @@ const CertificateSection = ({
 
       {/* Desktop: Title Words - Horizontal sentence for all certificates */}
       <div className="absolute inset-0 pointer-events-none hidden lg:block">
-        {/* First and third: bottom-left, second: bottom-right (mirrored) */}
-        <div className={`absolute ${getPositionClasses(certificate.id === "time-series" ? "bottom-right" : "bottom-left")} flex items-center gap-2`}>
+        {/* First (time-series) and third (computer-vision): bottom-left, second (data-engineering): bottom-right */}
+        <div className={`absolute ${getPositionClasses(certificate.id === "data-engineering" ? "bottom-right" : "bottom-left")} flex items-center gap-2`}>
           <span 
             className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
             style={{
