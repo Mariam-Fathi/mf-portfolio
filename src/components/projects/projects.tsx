@@ -98,39 +98,65 @@ const projects: Project[] = [
   },
 ];
 
-// Color palette: [6B2138, B7D9FF, 280B0B, F9E7C9] with balanced distribution
+// Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
+// One palette per project (6 projects = 6 palettes)
+// Each project uses its dedicated palette: project[0] uses palette[0], project[1] uses palette[1], etc.
+// Colors flow together for a cohesive, connected design with balanced distribution
 const cardPalette = [
   {
+    // Project 0: Homi
     background: "#6A0610", // Dark burgundy
-    headline: "#F9E7C9", // Light blue
+    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
     headlineStroke: "#F9E7C9",
-    body: "#FFFFFF", // White (readable on dark background)
-    link: "#F9E7C9", // Light blue
-    accent: "#F9E7C9", // Cream
-  },
-  {
-    background: "#B7D9FF", // Light blue
-    headline: "#6B2138", // Dark burgundy
-    headlineStroke: "#6B2138",
-    body: "#280B0B", // Dark brown (readable on light background)
-    link: "#6B2138", // Dark burgundy
-    accent: "#280B0B", // Dark brown
-  },
-  {
-    background: "#6A0610", // Dark brown
-    headline: "#F9E7C9", // Cream
-    headlineStroke: "#F9E7C9",
-    body: "#FFFFFF", // White (readable on dark background)
+    body: "#F9E7C9", // Cream (readable on dark background)
     link: "#F9E7C9", // Cream
-    accent: "#B7D9FF", // Light blue
+    accent: "#8A9EA7", // Blue-gray
   },
   {
-    background: "#F9E7C9", // Cream
-    headline: "#280B0B", // Dark brown
+    // Project 5: Smart Key Operational Portal
+    background: "#8A9EA7", // Blue-gray
+    headline: "#280B0B", // Dark brown (dark text on light bg - high contrast)
     headlineStroke: "#280B0B",
     body: "#280B0B", // Dark brown (readable on light background)
     link: "#280B0B", // Dark brown
-    accent: "#6B2138", // Dark burgundy
+    accent: "#6A0610", // Dark burgundy
+  },
+  {
+    // Project 2: Sanae3y Pro
+    background: "#F9E7C9", // Cream
+    headline: "#6A0610", // Dark burgundy (dark text on light bg - high contrast)
+    headlineStroke: "#6A0610",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#6A0610", // Dark burgundy
+    accent: "#8A9EA7", // Blue-gray
+  },
+  {
+    // Project 0: Homi
+    background: "#6A0610", // Dark burgundy
+    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
+    headlineStroke: "#F9E7C9",
+    body: "#F9E7C9", // Cream (readable on dark background)
+    link: "#F9E7C9", // Cream
+    accent: "#8A9EA7", // Blue-gray
+  },
+  {
+    // Project 5: Smart Key Operational Portal
+    background: "#8A9EA7", // Blue-gray
+    headline: "#280B0B", // Dark brown (dark text on light bg - high contrast)
+    headlineStroke: "#280B0B",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#280B0B", // Dark brown
+    accent: "#6A0610", // Dark burgundy
+  },
+
+  {
+    // Project 2: Sanae3y Pro
+    background: "#F9E7C9", // Cream
+    headline: "#6A0610", // Dark burgundy (dark text on light bg - high contrast)
+    headlineStroke: "#6A0610",
+    body: "#280B0B", // Dark brown (readable on light background)
+    link: "#6A0610", // Dark burgundy
+    accent: "#8A9EA7", // Blue-gray
   },
 ];
 
@@ -264,9 +290,8 @@ export default function GalleryShowcase({
         <div className="sticky-cards relative flex h-full w-full items-start justify-center overflow-hidden px-0">
           <div className="relative h-full w-full overflow-hidden">
             {projects.map((project, index) => {
-              // Third project (index 2) uses first project's colors
-              const paletteIndex = index === 2 ? 0 : (index % cardPalette.length);
-              const colors = cardPalette[paletteIndex];
+              // Each project uses its dedicated palette (project[0] = palette[0], project[1] = palette[1], etc.)
+              const colors = cardPalette[index];
 
               return (
                 <div

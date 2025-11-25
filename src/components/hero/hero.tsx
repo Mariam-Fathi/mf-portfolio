@@ -3158,11 +3158,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           className="hero-engineer-text"
           style={{
             position: "fixed",
-            bottom: "100px",
+            bottom: "200px",
             right: "clamp(0.5rem, 2vw, 2rem)",
             color: "#280B0B",
-            fontFamily: '"Miserable Emillia", cursive',
-            fontSize: isMobileScreen() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 15vw, 11rem)",
+            fontFamily: '"Comforter Brush", cursive',
+            fontSize: isMobileScreen() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 7vw, 7rem)",
             zIndex: 10000,
             pointerEvents: "none",
             whiteSpace: "nowrap",
@@ -3929,8 +3929,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
 
         .hero-engineer-text {
-          font-family: "Miserable Emillia", cursive;
-          color: #280B0B;
+          font-family: "Comforter Brush", cursive;
+          color:"#280B0B";
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
           z-index: 10000 !important;

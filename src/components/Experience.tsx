@@ -176,8 +176,8 @@ const LinePath = React.forwardRef<
       <motion.path
         ref={ref}
         d={pathD}
-        stroke="#B7D9FF"
-        strokeWidth="4"
+        stroke="#8A9EA7"
+        strokeWidth="3"
         fill="none"
         pathLength="1"
         strokeLinecap="round"
@@ -552,8 +552,8 @@ const PathPoint = ({
           className="absolute rounded-full"
           style={{
             backgroundColor: color,
-            width: "24px",
-            height: "24px",
+            width: "28px",
+            height: "28px",
             transform: "translate(-50%, -50%)",
             left: "50%",
             top: "50%",
