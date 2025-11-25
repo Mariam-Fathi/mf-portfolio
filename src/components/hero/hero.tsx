@@ -1963,13 +1963,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => clearInterval(interval);
   }, [isDotAnimationComplete, isDotAnimationStarted]);
 
-  // Animate Engineer text and text on M strokes to appear with blur effect after dot animation completes
+  // Animate Engineer text and text on M strokes to appear with glitch effect after dot animation completes
   useEffect(() => {
     if (!isDotAnimationComplete) return;
 
     // Skip animations on mobile - set to final state immediately
-    if (isMobileScreen() || animationEverCompleted) {
-      // Restore Engineer text immediately
+    if (isMobileScreen()) {
+      // Restore Engineer text immediately on mobile
       if (engineerTextRef.current) {
         const engineerText = engineerTextRef.current;
         // Ensure engineer text is always on top layer above the dot
@@ -1992,6 +1992,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         gsap.set(engineerText, {
           opacity: 1,
           filter: "blur(0px)",
+          x: 0,
+          y: 0,
+          rotation: 0,
         });
       }
 
@@ -2024,10 +2027,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           intoText.style.filter = "blur(0px)";
         }
       }
-      return; // Skip animation
+      return; // Skip animation on mobile
     }
 
-    // Animate Engineer text with blur fade-in effect (first time only)
+    // Animate Engineer text with typewriter effect (always run on desktop)
     if (engineerTextRef.current) {
       const engineerText = engineerTextRef.current;
       
@@ -2078,28 +2081,73 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
       }
       
-      // Create a timeline that ensures z-index is set throughout
-      const engineerTimeline = gsap.timeline();
+      // Kill any existing animations on this element first
+      gsap.killTweensOf(engineerText);
       
-      // Set z-index BEFORE opacity animation
-      engineerTimeline.call(forceZIndex);
-      engineerTimeline.to(engineerText, {
+      // Get the text content
+      const fullText = engineerText.textContent || "Software  Engineer";
+      const textArray = fullText.split('');
+      
+      // Clear the text initially
+      engineerText.textContent = '';
+      engineerText.style.opacity = "1"; // Make container visible
+      
+      // Ensure initial state with blur
+      gsap.set(engineerText, {
         opacity: 1,
-        filter: "blur(0px)",
-        duration: 1.2,
-        ease: "power2.out",
-        delay: 0.3,
-        onStart: forceZIndex,
-        onUpdate: forceZIndex,
-        onComplete: () => {
-          forceZIndex();
-          // Set one more time after animation completes
-          requestAnimationFrame(() => {
-            forceZIndex();
-            requestAnimationFrame(forceZIndex);
-          });
-        },
+        x: 0,
+        y: 0,
+        rotation: 0,
+        filter: "blur(10px)", // Start with blur
       });
+      
+      // Small delay to ensure element is ready
+      setTimeout(() => {
+        // Verify element exists and is ready
+        if (!engineerText || !engineerText.parentElement) {
+          console.warn('Engineer text element not ready for animation');
+          return;
+        }
+        
+        // Create typewriter animation timeline
+        const engineerTimeline = gsap.timeline({ delay: 0.2 });
+        
+        // Set z-index BEFORE animation
+        engineerTimeline.call(forceZIndex);
+        
+        // Typewriter effect with blur - reveal each character one by one
+        textArray.forEach((char, index) => {
+          // Add character
+          engineerTimeline.call(() => {
+            // Add the next character
+            engineerText.textContent += char;
+            forceZIndex();
+          }, null, index * 0.05); // 0.05 seconds per character
+          
+          // Gradually reduce blur as more characters are typed
+          const blurAmount = Math.max(0, 10 - (index * 0.4)); // Reduce blur progressively
+          engineerTimeline.to(engineerText, {
+            filter: `blur(${blurAmount}px)`,
+            duration: 0.08,
+            ease: "power2.out",
+          }, `-=${0.03}`); // Overlap slightly with character addition
+        });
+        
+        // Final blur removal to ensure it's completely sharp
+        engineerTimeline.to(engineerText, {
+          filter: "blur(0px)",
+          duration: 0.3,
+          ease: "power2.out",
+          onComplete: () => {
+            forceZIndex();
+            // Animation complete
+            requestAnimationFrame(() => {
+              forceZIndex();
+              requestAnimationFrame(forceZIndex);
+            });
+          },
+        });
+      }, 150);
       
       // Also set during and after animation
       setTimeout(forceZIndex, 300);
@@ -3050,7 +3098,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             pointerEvents: "none",
             whiteSpace: "nowrap",
             opacity: 0,
-            filter: "blur(10px)",
+            filter: "blur(0px)",
           }}
         >
          Software  Engineer
