@@ -1588,10 +1588,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // Position navigation at the end of the line, aligned to the right with no gap
       // Hero nav uses position: absolute, so we calculate relative position from absolute
       // Other sections use position: fixed with absoluteLineY (absolute viewport position)
-      // Calculate relative Y position for hero nav (absolute - container top)
-      const relativeLineY = absoluteLineY - containerRect.top;
+      // Center links in the space between top of viewport and the line
+      // Calculate absolute Y position (center between 0 and lineY)
+      const navAbsoluteY = absoluteLineY / 2; // Center between top (0) and line (absoluteLineY)
+      // Convert to relative position for hero (absolute - container top)
+      const navRelativeY = navAbsoluteY - containerRect.top;
       if (navRef.current) {
-        navRef.current.style.top = `${relativeLineY}px`;
+        navRef.current.style.top = `${navRelativeY}px`;
         navRef.current.style.left = `${lineEndX}px`;
         navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
         navRef.current.style.zIndex = '101'; // Ensure navigation is above the line

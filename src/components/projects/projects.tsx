@@ -138,12 +138,14 @@ export default function GalleryShowcase({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [linksYPosition, setLinksYPosition] = useState<number | null>(null);
   
-  // Get navigation Y position to align project links
+  // Get navigation Y position to align project links (centered between top and line)
   useEffect(() => {
     const updateLinksPosition = () => {
       const lineData = getHeroLineData();
       if (lineData) {
-        setLinksYPosition(lineData.lineY);
+        // Center links in the space between top of viewport and the line (same as nav links)
+        const navY = lineData.lineY / 2;
+        setLinksYPosition(navY);
       }
     };
     
@@ -277,8 +279,8 @@ export default function GalleryShowcase({
                     >
                   {/* Links Section - Aligned with navigation Y position */}
                   {project.links.length > 0 && (
-                    <div 
-                      className="absolute right-6 md:right-8 lg:right-12 flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-end"
+                    <div
+                      className="absolute left-6 md:left-8 lg:left-12 flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-start"
                       style={{
                         position: linksYPosition !== null ? "fixed" : "absolute",
                         top: linksYPosition !== null ? `${linksYPosition}px` : undefined,

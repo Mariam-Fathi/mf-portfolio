@@ -60,6 +60,8 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     // Use hero line end X position to expand line exactly like hero (before O)
     const targetLineWidth = lineData.lineEndX; // Line expands to this position (before O)
     const lineY = lineData.lineY;
+    // Center links in the space between top of viewport and the line
+    const navY = lineY / 2; // Center between top (0) and line (lineY)
     // Navigation should be at the right end of the line (where O is)
     // Use oPositionX if available, otherwise use lineEndX (line end position)
     const navFinalX = lineData.oPositionX || lineData.lineEndX; // O's position (where navigation should be)
@@ -78,6 +80,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         display: "flex",
         visibility: "visible",
         left: navFinalX, // At final position (where O is)
+        top: navY, // Center between top of viewport and line
         transform: "translate(-100%, -50%)", // Align right edge like hero
       });
       gsap.set(lineRef.current, { 
@@ -118,11 +121,11 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     });
     
     // Position navigation at O's final position (hidden initially, appears after O reaches end)
-    // Make sure it stays hidden during entire animation
+    // Center links in the space between top of viewport and the line
     if (navRef.current) {
       navRef.current.style.position = "fixed";
       navRef.current.style.left = `${navFinalX}px`;
-      navRef.current.style.top = `${lineY}px`;
+      navRef.current.style.top = `${navY}px`;
       navRef.current.style.transform = "translate(-100%, -50%)";
       navRef.current.style.opacity = "0"; // Force hidden during animation
       navRef.current.style.display = "flex";
@@ -136,7 +139,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     gsap.set(navRef.current, {
       position: "fixed",
       left: navFinalX, // Position at O's final position (right end) - stays here, doesn't move
-      top: lineY,
+      top: navY, // Center between top of viewport and line
       transform: "translate(-100%, -50%)", // Align right edge to line end, center vertically (like hero)
       opacity: 0, // Hidden initially - appears after O reaches end
       display: "flex", // Ensure it's displayed
@@ -186,6 +189,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     // Wait until line and O animation complete, then fade in navigation
     tl.to(navRef.current, {
       opacity: 1, // Fade in at final position
+      top: navY, // Center between top of viewport and line
       duration: 0.6,
       ease: "power2.out",
       onStart: () => {
@@ -220,11 +224,15 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         if (updatedLineData) {
           const targetLineWidth = updatedLineData.lineEndX;
           const navX = updatedLineData.oPositionX || updatedLineData.lineEndX;
+          const navY = updatedLineData.lineY / 2; // Center between top of viewport and line
           gsap.set(lineRef.current, { 
             width: targetLineWidth,
             transform: "translateY(-50%)" // Maintain vertical centering
           });
-          gsap.set(navRef.current, { left: navX });
+          gsap.set(navRef.current, { 
+            left: navX,
+            top: navY // Center between top of viewport and line
+          });
         }
       }
     };
