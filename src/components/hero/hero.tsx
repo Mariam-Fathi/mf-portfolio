@@ -2362,7 +2362,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     let screenHeight: number = 0;
     
     // Calculate mobile bottom padding to prevent cropping
-    const mobileBottomPadding = isMobileScreen() ? 20 : 0;
+    // Use visual viewport height on mobile to account for browser UI
+    const getViewportHeight = () => {
+      if (isMobileScreen() && typeof window !== 'undefined' && (window as any).visualViewport) {
+        return (window as any).visualViewport.height;
+      }
+      return window.innerHeight;
+    };
+    const mobileBottomPadding = isMobileScreen() ? 40 : 0; // Increased padding for mobile browser UI
     
     if (memoizedMariamSvgData && mariamSvgCalculated) {
       // Use memoized values
@@ -2418,12 +2425,23 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     portfolFontSize = parseFloat(portfolStyle.fontSize);
     
     // Calculate the required height: from PORTFOL bottom to screen bottom
-    screenHeight = window.innerHeight;
+    // Use visual viewport on mobile to get accurate height
+    screenHeight = getViewportHeight();
     screenWidth = window.innerWidth;
-    // No bottom frame, so use full height from PORTFOL to screen bottom
-    // On mobile, account for browser UI and ensure text isn't cropped
-    // mobileBottomPadding is already defined above
-    const availableHeight = screenHeight - portfolBottom - mobileBottomPadding;
+    
+    // On mobile, always position Mariam at the bottom of the screen regardless of PORTFOL position
+    // On desktop, use the space from PORTFOL to screen bottom
+    let availableHeight: number;
+    if (isMobileScreen()) {
+      // On mobile: always position Mariam at the bottom with a responsive height
+      // Use a percentage of screen height that adapts to different screen sizes
+      // Smaller screens get more space, larger mobile screens get less
+      const mobileBottomSpace = Math.min(screenHeight * 0.3, 200); // Max 200px or 30% of screen, whichever is smaller
+      availableHeight = mobileBottomSpace;
+    } else {
+      // Desktop: use full height from PORTFOL to screen bottom
+      availableHeight = screenHeight - portfolBottom - mobileBottomPadding;
+    }
     
     // Use canvas to measure text and find font size where horizontal stroke of "7" matches portfolWidth
     const canvas = document.createElement("canvas");
@@ -2481,18 +2499,19 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     svg.setAttribute("width", `${mariamWidth}px`);
     svg.setAttribute("height", `${mariamHeight}px`);
     
-    // Position SVG at bottom of screen
-    svg.style.position = "fixed";
-    svg.style.left = "0px";
-    svg.style.top = "auto";
-    // On mobile, add bottom padding to prevent cropping by browser UI
-    const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
-    svg.style.bottom = `${bottomOffset}px`; // Anchor SVG at bottom of screen with mobile offset
-    svg.style.margin = "0";
-    svg.style.padding = "0";
-    svg.style.height = `${mariamHeight}px`; // Explicit height
-    svg.style.width = `${mariamWidth}px`; // Full screen width
-    svg.style.overflow = "visible"; // Ensure no clipping
+      // Position SVG at bottom of screen
+      svg.style.position = "fixed";
+      svg.style.left = "0px";
+      svg.style.top = "auto";
+      // On mobile, always position at bottom with padding to prevent cropping
+      // On desktop, position relative to PORTFOL
+      const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
+      svg.style.bottom = `${bottomOffset}px`; // Anchor SVG at bottom of screen
+      svg.style.margin = "0";
+      svg.style.padding = "0";
+      svg.style.height = `${mariamHeight}px`; // Explicit height
+      svg.style.width = `${mariamWidth}px`; // Full screen width
+      svg.style.overflow = "visible"; // Ensure no clipping
     
     // Update text element - Mariam
     const textElement = svg.querySelector(".hero-mariam-text");
@@ -2523,9 +2542,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           // Calculate bottom of text in SVG coordinates
           const textBottom = currentY + textBbox.y + textBbox.height;
           
-          // We want text bottom to be exactly at mariamHeight (bottom of SVG = bottom of viewport)
-          if (Math.abs(textBottom - mariamHeight) > 0.1) {
-            const yAdjustment = mariamHeight - (textBbox.y + textBbox.height);
+          // We want text bottom to be slightly above the bottom of SVG to prevent clipping
+          // Account for mobile browser UI by leaving some space
+          const bottomMargin = isMobileScreen() ? 5 : 0;
+          const targetBottom = mariamHeight - bottomMargin;
+          if (Math.abs(textBottom - targetBottom) > 0.1) {
+            const yAdjustment = targetBottom - (textBbox.y + textBbox.height);
             textElement.setAttribute("y", yAdjustment.toString());
           }
         } catch (e) {
@@ -2582,9 +2604,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 const newCurrentY = parseFloat(textElement.getAttribute("y") || mariamHeight.toString());
                 const newTextBottom = newCurrentY + newBbox.y + newBbox.height;
                 
-                // We want the bottom of the text to be exactly at mariamHeight (bottom of SVG)
-                if (Math.abs(newTextBottom - mariamHeight) > 0.1) {
-                  const yBottomAdjustment = mariamHeight - (newBbox.y + newBbox.height);
+                // We want the bottom of the text to be slightly above bottom to prevent clipping
+                const bottomMargin = isMobileScreen() ? 5 : 0;
+                const targetBottom = mariamHeight - bottomMargin;
+                if (Math.abs(newTextBottom - targetBottom) > 0.1) {
+                  const yBottomAdjustment = targetBottom - (newBbox.y + newBbox.height);
                   textElement.setAttribute("y", yBottomAdjustment.toString());
                 }
               } catch (e) {
@@ -2614,8 +2638,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                 const bbox = (textElement as SVGTextElement).getBBox();
                 const currentY = parseFloat(textElement.getAttribute("y") || mariamHeight.toString());
                 const textBottom = currentY + bbox.y + bbox.height;
-                if (Math.abs(textBottom - mariamHeight) > 0.1) {
-                  const yAdjustment = mariamHeight - (bbox.y + bbox.height);
+                const bottomMargin = isMobileScreen() ? 5 : 0;
+                const targetBottom = mariamHeight - bottomMargin;
+                if (Math.abs(textBottom - targetBottom) > 0.1) {
+                  const yAdjustment = targetBottom - (bbox.y + bbox.height);
                   textElement.setAttribute("y", yAdjustment.toString());
                 }
               } catch (e) {
