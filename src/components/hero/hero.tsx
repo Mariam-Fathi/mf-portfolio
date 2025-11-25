@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
-import { setHeroNavigationY } from "@/utils/navigationPosition";
+import { setHeroNavigationY, setHeroLineData } from "@/utils/navigationPosition";
 
 interface HeroProps {
   onNavigate: (section: string) => void;
@@ -1566,6 +1566,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       // Calculate absolute Y position: container top + lineY
       const absoluteLineY = containerRect.top + lineY;
       setHeroNavigationY(absoluteLineY);
+      
+      // Store line data for use in other sections (absolute viewport positions)
+      const absoluteLineEndX = containerRect.left + lineEndX;
+      setHeroLineData({
+        lineY: absoluteLineY,
+        lineEndX: absoluteLineEndX,
+        lineWidth: lineWidth,
+      });
       
       // Position navigation at the end of the line, aligned to the right with no gap
       // Hero nav uses position: absolute, so we use lineY (relative to container)
