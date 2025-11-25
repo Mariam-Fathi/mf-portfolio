@@ -101,9 +101,9 @@ const projects: Project[] = [
 // Color palette: [6B2138, B7D9FF, 280B0B, F9E7C9] with balanced distribution
 const cardPalette = [
   {
-    background: "#6B2138", // Dark burgundy
-    headline: "#B7D9FF", // Light blue
-    headlineStroke: "#B7D9FF",
+    background: "#6A0610", // Dark burgundy
+    headline: "#F9E7C9", // Light blue
+    headlineStroke: "#F9E7C9",
     body: "#FFFFFF", // White (readable on dark background)
     link: "#B7D9FF", // Light blue
     accent: "#F9E7C9", // Cream
@@ -117,7 +117,7 @@ const cardPalette = [
     accent: "#280B0B", // Dark brown
   },
   {
-    background: "#280B0B", // Dark brown
+    background: "#6A0610", // Dark brown
     headline: "#F9E7C9", // Cream
     headlineStroke: "#F9E7C9",
     body: "#FFFFFF", // White (readable on dark background)
@@ -264,7 +264,9 @@ export default function GalleryShowcase({
         <div className="sticky-cards relative flex h-full w-full items-start justify-center overflow-hidden px-0">
           <div className="relative h-full w-full overflow-hidden">
             {projects.map((project, index) => {
-              const colors = cardPalette[index % cardPalette.length];
+              // Third project (index 2) uses first project's colors
+              const paletteIndex = index === 2 ? 0 : (index % cardPalette.length);
+              const colors = cardPalette[paletteIndex];
 
               return (
                 <div
