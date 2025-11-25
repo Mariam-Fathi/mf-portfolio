@@ -13,10 +13,10 @@ const certificates = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     // TIME left vertical (opposite of DATA), SERIES bottom-left-shifted (opposite of ENGINEERING)
-
+    textColor: "#6A0610", // Text color for this certificate
+    bgColor: "#F9E7C9", // Yellow// Text color for this certificate
     // bgColor: "#B7D9FF", // Light Blue
-    textColor: "#B7D9FF", // Text color for this certificate
-    bgColor: "#6B2138", // Yellow
+
 
     // TIME and SERIES horizontal as one sentence (mirrored - bottom-right)
     positions: {
@@ -31,8 +31,8 @@ const certificates = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    bgColor: "#B7D9FF", // Pink
-    textColor: "#6B2138", // Text color for this certificate
+    textColor: "#F9E7C9", // Text color for this certificate
+    bgColor: "#6A0610", // Yellow
     positions: {
       word1: { position: "top-left" },
       word2: { position: "top-left-next" }, // Next to word1 horizontally
@@ -47,8 +47,10 @@ const certificates = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    textColor: "#280B0B", // Text color for this certificate
-    bgColor: "#F9E7C9", // Yellow// Text color for this certificate
+    
+    bgColor: "#F9E7C9", // Pink
+    textColor: "#6A0610", // Text color for this certificate
+   
 
  
 

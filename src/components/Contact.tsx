@@ -316,10 +316,10 @@ const Contact: React.FC = () => {
                   fontFamily: '"Space Grotesk", "Inter", sans-serif',
                   color: "#280B0B" 
                 }}>
-                  <span className="text-xs uppercase tracking-wide" style={{ color: "#6B2138" }}>
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "#280B0B" }}>
                     {label}
                   </span>
-                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
+                  <span className="text-sm font-semibold" style={{ color: "#6A0610" }}>{caption}</span>
                 </span>
               </a>
             ),

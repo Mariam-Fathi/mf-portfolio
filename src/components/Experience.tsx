@@ -24,7 +24,7 @@ const experienceItems = [
     toDate: "Present",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#6B2138", // Fire Red from color palette
+    color: "#6A0610", // Fire Red from color palette
   },
 ];
 
