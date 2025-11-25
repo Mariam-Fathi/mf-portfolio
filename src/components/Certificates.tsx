@@ -11,7 +11,9 @@ const certificates = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    bgColor: "#FBBA16", // Yellow
+    bgColor: "#F9E7C9", // Pink
+    textColor: "#280B0B", // Text color for this certificate
+
     // DATA right vertical, ENGINEERING bottom-right (shifted)
     positions: {
       word1: { position: "right-vertical" },
@@ -25,8 +27,12 @@ const certificates = [
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    bgColor: "#E2B2B4", // Pink
     // TIME left vertical (opposite of DATA), SERIES bottom-left-shifted (opposite of ENGINEERING)
+    bgColor: "#B7D9FF", // Pink
+    textColor: "#6B2138", // Text color for this certificate
+    // bgColor: "#B7D9FF", // Light Blue
+
+
     positions: {
       word1: { position: "left-vertical" },
       word2: { position: "bottom-left-shifted" },
@@ -39,7 +45,11 @@ const certificates = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#9BCCD0", // Light Blue
+ 
+    textColor: "#B7D9FF", // Text color for this certificate
+
+    bgColor: "#6B2138", // Yellow
+
     // VISION same as DATA (right vertical), COMPUTER same right as ENGINEERING but regular bottom (no bottom shift)
     positions: {
       word1: { position: "bottom-right-same-right" }, // COMPUTER (same right position, regular bottom)
@@ -151,7 +161,8 @@ const CertificateSection = ({
             href={certificate.link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[#1e140b] hover:opacity-70 transition-opacity text-xs"
+            className="inline-flex items-center gap-1 hover:opacity-70 transition-opacity text-xs"
+            style={{ color: certificate.textColor }}
           >
             <span>View Certificate</span>
             <ExternalLink className="w-3 h-3" />
@@ -162,8 +173,9 @@ const CertificateSection = ({
       {/* Mobile: Full Title Vertical - One Side Only */}
       <div className={`absolute lg:hidden top-1/2 -translate-y-1/2 ${mobileSide === "right" ? "right-4" : "left-4"} pointer-events-none max-h-full overflow-visible`}>
         <span 
-          className="text-[#1e140b] font-bold text-xl sm:text-2xl uppercase tracking-tighter block"
+          className="font-bold text-xl sm:text-2xl uppercase tracking-tighter block"
           style={{
+            color: certificate.textColor,
             writingMode: "vertical-rl" as const,
             textOrientation: "mixed" as const,
             maxHeight: "90vh",
@@ -178,8 +190,11 @@ const CertificateSection = ({
         {/* First Word */}
         <div className={`absolute ${getPositionClasses(pos1)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
-            style={getTextStyle(pos1)}
+            className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            style={{
+              color: certificate.textColor,
+              ...getTextStyle(pos1)
+            }}
           >
             {word1}
           </span>
@@ -188,8 +203,11 @@ const CertificateSection = ({
         {/* Second Word */}
         <div className={`absolute ${getPositionClasses(pos2)}`}>
           <span 
-            className="text-[#1e140b] font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
-            style={getTextStyle(pos2)}
+            className="font-bold text-5xl lg:text-6xl xl:text-7xl uppercase tracking-tighter"
+            style={{
+              color: certificate.textColor,
+              ...getTextStyle(pos2)
+            }}
           >
             {word2}
           </span>

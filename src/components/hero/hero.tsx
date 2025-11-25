@@ -403,7 +403,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
     }
-  }, [isActive]);
+  }, [isActive, isDotAnimationComplete]);
 
   // Function to animate dot along SVG Mariam letters
   const buildDotTimeline = () => {
@@ -1558,29 +1558,30 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       const lineWidth = lineRect.width;
       const lineEndX = lineX + lineWidth; // End of the line
       
-      // Line is at 50% of container height, position navigation vertically centered on the line
-      // Use original calculation to match other sections
-      const lineY = containerRect.height * 0.5 - 24; // 50% of container minus offset
+      // Line is at 50% of container height with translateY(-50%), so its center is at 50% of container
+      // Get the actual center Y position of the line (lineRect.top + lineRect.height/2)
+      const lineCenterY = lineRect.top + lineRect.height / 2; // Actual center of the line
       
       // Store navigation Y position (absolute position relative to viewport) for use in other sections
-      // Calculate absolute Y position: container top + lineY
-      const absoluteLineY = containerRect.top + lineY;
+      // Use the actual line center position
+      const absoluteLineY = lineCenterY;
       setHeroNavigationY(absoluteLineY);
       
       // Store line data for use in other sections (absolute viewport positions)
       const absoluteLineEndX = containerRect.left + lineEndX;
       setHeroLineData({
-        lineY: absoluteLineY,
+        lineY: absoluteLineY, // This is now the actual center Y position of the line
         lineEndX: absoluteLineEndX,
         lineWidth: lineWidth,
       });
       
       // Position navigation at the end of the line, aligned to the right with no gap
-      // Hero nav uses position: absolute, so we use lineY (relative to container)
+      // Hero nav uses position: absolute, so we calculate relative position from absolute
       // Other sections use position: fixed with absoluteLineY (absolute viewport position)
-      // They should match: containerRect.top + lineY = absoluteLineY
+      // Calculate relative Y position for hero nav (absolute - container top)
+      const relativeLineY = absoluteLineY - containerRect.top;
       if (navRef.current) {
-        navRef.current.style.top = `${lineY}px`;
+        navRef.current.style.top = `${relativeLineY}px`;
         navRef.current.style.left = `${lineEndX}px`;
         navRef.current.style.transform = 'translate(-100%, -50%)'; // Align to the right end of the line
         navRef.current.style.zIndex = '101'; // Ensure navigation is above the line
@@ -1969,9 +1970,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
     // Skip animations on mobile - set to final state immediately
     if (isMobileScreen()) {
-      // Restore Engineer text immediately on mobile
+      // Restore Engineer text immediately on mobile - ensure it shows full text
       if (engineerTextRef.current) {
         const engineerText = engineerTextRef.current;
+        // Ensure text is fully displayed (restore from typewriter animation)
+        if (!engineerText.textContent || engineerText.textContent.trim() === '') {
+          engineerText.textContent = "Software  Engineer";
+        }
         // Ensure engineer text is always on top layer above the dot
         const forceZIndex = () => {
           engineerText.style.setProperty('z-index', '10000', 'important');
@@ -2372,48 +2377,64 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const mobileBottomPadding = isMobileScreen() ? 40 : 0; // Increased padding for mobile browser UI
     
     if (memoizedMariamSvgData && mariamSvgCalculated) {
-      // Use memoized values
-      fontSize = memoizedMariamSvgData.fontSize;
-      mariamWidth = memoizedMariamSvgData.mariamWidth;
-      mariamHeight = memoizedMariamSvgData.mariamHeight;
-      portfolBottom = memoizedMariamSvgData.portfolBottom;
-      portfolLeft = memoizedMariamSvgData.portfolLeft;
-      portfolFontSize = memoizedMariamSvgData.portfolFontSize;
-      screenWidth = memoizedMariamSvgData.screenWidth;
-      screenHeight = memoizedMariamSvgData.screenHeight;
+      // Use memoized values, but on mobile always recalculate when hero becomes active
+      // to ensure correct positioning with current viewport
+      const currentScreenHeight = getViewportHeight();
+      const currentScreenWidth = window.innerWidth;
       
-      // Apply memoized values directly
-      const padding = 10;
-      svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
-      svg.setAttribute("width", `${mariamWidth}px`);
-      svg.setAttribute("height", `${mariamHeight}px`);
-      svg.style.position = "fixed";
-      svg.style.left = "0px";
-      svg.style.top = "auto";
-      // On mobile, add bottom padding to prevent cropping by browser UI
-      const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
-      svg.style.bottom = `${bottomOffset}px`;
-      svg.style.margin = "0";
-      svg.style.padding = "0";
-      svg.style.height = `${mariamHeight}px`;
-      svg.style.width = `${mariamWidth}px`;
-      svg.style.overflow = "visible";
+      // On mobile, always recalculate when hero is active to ensure correct positioning
+      // On desktop, use memoized if screen size hasn't changed significantly
+      // Force recalculation on mobile when returning to hero to get fresh viewport measurements
+      const shouldRecalculate = isMobileScreen() && isActive;
       
-      // Update text element with memoized values
-      const textElement = svg.querySelector(".hero-mariam-text");
-      if (textElement) {
-        textElement.setAttribute("x", "0");
-        textElement.setAttribute("y", `${mariamHeight}px`);
-        textElement.setAttribute("dominant-baseline", "baseline");
-        textElement.setAttribute("text-anchor", "start");
-        textElement.setAttribute("dx", "0");
-        textElement.setAttribute("font-size", `${fontSize}px`);
-        textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
-        textElement.setAttribute("font-weight", "700");
-        textElement.setAttribute("letter-spacing", "0");
+      if (!shouldRecalculate && (
+        Math.abs(currentScreenHeight - memoizedMariamSvgData.screenHeight) <= 50 &&
+        Math.abs(currentScreenWidth - memoizedMariamSvgData.screenWidth) <= 50
+      )) {
+        // Use memoized values directly
+        fontSize = memoizedMariamSvgData.fontSize;
+        mariamWidth = memoizedMariamSvgData.mariamWidth;
+        mariamHeight = memoizedMariamSvgData.mariamHeight;
+        portfolBottom = memoizedMariamSvgData.portfolBottom;
+        portfolLeft = memoizedMariamSvgData.portfolLeft;
+        portfolFontSize = memoizedMariamSvgData.portfolFontSize;
+        screenWidth = memoizedMariamSvgData.screenWidth;
+        screenHeight = memoizedMariamSvgData.screenHeight;
+        
+        // Apply memoized values directly
+        const padding = 10;
+        svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
+        svg.setAttribute("width", `${mariamWidth}px`);
+        svg.setAttribute("height", `${mariamHeight}px`);
+        svg.style.position = "fixed";
+        svg.style.left = "0px";
+        svg.style.top = "auto";
+        // On mobile, add bottom padding to prevent cropping by browser UI
+        const bottomOffset = isMobileScreen() ? mobileBottomPadding : 0;
+        svg.style.bottom = `${bottomOffset}px`;
+        svg.style.margin = "0";
+        svg.style.padding = "0";
+        svg.style.height = `${mariamHeight}px`;
+        svg.style.width = `${mariamWidth}px`;
+        svg.style.overflow = "visible";
+        
+        // Update text element with memoized values
+        const textElement = svg.querySelector(".hero-mariam-text");
+        if (textElement) {
+          textElement.setAttribute("x", "0");
+          textElement.setAttribute("y", `${mariamHeight}px`);
+          textElement.setAttribute("dominant-baseline", "baseline");
+          textElement.setAttribute("text-anchor", "start");
+          textElement.setAttribute("dx", "0");
+          textElement.setAttribute("font-size", `${fontSize}px`);
+          textElement.setAttribute("font-family", '"Momo Trust Display", "Stack Sans", sans-serif');
+          textElement.setAttribute("font-weight", "700");
+          textElement.setAttribute("letter-spacing", "0");
+        }
+        
+        return; // Skip recalculation
       }
-      
-      return; // Skip recalculation
+      // If screen size changed, fall through to recalculate below
     }
     
     // Calculate values (first time only)
@@ -2985,7 +3006,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         clearTimeout(resizeTimeout);
       }
     };
-  }, [portfolWidth]);
+  }, [portfolWidth, isActive]); // Recalculate when hero becomes active (especially on mobile)
 
   return (
     <section

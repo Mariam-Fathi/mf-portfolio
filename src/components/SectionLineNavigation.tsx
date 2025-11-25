@@ -44,20 +44,28 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
   useEffect(() => {
     if (!lineData || !lineRef.current || !navRef.current) return;
 
+    // Calculate target line width to match certificate link position
+    // Certificate links use left-4 (16px) on mobile, md:left-8 (32px) on desktop
+    const isMobile = window.innerWidth < 768; // md breakpoint
+    const targetLineWidth = isMobile ? 16 : 32; // Match certificate link left padding
+
     // If already animated, just ensure navigation is visible
     if (hasAnimated) {
       gsap.set(navRef.current, { opacity: 1, display: "flex" });
-      gsap.set(lineRef.current, { opacity: 0.4, width: 150 });
+      gsap.set(lineRef.current, { 
+        opacity: 0.4, 
+        width: targetLineWidth,
+        transform: "translateY(-50%)" // Maintain vertical centering
+      });
       return;
     }
 
     // Set initial positions
     const lineY = lineData.lineY;
-    const targetLineWidth = 150; // Slightly expand the line (enough to be visible, but not too much)
     const gap = 10; // Small gap between line end and navigation
     const navX = targetLineWidth + gap;
 
-    // Position line at left edge, same Y as hero
+    // Position line at left edge, same Y as hero (exact same positioning as hero line)
     gsap.set(lineRef.current, {
       position: "fixed",
       left: 0,
@@ -66,6 +74,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       height: "1px",
       backgroundColor: "#280B0B",
       opacity: 0,
+      transform: "translateY(-50%)", // Center vertically like hero line (top: 50%, translateY(-50%))
       transformOrigin: "left center",
       zIndex: 10,
     });
@@ -127,11 +136,28 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       if (updatedData) {
         setLineData(updatedData);
       }
+      
+      // Update line width on resize to match certificate link position
+      if (lineRef.current && hasAnimated) {
+        const isMobile = window.innerWidth < 768;
+        const targetLineWidth = isMobile ? 16 : 32;
+        gsap.set(lineRef.current, { 
+          width: targetLineWidth,
+          transform: "translateY(-50%)" // Maintain vertical centering
+        });
+        
+        // Update navigation position
+        if (navRef.current) {
+          const gap = 10;
+          const navX = targetLineWidth + gap;
+          gsap.set(navRef.current, { left: navX });
+        }
+      }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [lineData]);
+  }, [lineData, hasAnimated]);
 
   if (!lineData) {
     return null; // Don't render until we have line data
