@@ -215,11 +215,11 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
 
         @media (max-width: 768px) {
           .section-line-nav-links {
-            gap: 1rem;
+            gap: 0.75rem;
           }
           
           .section-line-nav-links button {
-            font-size: clamp(0.5rem, 0.7vw, 0.65rem);
+            font-size: clamp(0.4rem, 0.6vw, 0.55rem);
           }
         }
       `}</style>
