@@ -201,7 +201,7 @@ export default function Home() {
             id="experience-content" 
             className={`content-section ${activeSection === "experience" ? "active" : ""}`}
           >
-            <Experience/>
+            <Experience isActive={activeSection === "experience"}/>
           </section>
 
           {/* Work Section */}

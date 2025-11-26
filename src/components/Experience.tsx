@@ -28,9 +28,14 @@ const experienceItems = [
   },
 ];
 
-const Experience = () => {
+interface ExperienceProps {
+  isActive?: boolean;
+}
+
+const Experience = ({ isActive = false }: ExperienceProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
+  // Use scroll progress only for path animation (not for item opacity)
   const { scrollYProgress } = useScroll({
     target: ref,
   });
@@ -110,26 +115,26 @@ const Experience = () => {
           <React.Fragment key={index}>
             <PathItem
               pathRef={pathRef}
-              scrollYProgress={scrollYProgress}
               position={item.position}
               side={item.side as "above" | "below"}
               item={item}
               color={item.color}
+              isActive={isActive}
             />
             {/* Two pulsing points on the path for each experience item */}
             <PathPoint
               pathRef={pathRef}
-              scrollYProgress={scrollYProgress}
               position={item.position}
               color={item.color}
               delay={0}
+              isActive={isActive}
             />
             <PathPoint
               pathRef={pathRef}
-              scrollYProgress={scrollYProgress}
               position={item.position}
               color={item.color}
               delay={0.3}
+              isActive={isActive}
             />
           </React.Fragment>
         ))}
@@ -197,14 +202,13 @@ LinePath.displayName = "LinePath";
 // Component to position items along the path
 const PathItem = ({
   pathRef,
-  scrollYProgress,
   position,
   side,
   item,
   color,
+  isActive = false,
 }: {
   pathRef: React.RefObject<SVGPathElement | null>;
-  scrollYProgress: any;
   position: number;
   side: "above" | "below";
   item: {
@@ -215,12 +219,19 @@ const PathItem = ({
     type: string;
   };
   color: string;
+  isActive?: boolean;
 }) => {
   const [point, setPoint] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Only calculate position when section is active
+    if (!isActive) {
+      setPoint({ x: 0, y: 0 });
+      return;
+    }
+
     const updatePosition = () => {
       if (!pathRef.current || !containerRef.current) return;
 
@@ -300,74 +311,40 @@ const PathItem = ({
       clearTimeout(timeoutId3);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [pathRef, position, side]);
+  }, [pathRef, position, side, isActive]); // Add isActive to recalculate when section becomes active
 
-  // Update opacity based on scroll progress and position
+  // Update opacity based on section active state (not scroll, since view is fixed)
   useEffect(() => {
-    // Once position is calculated (check if point has been set, y can be negative if above path)
-    // This ensures items appear even if scroll tracking has issues
+    if (!isActive) {
+      setOpacity(0);
+      return;
+    }
+    
+    // Once position is calculated, show items immediately when section becomes active
+    // Use a small delay to ensure smooth animation
     if (point.x !== 0 || point.y !== 0) {
-      // Set initial opacity - show items earlier for better visibility
-      const updateOpacity = () => {
-        try {
-          const currentProgress = scrollYProgress.get();
-          // Show item when scroll reaches 20% of its position (very early)
-          const itemProgress = position * 0.2;
-          if (currentProgress >= itemProgress) {
-            setOpacity(1);
-          } else {
-            // Still show with reduced opacity if we're close
-            const fadeInStart = itemProgress * 0.3;
-            if (currentProgress >= fadeInStart) {
-              setOpacity(0.3 + (currentProgress - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
-            } else {
-              // Show with minimal opacity so it's at least visible
-              setOpacity(0.3);
-            }
-          }
-        } catch (e) {
-          // If scrollYProgress.get() fails, show item anyway
-          setOpacity(1);
-        }
-      };
+      // Show immediately with a very short delay for smooth animation
+      const timeoutId = setTimeout(() => {
+        setOpacity(1);
+      }, 100); // Small delay for smooth transition
 
-      // Set initial opacity
-      updateOpacity();
-
-      const unsubscribe = scrollYProgress.on("change", (latest: number) => {
-        // Show item when scroll reaches 20% of its position
-        const itemProgress = position * 0.2;
-        if (latest >= itemProgress) {
-          setOpacity(1);
-        } else {
-          // Fade in gradually
-          const fadeInStart = itemProgress * 0.3;
-          if (latest >= fadeInStart) {
-            setOpacity(0.3 + (latest - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
-          } else {
-            // Show with minimal opacity so it's at least visible
-            setOpacity(0.3);
-          }
-        }
-      });
-
-      return () => unsubscribe();
+      return () => clearTimeout(timeoutId);
     } else {
       // Position not calculated yet, keep opacity at 0
       setOpacity(0);
     }
-  }, [scrollYProgress, position, point]);
+  }, [isActive, position, point]);
 
   return (
     <div ref={containerRef} className="absolute inset-0 w-full h-full">
       <motion.div
         className="absolute pointer-events-auto z-10"
         style={{
-          left: `${point.x}px`,
-          top: `${point.y}px`,
+          left: point.x > 0 ? `${point.x}px` : "50%",
+          top: point.y > 0 ? `${point.y}px` : "50%",
           transform: "translate(-50%, -50%)",
           opacity: opacity || 0,
-          visibility: (point.x === 0 && point.y === 0 && position > 0.01) ? "hidden" : "visible",
+          visibility: (!isActive || (point.x === 0 && point.y === 0)) ? "hidden" : "visible",
           willChange: "transform, opacity",
         }}
         initial={{ opacity: 0, scale: 0.8 }}
@@ -419,22 +396,28 @@ const PathItem = ({
 // Component to render pulsing points on the path
 const PathPoint = ({
   pathRef,
-  scrollYProgress,
   position,
   color,
   delay,
+  isActive = false,
 }: {
   pathRef: React.RefObject<SVGPathElement | null>;
-  scrollYProgress: any;
   position: number;
   color: string;
   delay: number;
+  isActive?: boolean;
 }) => {
   const [point, setPoint] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Only calculate position when section is active
+    if (!isActive) {
+      setPoint({ x: 0, y: 0 });
+      return;
+    }
+
     const updatePosition = () => {
       if (!pathRef.current || !containerRef.current) return;
 
@@ -488,52 +471,26 @@ const PathPoint = ({
       clearTimeout(timeoutId3);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [pathRef, position]);
+  }, [pathRef, position, isActive]); // Add isActive to recalculate when section becomes active
 
-  // Update opacity based on scroll progress and position
+  // Update opacity based on section active state (not scroll, since view is fixed)
   useEffect(() => {
+    if (!isActive) {
+      setOpacity(0);
+      return;
+    }
+    
     if (point.x !== 0 || point.y !== 0) {
-      const updateOpacity = () => {
-        try {
-          const currentProgress = scrollYProgress.get();
-          // Show point when scroll reaches 20% of its position
-          const itemProgress = position * 0.2;
-          if (currentProgress >= itemProgress) {
-            setOpacity(1);
-          } else {
-            const fadeInStart = itemProgress * 0.3;
-            if (currentProgress >= fadeInStart) {
-              setOpacity(0.3 + (currentProgress - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
-            } else {
-              setOpacity(0.3);
-            }
-          }
-        } catch (e) {
-          setOpacity(1);
-        }
-      };
+      // Show immediately with a very short delay for smooth animation
+      const timeoutId = setTimeout(() => {
+        setOpacity(1);
+      }, 100); // Small delay for smooth transition
 
-      updateOpacity();
-
-      const unsubscribe = scrollYProgress.on("change", (latest: number) => {
-        const itemProgress = position * 0.2;
-        if (latest >= itemProgress) {
-          setOpacity(1);
-        } else {
-          const fadeInStart = itemProgress * 0.3;
-          if (latest >= fadeInStart) {
-            setOpacity(0.3 + (latest - fadeInStart) / (itemProgress - fadeInStart) * 0.7);
-          } else {
-            setOpacity(0.3);
-          }
-        }
-      });
-
-      return () => unsubscribe();
+      return () => clearTimeout(timeoutId);
     } else {
       setOpacity(0);
     }
-  }, [scrollYProgress, position, point]);
+  }, [isActive, position, point]);
 
   return (
     <div ref={containerRef} className="absolute inset-0 w-full h-full pointer-events-none">
