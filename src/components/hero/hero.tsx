@@ -3161,7 +3161,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             bottom: "220px",
             right: "clamp(0.5rem, 2vw, 2rem)",
             color: "#280B0B",
-            fontFamily: '"Dancing Script", cursive',
+            fontFamily: '"Floralis Couture", cursive',
             fontSize: isMobileScreen() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 6vw, 6rem)",
             zIndex: 10000,
             pointerEvents: "none",
@@ -3929,7 +3929,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
 
         .hero-engineer-text {
-          font-family: "Comforter Brush", cursive;
+          font-family: "Floralis Couture", cursive;
           color:"#280B0B";
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
