@@ -74,6 +74,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [isDotAnimationStarted, setIsDotAnimationStarted] = useState(false);
   const [portfolWidth, setPortfolWidth] = useState<number>(0);
   const [isMariamReady, setIsMariamReady] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const finalDotRef = useRef<HTMLDivElement | null>(null);
   const heroCoverRef = useRef<HTMLDivElement | null>(null);
   const portfolioHeaderRef = useRef<HTMLDivElement | null>(null);
@@ -146,6 +147,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     }
     onNavigate(section);
   };
+
+  // Track client-side mount to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     // Set animation complete immediately since we removed HTML Mariam
@@ -2140,7 +2146,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             // Add the next character
             engineerText.textContent += char;
             forceZIndex();
-          }, null, index * 0.05); // 0.05 seconds per character
+          }, undefined, index * 0.05); // 0.05 seconds per character
           
           // Gradually reduce blur as more characters are typed
           const blurAmount = Math.max(0, 10 - (index * 0.4)); // Reduce blur progressively
@@ -3131,7 +3137,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       )}
 
       {/* Engineer text - bottom right, white, on top layer - rendered via Portal to body */}
-      {typeof document !== 'undefined' && createPortal(
+      {isMounted && document.body && createPortal(
         <div
           ref={(el) => {
             engineerTextRef.current = el;
