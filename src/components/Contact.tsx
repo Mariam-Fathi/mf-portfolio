@@ -86,10 +86,24 @@ const Contact: React.FC = () => {
   const mobileTilesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Playful text animation - bouncy and energetic
-    if (textRef.current) {
+    // Use IntersectionObserver to trigger animation when section comes into view
+    const sectionElement = textRef.current?.closest('section');
+    if (!sectionElement || !textRef.current) return;
+
+    let hasAnimated = false;
+
+    const animateText = () => {
+      if (hasAnimated || !textRef.current) return;
+      
       const text = textRef.current;
-      const textContent = text.textContent || '';
+      const textContent = text.textContent?.trim() || '';
+      
+      // Check if text content exists and hasn't been animated yet
+      if (!textContent || text.children.length > 0) {
+        return;
+      }
+
+      hasAnimated = true;
       text.innerHTML = '';
       
       // Create spans for each character with random initial positions
@@ -146,10 +160,53 @@ const Contact: React.FC = () => {
           ease: "elastic.out(1, 0.3)"
         });
       });
-    }
+    };
 
+    // Create IntersectionObserver
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Small delay to ensure DOM is ready
+            requestAnimationFrame(() => {
+              setTimeout(animateText, 100);
+            });
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        threshold: 0.2, // Trigger when 20% of section is visible
+        rootMargin: '0px',
+      }
+    );
+
+    observer.observe(sectionElement);
+
+    // Fallback: if section is already visible, animate after a short delay
+    const checkIfVisible = () => {
+      const rect = sectionElement.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (isVisible && !hasAnimated) {
+        setTimeout(animateText, 200);
+      }
+    };
+
+    // Check immediately and after a short delay
+    checkIfVisible();
+    const fallbackTimeout = setTimeout(checkIfVisible, 500);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallbackTimeout);
+    };
+  }, []);
+
+  useEffect(() => {
     // Desktop tiles - playful entrance and continuous animation
-    if (tilesRef.current) {
+    const animateDesktopTiles = () => {
+      if (!tilesRef.current) return;
+      
       const tiles = tilesRef.current.children;
       const floatTimelines = new Map<Element, gsap.core.Timeline>();
       
@@ -220,10 +277,12 @@ const Contact: React.FC = () => {
           timeline?.restart();
         });
       });
-    }
+    };
 
     // Mobile tiles - fun slide-in with bounce
-    if (mobileTilesRef.current) {
+    const animateMobileTiles = () => {
+      if (!mobileTilesRef.current) return;
+      
       const mobileTiles = mobileTilesRef.current.children;
       
       gsap.fromTo(mobileTiles,
@@ -242,9 +301,56 @@ const Contact: React.FC = () => {
           delay: 1,
         }
       );
+    };
 
-      // No tap motion effects
-    }
+    // Use the same observer pattern for tiles
+    const sectionElement = textRef.current?.closest('section');
+    if (!sectionElement) return;
+
+    let tilesAnimated = false;
+
+    const animateTiles = () => {
+      if (tilesAnimated) return;
+      tilesAnimated = true;
+      animateDesktopTiles();
+      animateMobileTiles();
+    };
+
+    const tilesObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            requestAnimationFrame(() => {
+              setTimeout(animateTiles, 200);
+            });
+            tilesObserver.disconnect();
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '0px',
+      }
+    );
+
+    tilesObserver.observe(sectionElement);
+
+    // Fallback check
+    const checkTilesVisible = () => {
+      const rect = sectionElement.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (isVisible && !tilesAnimated) {
+        setTimeout(animateTiles, 300);
+      }
+    };
+
+    checkTilesVisible();
+    const tilesFallbackTimeout = setTimeout(checkTilesVisible, 600);
+
+    return () => {
+      tilesObserver.disconnect();
+      clearTimeout(tilesFallbackTimeout);
+    };
   }, []);
 
   return (
