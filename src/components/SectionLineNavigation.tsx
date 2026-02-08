@@ -17,6 +17,9 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
   const [hasAnimated, setHasAnimated] = useState(false);
   const [lineData, setLineData] = useState<{ lineY: number; lineEndX: number; lineWidth: number; oPositionX: number } | null>(null);
 
+  // Track section changes to replay the line expansion animation
+  const prevSectionRef = useRef(currentSection);
+
   const sections = [
     { id: "hero", label: "home" },
     { id: "experience", label: "experience" },
@@ -24,6 +27,20 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     { id: "certificates", label: "certificates" },
     { id: "contact", label: "contact" },
   ];
+
+  // Reset animation when navigating to a different section
+  useEffect(() => {
+    if (prevSectionRef.current !== currentSection) {
+      prevSectionRef.current = currentSection;
+      // Kill any active animations on our elements
+      if (lineRef.current) gsap.killTweensOf(lineRef.current);
+      if (navRef.current) gsap.killTweensOf(navRef.current);
+      if (oRef.current) gsap.killTweensOf(oRef.current);
+      // Reset animation state to trigger re-animation
+      setIsAnimationComplete(false);
+      setHasAnimated(false);
+    }
+  }, [currentSection]);
 
   useEffect(() => {
     // Get line data from hero
