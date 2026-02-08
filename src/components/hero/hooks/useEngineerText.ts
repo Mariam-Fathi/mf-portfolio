@@ -34,12 +34,19 @@ export function useEngineerText(
       return;
     }
 
-    // ── Returning visit: restore final state instantly ───────────
+    // ── Returning visit: fade in to match hero blur entrance ─────
     if (engineerTextEverShown) {
       const el = engineerRef.current;
       if (el) {
         el.textContent = "Software  Engineer";
-        gsap.set(el, { opacity: 1, filter: "blur(0px)", x: 0, y: 0, rotation: 0 });
+        gsap.set(el, { opacity: 0, filter: "blur(15px)", x: 0, y: 0, rotation: 0 });
+        gsap.to(el, {
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.8,
+          ease: "power2.out",
+          delay: 0.2,
+        });
       }
       return;
     }
