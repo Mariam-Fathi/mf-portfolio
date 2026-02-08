@@ -276,6 +276,17 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
               <button
                 onClick={(e) => {
                   e.preventDefault();
+                  // Immediately hide nav and disable clicks before navigating
+                  if (navRef.current) {
+                    navRef.current.style.pointerEvents = "none";
+                    gsap.to(navRef.current, { opacity: 0, duration: 0.2, ease: "power2.in" });
+                  }
+                  if (lineRef.current) {
+                    gsap.to(lineRef.current, { width: 0, opacity: 0, duration: 0.3, ease: "power2.inOut" });
+                  }
+                  if (oRef.current) {
+                    gsap.to(oRef.current, { opacity: 0, duration: 0.3, ease: "power2.inOut" });
+                  }
                   onNavigate(section.id);
                 }}
                 className={currentSection === section.id ? "active" : ""}
