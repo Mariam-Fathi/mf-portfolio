@@ -30,7 +30,6 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     const getData = () => {
       const data = getHeroLineData();
       if (data) {
-        console.log('SectionLineNavigation: Got line data', data);
         setLineData(data);
         return true;
       }
@@ -53,7 +52,6 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
 
   useEffect(() => {
     if (!lineData || !lineRef.current || !navRef.current || !oRef.current) {
-      console.log('SectionLineNavigation: Missing refs or data', { lineData, lineRef: !!lineRef.current, navRef: !!navRef.current, oRef: !!oRef.current });
       return;
     }
 
