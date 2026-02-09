@@ -173,22 +173,29 @@ function buildDotTimeline(
   // ── Phase 1: Hold steady on "ı" in original colour ──────────────
   tl.to(dot, { duration: 0.6 });
 
-  // ── Phase 2: Wiggle on "ı" (elastic snap creates spring wobble) ──
+  // ── Phase 2: Wiggle — micro-struggle before breaking free ────────
   tl.to(dot, {
     keyframes: [
-      { x: iScreenX - d / 2, duration: 0.15, ease: "elastic" },
+      // Tiny upward attempt — stuck
+      { y: iScreenY - 4, scaleY: 1.04, duration: 0.1, ease: "power2.out" },
+      { y: iScreenY, scaleY: 0.96, duration: 0.08, ease: "power2.in" },
+      { scaleY: 1, duration: 0.05, ease: "power1.out" },
     ],
   });
 
-  // ── Phase 3: Break free — compress then explosive jump to "a" ──
+  // ── Phase 3: Break free — realistic squash-and-stretch physics ──
   tl.to(dot, {
     keyframes: [
-      // Compression — building energy (still original colour)
-      { scaleX: 1.2, scaleY: 0.7, duration: 0.2, ease: "power2.out" },
-      // Explosive launch upward — colour shifts to accent mid-air
-      { y: iScreenY - 80, scaleY: 0.9, scaleX: 1.1, duration: TIMING.dotJump, ease: "power4.out" },
-      // Arc smoothly to "a" position — now fully accent
-      { x: a2ScreenX - d / 2, y: a2ScreenY - 50, scaleY: 0.75, scaleX: 1, backgroundColor: dotBase, duration: TIMING.dotArc, ease: "sine.inOut" },
+      // Anticipation — sink down + full squash (loading the spring)
+      { y: iScreenY + 4, scaleX: 1.2, scaleY: 0.65, duration: 0.2, ease: "power2.in" },
+      // EXPLOSIVE launch — stretch tall and thin, colour starts shifting
+      { y: iScreenY - 50, scaleY: 1.3, scaleX: 0.8, backgroundColor: dotLand, duration: 0.18, ease: "power3.out" },
+      // Rising — decelerating, colour deepening toward accent
+      { y: iScreenY - 80, scaleY: 1.05, scaleX: 0.95, backgroundColor: dotBase, duration: 0.3, ease: "power2.out" },
+      // Apex hang — brief float, round shape, fully accent
+      { y: iScreenY - 85, scaleY: 1, scaleX: 1, duration: 0.12, ease: "sine.out" },
+      // Parabolic arc toward "a" — lighter flash during speed
+      { x: a2ScreenX - d / 2, y: a2ScreenY - 50, scaleY: 0.8, scaleX: 1, backgroundColor: dotMotion, duration: 0.5, ease: "power1.in" },
     ],
   });
 
