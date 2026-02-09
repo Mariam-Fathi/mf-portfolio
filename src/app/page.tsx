@@ -19,27 +19,29 @@ export default function Home() {
   
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const heroInitRef = useRef(false);
 
   const handleHeroReady = useCallback(() => {
     setIsHeroReady(true);
-    
-    // Animate hero entrance with cinematic blur fade in effect
-    if (heroRef.current) {
-      // Start with blur and hidden
-      gsap.set(heroRef.current, {
-        opacity: 0,
-        filter: "blur(15px)"
-      });
-      
-      // Fade in with blur out - same effect as preloader had
-      gsap.to(heroRef.current, {
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.2, // Small delay for cinematic effect
-      });
-    }
+    if (!heroRef.current) return;
+
+    const isReturn = heroInitRef.current;
+    heroInitRef.current = true;
+
+    // Kill any lingering tweens to prevent conflicts
+    gsap.killTweensOf(heroRef.current);
+
+    // Animate hero entrance — works for both first load and return.
+    // The hero div always mounts at opacity 0, so we animate from there.
+    gsap.set(heroRef.current, { opacity: 0, filter: "blur(15px)" });
+    gsap.to(heroRef.current, {
+      opacity: 1,
+      filter: "blur(0px)",
+      duration: isReturn ? 0.6 : 0.8,
+      ease: "power2.out",
+      delay: isReturn ? 0 : 0.2,
+      onComplete: () => setIsTransitioning(false),
+    });
   }, []);
 
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
@@ -64,7 +66,9 @@ export default function Home() {
     const tl = gsap.timeline();
 
     if (sectionId === "hero") {
-      // Returning to hero
+      // Returning to hero — hero mounts at opacity 0, then handleHeroReady
+      // fires once the component is ready and runs the blur-to-clear entrance.
+      // setIsTransitioning(false) is called inside handleHeroReady's onComplete.
       tl.to(`.content-section.active`, {
         opacity: 0,
         x: 100,
@@ -72,25 +76,6 @@ export default function Home() {
         ease: "power2.in",
         onComplete: () => {
           setActiveSection("hero");
-          // Add blur effect when returning to hero
-          if (heroRef.current) {
-            gsap.set(heroRef.current, {
-              opacity: 0,
-              filter: "blur(15px)"
-            });
-            gsap.to(heroRef.current, {
-              opacity: 1,
-              filter: "blur(0px)",
-              duration: 0.8,
-              ease: "power2.out",
-              delay: 0.2,
-              onComplete: () => {
-                setIsTransitioning(false);
-              }
-            });
-          } else {
-            setIsTransitioning(false);
-          }
         }
       });
 
@@ -175,7 +160,7 @@ export default function Home() {
         <div 
           ref={heroRef}
           style={{ 
-            opacity: isHeroReady ? 1 : 0,
+            opacity: 0,
             visibility: isHeroReady ? 'visible' : 'hidden'
           }}
         >

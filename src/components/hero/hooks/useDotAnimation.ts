@@ -324,14 +324,13 @@ export function useDotAnimation(
     // ── Restore from cache (skip animation replay) ──────────────
     if (cachedPositions && positionsCalculated) {
       setDotAtFinal(dot, cachedPositions);
-      // Fade in to match the hero blur entrance on return visits
+      // Fade in synced with the hero blur entrance on return visits
       gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
       gsap.to(dot, {
         opacity: 1,
         filter: "blur(0px)",
-        duration: 0.8,
+        duration: 0.6,
         ease: "power2.out",
-        delay: 0.2,
       });
       colorLetters(svgI, svgA2, svgM2);
       setIsDotComplete(true);
