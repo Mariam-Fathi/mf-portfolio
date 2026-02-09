@@ -105,8 +105,6 @@ function setDotAtFinal(dot: HTMLDivElement, pos: DotPositions) {
     y: pos.iScreenY,
     scale: 1,
     opacity: 1,
-    immediateRender: true,
-    force3D: true,
   });
 }
 
@@ -122,6 +120,9 @@ function colorLetters(
 }
 
 // ── Build the bouncing-dot GSAP timeline ─────────────────────────────
+// Narrative: dot starts on "ı", wiggles, breaks free across "a" & "m",
+// falls off-screen; a new dot drops from above, lands on "ı", rests,
+// then fades out — triggering the "software engineer" reveal.
 function buildDotTimeline(
   dot: HTMLDivElement,
   pos: DotPositions,
@@ -133,13 +134,20 @@ function buildDotTimeline(
   const { iScreenX, iScreenY, a2ScreenX, a2ScreenY, m2ScreenX, m2ScreenY, finalDotSize } = pos;
   const d = finalDotSize;
 
-  // Prepare the dot element — top/left anchor it at viewport origin
-  // so GSAP translate values map directly to viewport coordinates.
+  // Subtle colour variants for organic visual motion feedback
+  const dotBase = COLORS.accent;      // #6A0610
+  const dotMotion = "#882430";        // slightly lighter during fast arcs
+  const dotLand = "#7A1822";          // slightly lighter during impacts
+  const dotGhost = "#F2DDD8";         // very light for ghost exit
+  const dotFallLight = "#E8C4BC";     // light during new-dot fall
+  const dotFallMid = "#D09890";       // mid during new-dot bounce
+
+  // Prepare the dot element — starts in the primary (text) colour
   Object.assign(dot.style, {
     width: `${d}px`,
     height: `${d}px`,
     borderRadius: "50%",
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.primary,
     position: "fixed",
     top: "0px",
     left: "0px",
@@ -148,115 +156,125 @@ function buildDotTimeline(
     visibility: "visible",
     pointerEvents: "none",
     transformOrigin: "center center",
-    willChange: "transform, opacity",
-    border: "none",
-    boxShadow: "none",
   });
 
+  // Start ON the "ı" position (the dot is already sitting on the letter)
   gsap.set(dot, {
     x: iScreenX - d / 2,
-    y: -50,
+    y: iScreenY,
     rotation: 0,
     scale: 1,
     opacity: 1,
-    immediateRender: true,
-    force3D: true,
   });
 
-  const tl = gsap.timeline({ immediateRender: true, paused: true });
-  const inner = gsap.timeline({ immediateRender: true });
+  // Single flat timeline — no nesting, no immediateRender (matches old code)
+  const tl = gsap.timeline({ paused: true });
 
-  // ── Phase 1: Fall onto "ı" ────────────────────────────────────
-  inner.to(dot, {
+  // ── Phase 1: Hold steady on "ı" in original colour ──────────────
+  tl.to(dot, { duration: 0.6 });
+
+  // ── Phase 2: Wiggle on "ı" (elastic snap creates spring wobble) ──
+  tl.to(dot, {
     keyframes: [
-      { y: iScreenY + 60, backgroundColor: COLORS.accent, opacity: 1, duration: TIMING.dotFall, ease: "power2.in",
-        onComplete: () => gsap.to(svgI, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
-      },
-      { y: iScreenY + 30, scaleY: 0.7, duration: TIMING.dotBounce, ease: "power2.out" },
-      { y: iScreenY, scaleY: 1, duration: TIMING.dotSquash, ease: "power2.out" },
+      { x: iScreenX - d / 2, duration: 0.15, ease: "elastic" },
     ],
-    immediateRender: true,
   });
 
-  // ── Phase 2: Jump from "ı" to "a" ─────────────────────────────
-  inner.to(dot, {
+  // ── Phase 3: Break free — compress then explosive jump to "a" ──
+  tl.to(dot, {
     keyframes: [
-      { y: iScreenY, scaleX: 1.2, scaleY: 0.7, duration: 0.2, ease: "power2.out", force3D: true },
-      { y: iScreenY - 80, scaleY: 0.9, scaleX: 1.1, duration: TIMING.dotJump, ease: "power4.out", force3D: true },
-      { x: a2ScreenX - d / 2, y: a2ScreenY - 50, scaleY: 0.75, scaleX: 1, backgroundColor: COLORS.accent, duration: TIMING.dotArc, ease: "sine.inOut", force3D: true },
+      // Compression — building energy (still original colour)
+      { scaleX: 1.2, scaleY: 0.7, duration: 0.2, ease: "power2.out" },
+      // Explosive launch upward — colour shifts to accent mid-air
+      { y: iScreenY - 80, scaleY: 0.9, scaleX: 1.1, duration: TIMING.dotJump, ease: "power4.out" },
+      // Arc smoothly to "a" position — now fully accent
+      { x: a2ScreenX - d / 2, y: a2ScreenY - 50, scaleY: 0.75, scaleX: 1, backgroundColor: dotBase, duration: TIMING.dotArc, ease: "sine.inOut" },
     ],
   });
 
   // ── Phase 3: Land on "a" ───────────────────────────────────────
-  inner.to(dot, { y: a2ScreenY - 70, duration: 0.2, ease: "sine.inOut", force3D: true });
-  inner.to(dot, { y: a2ScreenY + 10, scaleY: 1.2, duration: 0.25, ease: "power2.in", force3D: true });
-  inner.to(dot, {
-    y: a2ScreenY, scaleY: 0.8, duration: 0.15, ease: "bounce.out", force3D: true,
+  tl.to(dot, { y: a2ScreenY - 70, duration: 0.2, ease: "sine.inOut" });
+  tl.to(dot, { y: a2ScreenY + 10, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" });
+  tl.to(dot, {
+    y: a2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
     onComplete: () => gsap.to(svgA2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
   });
-  inner.to(dot, { scaleY: 1, duration: 0.1, force3D: true });
+  tl.to(dot, { scaleY: 1, duration: 0.1 });
 
   // ── Phase 4: Jump to "m" ──────────────────────────────────────
-  inner.to(dot, {
+  tl.to(dot, {
     keyframes: [
-      { x: m2ScreenX - d / 2, y: m2ScreenY - 100, scaleY: 0.75, duration: 0.3, ease: "power2.out", force3D: true },
-      { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut", force3D: true },
-      { y: m2ScreenY + 20, scaleY: 1.2, duration: 0.25, ease: "power2.in", force3D: true },
+      { x: m2ScreenX - d / 2, y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: dotMotion, duration: 0.3, ease: "power2.out" },
+      { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut" },
+      { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" },
       {
-        y: m2ScreenY, scaleY: 0.8, duration: 0.15, ease: "bounce.out", force3D: true,
+        y: m2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
         onComplete: () => gsap.to(svgM2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
       },
-      { scaleY: 1, duration: 0.1, force3D: true },
+      { scaleY: 1, duration: 0.1 },
     ],
   }, "+=0.3");
 
-  // ── Phase 5: Fall off screen ───────────────────────────────────
-  inner.to(dot, {
-    y: window.innerHeight + 100,
-    scaleY: 1.1,
-    opacity: 1,
-    duration: 0.5,
-    ease: "power2.in",
-    force3D: true,
+  // ── Phase 5: Rise then fall off screen (ghost colour fade) ─────
+  tl.to(dot, {
+    keyframes: [
+      { backgroundColor: dotGhost, y: m2ScreenY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
+      { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" },
+    ],
   }, "+=0.3");
 
-  // ── Phase 6: Teleport to top, fall again onto "ı", stay ───────
-  inner.to(dot, {
+  // Hide original dot and brief pause before new dot
+  tl.set(dot, { display: "none" }, "+=0.3");
+
+  // ── Phase 6: New dot — teleport well above viewport ────────────
+  tl.set(dot, {
     x: iScreenX - d / 2,
-    y: -50,
+    y: -(d + 100),
     opacity: 1,
     scale: 1,
-    duration: 0.1,
-    ease: "none",
-    force3D: true,
+    scaleX: 1,
+    scaleY: 1,
+    backgroundColor: dotBase,
+    display: "block",
+    visibility: "visible",
   });
 
-  inner.to(dot, {
+  // Wiggle before dropping (same pattern as old code's finalDot)
+  tl.to(dot, {
     keyframes: [
-      { y: iScreenY + 60, opacity: 1, duration: TIMING.dotFall, ease: "power2.in", force3D: true },
-      { y: iScreenY + 30, scaleY: 0.7, duration: TIMING.dotBounce, ease: "power2.out", force3D: true },
+      { x: iScreenX - d / 2 - 5, duration: 0.2, ease: "power1.inOut" },
+      { x: iScreenX - d / 2 + 5, duration: 0.2, ease: "power1.inOut" },
+      { x: iScreenX - d / 2, duration: 0.2, ease: "power1.inOut" },
+    ],
+  });
+
+  // Signal engineer text to start (synced with the drop, not after)
+  tl.call(() => onComplete());
+
+  // Drop and land on "ı" with colour transitions
+  tl.to(dot, {
+    keyframes: [
+      { y: iScreenY + 60, backgroundColor: dotFallLight, duration: TIMING.dotFall, ease: "power2.in" },
+      { y: iScreenY + 30, scaleY: 0.7, backgroundColor: dotFallMid, duration: TIMING.dotBounce, ease: "power2.out" },
       {
-        y: iScreenY, scaleY: 1, duration: TIMING.dotSquash, ease: "power2.out", force3D: true,
+        y: iScreenY, scaleY: 1, backgroundColor: dotBase, duration: TIMING.dotSquash, ease: "power2.out",
         onComplete: () => gsap.to(svgI, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
       },
     ],
   });
 
-  // ── Phase 7: Lock at final position ────────────────────────────
-  inner.to(dot, {
+  // ── Lock at final position on "ı" ─────────────────────────────
+  tl.to(dot, {
     opacity: 1,
     scale: 1,
     duration: 0,
     ease: "none",
-    force3D: true,
     onComplete: () => {
       setDotAtFinal(dot, pos);
       animationEverCompleted = true;
-      onComplete();
     },
   }, "+=0.5");
 
-  tl.add(inner, 0);
   return tl;
 }
 
@@ -337,6 +355,17 @@ export function useDotAnimation(
         requestAnimationFrame(() => {
           const tl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
             setIsDotComplete(true);
+          });
+          // Match the hero section's blur-to-clear entrance so the
+          // dot (a portal on document.body) doesn't pop in abruptly.
+          // No extra delay — the surrounding setTimeout(200) already
+          // accounts for the same ~0.2 s offset the hero uses.
+          gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
+          gsap.to(dot, {
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.8,
+            ease: "power2.out",
           });
           setTimeout(() => {
             tl.play();
