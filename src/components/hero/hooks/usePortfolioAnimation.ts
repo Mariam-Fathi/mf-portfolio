@@ -208,27 +208,42 @@ export function usePortfolioAnimation(
       },
     });
 
-    // Step 2: Capture O start, rotate I, push O
+    // Step 2: Capture O start, anticipation + rotate I, push O
     tl.call(() => {
       const oRect = oEl.getBoundingClientRect();
       const cRect = headerRef.current?.getBoundingClientRect();
       if (cRect) oStartX = oRect.left - cRect.left;
     });
 
+    // Anticipation: subtle squash-stretch wind-up
     tl.to(iEl, {
+      scaleX: 0.85,
+      scaleY: 1.15,
+      duration: 0.18,
+      ease: "power2.out",
+      delay: 0.5,
+    });
+
+    // Rotation with organic overshoot + O pushes simultaneously
+    tl.to(iEl, {
+      scaleX: 1,
+      scaleY: 1,
       rotation: 90,
       duration: TIMING.portfolioRotate,
-      ease: "power2.inOut",
+      ease: "back.out(1.4)",
       transformOrigin: "center center",
-      delay: 1.1,
       onStart: () => {
         if (iWidth > 0) {
-          gsap.to(oEl, { x: iWidth, duration: TIMING.portfolioRotate, ease: "power2.inOut", delay: 0.3 });
+          gsap.to(oEl, {
+            x: iWidth,
+            duration: TIMING.portfolioRotate * 0.85,
+            ease: "power3.inOut",
+          });
         }
       },
     });
 
-    // Step 3: Fade I, show line
+    // Step 3: I fades + morphs into line (crossfade)
     tl.to(iEl, {
       opacity: 0,
       duration: 0.3,
@@ -241,9 +256,10 @@ export function usePortfolioAnimation(
       onComplete: () => {
         iEl.style.display = "none";
         lineEl.style.display = "block";
-        gsap.set(lineEl, { opacity: 1, x: iOriginalPosition, width: 0, transformOrigin: "left center" });
+        gsap.set(lineEl, { opacity: 0, x: iOriginalPosition, width: 0, transformOrigin: "left center" });
+        gsap.to(lineEl, { opacity: 1, duration: 0.2, ease: "power2.out" });
       },
-    }, "-=0.3");
+    }, "-=0.4");
 
     // Step 4: Expand line + slide O to end
     tl.call(() => {
@@ -279,8 +295,8 @@ export function usePortfolioAnimation(
 
         gsap.to(oEl, {
           x: oFinalX,
-          duration: TIMING.portfolioExpand,
-          ease: "power2.out",
+          duration: 1.6,
+          ease: "expo.out",
           onComplete: () => {
             everCompleted = true;
             setIsComplete(true);
@@ -288,8 +304,8 @@ export function usePortfolioAnimation(
         });
         gsap.to(lineEl, {
           width: finalLineWidth,
-          duration: TIMING.portfolioExpand,
-          ease: "power2.out",
+          duration: 1.6,
+          ease: "expo.out",
         });
       });
     });
