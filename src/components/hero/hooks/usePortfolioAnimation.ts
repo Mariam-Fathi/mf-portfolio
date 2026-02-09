@@ -215,13 +215,13 @@ export function usePortfolioAnimation(
       if (cRect) oStartX = oRect.left - cRect.left;
     });
 
-    // Anticipation: subtle squash-stretch wind-up
+    // Anticipation: subtle squash-stretch wind-up (synced with dot wiggle)
     tl.to(iEl, {
-      scaleX: 0.85,
-      scaleY: 1.15,
-      duration: 0.18,
+      scaleX: 0.92,
+      scaleY: 1.08,
+      duration: 0.12,
       ease: "power2.out",
-      delay: 0.5,
+      delay: 0.35,
     });
 
     // Rotation with organic overshoot + O pushes simultaneously
@@ -295,7 +295,7 @@ export function usePortfolioAnimation(
 
         gsap.to(oEl, {
           x: oFinalX,
-          duration: 1.6,
+          duration: 2.2,
           ease: "expo.out",
           onComplete: () => {
             everCompleted = true;
@@ -304,7 +304,7 @@ export function usePortfolioAnimation(
         });
         gsap.to(lineEl, {
           width: finalLineWidth,
-          duration: 1.6,
+          duration: 2.2,
           ease: "expo.out",
         });
       });

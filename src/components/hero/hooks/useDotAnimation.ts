@@ -374,10 +374,8 @@ export function useDotAnimation(
             duration: 0.8,
             ease: "power2.out",
           });
-          setTimeout(() => {
-            tl.play();
-            setIsDotStarted(true);
-          }, 100);
+          tl.play();
+          setIsDotStarted(true);
         });
       });
     }, 200);
