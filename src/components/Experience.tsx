@@ -6,7 +6,7 @@ import React, { useRef, useEffect, useState } from "react";
 const experienceItems = [
   {
     number: "01",
-    title: "Mobile Engineer",
+    title: "Frontend Team Lead",
     company: "Tarqia",
     type: "Full-time",
     fromDate: "Jan 2024",
@@ -19,9 +19,9 @@ const experienceItems = [
     number: "02",
     title: "Software Engineer",
     company: "Dracode",
-    type: "Contractor ",
+    type: "Contract ",
     fromDate: "Sep 2025",
-    toDate: "Present",
+    toDate: "Jan 2026",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
     color: "#6A0610", // Fire Red from color palette
