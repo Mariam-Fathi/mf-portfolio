@@ -276,6 +276,8 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
               <button
                 onClick={(e) => {
                   e.preventDefault();
+                  // Don't hide anything if clicking the already-active section
+                  if (currentSection === section.id) return;
                   // Immediately hide nav and disable clicks before navigating
                   if (navRef.current) {
                     navRef.current.style.pointerEvents = "none";
