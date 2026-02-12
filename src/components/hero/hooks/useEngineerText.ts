@@ -1,13 +1,12 @@
 import { useEffect, type RefObject } from "react";
 import gsap from "gsap";
-import { TIMING } from "../constants";
 import { checkIsMobile } from "./useIsMobile";
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
 let engineerTextEverShown = false;
 
 /**
- * Animates the "Software Engineer" text with a typewriter + blur-reveal effect.
+ * Animates the "Software Engineer" text with a write-on (clip reveal) effect.
  *
  * On mobile the final state is applied immediately — no animation.
  * On subsequent visits (cache hit), the final state is restored instantly.
@@ -18,7 +17,7 @@ export function useEngineerText(
   isDotAnimationComplete: boolean,
   isMariamReady: boolean,
 ) {
-  // ── Typewriter + blur reveal ──────────────────────────────────
+  // ── Write-on reveal ───────────────────────────────────────────
   useEffect(() => {
     if (!isDotAnimationComplete) return;
     const isMobile = checkIsMobile();
@@ -28,7 +27,7 @@ export function useEngineerText(
       if (engineerRef.current) {
         const el = engineerRef.current;
         if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
-        gsap.set(el, { opacity: 1, filter: "blur(0px)", x: 0, y: 0, rotation: 0 });
+        gsap.set(el, { opacity: 1, filter: "blur(0px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
       }
       engineerTextEverShown = true;
       return;
@@ -39,7 +38,7 @@ export function useEngineerText(
       const el = engineerRef.current;
       if (el) {
         el.textContent = "Software  Engineer";
-        gsap.set(el, { opacity: 0, filter: "blur(15px)", x: 0, y: 0, rotation: 0 });
+        gsap.set(el, { opacity: 0, filter: "blur(15px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
         gsap.to(el, {
           opacity: 1,
           filter: "blur(0px)",
@@ -51,36 +50,31 @@ export function useEngineerText(
       return;
     }
 
-    // ── Desktop: typewriter effect (first visit only) ────────────
+    // ── Desktop: write-on effect (first visit only) ──────────────
     const el = engineerRef.current;
     if (!el) return;
 
     gsap.killTweensOf(el);
-    const fullText = el.textContent || "Software  Engineer";
-    const chars = fullText.split("");
-    el.textContent = "";
+    if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
-    gsap.set(el, { opacity: 1, x: 0, y: 0, rotation: 0, filter: "blur(10px)" });
+    // Start fully clipped (hidden) — reveal from left to right
+    gsap.set(el, {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      rotation: 0,
+      filter: "blur(0px)",
+      clipPath: "inset(0 100% 0 0)",
+    });
 
     const tid = setTimeout(() => {
       if (!el.parentElement) return;
 
-      const tl = gsap.timeline({ delay: 0.2 });
-
-      chars.forEach((char, idx) => {
-        tl.call(
-          () => { el.textContent += char; },
-          null,
-          idx * TIMING.typewriterPerChar,
-        );
-        const blur = Math.max(0, 10 - idx * 0.4);
-        tl.to(el, { filter: `blur(${blur}px)`, duration: 0.08, ease: "power2.out" }, `-=${0.03}`);
-      });
-
-      tl.to(el, {
-        filter: "blur(0px)",
-        duration: 0.3,
-        ease: "power2.out",
+      gsap.to(el, {
+        clipPath: "inset(0 0% 0 0)",
+        duration: 2,
+        ease: "power1.inOut",
+        delay: 0.2,
         onComplete: () => { engineerTextEverShown = true; },
       });
     }, 150);

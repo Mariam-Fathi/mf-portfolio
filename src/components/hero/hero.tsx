@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import gsap from "gsap";
 import { COLORS, FONTS, Z_LAYERS } from "./constants";
 import { NAV_SECTIONS } from "./types";
 import type { HeroProps } from "./types";
@@ -9,7 +10,8 @@ import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useMariamSvg } from "./hooks/useMariamSvg";
 import { useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
-import { usePortfolioAnimation } from "./hooks/usePortfolioAnimation";
+import { usePortfolioAnimation, hasPortfolioEverCompleted } from "./hooks/usePortfolioAnimation";
+import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
 import { useHeroNavigation } from "./hooks/useHeroNavigation";
 
@@ -32,6 +34,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const navRef = useRef<HTMLElement>(null);
 
   const [isMounted, setIsMounted] = useState(false);
+  const [isOClicked, setIsOClicked] = useState(false);
+  const [showClickPrompt, setShowClickPrompt] = useState(false);
+  const clickSvgRef = useRef<SVGSVGElement>(null);
+  const clickTlRef = useRef<gsap.core.Timeline | null>(null);
+  const [isDotClicked, setIsDotClicked] = useState(false);
+  const isDotClickedRef = useRef(false);
+  const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
+  const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
+  const dotClickSvgRef = useRef<SVGSVGElement>(null);
+  const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
   const isMobile = useIsMobile();
 
   // Flip once on the client so portals are never rendered during SSR
@@ -43,7 +55,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   //   usePortfolWidth → portfolWidth
   //   useMariamSvg(portfolWidth) → isMariamReady
   //   useDotAnimation(isMariamReady) → isDotAnimationStarted / isDotAnimationComplete
-  //   usePortfolioAnimation(isDotAnimationStarted) → isPortfolioAnimationComplete
+  //   usePortfolioAnimation(isOClicked) → isPortfolioAnimationComplete  (user clicks "O")
   //   useEngineerText(isDotAnimationComplete)
   //   useHeroNavigation(isPortfolioAnimationComplete)
 
@@ -65,17 +77,216 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isActive,
     isMariamReady,
     isMobile,
+    isDotClicked,
   );
 
   const { isPortfolioAnimationComplete } = usePortfolioAnimation(
     portfolioHeaderRef,
-    isDotAnimationStarted,
+    isOClicked,
     isActive,
     isMobile,
   );
 
   useEngineerText(engineerTextRef, numberSevenRef, isDotAnimationComplete, isMariamReady);
   useHeroNavigation(navRef, portfolioHeaderRef, isPortfolioAnimationComplete);
+
+  // ── Click prompt on "O" ──────────────────────────────────────
+  useEffect(() => {
+    if (isMariamReady && !isOClicked && isActive && !hasPortfolioEverCompleted()) {
+      const timer = setTimeout(() => setShowClickPrompt(true), 800);
+      return () => clearTimeout(timer);
+    }
+    if (isOClicked || hasPortfolioEverCompleted()) setShowClickPrompt(false);
+  }, [isMariamReady, isOClicked, isActive]);
+
+  // ── Animate click SVG: draw once, then sway to attract attention ──
+  useEffect(() => {
+    if (!showClickPrompt || !clickSvgRef.current) return;
+    const svgEl = clickSvgRef.current;
+
+    gsap.set(svgEl, {
+      xPercent: -50,
+      rotation: 0,
+      transformOrigin: "50% 0%",
+      opacity: 0,
+    });
+
+    // Fade in then sway
+    gsap.to(svgEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
+
+    const swayTl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
+    clickTlRef.current = swayTl;
+
+    swayTl.fromTo(svgEl, {
+      rotation: -4,
+    }, {
+      rotation: 4,
+      duration: 1,
+      ease: "sine.inOut",
+    });
+
+    return () => {
+      if (clickTlRef.current) clickTlRef.current.kill();
+      gsap.killTweensOf(svgEl);
+    };
+  }, [showClickPrompt]);
+
+  // ── Handle O click ───────────────────────────────────────────
+  const handleOClick = useCallback(() => {
+    if (isOClicked) return;
+    if (clickTlRef.current) clickTlRef.current.kill();
+    if (clickSvgRef.current) {
+      gsap.to(clickSvgRef.current, { opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.in" });
+    }
+    setIsOClicked(true);
+    setShowClickPrompt(false);
+  }, [isOClicked]);
+
+  // ── Dot click prompt on "ı" ─────────────────────────────────
+  // Calculate "ı" dot position after Mariam SVG is ready
+  useEffect(() => {
+    if (!isMariamReady || !svgIRef.current) return;
+    const updatePos = () => {
+      const iRect = svgIRef.current?.getBoundingClientRect();
+      if (!iRect) return;
+      const mobile = checkIsMobile();
+      const baseDotSize = Math.max(iRect.width * 0.5, 64);
+      const dotSize = mobile ? Math.min(baseDotSize * 0.6, 40) : baseDotSize;
+      setDotClickPos({
+        x: iRect.left + iRect.width / 2,
+        y: iRect.top + iRect.height * 0.19,
+        size: dotSize,
+      });
+    };
+    updatePos();
+    window.addEventListener("resize", updatePos);
+    return () => window.removeEventListener("resize", updatePos);
+  }, [isMariamReady]);
+
+  // Pre-show the actual dot at "ı" position before click
+  useEffect(() => {
+    if (!isMariamReady || isDotClicked || !dotRef.current || !dotClickPos) return;
+    if (hasDotAnimationEverCompleted()) return;
+
+    const dot = dotRef.current;
+    const size = dotClickPos.size;
+    const baseY = dotClickPos.y;
+    const baseX = dotClickPos.x - size / 2;
+
+    Object.assign(dot.style, {
+      display: "block",
+      visibility: "visible",
+      position: "fixed",
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      backgroundColor: COLORS.primary,
+      top: "0px",
+      left: "0px",
+      pointerEvents: "auto",
+      cursor: "pointer",
+      transformOrigin: "center center",
+    });
+    gsap.set(dot, {
+      x: baseX,
+      y: baseY,
+      opacity: 1,
+      rotation: 0,
+      scale: 1,
+    });
+
+    // Hover wiggle — dot struggles to break free
+    let wiggleTl: gsap.core.Timeline | null = null;
+    const onMouseEnter = () => {
+      if (wiggleTl) wiggleTl.kill();
+      wiggleTl = gsap.timeline();
+      wiggleTl
+        .to(dot, { y: baseY - 4, scaleY: 1.04, scaleX: 0.96, duration: 0.1, ease: "power2.out" })
+        .to(dot, { y: baseY, scaleY: 0.96, scaleX: 1.04, duration: 0.08, ease: "power2.in" })
+        .to(dot, { scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" })
+        .to(dot, { y: baseY - 3, scaleY: 1.03, scaleX: 0.97, duration: 0.1, ease: "power2.out" }, "+=0.15")
+        .to(dot, { y: baseY, scaleY: 0.97, scaleX: 1.03, duration: 0.08, ease: "power2.in" })
+        .to(dot, { scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" });
+    };
+    const onMouseLeave = () => {
+      if (wiggleTl) wiggleTl.kill();
+      gsap.to(dot, { y: baseY, scaleY: 1, scaleX: 1, duration: 0.15, ease: "power1.out" });
+    };
+
+    dot.addEventListener("mouseenter", onMouseEnter);
+    dot.addEventListener("mouseleave", onMouseLeave);
+
+    return () => {
+      dot.removeEventListener("mouseenter", onMouseEnter);
+      dot.removeEventListener("mouseleave", onMouseLeave);
+      if (wiggleTl) wiggleTl.kill();
+      // Use the ref to avoid the stale closure hiding the dot
+      // when isDotClicked transitions from false → true
+      if (!isDotClickedRef.current && !hasDotAnimationEverCompleted()) {
+        Object.assign(dot.style, {
+          display: "none",
+          opacity: "0",
+          visibility: "hidden",
+          pointerEvents: "none",
+          cursor: "default",
+        });
+      }
+    };
+  }, [isMariamReady, isDotClicked, dotClickPos]);
+
+  // Show dot click prompt
+  useEffect(() => {
+    if (isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
+      const timer = setTimeout(() => setShowDotClickPrompt(true), 1200);
+      return () => clearTimeout(timer);
+    }
+    if (isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
+  }, [isMariamReady, isDotClicked, isActive, dotClickPos]);
+
+  // Animate dot click SVG: draw once, then sway
+  useEffect(() => {
+    if (!showDotClickPrompt || !dotClickSvgRef.current) return;
+    const svgEl = dotClickSvgRef.current;
+
+    gsap.set(svgEl, {
+      rotation: 0,
+      transformOrigin: "50% 100%",
+      opacity: 0,
+    });
+
+    // Fade in then sway
+    gsap.to(svgEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
+
+    const swayTl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
+    dotClickTlRef.current = swayTl;
+    swayTl.fromTo(svgEl, { rotation: -4 }, { rotation: 4, duration: 1, ease: "sine.inOut" });
+
+    return () => {
+      if (dotClickTlRef.current) dotClickTlRef.current.kill();
+      gsap.killTweensOf(svgEl);
+    };
+  }, [showDotClickPrompt]);
+
+  // Handle dot click
+  const handleDotClick = useCallback(() => {
+    if (isDotClicked) return;
+    // Set ref synchronously BEFORE state — prevents the pre-show
+    // cleanup from hiding the dot during the React commit phase
+    isDotClickedRef.current = true;
+    if (dotClickTlRef.current) dotClickTlRef.current.kill();
+    if (dotClickSvgRef.current) {
+      gsap.to(dotClickSvgRef.current, { opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.in" });
+    }
+    // Remove click interactivity from the dot
+    if (dotRef.current) {
+      Object.assign(dotRef.current.style, {
+        pointerEvents: "none",
+        cursor: "default",
+      });
+    }
+    setIsDotClicked(true);
+    setShowDotClickPrompt(false);
+  }, [isDotClicked]);
 
   // ── Call onReady when Mariam is positioned ─────────────────────
   useEffect(() => {
@@ -150,7 +361,71 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         <div className="hero-frame-marquee hero-frame-marquee-top">
           <div className="hero-cover-header">
             <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-              <span className="hero-cover-title-full" aria-label="Portfolio">PORTFOLIO</span>
+              <span className="hero-cover-title-full" aria-label="Portfolio">{"PORTFOLI"}<span
+                  className="hero-o-trigger"
+                  onClick={handleOClick}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleOClick(); }}
+                >{"O"}{showClickPrompt && (
+                  <svg
+                    ref={clickSvgRef}
+                    className="hero-click-svg"
+                    viewBox="0 0 100 70"
+                    preserveAspectRatio="xMidYMid meet"
+                    aria-hidden="true"
+                  >
+                    <defs>
+                      <clipPath id="hero-click-clip">
+                        <rect width="100" height="70" x="0" y="0" />
+                      </clipPath>
+                    </defs>
+                    <g clipPath="url(#hero-click-clip)">
+                      <g transform="matrix(1.554,0.136,-0.136,1.554,9.843,12)">
+                        <g transform="translate(4.4,10.6) scale(1,-1) translate(-4.4,-10.6)">
+                          <g transform="translate(4.016,8)">
+                            <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M2.016,-6C1.235,-5.932,0.736,-5.403,0.158,-4.91C-0.567,-4.288,-1.054,-3.599,-1.346,-2.694C-1.559,-2.053,-1.76,-1.413,-1.888,-0.748C-2.016,-0.083,-1.986,0.545,-1.973,1.185C-1.949,2.454,-1.486,3.968,-0.409,4.732C-0.153,4.91,0.145,5.021,0.413,5.175C0.657,5.317,0.865,5.514,1.12,5.625C1.284,5.692,1.327,5.723,1.454,5.822C1.582,5.92,1.655,5.982,1.839,6" />
+                          </g>
+                          <g transform="translate(4.74,13.192)">
+                            <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M-2.506,2.443C-2.506,2.443,-2.57,2.451,-2.57,2.451C-1.515,2.31,-0.466,2.249,0.589,2.108L1.696,1.959C1.878,1.935,2.265,1.958,2.396,1.828C2.57,1.656,2.357,0.978,2.328,0.764C2.294,0.508,2.226,0.241,2.24,-0.016C2.255,-0.252,2.281,-0.494,2.276,-0.733C2.268,-1.067,2.274,-1.381,2.229,-1.715C2.196,-1.96,2.164,-2.206,2.13,-2.451" />
+                          </g>
+                        </g>
+                      </g>
+                      <g transform="matrix(1.272,-0.27,0.27,1.272,18,41)">
+                        <g transform="translate(51.831,5.275)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.35,-2.47C0.028,-1.519,-0.195,-0.803,-0.175,0.175C-0.167,0.561,-0.183,0.939,-0.175,1.317C-0.167,1.69,-0.35,2.104,-0.211,2.47" />
+                        </g>
+                        <g transform="translate(51.162,12.575)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.193,0.304C0.109,0.081,-0.034,-0.13,-0.193,-0.304C-0.157,-0.169,-0.125,-0.029,-0.098,0.11" />
+                        </g>
+                        <g transform="translate(5.635,7.245)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.218,-3.88C1.904,-3.8,1.737,-4.134,1.453,-4.226C1.013,-4.373,0.674,-4.214,0.253,-4.146C-0.253,-4.063,-0.709,-4.15,-1.159,-3.84C-1.497,-3.605,-1.784,-3.196,-2.075,-2.905C-2.273,-2.71,-2.471,-2.524,-2.635,-2.301C-2.813,-2.058,-2.964,-1.796,-3.016,-1.497C-3.135,-0.833,-2.651,-0.376,-2.779,0.248C-2.901,0.857,-3.089,1.35,-2.826,1.963C-2.508,2.706,-2.026,2.933,-1.422,3.414C-1.112,3.661,-0.781,3.884,-0.416,4.039C-0.188,4.134,0.169,4.373,0.407,4.341C0.781,4.289,1.151,3.983,1.513,3.864C1.974,3.709,2.679,3.486,3.135,3.438" />
+                        </g>
+                        <g transform="translate(41.164,7.61)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-0.428,5.047C-0.448,4.12,-0.463,3.19,-0.487,2.263C-0.503,1.655,-0.515,1.106,-0.392,0.505C-0.3,0.056,-0.181,-0.326,-0.181,-0.783C-0.181,-1.487,-0.121,-2.092,0.002,-2.788C0.073,-3.186,0.141,-3.599,0.244,-3.993C0.34,-4.351,0.515,-4.661,0.455,-5.047" />
+                        </g>
+                        <g transform="translate(43.777,6.097)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-2.153,1.74C-2.027,0.944,-0.944,0.475,-0.371,0.022C-0.017,-0.261,0.403,-0.42,0.741,-0.71C1.191,-1.096,1.616,-1.442,2.153,-1.74C2.137,-1.609,2.066,-1.509,1.931,-1.446" />
+                        </g>
+                        <g transform="translate(43.497,9.02)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.606,-2.253C-1.535,-1.807,-1.293,-1.211,-1.09,-0.801C-0.704,-0.034,-0.004,0.253,0.656,0.666C1.142,0.969,1.363,1.772,1.606,2.253" />
+                        </g>
+                        <g transform="translate(24.172,2.806)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.062,0.115L0.062,0.012C0.062,0.095,0.013,0.259,0.141,0.239C0.268,0.219,0.26,-0.004,0.193,-0.072C-0.054,-0.306,-0.268,0.306,0.053,0.167C0.086,0.032,-0.13,0.016,-0.125,0.175" />
+                        </g>
+                        <g transform="translate(24.518,9.215)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.093,2.746C0.149,2.535,0.193,2.242,0.157,2.018C0.113,1.745,-0.014,1.565,-0.026,1.283C-0.038,1.036,0.018,0.798,-0.026,0.551C-0.074,0.268,-0.169,0.065,-0.181,-0.224C-0.193,-0.514,-0.161,-0.81,-0.157,-1.099C-0.157,-1.664,0.038,-2.158,0.061,-2.746" />
+                        </g>
+                        <g transform="translate(16.343,7.284)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.579,-4.2C-1.948,-3.929,-1.758,-3.141,-1.833,-2.744C-1.953,-2.119,-2.188,-1.598,-2.195,-0.954C-2.203,-0.318,-2.227,0.322,-2.232,0.959C-2.235,1.468,-2.351,1.846,-2.414,2.343C-2.477,2.839,-2.282,3.373,-2.112,3.85C-1.977,3.695,-1.571,4.161,-1.396,4.149C-0.713,4.109,-0.044,4.097,0.645,4.113C0.982,4.12,1.32,4.124,1.654,4.137C1.921,4.145,2.216,4.2,2.477,4.128" />
+                        </g>
+                        <g transform="translate(32.644,7.785)">
+                          <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.663,-3.592C2.642,-3.815,2.105,-3.798,1.954,-3.794C1.791,-3.794,1.628,-3.783,1.465,-3.794C1.27,-3.811,1.091,-3.882,0.9,-3.918C0.168,-4.044,-0.233,-3.656,-0.746,-3.281C-1.295,-2.884,-1.617,-2.431,-1.852,-1.822C-2.051,-1.309,-2.11,-0.76,-2.357,-0.263C-2.428,-0.116,-2.516,0.023,-2.56,0.178C-2.587,0.279,-2.6,0.382,-2.604,0.486C-2.62,0.755,-2.623,1.03,-2.635,1.301C-2.639,1.384,-2.663,1.491,-2.635,1.574C-2.604,1.671,-2.508,1.762,-2.456,1.845C-2.297,2.091,-2.138,2.335,-1.987,2.585C-1.876,2.768,-1.78,2.966,-1.637,3.125C-1.51,3.266,-1.359,3.388,-1.224,3.52C-1.128,3.615,-1.037,3.698,-0.913,3.754C-0.834,3.79,-0.75,3.814,-0.671,3.833C-0.516,3.874,-0.361,3.889,-0.201,3.901C0.141,3.93,0.475,4.044,0.822,4.04C1.107,4.04,1.37,4.029,1.652,3.982" />
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                )}</span></span>
               <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
               <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
               <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Navigation menu toggle">O</span>
@@ -225,6 +500,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           <div
             ref={dotRef}
             className="hero-dot-overlay"
+            onClick={!isDotClicked && showDotClickPrompt ? handleDotClick : undefined}
+            role={!isDotClicked && showDotClickPrompt ? "button" : undefined}
+            tabIndex={!isDotClicked && showDotClickPrompt ? 0 : undefined}
+            onKeyDown={!isDotClicked && showDotClickPrompt ? (e: React.KeyboardEvent) => { if (e.key === "Enter") handleDotClick(); } : undefined}
             style={{
               position: "fixed",
               top: 0,
@@ -248,7 +527,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               bottom: "220px",
               right: "clamp(0.5rem, 2vw, 2rem)",
               color: COLORS.primary,
-              fontFamily: FONTS.script,
+              fontFamily: FONTS.handwritten,
               fontSize: checkIsMobile() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 6vw, 6rem)",
               zIndex: Z_LAYERS.engineerText,
               pointerEvents: "none",
@@ -258,6 +537,82 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             }}
           >
             Software  Engineer
+          </div>,
+          document.body,
+        )}
+
+      {/* ── Dot click SVG (React Portal) ───────────────────────── */}
+      {isMounted && showDotClickPrompt && dotClickPos && !isDotClicked &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              left: `${dotClickPos.x}px`,
+              top: `${dotClickPos.y - 4}px`,
+              transform: "translateX(-50%) translateY(-100%)",
+              zIndex: Z_LAYERS.dot + 10,
+              pointerEvents: "none",
+            }}
+          >
+            <svg
+              ref={dotClickSvgRef}
+              viewBox="0 0 100 70"
+              preserveAspectRatio="xMidYMid meet"
+              aria-hidden="true"
+              style={{
+                width: "clamp(55px, 7vw, 90px)",
+                height: "auto",
+                display: "block",
+                color: COLORS.primary,
+                opacity: 0,
+                overflow: "visible",
+              }}
+            >
+              <g>
+                {/* Arrow — at bottom, head points down toward dot */}
+                <g transform="matrix(1.554,0.136,-0.136,1.554,9.843,38)">
+                  <g transform="translate(4.016,8)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M2.016,-6C1.235,-5.932,0.736,-5.403,0.158,-4.91C-0.567,-4.288,-1.054,-3.599,-1.346,-2.694C-1.559,-2.053,-1.76,-1.413,-1.888,-0.748C-2.016,-0.083,-1.986,0.545,-1.973,1.185C-1.949,2.454,-1.486,3.968,-0.409,4.732C-0.153,4.91,0.145,5.021,0.413,5.175C0.657,5.317,0.865,5.514,1.12,5.625C1.284,5.692,1.327,5.723,1.454,5.822C1.582,5.92,1.655,5.982,1.839,6" />
+                  </g>
+                  <g transform="translate(4.74,13.192)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M-2.506,2.443C-2.506,2.443,-2.57,2.451,-2.57,2.451C-1.515,2.31,-0.466,2.249,0.589,2.108L1.696,1.959C1.878,1.935,2.265,1.958,2.396,1.828C2.57,1.656,2.357,0.978,2.328,0.764C2.294,0.508,2.226,0.241,2.24,-0.016C2.255,-0.252,2.281,-0.494,2.276,-0.733C2.268,-1.067,2.274,-1.381,2.229,-1.715C2.196,-1.96,2.164,-2.206,2.13,-2.451" />
+                  </g>
+                </g>
+                {/* Click text — at top, near the arrow tail */}
+                <g transform="matrix(1.272,-0.27,0.27,1.272,18,27)">
+                  <g transform="translate(51.831,5.275)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.35,-2.47C0.028,-1.519,-0.195,-0.803,-0.175,0.175C-0.167,0.561,-0.183,0.939,-0.175,1.317C-0.167,1.69,-0.35,2.104,-0.211,2.47" />
+                  </g>
+                  <g transform="translate(51.162,12.575)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.193,0.304C0.109,0.081,-0.034,-0.13,-0.193,-0.304C-0.157,-0.169,-0.125,-0.029,-0.098,0.11" />
+                  </g>
+                  <g transform="translate(5.635,7.245)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.218,-3.88C1.904,-3.8,1.737,-4.134,1.453,-4.226C1.013,-4.373,0.674,-4.214,0.253,-4.146C-0.253,-4.063,-0.709,-4.15,-1.159,-3.84C-1.497,-3.605,-1.784,-3.196,-2.075,-2.905C-2.273,-2.71,-2.471,-2.524,-2.635,-2.301C-2.813,-2.058,-2.964,-1.796,-3.016,-1.497C-3.135,-0.833,-2.651,-0.376,-2.779,0.248C-2.901,0.857,-3.089,1.35,-2.826,1.963C-2.508,2.706,-2.026,2.933,-1.422,3.414C-1.112,3.661,-0.781,3.884,-0.416,4.039C-0.188,4.134,0.169,4.373,0.407,4.341C0.781,4.289,1.151,3.983,1.513,3.864C1.974,3.709,2.679,3.486,3.135,3.438" />
+                  </g>
+                  <g transform="translate(41.164,7.61)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-0.428,5.047C-0.448,4.12,-0.463,3.19,-0.487,2.263C-0.503,1.655,-0.515,1.106,-0.392,0.505C-0.3,0.056,-0.181,-0.326,-0.181,-0.783C-0.181,-1.487,-0.121,-2.092,0.002,-2.788C0.073,-3.186,0.141,-3.599,0.244,-3.993C0.34,-4.351,0.515,-4.661,0.455,-5.047" />
+                  </g>
+                  <g transform="translate(43.777,6.097)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-2.153,1.74C-2.027,0.944,-0.944,0.475,-0.371,0.022C-0.017,-0.261,0.403,-0.42,0.741,-0.71C1.191,-1.096,1.616,-1.442,2.153,-1.74C2.137,-1.609,2.066,-1.509,1.931,-1.446" />
+                  </g>
+                  <g transform="translate(43.497,9.02)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.606,-2.253C-1.535,-1.807,-1.293,-1.211,-1.09,-0.801C-0.704,-0.034,-0.004,0.253,0.656,0.666C1.142,0.969,1.363,1.772,1.606,2.253" />
+                  </g>
+                  <g transform="translate(24.172,2.806)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.062,0.115L0.062,0.012C0.062,0.095,0.013,0.259,0.141,0.239C0.268,0.219,0.26,-0.004,0.193,-0.072C-0.054,-0.306,-0.268,0.306,0.053,0.167C0.086,0.032,-0.13,0.016,-0.125,0.175" />
+                  </g>
+                  <g transform="translate(24.518,9.215)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.093,2.746C0.149,2.535,0.193,2.242,0.157,2.018C0.113,1.745,-0.014,1.565,-0.026,1.283C-0.038,1.036,0.018,0.798,-0.026,0.551C-0.074,0.268,-0.169,0.065,-0.181,-0.224C-0.193,-0.514,-0.161,-0.81,-0.157,-1.099C-0.157,-1.664,0.038,-2.158,0.061,-2.746" />
+                  </g>
+                  <g transform="translate(16.343,7.284)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.579,-4.2C-1.948,-3.929,-1.758,-3.141,-1.833,-2.744C-1.953,-2.119,-2.188,-1.598,-2.195,-0.954C-2.203,-0.318,-2.227,0.322,-2.232,0.959C-2.235,1.468,-2.351,1.846,-2.414,2.343C-2.477,2.839,-2.282,3.373,-2.112,3.85C-1.977,3.695,-1.571,4.161,-1.396,4.149C-0.713,4.109,-0.044,4.097,0.645,4.113C0.982,4.12,1.32,4.124,1.654,4.137C1.921,4.145,2.216,4.2,2.477,4.128" />
+                  </g>
+                  <g transform="translate(32.644,7.785)">
+                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.663,-3.592C2.642,-3.815,2.105,-3.798,1.954,-3.794C1.791,-3.794,1.628,-3.783,1.465,-3.794C1.27,-3.811,1.091,-3.882,0.9,-3.918C0.168,-4.044,-0.233,-3.656,-0.746,-3.281C-1.295,-2.884,-1.617,-2.431,-1.852,-1.822C-2.051,-1.309,-2.11,-0.76,-2.357,-0.263C-2.428,-0.116,-2.516,0.023,-2.56,0.178C-2.587,0.279,-2.6,0.382,-2.604,0.486C-2.62,0.755,-2.623,1.03,-2.635,1.301C-2.639,1.384,-2.663,1.491,-2.635,1.574C-2.604,1.671,-2.508,1.762,-2.456,1.845C-2.297,2.091,-2.138,2.335,-1.987,2.585C-1.876,2.768,-1.78,2.966,-1.637,3.125C-1.51,3.266,-1.359,3.388,-1.224,3.52C-1.128,3.615,-1.037,3.698,-0.913,3.754C-0.834,3.79,-0.75,3.814,-0.671,3.833C-0.516,3.874,-0.361,3.889,-0.201,3.901C0.141,3.93,0.475,4.044,0.822,4.04C1.107,4.04,1.37,4.029,1.652,3.982" />
+                  </g>
+                </g>
+              </g>
+            </svg>
           </div>,
           document.body,
         )}
@@ -411,6 +766,38 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           transform: translateY(-50%);
         }
 
+        /* ── O click trigger ──────────────────────────────────── */
+        .hero-o-trigger {
+          position: relative;
+          cursor: pointer;
+          display: inline;
+          pointer-events: auto;
+          transition: color 0.3s ease;
+          outline: none;
+        }
+        .hero-o-trigger:hover {
+          color: ${COLORS.accent};
+        }
+        .hero-o-trigger:focus-visible {
+          color: ${COLORS.accent};
+        }
+        .hero-click-svg {
+          position: absolute;
+          top: 70%;
+          left: 50%;
+          width: clamp(55px, 7vw, 90px);
+          height: auto;
+          pointer-events: none;
+          color: ${COLORS.primary};
+          opacity: 0;
+          z-index: 20;
+        }
+        @media (max-width: 768px) {
+          .hero-click-svg {
+            width: clamp(40px, 10vw, 60px);
+          }
+        }
+
         /* ── Navigation ────────────────────────────────────────── */
         .hero-site-navigation {
           position: absolute;
@@ -451,7 +838,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         /* ── Engineer text ─────────────────────────────────────── */
         :global(.hero-engineer-text) {
-          font-family: ${FONTS.script};
+          font-family: ${FONTS.handwritten};
           color: ${COLORS.primary};
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;

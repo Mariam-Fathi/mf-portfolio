@@ -130,6 +130,7 @@ function buildDotTimeline(
   svgA2: SVGTSpanElement,
   svgM2: SVGTSpanElement,
   onComplete: () => void,
+  skipIntro = false,
 ): gsap.core.Timeline {
   const { iScreenX, iScreenY, a2ScreenX, a2ScreenY, m2ScreenX, m2ScreenY, finalDotSize } = pos;
   const d = finalDotSize;
@@ -170,18 +171,36 @@ function buildDotTimeline(
   // Single flat timeline — no nesting, no immediateRender (matches old code)
   const tl = gsap.timeline({ paused: true });
 
-  // ── Phase 1: Hold steady on "ı" in original colour ──────────────
-  tl.to(dot, { duration: 0.6 });
+  if (!skipIntro) {
+    // ── Phase 1: Hold steady on "ı" in original colour ────────────
+    tl.to(dot, { duration: 0.6 });
 
-  // ── Phase 2: Wiggle — micro-struggle before breaking free ────────
-  tl.to(dot, {
-    keyframes: [
-      // Tiny upward attempt — stuck
-      { y: iScreenY - 4, scaleY: 1.04, duration: 0.1, ease: "power2.out" },
-      { y: iScreenY, scaleY: 0.96, duration: 0.08, ease: "power2.in" },
-      { scaleY: 1, duration: 0.05, ease: "power1.out" },
-    ],
-  });
+    // ── Phase 2: Wiggle — micro-struggle before breaking free ──────
+    tl.to(dot, {
+      keyframes: [
+        { y: iScreenY - 4, scaleY: 1.04, duration: 0.1, ease: "power2.out" },
+        { y: iScreenY, scaleY: 0.96, duration: 0.08, ease: "power2.in" },
+        { scaleY: 1, duration: 0.05, ease: "power1.out" },
+      ],
+    });
+  } else {
+    // ── Click-reaction: wiggle → colour shift → then break free ───
+    // Aggressive wiggle — the dot is reacting to the click
+    tl.to(dot, {
+      keyframes: [
+        { y: iScreenY - 5, scaleY: 1.06, scaleX: 0.94, duration: 0.08, ease: "power3.out" },
+        { y: iScreenY + 2, scaleY: 0.92, scaleX: 1.08, duration: 0.06, ease: "power3.in" },
+        { y: iScreenY - 3, scaleY: 1.03, scaleX: 0.97, duration: 0.06, ease: "power2.out" },
+        { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" },
+      ],
+    });
+    // Colour shift — primary → accent (the dot is "activating")
+    tl.to(dot, {
+      backgroundColor: COLORS.accent,
+      duration: 0.15,
+      ease: "power2.inOut",
+    });
+  }
 
   // ── Phase 3: Break free — realistic squash-and-stretch physics ──
   tl.to(dot, {
@@ -295,6 +314,7 @@ export function useDotAnimation(
   isActive: boolean,
   isMariamReady: boolean,
   isMobile: boolean,
+  shouldAnimate: boolean,
 ): { isDotAnimationStarted: boolean; isDotAnimationComplete: boolean } {
   const [isDotStarted, setIsDotStarted] = useState(false);
   const [isDotComplete, setIsDotComplete] = useState(false);
@@ -338,6 +358,9 @@ export function useDotAnimation(
       return;
     }
 
+    // ── Wait for user click ─────────────────────────────────────
+    if (!shouldAnimate) return;
+
     // ── Calculate fresh positions ────────────────────────────────
     const pos = calculatePositions(svgI, svgA2, svgM2);
     cachedPositions = pos;
@@ -356,31 +379,35 @@ export function useDotAnimation(
     }
 
     // ── Desktop: play animation ──────────────────────────────────
+    // If the dot is already visible (pre-shown as click target), skip
+    // the intro hold/wiggle and blur — jump straight into the action.
+    const dotAlreadyVisible =
+      dot.style.display === "block" && parseFloat(dot.style.opacity || "0") > 0;
+    const startDelay = dotAlreadyVisible ? 0 : 200;
+
     const tid = setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const tl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
             setIsDotComplete(true);
-          });
-          // Match the hero section's blur-to-clear entrance so the
-          // dot (a portal on document.body) doesn't pop in abruptly.
-          // No extra delay — the surrounding setTimeout(200) already
-          // accounts for the same ~0.2 s offset the hero uses.
-          gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
-          gsap.to(dot, {
-            opacity: 1,
-            filter: "blur(0px)",
-            duration: 0.8,
-            ease: "power2.out",
-          });
+          }, dotAlreadyVisible);
+          if (!dotAlreadyVisible) {
+            gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
+            gsap.to(dot, {
+              opacity: 1,
+              filter: "blur(0px)",
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          }
           tl.play();
           setIsDotStarted(true);
         });
       });
-    }, 200);
+    }, startDelay);
 
     return () => clearTimeout(tid);
-  }, [isActive, isMariamReady, isMobile, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
+  }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
 
   // ── Resize handler — recalculate positions ─────────────────────
   useEffect(() => {

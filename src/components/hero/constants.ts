@@ -13,6 +13,7 @@ export const FONTS = {
   display: '"Momo Trust Display", "Stack Sans", sans-serif',
   body: '"Space Grotesk", "Inter", sans-serif',
   script: '"Floralis Couture", cursive',
+  handwritten: '"Handwritten", cursive',
 } as const;
 
 // ── Z-index layering ────────────────────────────────────────────────

@@ -62,7 +62,7 @@ function restoreFinalState(
 // ── Hook ─────────────────────────────────────────────────────────────
 export function usePortfolioAnimation(
   headerRef: RefObject<HTMLDivElement | null>,
-  isDotAnimationStarted: boolean,
+  shouldAnimate: boolean,
   isActive: boolean,
   isMobile: boolean,
 ): { isPortfolioAnimationComplete: boolean } {
@@ -97,7 +97,7 @@ export function usePortfolioAnimation(
     }
 
     // ── Wait for dot animation to start ──────────────────────────
-    if (!isDotAnimationStarted) return;
+    if (!shouldAnimate) return;
 
     // ── Cached: jump to final state ──────────────────────────────
     if (cachedData && dataCalculated) {
@@ -330,7 +330,7 @@ export function usePortfolioAnimation(
       tl.kill();
       window.removeEventListener("resize", handleResize);
     };
-  }, [isActive, isDotAnimationStarted, isMobile, headerRef]);
+  }, [isActive, shouldAnimate, isMobile, headerRef]);
 
   return { isPortfolioAnimationComplete: isComplete };
 }
