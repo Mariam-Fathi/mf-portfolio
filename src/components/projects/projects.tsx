@@ -307,10 +307,10 @@ export default function GalleryShowcase({
                         background: colors.background,
                       }}
                     >
-                  {/* Links Section - Aligned with navigation Y position */}
+                  {/* Links Section — fixed at nav Y on desktop, in-flow on mobile */}
                   {project.links.length > 0 && (
                     <div
-                      className="absolute left-6 md:left-8 lg:left-12 flex flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-start"
+                      className="hidden lg:flex absolute left-6 md:left-8 lg:left-12 flex-wrap gap-x-4 md:gap-x-6 gap-y-2 md:gap-y-3 items-baseline justify-start"
                       style={{
                         position: linksYPosition !== null ? "fixed" : "absolute",
                         top: linksYPosition !== null ? `${linksYPosition}px` : undefined,
@@ -318,97 +318,99 @@ export default function GalleryShowcase({
                         zIndex: 20,
                       }}
                     >
-                        {project.links.map((link, linkIndex) => {
-                          // Link color matches the headline color
-                          const linkColor = colors.headline;
-                          // Consistent styling for all links - same size as nav links
-                          const linkClassName = "project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
-                          const linkStyle = { 
-                            fontFamily: '"Space Grotesk", "Inter", sans-serif',
-                          };
+                      {project.links.map((link, linkIndex) => {
+                        const linkColor = colors.headline;
+                        const linkClassName = "project-link uppercase tracking-[0.15em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
+                        const linkStyle = { fontFamily: '"Space Grotesk", "Inter", sans-serif' };
 
-                          // Handle grouped links (like Kaggle Notebooks)
-                          if (link.isGrouped && link.groupedLinks) {
-                            const prefix = link.name.split(":")[0];
-                            return (
-                              <div
-                                key={linkIndex}
-                                className="project-link uppercase tracking-[0.12em] md:tracking-[0.15em] font-medium"
-                                style={{ color: linkColor, ...linkStyle }}
-                              >
-                                <span>{prefix}: </span>
-                                {link.groupedLinks.map((groupedLink, idx) => (
-                                  <React.Fragment key={idx}>
-                                    <a
-                                      href={groupedLink.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="project-link transition-opacity hover:opacity-70 inline-flex items-center gap-1"
-                                      style={{ color: linkColor, ...linkStyle }}
-                                    >
-                                      [{idx + 1}]
-                                      <ExternalLink className="w-3 h-3" />
-                                    </a>
-                                    {idx < link.groupedLinks!.length - 1 && ", "}
-                                  </React.Fragment>
-                                ))}
-                              </div>
-                            );
-                          }
-
+                        if (link.isGrouped && link.groupedLinks) {
+                          const prefix = link.name.split(":")[0];
                           return (
-                            <a
-                              key={linkIndex}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={linkClassName}
-                              style={{ color: linkColor, ...linkStyle }}
-                            >
-                              {link.name}
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
+                            <div key={linkIndex} className="project-link uppercase tracking-[0.15em] font-medium" style={{ color: linkColor, ...linkStyle }}>
+                              <span>{prefix}: </span>
+                              {link.groupedLinks.map((groupedLink, idx) => (
+                                <React.Fragment key={idx}>
+                                  <a href={groupedLink.url} target="_blank" rel="noopener noreferrer" className="project-link transition-opacity hover:opacity-70 inline-flex items-center gap-1" style={{ color: linkColor, ...linkStyle }}>
+                                    [{idx + 1}]<ExternalLink className="w-3 h-3" />
+                                  </a>
+                                  {idx < link.groupedLinks!.length - 1 && ", "}
+                                </React.Fragment>
+                              ))}
+                            </div>
                           );
-                        })}
+                        }
+                        return (
+                          <a key={linkIndex} href={link.url} target="_blank" rel="noopener noreferrer" className={linkClassName} style={{ color: linkColor, ...linkStyle }}>
+                            {link.name}<ExternalLink className="w-3 h-3" />
+                          </a>
+                        );
+                      })}
                     </div>
                   )}
 
-
-                  {/* Content Section - Aligned with number's right edge */}
+                  {/* Content Section */}
                   <div className="flex-1 flex flex-col lg:flex-row lg:items-end gap-6 md:gap-8">
-                    {/* Text Section - Top on mobile, right on desktop */}
-                          <div
-                      className="flex flex-col gap-3 md:gap-4 text-left flex-1 pb-6 lg:pb-6 order-1 lg:order-2"
-                            style={{
-                              fontFamily: '"Space Grotesk", "Inter", sans-serif',
-                      }}
+                    {/* Text Section */}
+                    <div
+                      className="flex flex-col gap-3 md:gap-4 text-left flex-1 pb-6 lg:pb-6 order-1 lg:order-2 mt-10 lg:mt-0"
+                      style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                     >
                       {/* Role */}
-                            <p
-                              className="text-[10px] md:text-xs tracking-[0.35em] uppercase"
-                              style={{ color: colors.link }}
-                            >
-                              {project.role}
-                            </p>
+                      <p
+                        className="text-[10px] md:text-xs tracking-[0.35em] uppercase"
+                        style={{ color: colors.link }}
+                      >
+                        {project.role}
+                      </p>
 
                       {/* Project Title */}
-                            <h3
+                      <h3
                         className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-semibold uppercase tracking-[0.15em] md:tracking-[0.2em] leading-tight"
-                              style={{ 
-                                fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-                                color: colors.headline 
-                              }}
-                            >
-                              {project.title}
-                            </h3>
+                        style={{ fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif', color: colors.headline }}
+                      >
+                        {project.title}
+                      </h3>
 
                       {/* Short Description */}
-                            <p
+                      <p
                         className="text-xs md:text-sm leading-relaxed font-light max-w-2xl"
-                              style={{ color: colors.body }}
-                            >
-                              {project.description}
-                            </p>
+                        style={{ color: colors.body }}
+                      >
+                        {project.description}
+                      </p>
+
+                      {/* Links — in-flow below description on mobile only */}
+                      {project.links.length > 0 && (
+                        <div className="flex lg:hidden flex-wrap gap-x-4 gap-y-2 items-baseline mt-2">
+                          {project.links.map((link, linkIndex) => {
+                            const linkColor = colors.headline;
+                            const linkClassName = "project-link-mobile uppercase tracking-[0.12em] font-medium transition-opacity hover:opacity-70 inline-flex items-center gap-1";
+                            const linkStyle = { fontFamily: '"Space Grotesk", "Inter", sans-serif' };
+
+                            if (link.isGrouped && link.groupedLinks) {
+                              const prefix = link.name.split(":")[0];
+                              return (
+                                <div key={linkIndex} className="project-link-mobile uppercase tracking-[0.12em] font-medium" style={{ color: linkColor, ...linkStyle }}>
+                                  <span>{prefix}: </span>
+                                  {link.groupedLinks.map((groupedLink, idx) => (
+                                    <React.Fragment key={idx}>
+                                      <a href={groupedLink.url} target="_blank" rel="noopener noreferrer" className="project-link-mobile transition-opacity hover:opacity-70 inline-flex items-center gap-1" style={{ color: linkColor, ...linkStyle }}>
+                                        [{idx + 1}]<ExternalLink className="w-3 h-3" />
+                                      </a>
+                                      {idx < link.groupedLinks!.length - 1 && ", "}
+                                    </React.Fragment>
+                                  ))}
+                                </div>
+                              );
+                            }
+                            return (
+                              <a key={linkIndex} href={link.url} target="_blank" rel="noopener noreferrer" className={linkClassName} style={{ color: linkColor, ...linkStyle }}>
+                                {link.name}<ExternalLink className="w-3 h-3" />
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* Big Project Number - Below text on mobile, left on desktop */}
@@ -435,12 +437,10 @@ export default function GalleryShowcase({
       </div>
       <style jsx>{`
         .project-link {
-          font-size: clamp(0.4rem, 0.6vw, 0.55rem);
+          font-size: clamp(0.6rem, 0.8vw, 0.75rem);
         }
-        @media (min-width: 768px) {
-          .project-link {
-            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
-          }
+        .project-link-mobile {
+          font-size: clamp(0.55rem, 2.5vw, 0.75rem);
         }
       `}</style>
     </section>
