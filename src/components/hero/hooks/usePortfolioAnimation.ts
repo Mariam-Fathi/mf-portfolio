@@ -224,7 +224,7 @@ export function usePortfolioAnimation(
       delay: 0.35,
     });
 
-    // Rotation with organic overshoot + O pushes simultaneously
+    // Rotation with organic overshoot — O reacts like the I pushed it
     tl.to(iEl, {
       scaleX: 1,
       scaleY: 1,
@@ -234,16 +234,19 @@ export function usePortfolioAnimation(
       transformOrigin: "center center",
       onStart: () => {
         if (iWidth > 0) {
+          // O reacts after a beat — the I needs to rotate enough
+          // to physically encroach on the O's space before it budges
           gsap.to(oEl, {
             x: iWidth,
-            duration: TIMING.portfolioRotate * 0.85,
-            ease: "power3.inOut",
+            delay: TIMING.portfolioRotate * 0.15,
+            duration: TIMING.portfolioRotate * 0.7,
+            ease: "power2.out",
           });
         }
       },
     });
 
-    // Step 3: I fades + morphs into line (crossfade)
+    // Step 3: I fades + morphs into line (after landing horizontally)
     tl.to(iEl, {
       opacity: 0,
       duration: 0.3,
@@ -259,7 +262,7 @@ export function usePortfolioAnimation(
         gsap.set(lineEl, { opacity: 0, x: iOriginalPosition, width: 0, transformOrigin: "left center" });
         gsap.to(lineEl, { opacity: 1, duration: 0.2, ease: "power2.out" });
       },
-    }, "-=0.4");
+    }, "+=0.35");
 
     // Step 4: Expand line + slide O to end
     tl.call(() => {

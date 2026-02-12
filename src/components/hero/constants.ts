@@ -34,7 +34,7 @@ export const TIMING = {
   dotJump: 0.7,
   dotArc: 0.4,
   portfolioFade: 0.3,
-  portfolioRotate: 0.8,
+  portfolioRotate: 1.4,
   portfolioExpand: 2.5,
   typewriterPerChar: 0.05,
   blurReveal: 1.2,
