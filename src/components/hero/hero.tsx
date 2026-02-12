@@ -197,12 +197,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       cursor: "pointer",
       transformOrigin: "center center",
     });
+    // Start blurred to match the hero container's blur-to-clear entrance
+    // (page.tsx: 0.8s duration, 0.2s delay on first load).
+    // The dot is a portal on document.body so it doesn't inherit the
+    // hero div's filter — we replicate the same animation here.
     gsap.set(dot, {
       x: baseX,
       y: baseY,
-      opacity: 1,
+      opacity: 0,
+      filter: "blur(15px)",
       rotation: 0,
       scale: 1,
+    });
+    gsap.to(dot, {
+      opacity: 1,
+      filter: "blur(0px)",
+      duration: 0.8,
+      delay: 0.2,
+      ease: "power2.out",
     });
 
     // Hover wiggle — dot struggles to break free
