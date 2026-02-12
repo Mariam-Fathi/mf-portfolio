@@ -2,17 +2,20 @@ import { useState, useEffect } from "react";
 import { BREAKPOINTS } from "../constants";
 
 /**
- * Reactive hook — triggers re-render when the breakpoint is crossed.
- * Defaults to the `lg` (1024 px) breakpoint.
+ * Reactive hook — triggers re-render only when the breakpoint is crossed.
+ * Uses `matchMedia` instead of a resize listener so the callback fires
+ * once per threshold crossing, not on every pixel of resize.
  */
 export function useIsMobile(breakpoint = BREAKPOINTS.lg): boolean {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < breakpoint);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    setIsMobile(mql.matches);
+
+    const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
   }, [breakpoint]);
 
   return isMobile;

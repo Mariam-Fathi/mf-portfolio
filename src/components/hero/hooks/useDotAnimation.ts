@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import gsap from "gsap";
 import { COLORS, TIMING } from "../constants";
 import { checkIsMobile } from "./useIsMobile";
@@ -17,40 +17,6 @@ export function resetDotCache() {
 
 export function hasDotAnimationEverCompleted() {
   return animationEverCompleted;
-}
-
-// ── Measure an individual SVG letter for positioning ─────────────────
-function measureLetterPosition(
-  svg: SVGSVGElement,
-  letter: string,
-  index: number,
-  textX: number,
-  textY: number,
-  fontSize: number,
-  fontFamily: string,
-  dominantBaseline: string,
-) {
-  const letters = ["M", "a", "r", "i", "a", "m"];
-  let cumulativeX = 0;
-
-  for (let i = 0; i < index; i++) {
-    const temp = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    temp.setAttribute("font-size", `${fontSize}px`);
-    temp.setAttribute("font-family", fontFamily);
-    temp.setAttribute("font-weight", "700");
-    temp.setAttribute("letter-spacing", "0");
-    temp.setAttribute("x", textX.toString());
-    temp.setAttribute("y", textY.toString());
-    temp.setAttribute("dominant-baseline", dominantBaseline);
-    temp.setAttribute("text-anchor", "start");
-    temp.textContent = letters[i];
-    temp.style.visibility = "hidden";
-    svg.appendChild(temp);
-    cumulativeX += temp.getBBox().width;
-    svg.removeChild(temp);
-  }
-
-  return { x: textX + cumulativeX };
 }
 
 // ── Calculate dot positions from SVG tspan elements ──────────────────
@@ -143,30 +109,35 @@ function buildDotTimeline(
   const dotFallLight = "#E8C4BC";     // light during new-dot fall
   const dotFallMid = "#D09890";       // mid during new-dot bounce
 
-  // Prepare the dot element — starts in the primary (text) colour
-  Object.assign(dot.style, {
-    width: `${d}px`,
-    height: `${d}px`,
-    borderRadius: "50%",
-    backgroundColor: COLORS.primary,
-    position: "fixed",
-    top: "0px",
-    left: "0px",
-    opacity: "1",
-    display: "block",
-    visibility: "visible",
-    pointerEvents: "none",
-    transformOrigin: "center center",
-  });
-
-  // Start ON the "ı" position (the dot is already sitting on the letter)
-  gsap.set(dot, {
-    x: iScreenX - d / 2,
-    y: iScreenY,
-    rotation: 0,
-    scale: 1,
-    opacity: 1,
-  });
+  // Prepare the dot element
+  // When skipIntro is true the dot is already visible with correct size/pos
+  // from the pre-show effect — only reset what the timeline actually needs.
+  if (!skipIntro) {
+    Object.assign(dot.style, {
+      width: `${d}px`,
+      height: `${d}px`,
+      borderRadius: "50%",
+      backgroundColor: COLORS.primary,
+      position: "fixed",
+      top: "0px",
+      left: "0px",
+      opacity: "1",
+      display: "block",
+      visibility: "visible",
+      pointerEvents: "none",
+      transformOrigin: "center center",
+    });
+    gsap.set(dot, {
+      x: iScreenX - d / 2,
+      y: iScreenY,
+      rotation: 0,
+      scale: 1,
+      opacity: 1,
+    });
+  } else {
+    // Ensure non-interactive during animation
+    dot.style.pointerEvents = "none";
+  }
 
   // Single flat timeline — no nesting, no immediateRender (matches old code)
   const tl = gsap.timeline({ paused: true });
@@ -223,7 +194,7 @@ function buildDotTimeline(
   tl.to(dot, { y: a2ScreenY + 10, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" });
   tl.to(dot, {
     y: a2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
-    onComplete: () => gsap.to(svgA2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
+    onComplete: () => { gsap.to(svgA2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
   });
   tl.to(dot, { scaleY: 1, duration: 0.1 });
 
@@ -235,7 +206,7 @@ function buildDotTimeline(
       { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" },
       {
         y: m2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
-        onComplete: () => gsap.to(svgM2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
+        onComplete: () => { gsap.to(svgM2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
       },
       { scaleY: 1, duration: 0.1 },
     ],
@@ -284,7 +255,7 @@ function buildDotTimeline(
       { y: iScreenY + 30, scaleY: 0.7, backgroundColor: dotFallMid, duration: TIMING.dotBounce, ease: "power2.out" },
       {
         y: iScreenY, scaleY: 1, backgroundColor: dotBase, duration: TIMING.dotSquash, ease: "power2.out",
-        onComplete: () => gsap.to(svgI, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }),
+        onComplete: () => { gsap.to(svgI, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
       },
     ],
   });
@@ -385,10 +356,12 @@ export function useDotAnimation(
       dot.style.display === "block" && parseFloat(dot.style.opacity || "0") > 0;
     const startDelay = dotAlreadyVisible ? 0 : 200;
 
+    let activeTl: gsap.core.Timeline | null = null;
+
     const tid = setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          const tl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
+          activeTl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
             setIsDotComplete(true);
           }, dotAlreadyVisible);
           if (!dotAlreadyVisible) {
@@ -400,13 +373,19 @@ export function useDotAnimation(
               ease: "power2.out",
             });
           }
-          tl.play();
+          activeTl.play();
           setIsDotStarted(true);
         });
       });
     }, startDelay);
 
-    return () => clearTimeout(tid);
+    return () => {
+      clearTimeout(tid);
+      if (activeTl) {
+        activeTl.kill();
+        activeTl = null;
+      }
+    };
   }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
 
   // ── Resize handler — recalculate positions ─────────────────────

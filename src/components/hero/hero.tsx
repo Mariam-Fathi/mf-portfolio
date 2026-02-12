@@ -143,7 +143,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   }, [isOClicked]);
 
   // ── Dot click prompt on "ı" ─────────────────────────────────
-  // Calculate "ı" dot position after Mariam SVG is ready
+  // Calculate "ı" dot position after Mariam SVG is ready.
+  // Debounced on resize to avoid layout thrash on every pixel.
   useEffect(() => {
     if (!isMariamReady || !svgIRef.current) return;
     const updatePos = () => {
@@ -159,8 +160,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     };
     updatePos();
-    window.addEventListener("resize", updatePos);
-    return () => window.removeEventListener("resize", updatePos);
+
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const debouncedUpdate = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updatePos, 150);
+    };
+    window.addEventListener("resize", debouncedUpdate);
+    return () => {
+      window.removeEventListener("resize", debouncedUpdate);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, [isMariamReady]);
 
   // Pre-show the actual dot at "ı" position before click
@@ -528,7 +538,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               right: "clamp(0.5rem, 2vw, 2rem)",
               color: COLORS.primary,
               fontFamily: FONTS.handwritten,
-              fontSize: checkIsMobile() ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 6vw, 6rem)",
+              fontSize: isMobile ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 6vw, 6rem)",
               zIndex: Z_LAYERS.engineerText,
               pointerEvents: "none",
               whiteSpace: "nowrap",

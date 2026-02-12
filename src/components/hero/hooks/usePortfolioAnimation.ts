@@ -310,18 +310,33 @@ export function usePortfolioAnimation(
       });
     });
 
-    // Resize handler
-    let animationDone = false;
-    const onComplete = () => { animationDone = true; };
+    // Resize handler — uses `everCompleted` (module-level) which is set
+    // by the gsap.to(oEl) onComplete callback above.
     const handleResize = () => {
-      if (animationDone && oEl && lineEl) {
+      if (everCompleted && oEl && lineEl && cachedData) {
         const cRect = headerRef.current?.getBoundingClientRect();
         if (!cRect) return;
         const padding = window.innerWidth < 768 ? 16 : 32;
-        const newEnd = cRect.width - padding;
-        gsap.set(oEl, { x: newEnd });
-        const lineStart = iOriginalPosition || (gsap.getProperty(lineEl, "x") as number);
-        gsap.set(lineEl, { width: Math.max(0, newEnd - lineStart) });
+        const absoluteEnd = cRect.width - padding;
+
+        const portfolRect = (headerRef.current?.querySelector(
+          ".hero-cover-title-portfol",
+        ) as HTMLElement | null)?.getBoundingClientRect();
+        if (!portfolRect) return;
+
+        const oWidth = oEl.getBoundingClientRect().width;
+        const oFinalLeft = absoluteEnd - oWidth / 2;
+        const lEnd = portfolRect.right - cRect.left;
+        const gap = Math.max(0, (cachedData.iOriginalPosition) - lEnd);
+        const lineEndPos = oFinalLeft - gap - 10;
+        const oFinalX = oFinalLeft - cachedData.oStartX + 40;
+        const finalLineWidth = Math.max(0, Math.min(lineEndPos - cachedData.iOriginalPosition, cRect.width - cachedData.iOriginalPosition));
+
+        gsap.set(oEl, { x: oFinalX });
+        gsap.set(lineEl, { width: finalLineWidth });
+
+        // Update cache so subsequent restores use new dimensions
+        cachedData = { ...cachedData, oFinalX, lineFinalWidth: finalLineWidth, containerWidth: cRect.width };
       }
     };
     window.addEventListener("resize", handleResize);

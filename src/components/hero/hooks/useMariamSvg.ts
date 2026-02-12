@@ -25,7 +25,15 @@ function getViewportHeight(): number {
 }
 
 // ── Utility: measure base text width at a reference font size ────────
+// Cached at module level — the ratio is deterministic for a given font
+// and never needs to be re-measured (avoids repeated DOM thrashing).
+let cachedWidthPerFontSize: number | null = null;
+
 function measureBaseTextWidth(): { widthPerFontSize: number } {
+  if (cachedWidthPerFontSize !== null) {
+    return { widthPerFontSize: cachedWidthPerFontSize };
+  }
+
   const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   tempSvg.style.cssText = "position:absolute;visibility:hidden;width:2000px;height:2000px";
   document.body.appendChild(tempSvg);
@@ -39,9 +47,9 @@ function measureBaseTextWidth(): { widthPerFontSize: number } {
   tempSvg.appendChild(tempText);
 
   const bbox = tempText.getBBox();
-  const widthPerFontSize = bbox.width / 200;
+  cachedWidthPerFontSize = bbox.width / 200;
   document.body.removeChild(tempSvg);
-  return { widthPerFontSize };
+  return { widthPerFontSize: cachedWidthPerFontSize };
 }
 
 

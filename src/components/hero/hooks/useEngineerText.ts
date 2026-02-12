@@ -80,7 +80,7 @@ export function useEngineerText(
     }, 150);
 
     return () => clearTimeout(tid);
-  }, [isDotAnimationComplete, engineerRef, svgRef]);
+  }, [isDotAnimationComplete, engineerRef]);
 
   // ── Position engineer text above Mariam on mobile ──────────────
   useEffect(() => {
