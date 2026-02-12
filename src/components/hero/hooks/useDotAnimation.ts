@@ -388,26 +388,34 @@ export function useDotAnimation(
     };
   }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
 
-  // ── Resize handler — recalculate positions ─────────────────────
+  // ── Resize handler — recalculate positions after Mariam re-layouts ──
   useEffect(() => {
     if (!isActive || !isMariamReady) return;
 
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
-      positionsCalculated = false;
-      cachedPositions = null;
+      if (resizeTimer) clearTimeout(resizeTimer);
+      // Wait for Mariam's 150ms debounce + 3-frame rAF chain to finish
+      resizeTimer = setTimeout(() => {
+        positionsCalculated = false;
+        cachedPositions = null;
 
-      if (animationEverCompleted && svgIRef.current && svgA2Ref.current && svgM2Ref.current && dotRef.current) {
-        requestAnimationFrame(() => {
-          const pos = calculatePositions(svgIRef.current!, svgA2Ref.current!, svgM2Ref.current!);
-          cachedPositions = pos;
-          positionsCalculated = true;
-          setDotAtFinal(dotRef.current!, pos);
-        });
-      }
+        if (animationEverCompleted && svgIRef.current && svgA2Ref.current && svgM2Ref.current && dotRef.current) {
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            const pos = calculatePositions(svgIRef.current!, svgA2Ref.current!, svgM2Ref.current!);
+            cachedPositions = pos;
+            positionsCalculated = true;
+            setDotAtFinal(dotRef.current!, pos);
+          }));
+        }
+      }, 250);
     };
 
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, [isActive, isMariamReady, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
 
   return { isDotAnimationStarted: isDotStarted, isDotAnimationComplete: isDotComplete };

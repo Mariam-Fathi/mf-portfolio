@@ -87,7 +87,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isMobile,
   );
 
-  useEngineerText(engineerTextRef, numberSevenRef, isDotAnimationComplete, isMariamReady);
+  useEngineerText(engineerTextRef, numberSevenRef, svgIRef, svgA2Ref, svgM2Ref, isDotAnimationComplete, isMariamReady);
   useHeroNavigation(navRef, portfolioHeaderRef, isPortfolioAnimationComplete);
 
   // ── Click prompt on "O" ──────────────────────────────────────
@@ -161,10 +161,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     };
     updatePos();
 
+    // Debounce > Mariam's 150ms + 3-frame rAF chain so "ı" position
+    // is fresh after the SVG re-layouts.
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const debouncedUpdate = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(updatePos, 150);
+      resizeTimer = setTimeout(() => {
+        requestAnimationFrame(() => requestAnimationFrame(updatePos));
+      }, 250);
     };
     window.addEventListener("resize", debouncedUpdate);
     return () => {
@@ -546,11 +550,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             className="hero-engineer-text"
             style={{
               position: "fixed",
-              bottom: "220px",
-              right: "clamp(0.5rem, 2vw, 2rem)",
+              top: 0,
+              right: 0,
               color: COLORS.primary,
               fontFamily: FONTS.handwritten,
-              fontSize: isMobile ? "clamp(1.5rem, 5vw, 3.5rem)" : "clamp(2rem, 6vw, 6rem)",
+              fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
               zIndex: Z_LAYERS.engineerText,
               pointerEvents: "none",
               whiteSpace: "nowrap",

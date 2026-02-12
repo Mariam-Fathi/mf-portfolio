@@ -12,7 +12,7 @@ export function resetMariamCache() {
   svgDataCalculated = false;
 }
 
-// ── Utility: get viewport height accounting for mobile browser chrome ─
+// ── Viewport height accounting for mobile browser chrome ────────────
 function getViewportHeight(): number {
   if (
     checkIsMobile() &&
@@ -24,15 +24,11 @@ function getViewportHeight(): number {
   return window.innerHeight;
 }
 
-// ── Utility: measure base text width at a reference font size ────────
-// Cached at module level — the ratio is deterministic for a given font
-// and never needs to be re-measured (avoids repeated DOM thrashing).
+// ── Measure base text width ratio (cached — font is deterministic) ──
 let cachedWidthPerFontSize: number | null = null;
 
-function measureBaseTextWidth(): { widthPerFontSize: number } {
-  if (cachedWidthPerFontSize !== null) {
-    return { widthPerFontSize: cachedWidthPerFontSize };
-  }
+function getWidthPerFontSize(): number {
+  if (cachedWidthPerFontSize !== null) return cachedWidthPerFontSize;
 
   const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   tempSvg.style.cssText = "position:absolute;visibility:hidden;width:2000px;height:2000px";
@@ -46,19 +42,128 @@ function measureBaseTextWidth(): { widthPerFontSize: number } {
   tempText.textContent = "Mariam";
   tempSvg.appendChild(tempText);
 
-  const bbox = tempText.getBBox();
-  cachedWidthPerFontSize = bbox.width / 200;
+  cachedWidthPerFontSize = tempText.getBBox().width / 200;
   document.body.removeChild(tempSvg);
-  return { widthPerFontSize: cachedWidthPerFontSize };
+  return cachedWidthPerFontSize;
 }
 
-
-// ── Apply cached or freshly-calculated SVG data ──────────────────────
-function applySvgLayout(
-  svg: SVGSVGElement,
-  data: MariamSvgData,
+// ── Bottom-align the text inside the SVG viewBox ────────────────────
+function alignTextToBottom(
+  textEl: SVGTextElement,
+  mariamHeight: number,
   isMobile: boolean,
 ) {
+  try {
+    const bbox = textEl.getBBox();
+    const bottomMargin = isMobile ? 5 : 0;
+    const target = mariamHeight - bottomMargin;
+    const yAdjustment = target - (bbox.y + bbox.height);
+    textEl.setAttribute("y", yAdjustment.toString());
+  } catch {
+    // Ignore — getBBox can throw if element is not rendered
+  }
+}
+
+// ── Core layout calculation ─────────────────────────────────────────
+// Extracted so it can be called from both the initial effect and the
+// resize handler without duplicating logic.
+function layoutMariam(
+  svg: SVGSVGElement,
+  portfolioHeaderRef: RefObject<HTMLDivElement | null>,
+  isMobile: boolean,
+  onDone?: () => void,
+) {
+  const portfolEl = portfolioHeaderRef.current?.querySelector(
+    ".hero-cover-title-portfol",
+  ) as HTMLElement | null;
+  if (!portfolEl) { onDone?.(); return; }
+
+  const screenHeight = getViewportHeight();
+  const screenWidth = window.innerWidth;
+  const portfolRect = portfolEl.getBoundingClientRect();
+  const mobileBottomPadding = isMobile ? 40 : 0;
+
+  const availableHeight = isMobile
+    ? Math.min(screenHeight * 0.3, 200)
+    : screenHeight - portfolRect.bottom - mobileBottomPadding;
+
+  const widthPerFontSize = getWidthPerFontSize();
+  let fontSize = (screenWidth - 2) / widthPerFontSize;
+  const mariamWidth = screenWidth;
+  const mariamHeight = availableHeight;
+  const padding = 10;
+
+  // Apply SVG container dimensions
+  svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
+  svg.setAttribute("width", `${mariamWidth}px`);
+  svg.setAttribute("height", `${mariamHeight}px`);
+  Object.assign(svg.style, {
+    position: "fixed",
+    left: "0px",
+    top: "auto",
+    bottom: `${mobileBottomPadding}px`,
+    margin: "0",
+    padding: "0",
+    height: `${mariamHeight}px`,
+    width: `${mariamWidth}px`,
+    overflow: "visible",
+  });
+
+  const textEl = svg.querySelector(".hero-mariam-text") as SVGTextElement | null;
+  if (!textEl) { onDone?.(); return; }
+
+  // Apply text attributes
+  textEl.setAttribute("x", "0");
+  textEl.setAttribute("y", `${mariamHeight}px`);
+  textEl.setAttribute("dominant-baseline", "baseline");
+  textEl.setAttribute("text-anchor", "start");
+  textEl.setAttribute("dx", "0");
+  textEl.setAttribute("font-size", `${fontSize}px`);
+  textEl.setAttribute("font-family", FONTS.display);
+  textEl.setAttribute("font-weight", "700");
+  textEl.setAttribute("letter-spacing", "0");
+
+  // Measure → scale → align → cache → done (3 rAF frames)
+  requestAnimationFrame(() => {
+    alignTextToBottom(textEl, mariamHeight, isMobile);
+
+    requestAnimationFrame(() => {
+      try {
+        const bbox = textEl.getBBox();
+        const widthScale = (screenWidth - 2) / bbox.width;
+        const heightScale = mariamHeight / bbox.height;
+        const scale = Math.min(widthScale, heightScale);
+
+        if (scale > 1.01 || scale < 0.99) {
+          fontSize *= scale;
+          textEl.setAttribute("font-size", `${fontSize}px`);
+        }
+
+        cachedSvgData = {
+          fontSize,
+          mariamWidth,
+          mariamHeight,
+          portfolBottom: portfolRect.bottom,
+          portfolLeft: portfolRect.left,
+          portfolFontSize: parseFloat(window.getComputedStyle(portfolEl).fontSize),
+          screenWidth,
+          screenHeight,
+        };
+        svgDataCalculated = true;
+
+        requestAnimationFrame(() => {
+          alignTextToBottom(textEl, mariamHeight, isMobile);
+          onDone?.();
+        });
+      } catch {
+        onDone?.();
+      }
+    });
+  });
+}
+
+// ── Apply cached data for instant restore ───────────────────────────
+function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: boolean) {
   const { fontSize, mariamWidth, mariamHeight } = data;
   const padding = 10;
   const bottomOffset = isMobile ? 40 : 0;
@@ -92,28 +197,6 @@ function applySvgLayout(
   }
 }
 
-// ── Bottom-align the text inside the SVG viewBox ─────────────────────
-function alignTextToBottom(
-  textEl: SVGTextElement,
-  mariamHeight: number,
-  isMobile: boolean,
-) {
-  try {
-    const bbox = textEl.getBBox();
-    const bottomMargin = isMobile ? 5 : 0;
-    const target = mariamHeight - bottomMargin;
-    const textBottom = bbox.y + bbox.height;
-    if (Math.abs(textBottom - target) > 0.1) {
-      textEl.setAttribute("y", (target - bbox.y - bbox.height + parseFloat(textEl.getAttribute("y") || "0")).toString());
-      // Simpler recalc: set y = target - (bbox.y + bbox.height) keeps bottom at target
-      const yAdjustment = target - (bbox.y + bbox.height);
-      textEl.setAttribute("y", yAdjustment.toString());
-    }
-  } catch {
-    // Ignore
-  }
-}
-
 // ── Hook ─────────────────────────────────────────────────────────────
 export function useMariamSvg(
   svgRef: RefObject<SVGSVGElement | null>,
@@ -127,131 +210,43 @@ export function useMariamSvg(
     const svg = svgRef.current;
     if (!svg || portfolWidth === 0 || !portfolioHeaderRef.current) return;
 
-    const portfolEl = portfolioHeaderRef.current.querySelector(
-      ".hero-cover-title-portfol",
-    ) as HTMLElement | null;
-    if (!portfolEl) return;
-
     const isMobile = checkIsMobile();
-    const mobileBottomPadding = isMobile ? 40 : 0;
-    const screenHeight = getViewportHeight();
-    const screenWidth = window.innerWidth;
 
-    // ── Use cache when screen size hasn't changed significantly ──
+    // ── Quick restore from cache (same screen size) ─────────────
     if (cachedSvgData && svgDataCalculated) {
-      const shouldRecalculate = isMobile && isActive;
+      const screenH = getViewportHeight();
+      const screenW = window.innerWidth;
       if (
-        !shouldRecalculate &&
-        Math.abs(screenHeight - cachedSvgData.screenHeight) <= 50 &&
-        Math.abs(screenWidth - cachedSvgData.screenWidth) <= 50
+        Math.abs(screenH - cachedSvgData.screenHeight) <= 50 &&
+        Math.abs(screenW - cachedSvgData.screenWidth) <= 50
       ) {
-        applySvgLayout(svg, cachedSvgData, isMobile);
+        applyCachedLayout(svg, cachedSvgData, isMobile);
         setIsMariamReady(true);
-        return;
-      }
-    }
-
-    // ── Fresh calculation ────────────────────────────────────────
-    const portfolRect = portfolEl.getBoundingClientRect();
-    const portfolBottom = portfolRect.bottom;
-    const portfolLeft = portfolRect.left;
-    const portfolFontSize = parseFloat(window.getComputedStyle(portfolEl).fontSize);
-
-    let availableHeight: number;
-    if (isMobile) {
-      availableHeight = Math.min(screenHeight * 0.3, 200);
-    } else {
-      availableHeight = screenHeight - portfolBottom - mobileBottomPadding;
-    }
-
-    const { widthPerFontSize } = measureBaseTextWidth();
-    const targetWidth = screenWidth - 2;
-    let fontSize = targetWidth / widthPerFontSize;
-
-    const mariamWidth = screenWidth;
-    const mariamHeight = availableHeight;
-    const padding = 10;
-
-    svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
-    svg.setAttribute("width", `${mariamWidth}px`);
-    svg.setAttribute("height", `${mariamHeight}px`);
-    Object.assign(svg.style, {
-      position: "fixed",
-      left: "0px",
-      top: "auto",
-      bottom: `${isMobile ? 40 : 0}px`,
-      margin: "0",
-      padding: "0",
-      height: `${mariamHeight}px`,
-      width: `${mariamWidth}px`,
-      overflow: "visible",
-    });
-
-    const textElement = svg.querySelector(".hero-mariam-text") as SVGTextElement | null;
-    if (!textElement) {
-      setTimeout(() => setIsMariamReady(true), 100);
-      return;
-    }
-
-    textElement.setAttribute("x", "0");
-    textElement.setAttribute("y", `${mariamHeight}px`);
-    textElement.setAttribute("dominant-baseline", "baseline");
-    textElement.setAttribute("text-anchor", "start");
-    textElement.setAttribute("dx", "0");
-    textElement.setAttribute("font-size", `${fontSize}px`);
-    textElement.setAttribute("font-family", FONTS.display);
-    textElement.setAttribute("font-weight", "700");
-    textElement.setAttribute("letter-spacing", "0");
-
-    // Measure → scale → align bottom → position M-texts → mark ready
-    requestAnimationFrame(() => {
-      alignTextToBottom(textElement, mariamHeight, isMobile);
-
-      requestAnimationFrame(() => {
-        try {
-          const bbox = textElement.getBBox();
-          const widthScale = (screenWidth - 2) / bbox.width;
-          const heightScale = mariamHeight / bbox.height;
-          const scale = Math.min(widthScale, heightScale);
-
-          if (scale > 1.01 || scale < 0.99) {
-            fontSize *= scale;
-            textElement.setAttribute("font-size", `${fontSize}px`);
-          }
-
-          // Cache calculated data
-          cachedSvgData = {
-            fontSize,
-            mariamWidth,
-            mariamHeight,
-            portfolBottom,
-            portfolLeft,
-            portfolFontSize,
-            screenWidth,
-            screenHeight,
-          };
-          svgDataCalculated = true;
-
-          // Final bottom alignment after font-size adjustment
-          requestAnimationFrame(() => {
-            alignTextToBottom(textElement, mariamHeight, isMobile);
-
-            setIsMariamReady(true);
-          });
-        } catch {
+        // Still attach resize handler below
+      } else {
+        // Screen changed — recalculate
+        svgDataCalculated = false;
+        cachedSvgData = null;
+        layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
           setIsMariamReady(true);
-        }
+        });
+      }
+    } else {
+      // ── Fresh calculation ──────────────────────────────────────
+      layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
+        setIsMariamReady(true);
       });
-    });
+    }
 
-    // ── Resize handler ──────────────────────────────────────────
+    // ── Resize handler — actually recalculates ──────────────────
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        if (isMobile && cachedSvgData) {
+        // Skip tiny changes on mobile (virtual keyboard, etc.)
+        if (checkIsMobile() && cachedSvgData) {
           const w = window.innerWidth;
-          const h = window.innerHeight;
+          const h = getViewportHeight();
           if (
             Math.abs(w - cachedSvgData.screenWidth) < 100 &&
             Math.abs(h - cachedSvgData.screenHeight) < 100
@@ -259,10 +254,11 @@ export function useMariamSvg(
             return;
           }
         }
+
         svgDataCalculated = false;
         cachedSvgData = null;
-        // Re-run the effect by toggling state — not ideal but simple
-      }, 300);
+        layoutMariam(svg, portfolioHeaderRef, checkIsMobile());
+      }, 150);
     };
 
     window.addEventListener("resize", handleResize);

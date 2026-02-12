@@ -5,8 +5,13 @@ import { checkIsMobile } from "./useIsMobile";
 // ── Module-level cache (survives unmount / remount) ─────────────────
 let engineerTextEverShown = false;
 
+// Cache the width-per-fontSize ratio so we only force one reflow for
+// the measurement instead of doing it on every resize.
+let cachedWidthRatio: number | null = null;
+
 /**
- * Animates the "Software Engineer" text with a write-on (clip reveal) effect.
+ * Animates the "Software Engineer" text with a write-on (clip reveal) effect
+ * and positions it dynamically above the "am" portion of "Mariam".
  *
  * On mobile the final state is applied immediately — no animation.
  * On subsequent visits (cache hit), the final state is restored instantly.
@@ -14,6 +19,9 @@ let engineerTextEverShown = false;
 export function useEngineerText(
   engineerRef: RefObject<HTMLDivElement | null>,
   svgRef: RefObject<SVGSVGElement | null>,
+  svgIRef: RefObject<SVGTSpanElement | null>,
+  svgA2Ref: RefObject<SVGTSpanElement | null>,
+  svgM2Ref: RefObject<SVGTSpanElement | null>,
   isDotAnimationComplete: boolean,
   isMariamReady: boolean,
 ) {
@@ -82,53 +90,92 @@ export function useEngineerText(
     return () => clearTimeout(tid);
   }, [isDotAnimationComplete, engineerRef]);
 
-  // ── Position engineer text above Mariam on mobile ──────────────
+  // ── Position & scale relative to the "am" in Mariam ────────────
+  // Uses getBBox() in SVG coordinates + viewBox transform to compute
+  // precise screen positions. tspan.getBoundingClientRect() is unreliable
+  // (includes ascender space), so we avoid it.
   useEffect(() => {
-    if (!checkIsMobile() || !isMariamReady) return;
-    const engineerEl = engineerRef.current;
+    if (!isMariamReady) return;
+    const el = engineerRef.current;
     const svg = svgRef.current;
-    if (!engineerEl || !svg) return;
+    const a2 = svgA2Ref.current;
+    const m2 = svgM2Ref.current;
+    if (!el || !svg || !a2 || !m2) return;
+
+    // Ensure text content exists for measurement
+    if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
+
+    // Compute the width-per-fontSize ratio once (forces one reflow)
+    if (cachedWidthRatio === null) {
+      const refSize = 48;
+      el.style.fontSize = `${refSize}px`;
+      const refWidth = el.getBoundingClientRect().width;
+      if (refWidth > 0) {
+        cachedWidthRatio = refWidth / refSize;
+      }
+    }
 
     const position = () => {
-      const mariamText = svg.querySelector(".hero-mariam-text") as SVGTextElement | null;
-      if (!mariamText) return;
+      const iEl = svgIRef.current;
+      if (!iEl || !a2 || !m2 || !el || cachedWidthRatio === null || cachedWidthRatio <= 0) return;
 
-      const svgRect = svg.getBoundingClientRect();
-      let textBBox: DOMRect;
-      try {
-        textBBox = mariamText.getBBox();
-      } catch {
-        return;
-      }
+      // Horizontal: use "am" getBoundingClientRect (left/right are reliable)
+      const a2Rect = a2.getBoundingClientRect();
+      const m2Rect = m2.getBoundingClientRect();
+      const amRightScreen = m2Rect.right;
+      const amWidth = amRightScreen - a2Rect.left;
 
-      const viewBox = svg.viewBox.baseVal;
-      const scaleY = viewBox.height > 0 ? svgRect.height / viewBox.height : 1;
-      const scaleX = viewBox.width > 0 ? svgRect.width / viewBox.width : 1;
+      // Vertical: use "ı" position — the same proven reference the dot uses.
+      // The dot sits at iRect.top + iRect.height * 0.19, so the engineer
+      // text bottom should align with that line.
+      const iRect = iEl.getBoundingClientRect();
+      const dotY = iRect.top + iRect.height * 0.19;
 
-      const mariamTop = svgRect.bottom - (viewBox.height - textBBox.y) * scaleY;
-      const engHeight = engineerEl.getBoundingClientRect().height;
-      const engTop = mariamTop - engHeight - 4;
+      if (amWidth <= 0) return;
 
-      const mariamRight = svgRect.left + (textBBox.x + textBBox.width) * scaleX;
-      const dist = window.innerWidth - mariamRight;
-      const right = Math.max(0.3, dist * 0.15);
+      // Scale font size so text width ≈ 85% of amWidth
+      const targetFontSize = (amWidth * 0.85) / cachedWidthRatio;
+      const minFontSize = checkIsMobile() ? 14 : 20;
+      el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
-      engineerEl.style.setProperty("top", `${engTop}px`, "important");
-      engineerEl.style.setProperty("bottom", "auto", "important");
-      engineerEl.style.setProperty("right", `${right}rem`, "important");
-      engineerEl.style.setProperty("transform", "translateY(0)", "important");
+      // Measure height after font resize (triggers sync reflow).
+      // Handwritten fonts have large ascender/descender space in the
+      // line box — roughly 30% is whitespace above the visible glyphs.
+      // Compensate by shifting down by that fraction.
+      const engRect = el.getBoundingClientRect();
+      const descenderOffset = engRect.height * 0.3;
+
+      // Center horizontally over "am"
+      const amCenterX = a2Rect.left + amWidth / 2;
+      const engLeft = amCenterX - engRect.width / 2;
+
+      el.style.setProperty("top", `${dotY - engRect.height + descenderOffset}px`, "important");
+      el.style.setProperty("bottom", "auto", "important");
+      el.style.setProperty("left", `${engLeft}px`, "important");
+      el.style.setProperty("right", "auto", "important");
     };
 
+    // Position immediately, then retry to catch late font loads
     requestAnimationFrame(position);
     const t1 = setTimeout(position, 100);
     const t2 = setTimeout(position, 300);
-    window.addEventListener("resize", position);
+
+    // Debounced resize handler — runs after Mariam's 150ms resize
+    // completes its 3-frame rAF chain (~200ms total).
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const onResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        requestAnimationFrame(() => requestAnimationFrame(position));
+      }, 250);
+    };
+    window.addEventListener("resize", onResize);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      window.removeEventListener("resize", position);
+      if (resizeTimer) clearTimeout(resizeTimer);
+      window.removeEventListener("resize", onResize);
     };
-  }, [isMariamReady, isDotAnimationComplete, engineerRef, svgRef]);
+  }, [isMariamReady, isDotAnimationComplete, engineerRef, svgRef, svgIRef, svgA2Ref, svgM2Ref]);
 }
-
