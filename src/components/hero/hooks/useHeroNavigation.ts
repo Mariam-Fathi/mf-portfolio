@@ -69,7 +69,20 @@ export function useHeroNavigation(
     }
 
     requestAnimationFrame(() => requestAnimationFrame(position));
-    window.addEventListener("resize", position);
-    return () => window.removeEventListener("resize", position);
+
+    // Debounced — waits for usePortfolioAnimation's resize handler
+    // to finish repositioning O and the line first.
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const onResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        requestAnimationFrame(() => requestAnimationFrame(position));
+      }, 300);
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, [isPortfolioAnimationComplete, navRef, portfolioHeaderRef]);
 }

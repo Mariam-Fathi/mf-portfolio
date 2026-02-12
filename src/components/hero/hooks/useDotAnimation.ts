@@ -30,8 +30,9 @@ function calculatePositions(
   const m2Rect = svgM2.getBoundingClientRect();
 
   const isMobile = checkIsMobile();
-  const baseDotSize = Math.max(iRect.width * 0.5, 64);
-  const dotSize = isMobile ? Math.min(baseDotSize * 0.6, 40) : baseDotSize;
+  // Use height (proportional to font size) rather than width (narrow for "ı")
+  const baseDotSize = iRect.height * 0.135;
+  const dotSize = isMobile ? baseDotSize * 0.6 : baseDotSize;
 
   return {
     iScreenX: iRect.left + iRect.width / 2,
@@ -48,8 +49,8 @@ function calculatePositions(
 
 // ── Place dot at its resting position on "ı" ─────────────────────────
 function setDotAtFinal(dot: HTMLDivElement, pos: DotPositions) {
-  const isMobile = checkIsMobile();
-  const size = isMobile ? Math.min(pos.finalDotSize * 0.6, 40) : pos.finalDotSize;
+  // finalDotSize is already mobile-adjusted from calculatePositions
+  const size = pos.finalDotSize;
 
   Object.assign(dot.style, {
     width: `${size}px`,

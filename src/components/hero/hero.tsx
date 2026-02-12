@@ -40,6 +40,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const clickTlRef = useRef<gsap.core.Timeline | null>(null);
   const [isDotClicked, setIsDotClicked] = useState(false);
   const isDotClickedRef = useRef(false);
+  const dotPreShownRef = useRef(false);
   const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
   const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
   const dotClickSvgRef = useRef<SVGSVGElement>(null);
@@ -151,8 +152,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       const iRect = svgIRef.current?.getBoundingClientRect();
       if (!iRect) return;
       const mobile = checkIsMobile();
-      const baseDotSize = Math.max(iRect.width * 0.5, 64);
-      const dotSize = mobile ? Math.min(baseDotSize * 0.6, 40) : baseDotSize;
+      const baseDotSize = iRect.height * 0.135;
+      const dotSize = mobile ? baseDotSize * 0.6 : baseDotSize;
       setDotClickPos({
         x: iRect.left + iRect.width / 2,
         y: iRect.top + iRect.height * 0.19,
@@ -177,7 +178,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     };
   }, [isMariamReady]);
 
-  // Pre-show the actual dot at "ı" position before click
+  // Pre-show the actual dot at "ı" position before click.
+  // Separates the one-time blur-in entrance from resize repositioning
+  // so the dot doesn't flash/re-animate whenever dotClickPos updates.
   useEffect(() => {
     if (!isMariamReady || isDotClicked || !dotRef.current || !dotClickPos) return;
     if (hasDotAnimationEverCompleted()) return;
@@ -187,6 +190,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     const baseY = dotClickPos.y;
     const baseX = dotClickPos.x - size / 2;
 
+    // Always keep size/position up-to-date (covers resize)
     Object.assign(dot.style, {
       display: "block",
       visibility: "visible",
@@ -201,25 +205,35 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       cursor: "pointer",
       transformOrigin: "center center",
     });
-    // Start blurred to match the hero container's blur-to-clear entrance
-    // (page.tsx: 0.8s duration, 0.2s delay on first load).
-    // The dot is a portal on document.body so it doesn't inherit the
-    // hero div's filter — we replicate the same animation here.
-    gsap.set(dot, {
-      x: baseX,
-      y: baseY,
-      opacity: 0,
-      filter: "blur(15px)",
-      rotation: 0,
-      scale: 1,
-    });
-    gsap.to(dot, {
-      opacity: 1,
-      filter: "blur(0px)",
-      duration: 0.8,
-      delay: 0.2,
-      ease: "power2.out",
-    });
+
+    if (!dotPreShownRef.current) {
+      // First time: blur-in to match the hero container's entrance
+      // (page.tsx: 0.8s duration, 0.2s delay on first load).
+      gsap.set(dot, {
+        x: baseX,
+        y: baseY,
+        opacity: 0,
+        filter: "blur(15px)",
+        rotation: 0,
+        scale: 1,
+      });
+      gsap.to(dot, {
+        opacity: 1,
+        filter: "blur(0px)",
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power2.out",
+        onComplete: () => { dotPreShownRef.current = true; },
+      });
+    } else {
+      // Resize: snap to new position/size without re-animating
+      gsap.set(dot, {
+        x: baseX,
+        y: baseY,
+        rotation: 0,
+        scale: 1,
+      });
+    }
 
     // Hover wiggle — dot struggles to break free
     let wiggleTl: gsap.core.Timeline | null = null;
@@ -246,9 +260,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       dot.removeEventListener("mouseenter", onMouseEnter);
       dot.removeEventListener("mouseleave", onMouseLeave);
       if (wiggleTl) wiggleTl.kill();
-      // Use the ref to avoid the stale closure hiding the dot
-      // when isDotClicked transitions from false → true
-      if (!isDotClickedRef.current && !hasDotAnimationEverCompleted()) {
+      // Don't hide on resize re-runs (dotPreShownRef stays true).
+      // Don't hide when isDotClicked transitions (animation takes over).
+      // Only hide if the dot was never fully shown (e.g. early unmount).
+      if (!isDotClickedRef.current && !hasDotAnimationEverCompleted() && !dotPreShownRef.current) {
         Object.assign(dot.style, {
           display: "none",
           opacity: "0",

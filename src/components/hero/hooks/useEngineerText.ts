@@ -125,7 +125,7 @@ export function useEngineerText(
       const refWidth = el.getBoundingClientRect().width;
       if (refWidth <= 0) return;
 
-      const targetFontSize = (amWidth / refWidth) * REF;
+      const targetFontSize = (amWidth / refWidth) * REF * 0.90;
       const minFontSize = checkIsMobile() ? 14 : 20;
       el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
@@ -134,7 +134,7 @@ export function useEngineerText(
       // line box — roughly 30% is whitespace above the visible glyphs.
       // Compensate by shifting down by that fraction.
       const engRect = el.getBoundingClientRect();
-      const descenderOffset = engRect.height * 0.3;
+      const descenderOffset = engRect.height * 0.4;
 
       // Center horizontally over "am"
       const amCenterX = a2Rect.left + amWidth / 2;
