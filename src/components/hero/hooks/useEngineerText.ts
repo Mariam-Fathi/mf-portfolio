@@ -133,8 +133,8 @@ export function useEngineerText(
 
       if (amWidth <= 0) return;
 
-      // Scale font size so text width ≈ 85% of amWidth
-      const targetFontSize = (amWidth * 0.85) / cachedWidthRatio;
+      // Scale font size so text width ≈ amWidth
+      const targetFontSize = amWidth / cachedWidthRatio;
       const minFontSize = checkIsMobile() ? 14 : 20;
       el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
