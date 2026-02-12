@@ -310,40 +310,60 @@ export function usePortfolioAnimation(
       });
     });
 
-    // Resize handler — uses `everCompleted` (module-level) which is set
-    // by the gsap.to(oEl) onComplete callback above.
+    // Resize handler — recalculates from live DOM positions rather than
+    // stale cached pixel offsets (font size is viewport-relative via clamp).
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
-      if (everCompleted && oEl && lineEl && cachedData) {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!everCompleted || !oEl || !lineEl) return;
         const cRect = headerRef.current?.getBoundingClientRect();
         if (!cRect) return;
-        const padding = window.innerWidth < 768 ? 16 : 32;
-        const absoluteEnd = cRect.width - padding;
 
         const portfolRect = (headerRef.current?.querySelector(
           ".hero-cover-title-portfol",
         ) as HTMLElement | null)?.getBoundingClientRect();
         if (!portfolRect) return;
 
+        const padding = window.innerWidth < 768 ? 16 : 32;
+        const absoluteEnd = cRect.width - padding;
         const oWidth = oEl.getBoundingClientRect().width;
         const oFinalLeft = absoluteEnd - oWidth / 2;
-        const lEnd = portfolRect.right - cRect.left;
-        const gap = Math.max(0, (cachedData.iOriginalPosition) - lEnd);
-        const lineEndPos = oFinalLeft - gap - 10;
-        const oFinalX = oFinalLeft - cachedData.oStartX + 40;
-        const finalLineWidth = Math.max(0, Math.min(lineEndPos - cachedData.iOriginalPosition, cRect.width - cachedData.iOriginalPosition));
+
+        // Derive O's natural DOM position by subtracting its current GSAP x
+        const currentOGsapX = Number(gsap.getProperty(oEl, "x")) || 0;
+        const currentOLeft = oEl.getBoundingClientRect().left - cRect.left;
+        const naturalOLeft = currentOLeft - currentOGsapX;
+
+        const oFinalX = oFinalLeft - naturalOLeft;
+
+        // Line: starts right after "PORTFOL", ends just before O
+        const lineStartX = portfolRect.right - cRect.left + 8;
+        const lineEndPos = oFinalLeft - 8;
+        const finalLineWidth = Math.max(0, lineEndPos - lineStartX);
 
         gsap.set(oEl, { x: oFinalX });
-        gsap.set(lineEl, { width: finalLineWidth });
+        gsap.set(lineEl, { x: lineStartX, width: finalLineWidth });
 
         // Update cache so subsequent restores use new dimensions
-        cachedData = { ...cachedData, oFinalX, lineFinalWidth: finalLineWidth, containerWidth: cRect.width };
-      }
+        if (cachedData) {
+          cachedData = {
+            ...cachedData,
+            oFinalX,
+            lineFinalWidth: finalLineWidth,
+            iOriginalPosition: lineStartX,
+            oStartX: naturalOLeft,
+            containerWidth: cRect.width,
+          };
+        }
+      }, 150);
     };
     window.addEventListener("resize", handleResize);
 
     return () => {
       tl.kill();
       window.removeEventListener("resize", handleResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
     };
   }, [isActive, shouldAnimate, isMobile, headerRef]);
 
