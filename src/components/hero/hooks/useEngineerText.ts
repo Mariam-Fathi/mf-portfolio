@@ -5,9 +5,6 @@ import { checkIsMobile } from "./useIsMobile";
 // ── Module-level cache (survives unmount / remount) ─────────────────
 let engineerTextEverShown = false;
 
-// Cache the width-per-fontSize ratio so we only force one reflow for
-// the measurement instead of doing it on every resize.
-let cachedWidthRatio: number | null = null;
 
 /**
  * Animates the "Software Engineer" text with a write-on (clip reveal) effect
@@ -105,19 +102,9 @@ export function useEngineerText(
     // Ensure text content exists for measurement
     if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
-    // Compute the width-per-fontSize ratio once (forces one reflow)
-    if (cachedWidthRatio === null) {
-      const refSize = 48;
-      el.style.fontSize = `${refSize}px`;
-      const refWidth = el.getBoundingClientRect().width;
-      if (refWidth > 0) {
-        cachedWidthRatio = refWidth / refSize;
-      }
-    }
-
     const position = () => {
       const iEl = svgIRef.current;
-      if (!iEl || !a2 || !m2 || !el || cachedWidthRatio === null || cachedWidthRatio <= 0) return;
+      if (!iEl || !a2 || !m2 || !el) return;
 
       // Horizontal: use "am" getBoundingClientRect (left/right are reliable)
       const a2Rect = a2.getBoundingClientRect();
@@ -126,15 +113,19 @@ export function useEngineerText(
       const amWidth = amRightScreen - a2Rect.left;
 
       // Vertical: use "ı" position — the same proven reference the dot uses.
-      // The dot sits at iRect.top + iRect.height * 0.19, so the engineer
-      // text bottom should align with that line.
       const iRect = iEl.getBoundingClientRect();
       const dotY = iRect.top + iRect.height * 0.19;
 
       if (amWidth <= 0) return;
 
-      // Scale font size so text width ≈ amWidth
-      const targetFontSize = amWidth / cachedWidthRatio;
+      // Measure at a known reference size, then scale to fit amWidth.
+      // Done every call to handle font-load timing correctly.
+      const REF = 48;
+      el.style.fontSize = `${REF}px`;
+      const refWidth = el.getBoundingClientRect().width;
+      if (refWidth <= 0) return;
+
+      const targetFontSize = (amWidth / refWidth) * REF;
       const minFontSize = checkIsMobile() ? 14 : 20;
       el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
