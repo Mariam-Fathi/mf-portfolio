@@ -95,7 +95,7 @@ const Contact: React.FC = () => {
       const ry = (Math.random() - 0.5) * 150;
       const rr = (Math.random() - 0.5) * 180;
 
-      gsap.set(span, { x: rx, y: ry, rotation: rr, scale: 0.6, opacity: 0 });
+      gsap.set(span, { x: rx, y: ry, rotation: rr, opacity: 0 });
       text.appendChild(span);
     });
   }, []);
@@ -132,10 +132,9 @@ const Contact: React.FC = () => {
             x: 0,
             y: 0,
             rotation: 0,
-            scale: 1,
-            duration: 1.2,
+            duration: 1,
             stagger: { each: 0.08, from: "random" },
-            ease: "elastic.out(1, 0.5)",
+            ease: "back.out(1.4)",
           }),
         );
 
