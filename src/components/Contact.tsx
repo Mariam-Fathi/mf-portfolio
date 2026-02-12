@@ -54,8 +54,8 @@ const contactTiles: ContactTile[] = [
   {
     id: "email",
     label: "Email",
-    caption: "mariam.fathi.siam@outlook.com",
-    href: "mailto:mariam.fathi.siam@outlook.com",
+    caption: "mariam.f.siam@gmail.com",
+    href: "mailto:mariam.f.siam@gmail.com",
     accent: "#0078d4",
     icon: IconMail,
     position: { bottom: "18%", right: "18%" },
