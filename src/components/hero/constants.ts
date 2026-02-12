@@ -23,7 +23,7 @@ export const Z_LAYERS = {
   frame: 200,
   mariamSvg: 300,
   navigation: 101,
-  engineerText: 500,
+  engineerText: 9999,
 } as const;
 
 // ── Animation durations (seconds) ───────────────────────────────────

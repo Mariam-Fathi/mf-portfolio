@@ -250,14 +250,15 @@ function buildDotTimeline(
   tl.call(() => onComplete());
 
   // Drop and land on "ı" with colour transitions
+  // The "ı" color change fires at impact (first contact) — not after settle
   tl.to(dot, {
     keyframes: [
-      { y: iScreenY + 60, backgroundColor: dotFallLight, duration: TIMING.dotFall, ease: "power2.in" },
-      { y: iScreenY + 30, scaleY: 0.7, backgroundColor: dotFallMid, duration: TIMING.dotBounce, ease: "power2.out" },
       {
-        y: iScreenY, scaleY: 1, backgroundColor: dotBase, duration: TIMING.dotSquash, ease: "power2.out",
-        onComplete: () => { gsap.to(svgI, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
+        y: iScreenY + 60, backgroundColor: dotFallLight, duration: TIMING.dotFall, ease: "power2.in",
+        onComplete: () => { gsap.to(svgI, { fill: COLORS.accent, duration: 0.25, ease: "power2.out" }); },
       },
+      { y: iScreenY + 30, scaleY: 0.7, backgroundColor: dotFallMid, duration: TIMING.dotBounce, ease: "power2.out" },
+      { y: iScreenY, scaleY: 1, backgroundColor: dotBase, duration: TIMING.dotSquash, ease: "power2.out" },
     ],
   });
 

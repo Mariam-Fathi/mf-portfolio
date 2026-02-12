@@ -573,6 +573,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               zIndex: Z_LAYERS.engineerText,
               pointerEvents: "none",
               whiteSpace: "nowrap",
+              overflow: "visible",
               opacity: 0,
               filter: "blur(0px)",
             }}
@@ -885,7 +886,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           user-select: none;
           z-index: ${Z_LAYERS.engineerText} !important;
           position: fixed !important;
-          isolation: isolate;
+          overflow: visible;
         }
         @media (max-width: 768px) {
           :global(.hero-engineer-text) {

@@ -80,7 +80,11 @@ export function useEngineerText(
         duration: 2,
         ease: "power1.inOut",
         delay: 0.2,
-        onComplete: () => { engineerTextEverShown = true; },
+        onComplete: () => {
+          // Remove clipPath entirely so no sub-pixel clipping remains
+          gsap.set(el, { clipPath: "none" });
+          engineerTextEverShown = true;
+        },
       });
     }, 150);
 
