@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
   IconMail,
-  IconFileDescription,
   IconLetterK,
 } from "@tabler/icons-react";
 import { gsap } from "gsap";
@@ -19,7 +18,6 @@ type ContactTile = {
   label: string;
   caption: string;
   href: string;
-  background: string;
   accent: string;
   icon: TablerIcon;
   position: React.CSSProperties;
@@ -31,224 +29,225 @@ const contactTiles: ContactTile[] = [
     label: "Kaggle",
     caption: "kaggle.com/mariamfathi",
     href: "https://www.kaggle.com/mariamfathiamin",
-    background: "linear-gradient(135deg, rgba(32, 190, 255, 0.15) 0%, rgba(32, 190, 255, 0.05) 100%)",
-    accent: "#20BEFF", // Kaggle brand blue
+    accent: "#20BEFF",
     icon: IconLetterK,
-    position: {
-      top: "28%",
-      left: "18%",
-    },
+    position: { top: "20%", left: "18%" },
   },
   {
     id: "github",
     label: "GitHub",
     caption: "github.com/mariamfathi",
     href: "https://github.com/Mariam-Fathi",
-    background: "linear-gradient(135deg, rgba(36, 41, 46, 0.15) 0%, rgba(36, 41, 46, 0.05) 100%)",
-    accent: "#24292e", // GitHub brand dark gray/black
+    accent: "#24292e",
     icon: IconBrandGithub,
-    position: {
-      top: "26%",
-      right: "18%",
-    },
+    position: { top: "18%", right: "18%" },
   },
   {
     id: "linkedin",
     label: "LinkedIn",
     caption: "linkedin.com/in/mariamfathi",
     href: "https://www.linkedin.com/in/mariam-fathi-siam",
-    background: "linear-gradient(135deg, rgba(0, 119, 181, 0.15) 0%, rgba(0, 119, 181, 0.05) 100%)",
-    accent: "#0077b5", // LinkedIn brand blue
+    accent: "#0077b5",
     icon: IconBrandLinkedin,
-    position: {
-      bottom: "28%",
-      left: "20%",
-    },
+    position: { bottom: "20%", left: "20%" },
   },
   {
     id: "email",
     label: "Email",
     caption: "mariam.fathi.siam@outlook.com",
     href: "mailto:mariam.fathi.siam@outlook.com",
-    background: "linear-gradient(135deg, rgba(0, 120, 212, 0.15) 0%, rgba(0, 120, 212, 0.05) 100%)",
-    accent: "#0078d4", // Outlook/Microsoft brand blue
+    accent: "#0078d4",
     icon: IconMail,
-    position: {
-      bottom: "26%",
-      right: "18%",
-    },
+    position: { bottom: "18%", right: "18%" },
   },
 ];
 
+// ── Entrance directions for desktop tiles ──────────────────────────
+const TILE_DIRS = [
+  { x: -200, y: -100, rotation: -45 },
+  { x: 200, y: -100, rotation: 45 },
+  { x: -200, y: 100, rotation: -30 },
+  { x: 200, y: 100, rotation: 30 },
+];
+
 const Contact: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
   const tilesRef = useRef<HTMLDivElement>(null);
   const mobileTilesRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
 
+  // ── Build character spans once (avoids innerHTML on every render) ──
+  const buildCharSpans = useCallback(() => {
+    const text = textRef.current;
+    if (!text) return;
+    const content = text.textContent || "";
+    text.innerHTML = "";
+
+    content.split("").forEach((char) => {
+      const span = document.createElement("span");
+      span.textContent = char === " " ? "\u00A0" : char;
+      span.style.display = "inline-block";
+      span.style.opacity = "0";
+
+      // Controlled random scatter — bounded so no character flies off-screen
+      const rx = (Math.random() - 0.5) * 150;
+      const ry = (Math.random() - 0.5) * 150;
+      const rr = (Math.random() - 0.5) * 180;
+
+      gsap.set(span, { x: rx, y: ry, rotation: rr, scale: 0.6, opacity: 0 });
+      text.appendChild(span);
+    });
+  }, []);
+
+  // ── Main animation (triggered by IntersectionObserver) ────────────
   useEffect(() => {
-    // Playful text animation - bouncy and energetic
-    if (textRef.current) {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    // Prepare character spans immediately so the text is invisible but in the DOM
+    buildCharSpans();
+
+    // Collect everything that needs cleanup
+    const tweens: gsap.core.Tween[] = [];
+    const timelines: gsap.core.Timeline[] = [];
+    const listeners: { el: Element | HTMLElement; type: string; fn: EventListener }[] = [];
+
+    const addListener = (el: Element | HTMLElement, type: string, fn: EventListener) => {
+      el.addEventListener(type, fn);
+      listeners.push({ el, type, fn });
+    };
+
+    // ── Animate when section scrolls into view ─────────────────────
+    const runAnimations = () => {
+      if (hasAnimated.current) return;
+      hasAnimated.current = true;
+
+      // ── 1. Text character entrance ───────────────────────────────
       const text = textRef.current;
-      const textContent = text.textContent || '';
-      text.innerHTML = '';
-      
-      // Create spans for each character with random initial positions
-      textContent.split('').forEach((char, index) => {
-        const span = document.createElement('span');
-        span.textContent = char === ' ' ? '\u00A0' : char;
-        span.style.display = 'inline-block';
-        span.style.opacity = '0';
-        
-        // Random starting positions for playful effect
-        const randomX = (Math.random() - 0.5) * 200;
-        const randomY = (Math.random() - 0.5) * 200;
-        const randomRotation = (Math.random() - 0.5) * 360;
-        const randomScale = Math.random() * 0.5 + 0.5;
-        
-        span.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg) scale(${randomScale})`;
-        text.appendChild(span);
-      });
-
-      // Bouncy character animation
-      gsap.to(text.children, {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        rotation: 0,
-        scale: 1,
-        duration: 1.2,
-        stagger: {
-          each: 0.1,
-          from: "random",
-        },
-        ease: "elastic.out(1, 0.5)",
-      });
-
-      // Add wobbly text effect on hover
-      text.addEventListener('mouseenter', () => {
-        gsap.to(text.children, {
-          rotation: () => gsap.utils.random(-10, 10),
-          y: () => gsap.utils.random(-5, 5),
-          x: () => gsap.utils.random(-3, 3),
-          duration: 0.3,
-          stagger: 0.03,
-          ease: "sine.out"
-        });
-      });
-
-      text.addEventListener('mouseleave', () => {
-        gsap.to(text.children, {
-          rotation: 0,
-          y: 0,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.02,
-          ease: "elastic.out(1, 0.3)"
-        });
-      });
-    }
-
-    // Desktop tiles - playful entrance and continuous animation
-    if (tilesRef.current) {
-      const tiles = tilesRef.current.children;
-      const floatTimelines = new Map<Element, gsap.core.Timeline>();
-      
-      // Random entrance from different directions
-      Array.from(tiles).forEach((tile, index) => {
-        const directions = [
-          { x: -200, y: -100, rotation: -45 },
-          { x: 200, y: -100, rotation: 45 },
-          { x: -200, y: 100, rotation: -30 },
-          { x: 200, y: 100, rotation: 30 }
-        ];
-        
-        const dir = directions[index % directions.length];
-        
-        gsap.fromTo(tile,
-          {
-            opacity: 0,
-            x: dir.x,
-            y: dir.y,
-            rotation: dir.rotation,
-            scale: 0,
-          },
-          {
+      if (text?.children.length) {
+        tweens.push(
+          gsap.to(text.children, {
             opacity: 1,
             x: 0,
             y: 0,
             rotation: 0,
             scale: 1,
-            duration: 1.5,
-            delay: 0.5 + (index * 0.2),
-            ease: "back.out(1.7)",
-          }
+            duration: 1.2,
+            stagger: { each: 0.08, from: "random" },
+            ease: "elastic.out(1, 0.5)",
+          }),
         );
-      });
 
-      // Continuous playful floating with different patterns
-      Array.from(tiles).forEach((tile, index) => {
-        const floatTimeline = gsap.timeline({ repeat: -1, yoyo: true });
+        // Hover wobble on the heading
+        const onEnter = () => {
+          tweens.push(
+            gsap.to(text.children, {
+              rotation: () => gsap.utils.random(-8, 8),
+              y: () => gsap.utils.random(-4, 4),
+              duration: 0.3,
+              stagger: 0.03,
+              ease: "sine.out",
+            }),
+          );
+        };
+        const onLeave = () => {
+          tweens.push(
+            gsap.to(text.children, {
+              rotation: 0,
+              y: 0,
+              x: 0,
+              duration: 0.5,
+              stagger: 0.02,
+              ease: "elastic.out(1, 0.3)",
+            }),
+          );
+        };
+        addListener(text, "mouseenter", onEnter);
+        addListener(text, "mouseleave", onLeave);
+      }
 
-        // Each tile has unique floating pattern
-        const floatHeight = 15 + (index * 3);
-        const floatDuration = 2.5 + (index * 0.5);
+      // ── 2. Desktop tiles ─────────────────────────────────────────
+      if (tilesRef.current) {
+        const tiles = Array.from(tilesRef.current.children);
 
-        floatTimeline
-          .to(tile, {
-            y: `-=${floatHeight}`,
-            duration: floatDuration,
-            ease: "sine.inOut",
-          })
-          .to(tile, {
-            y: `+=${floatHeight}`,
-            duration: floatDuration,
-            ease: "sine.inOut",
-          });
+        tiles.forEach((tile, i) => {
+          const dir = TILE_DIRS[i % TILE_DIRS.length];
 
-        floatTimelines.set(tile, floatTimeline);
-      });
+          tweens.push(
+            gsap.fromTo(
+              tile,
+              { opacity: 0, x: dir.x, y: dir.y, rotation: dir.rotation, scale: 0 },
+              {
+                opacity: 1,
+                x: 0,
+                y: 0,
+                rotation: 0,
+                scale: 1,
+                duration: 1.5,
+                delay: 0.5 + i * 0.2,
+                ease: "back.out(1.7)",
+              },
+            ),
+          );
 
-      // Pause floating animation on hover for better UX
-      Array.from(tiles).forEach((tile) => {
-        tile.addEventListener("mouseenter", () => {
-          const timeline = floatTimelines.get(tile);
-          timeline?.pause();
+          // Continuous float — uses absolute yoyo so values never drift
+          const floatH = 12 + i * 3;
+          const floatD = 2.5 + i * 0.4;
+          const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: 1.5 + i * 0.2 });
+          tl.to(tile, { y: -floatH, duration: floatD, ease: "sine.inOut" });
+          timelines.push(tl);
+
+          // Pause float on hover
+          addListener(tile, "mouseenter", () => tl.pause());
+          addListener(tile, "mouseleave", () => tl.resume());
         });
+      }
 
-        tile.addEventListener("mouseleave", () => {
-          const timeline = floatTimelines.get(tile);
-          timeline?.restart();
-        });
-      });
-    }
+      // ── 3. Mobile tiles ──────────────────────────────────────────
+      if (mobileTilesRef.current) {
+        tweens.push(
+          gsap.fromTo(
+            mobileTilesRef.current.children,
+            { opacity: 0, x: -100, scale: 0.8 },
+            {
+              opacity: 1,
+              x: 0,
+              scale: 1,
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "bounce.out",
+              delay: 0.6,
+            },
+          ),
+        );
+      }
+    };
 
-    // Mobile tiles - fun slide-in with bounce
-    if (mobileTilesRef.current) {
-      const mobileTiles = mobileTilesRef.current.children;
-      
-      gsap.fromTo(mobileTiles,
-        {
-          opacity: 0,
-          x: -100,
-          scale: 0.8,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          scale: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "bounce.out",
-          delay: 1,
+    // ── IntersectionObserver — fire once when 20% visible ──────────
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          runAnimations();
+          observer.disconnect();
         }
-      );
+      },
+      { threshold: 0.2 },
+    );
+    observer.observe(section);
 
-      // No tap motion effects
-    }
-  }, []);
+    // ── Cleanup ────────────────────────────────────────────────────
+    return () => {
+      observer.disconnect();
+      tweens.forEach((t) => t.kill());
+      timelines.forEach((t) => t.kill());
+      listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
+    };
+  }, [buildCharSpans]);
 
   return (
     <section
+      ref={sectionRef}
       id="contact"
       className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F9E7C9] text-[#111827]"
     >
@@ -256,25 +255,9 @@ const Contact: React.FC = () => {
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
           <filter id="glass-distortion-contact" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence 
-              type="fractalNoise" 
-              baseFrequency="0.02 0.02"
-              numOctaves="2" 
-              seed="92" 
-              result="noise" 
-            />
-            <feGaussianBlur 
-              in="noise" 
-              stdDeviation="2" 
-              result="blurred" 
-            />
-            <feDisplacementMap 
-              in="SourceGraphic" 
-              in2="blurred" 
-              scale="110"
-              xChannelSelector="R" 
-              yChannelSelector="G" 
-            />
+            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="92" result="noise" />
+            <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+            <feDisplacementMap in="SourceGraphic" in2="blurred" scale="110" xChannelSelector="R" yChannelSelector="G" />
           </filter>
         </defs>
       </svg>
@@ -285,45 +268,40 @@ const Contact: React.FC = () => {
       </div>
 
       <div className="relative flex flex-col lg:flex-row min-h-screen w-full items-center justify-center lg:justify-center">
-        <h1 
+        <h1
           ref={textRef}
-          className="relative z-10 w-full text-left lg:text-center font-black uppercase leading-[0.78] text-[clamp(3rem,12vw,24rem)] md:text-[clamp(6rem,20vw,24rem)] cursor-pointer hover:scale-105 transition-transform duration-300 mb-8 lg:mb-0 px-6 lg:px-0"
+          className="relative z-10 w-full text-left lg:text-center font-black uppercase leading-[0.78] text-[clamp(3rem,12vw,24rem)] md:text-[clamp(6rem,20vw,24rem)] cursor-pointer transition-none mb-8 lg:mb-0 px-6 lg:px-0"
           style={{
             fontFamily: '"A Day in September", cursive',
             color: "#280B0B",
-            letterSpacing: "0.1em"
+            letterSpacing: "0.1em",
           }}
         >
-          LET'S TALK
+          LET&apos;S TALK
         </h1>
 
-        <div ref={tilesRef} className="absolute inset-0 hidden lg:block">
-          {contactTiles.map(
-            ({ id, label, caption, href, accent, icon: Icon, position }) => (
-              <a
-                key={id}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group absolute flex items-center gap-3 cursor-pointer"
-                style={position}
+        <div ref={tilesRef} className="absolute inset-0 z-20 hidden lg:block">
+          {contactTiles.map(({ id, label, caption, href, accent, icon: Icon, position }) => (
+            <a
+              key={id}
+              href={href}
+              target={href.startsWith("http") ? "_blank" : undefined}
+              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="group absolute flex items-center gap-3 cursor-pointer"
+              style={position}
+            >
+              <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
+                <Icon className="h-7 w-7" stroke={1.7} />
+              </span>
+              <span
+                className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
               >
-                <span className="contact-icon-glass flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
-                  <Icon className="h-7 w-7" stroke={1.7} />
-                </span>
-
-                <span className="contact-text-glass flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ 
-                  fontFamily: '"Space Grotesk", "Inter", sans-serif',
-                  color: "#280B0B" 
-                }}>
-                  <span className="text-xs uppercase tracking-wide" style={{ color: "#280B0B" }}>
-                    {label}
-                  </span>
-                  <span className="text-sm font-semibold" style={{ color: "#6A0610" }}>{caption}</span>
-                </span>
-              </a>
-            ),
-          )}
+                <span className="text-xs uppercase tracking-wide" style={{ color: "#280B0B" }}>{label}</span>
+                <span className="text-sm font-semibold" style={{ color: "#6A0610" }}>{caption}</span>
+              </span>
+            </a>
+          ))}
         </div>
 
         <div ref={mobileTilesRef} className="relative z-20 flex w-full flex-col gap-4 px-6 lg:hidden">
@@ -335,16 +313,14 @@ const Contact: React.FC = () => {
               rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
               className="flex items-center gap-3 active:scale-95 transition-transform"
             >
-              <span className="contact-icon-glass-mobile flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
+              <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
                 <Icon className="h-6 w-6" stroke={1.7} />
               </span>
-              <span className="contact-text-glass-mobile flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ 
-                fontFamily: '"Space Grotesk", "Inter", sans-serif',
-                color: "#280B0B" 
-              }}>
-                <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>
-                  {label}
-                </span>
+              <span
+                className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
+              >
+                <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
                 <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
               </span>
             </a>
@@ -353,172 +329,50 @@ const Contact: React.FC = () => {
       </div>
 
       <style jsx>{`
-        /* Liquid Glass Effect for Icon Container - Desktop (Rounded) */
-        .contact-icon-glass {
+        /* ── Shared Liquid Glass ──────────────────────────────────── */
+        .contact-glass {
           position: relative;
           width: fit-content;
           height: fit-content;
-          border-radius: 9999px;
           overflow: hidden;
           transition: all 0.3s ease;
           isolation: isolate;
           box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
         }
-
-        .contact-icon-glass::before {
+        .contact-glass::before {
           content: '';
           position: absolute;
           inset: 0;
           z-index: 0;
-          border-radius: 9999px;
           box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
           background-color: rgba(109, 109, 109, 0);
           pointer-events: none;
+          border-radius: inherit;
         }
-
-        .contact-icon-glass::after {
+        .contact-glass::after {
           content: '';
           position: absolute;
           inset: 0;
           z-index: -1;
-          border-radius: 9999px;
           backdrop-filter: blur(14px);
           -webkit-backdrop-filter: blur(14px);
           filter: url(#glass-distortion-contact);
           -webkit-filter: url(#glass-distortion-contact);
           isolation: isolate;
           pointer-events: none;
+          border-radius: inherit;
         }
-
-        .contact-icon-glass > * {
+        .contact-glass > * {
           position: relative;
           z-index: 10;
         }
 
-        /* Liquid Glass Effect for Text Container - Desktop (Auto-fit) */
-        .contact-text-glass {
-          position: relative;
-          width: fit-content;
-          height: fit-content;
-          border-radius: 1rem;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          isolation: isolate;
-          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
-        }
-
-        .contact-text-glass::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          border-radius: 1rem;
-          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
-          background-color: rgba(109, 109, 109, 0);
-          pointer-events: none;
-        }
-
-        .contact-text-glass::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          border-radius: 1rem;
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          filter: url(#glass-distortion-contact);
-          -webkit-filter: url(#glass-distortion-contact);
-          isolation: isolate;
-          pointer-events: none;
-        }
-
-        .contact-text-glass > * {
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Liquid Glass Effect for Icon Container - Mobile (Rounded) */
-        .contact-icon-glass-mobile {
-          position: relative;
-          width: fit-content;
-          height: fit-content;
+        /* Shape variants */
+        .contact-glass--icon {
           border-radius: 9999px;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          isolation: isolate;
-          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
         }
-
-        .contact-icon-glass-mobile::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          border-radius: 9999px;
-          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
-          background-color: rgba(109, 109, 109, 0);
-          pointer-events: none;
-        }
-
-        .contact-icon-glass-mobile::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          border-radius: 9999px;
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          filter: url(#glass-distortion-contact);
-          -webkit-filter: url(#glass-distortion-contact);
-          isolation: isolate;
-          pointer-events: none;
-        }
-
-        .contact-icon-glass-mobile > * {
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Liquid Glass Effect for Text Container - Mobile (Auto-fit) */
-        .contact-text-glass-mobile {
-          position: relative;
-          width: fit-content;
-          height: fit-content;
+        .contact-glass--text {
           border-radius: 1rem;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          isolation: isolate;
-          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
-        }
-
-        .contact-text-glass-mobile::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          border-radius: 1rem;
-          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
-          background-color: rgba(109, 109, 109, 0);
-          pointer-events: none;
-        }
-
-        .contact-text-glass-mobile::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          border-radius: 1rem;
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          filter: url(#glass-distortion-contact);
-          -webkit-filter: url(#glass-distortion-contact);
-          isolation: isolate;
-          pointer-events: none;
-        }
-
-        .contact-text-glass-mobile > * {
-          position: relative;
-          z-index: 10;
         }
       `}</style>
     </section>
