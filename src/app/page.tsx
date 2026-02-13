@@ -108,6 +108,8 @@ export default function Home() {
               delay: 0.2, // Same delay as hero
               onComplete: () => {
                 setIsTransitioning(false);
+                // Focus the section so scroll events route to it immediately
+                targetSection?.focus({ preventScroll: true });
               }
             });
           } else {
@@ -147,6 +149,9 @@ export default function Home() {
         },
         onComplete: () => {
           setIsTransitioning(false);
+          // Focus the section so scroll events route to it immediately
+          const section = document.getElementById(`${sectionId}-content`);
+          section?.focus({ preventScroll: true });
         }
       });
     }
@@ -184,6 +189,7 @@ export default function Home() {
           {/* Experience Section */}
           <section 
             id="experience-content" 
+            tabIndex={-1}
             className={`content-section ${activeSection === "experience" ? "active" : ""}`}
           >
             <Experience isActive={activeSection === "experience"}/>
@@ -192,6 +198,7 @@ export default function Home() {
           {/* Work Section */}
           <section 
             id="work-content" 
+            tabIndex={-1}
             className={`content-section ${activeSection === "work" ? "active" : ""}`}
           >
             <GalleryShowcase />
@@ -200,6 +207,7 @@ export default function Home() {
           {/* Certificates Section */}
           <section 
             id="certificates-content" 
+            tabIndex={-1}
             className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
           >
             <Certificates/>
@@ -208,6 +216,7 @@ export default function Home() {
           {/* Contact Section */}
           <section 
             id="contact-content" 
+            tabIndex={-1}
             className={`content-section ${activeSection === "contact" ? "active" : ""}`}
           >
             <Contact />
@@ -248,6 +257,7 @@ export default function Home() {
           padding: 0;
           margin: 0;
           filter: blur(15px); /* Initial blur state - same as hero/preloader */
+          outline: none; /* Hide focus ring when programmatically focused */
         }
         .content-section::-webkit-scrollbar {
           display: none;
