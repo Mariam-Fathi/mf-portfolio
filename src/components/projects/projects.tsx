@@ -26,6 +26,7 @@ type Project = {
 
 type ProjectsProps = {
   scrollContainer?: HTMLDivElement | null;
+  isActive?: boolean;
 };
 
 const projects: Project[] = [
@@ -162,10 +163,13 @@ const cardPalette = [
 
 export default function GalleryShowcase({
   scrollContainer = null,
+  isActive = false,
 }: ProjectsProps) {
   const container = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [linksYPosition, setLinksYPosition] = useState<number | null>(null);
+  const autoScrollTweenRef = useRef<gsap.core.Tween | null>(null);
+  const autoScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Get navigation Y position to align project links (centered between top and line)
   useEffect(() => {
@@ -275,6 +279,76 @@ export default function GalleryShowcase({
     },
     { scope: container }
   );
+
+  // Auto-scroll: programmatically scroll the container so ScrollTrigger picks it up
+  useEffect(() => {
+    if (!isActive || !container.current) return;
+
+    // Find the scrollable parent (content-section) — same logic as useGSAP
+    let scroller: HTMLElement | null = container.current.parentElement;
+    while (scroller && !scroller.classList.contains("content-section")) {
+      scroller = scroller.parentElement;
+    }
+    if (!scroller) return;
+
+    // Reset scroll to top for a fresh auto-play each time the section becomes active
+    scroller.scrollTop = 0;
+    ScrollTrigger.refresh();
+
+    const totalCards = projects.length;
+    const viewportHeight = scroller.clientHeight;
+    let currentCard = 0;
+    let stopped = false;
+
+    const AUTO_SCROLL_INITIAL_DELAY = 2500; // Wait for section blur-in transition
+    const CARD_HOLD_DURATION = 4000;        // Time to display each card (ms)
+    const SCROLL_DURATION = 1.2;            // Smooth scroll duration (seconds)
+
+    const advanceToNextCard = () => {
+      if (stopped || currentCard >= totalCards - 1) return;
+
+      currentCard++;
+      const targetScroll = viewportHeight * currentCard;
+
+      autoScrollTweenRef.current = gsap.to(scroller!, {
+        scrollTop: targetScroll,
+        duration: SCROLL_DURATION,
+        ease: "power2.inOut",
+        onComplete: () => {
+          if (!stopped) {
+            autoScrollTimerRef.current = setTimeout(advanceToNextCard, CARD_HOLD_DURATION);
+          }
+        },
+      });
+    };
+
+    // Start auto-scroll after initial delay
+    autoScrollTimerRef.current = setTimeout(advanceToNextCard, AUTO_SCROLL_INITIAL_DELAY);
+
+    // Stop auto-scroll on any user interaction
+    const stopAutoScroll = () => {
+      stopped = true;
+      if (autoScrollTweenRef.current) {
+        autoScrollTweenRef.current.kill();
+        autoScrollTweenRef.current = null;
+      }
+      if (autoScrollTimerRef.current) {
+        clearTimeout(autoScrollTimerRef.current);
+        autoScrollTimerRef.current = null;
+      }
+      scroller!.removeEventListener("wheel", stopAutoScroll);
+      scroller!.removeEventListener("touchstart", stopAutoScroll);
+      scroller!.removeEventListener("pointerdown", stopAutoScroll);
+    };
+
+    scroller.addEventListener("wheel", stopAutoScroll, { passive: true });
+    scroller.addEventListener("touchstart", stopAutoScroll, { passive: true });
+    scroller.addEventListener("pointerdown", stopAutoScroll, { passive: true });
+
+    return () => {
+      stopAutoScroll();
+    };
+  }, [isActive]);
 
   return (
     <section
