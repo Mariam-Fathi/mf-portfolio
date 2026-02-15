@@ -6,7 +6,7 @@ import React, { useRef, useEffect, useState } from "react";
 const experienceItems = [
   {
     number: "01",
-    title: "Senior Frontend Engineer",
+    title: "Frontend Engineer",
     company: "Tarqia",
     type: "Full-time",
     fromDate: "Jan 2024",
