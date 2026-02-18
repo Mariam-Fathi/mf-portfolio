@@ -36,24 +36,13 @@ const projects: Project[] = [
     description:
       "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard for business intelligence. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
     links: [
-      { name: "Play Store", url: "#" },
-      { name: "Dashboard", url: "#" },
+      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
       { name: "Kaggle Notebooks: [1], [2], [3] [4]", url: "#", isGrouped: true, groupedLinks: [
-        { name: "Real Estate Data Discovery Analysis", url: "#" },
-        { name: "38.19% SUSPICIOUS RECORDS", url: "#" },
-        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
-        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
+        { name: "Real Estate Data Discovery Analysis", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis" },
+        { name: "38.19% SUSPICIOUS RECORDS", url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records" },
+        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
+        { name: "87.4% Memory Opt + Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
       ]},
-    ],
-  },
-  {
-    id: "sanayat",
-    title: "Sanayat",
-    role: "Full-Stack Engineer",
-    description:
-      "On-demand handyman services platform connecting customers with verified local workers. The system spans a customer mobile app, a handyman mobile app, an admin dashboard, and a scalable NestJS backend with 29+ modules. Features include OTP authentication, PostGIS-based location matching, real-time WebSocket chat, wallet payments, direct and broadcast bookings, scheduled jobs, multi-dimensional ratings, dispute resolution, and a referral/promo engine. Covered by 238 unit tests across 25 modules.",
-    links: [
-      { name: "GitHub", url: "#" },
     ],
   },
   {
@@ -63,28 +52,7 @@ const projects: Project[] = [
     description:
       "Internal tool using Hugging Face pre-trained models for instant cost estimation. Achieved 85% accuracy, reducing quotation time from days to minutes. Associated with Dracode, addressing critical sales bottleneck by automating complex estimation workflows and providing real-time pricing insights. Streamlines the sales process through intelligent automation and data-driven decision support.",
     links: [
-      { name: "Demo", url: "#" },
-    ],
-  },
-  {
-    id: "personality-ai",
-    title: "Multimodal Personality Analysis",
-    role: "AI Researcher / Machine Learning Engineer",
-    description:
-      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
-    links: [
-      { name: "Graduation Thesis", url: "#" },
-    ],
-  },
-  {
-    id: "smart-key",
-    title: "Smart Key",
-    role: "Mobile Engineer",
-    description:
-      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
-    links: [
-      { name: "Play Store", url: "#" },
-      { name: "App Store", url: "#" },
+      { name: "Demo", url: "https://drive.google.com/file/d/1Xt8ge6XRi22h3r8goPqdKWxAZBFO5Fbo/view" },
     ],
   },
   {
@@ -94,7 +62,38 @@ const projects: Project[] = [
     description:
       "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
     links: [
-      { name: "Demo", url: "#" },
+      { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
+    ],
+  },
+  {
+    id: "smart-key",
+    title: "Smart Key",
+    role: "Mobile Engineer",
+    description:
+      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
+    links: [
+      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.smartkeylb" },
+      { name: "App Store", url: "https://apps.apple.com/eg/app/smartkeylb/id6753882015" },
+    ],
+  },
+  {
+    id: "personality-ai",
+    title: "Multimodal Personality Analysis",
+    role: "AI Researcher / Machine Learning Engineer",
+    description:
+      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
+    links: [
+      { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
+    ],
+  },
+  {
+    id: "sanayat",
+    title: "Sanayat",
+    role: "Full-Stack Engineer",
+    description:
+      "On-demand handyman services platform connecting customers with verified local workers. The system spans a customer mobile app, a handyman mobile app, an admin dashboard, and a scalable NestJS backend with 29+ modules. Features include OTP authentication, PostGIS-based location matching, real-time WebSocket chat, wallet payments, direct and broadcast bookings, scheduled jobs, multi-dimensional ratings, dispute resolution, and a referral/promo engine. Covered by 238 unit tests across 25 modules.",
+    links: [
+      // { name: "GitHub", url: "#" },
     ],
   },
   {
@@ -104,7 +103,7 @@ const projects: Project[] = [
     description:
       "Admin dashboard for a wheelchair rental management system built with React 19 and TypeScript. Features real-time KPI analytics with Recharts, Google Maps integration for contracting-party locations, role-based access control, and full CRUD management for assets, trips, and users. Supports Arabic/English with RTL layouts and data export to CSV and PDF.",
     links: [
-      { name: "Demo", url: "#" },
+      // { name: "Demo", url: "#" },
     ],
   },
 ];
