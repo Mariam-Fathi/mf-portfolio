@@ -125,8 +125,6 @@ const projects: Project[] = [
 
 // Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
 // One palette per project (6 projects = 6 palettes)
-// Each project uses its dedicated palette: project[0] uses palette[0], project[1] uses palette[1], etc.
-// Colors flow together for a cohesive, connected design with balanced distribution
 const cardPalette = [
   {
     // Project 0: Homi
