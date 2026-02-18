@@ -46,6 +46,30 @@ const projects: Project[] = [
     ],
   },
   {
+    id: "font-selection-agent",
+    title: "Font Selection Agent",
+    role: "AI Engineer",
+    description:
+      "AI-powered assistant that automates font selection for UI projects. It prompts for your UI file (HTML/React/Vue/Angular), searches a curated set of Google Fonts by category, injects fonts into the running page, and captures automated Playwright screenshots for side-by-side visual comparison—then safely restores the original file. Built with Google ADK + GenAI tooling and a screenshot pipeline to make typography exploration fast and reproducible.",
+    links: [
+      { name: "GitHub", url: "https://github.com/Mariam-Fathi/font-selection-agent" },
+      {
+        name: "Kaggle Capstone Writeup",
+        url: "https://www.kaggle.com/competitions/agents-intensive-capstone-project/writeups/new-writeup-1763196957997",
+      },
+    ],
+  },
+  {
+    id: "personality-ai",
+    title: "Multimodal Personality Analysis",
+    role: "AI Researcher / Machine Learning Engineer",
+    description:
+      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
+    links: [
+      { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
+    ],
+  },
+  {
     id: "sales-ai",
     title: "Estimator",
     role: "Full-Stack Engineer",
@@ -53,16 +77,6 @@ const projects: Project[] = [
       "Internal tool using Hugging Face pre-trained models for instant cost estimation. Achieved 85% accuracy, reducing quotation time from days to minutes. Associated with Dracode, addressing critical sales bottleneck by automating complex estimation workflows and providing real-time pricing insights. Streamlines the sales process through intelligent automation and data-driven decision support.",
     links: [
       { name: "Demo", url: "https://drive.google.com/file/d/1Xt8ge6XRi22h3r8goPqdKWxAZBFO5Fbo/view" },
-    ],
-  },
-  {
-    id: "iot-portal",
-    title: "Smart Key Operational Portal",
-    role: "Full-Stack Engineer",
-    description:
-      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
-    links: [
-      { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
     ],
   },
   {
@@ -77,13 +91,13 @@ const projects: Project[] = [
     ],
   },
   {
-    id: "personality-ai",
-    title: "Multimodal Personality Analysis",
-    role: "AI Researcher / Machine Learning Engineer",
+    id: "iot-portal",
+    title: "Smart Key Operational Portal",
+    role: "Full-Stack Engineer",
     description:
-      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
+      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
     links: [
-      { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
+      { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
     ],
   },
   {
@@ -106,6 +120,7 @@ const projects: Project[] = [
       // { name: "Demo", url: "#" },
     ],
   },
+
 ];
 
 // Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
@@ -172,6 +187,15 @@ const cardPalette = [
     body: "#280B0B", // Dark brown
     link: "#280B0B", // Dark brown
     accent: "#6A0610", // Dark burgundy
+  },
+  {
+    // Project 7: Font Selection Agent
+    background: "#6A0610", // Dark burgundy
+    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
+    headlineStroke: "#F9E7C9",
+    body: "#F9E7C9", // Cream (readable on dark background)
+    link: "#F9E7C9", // Cream
+    accent: "#8A9EA7", // Blue-gray
   },
 ];
 
