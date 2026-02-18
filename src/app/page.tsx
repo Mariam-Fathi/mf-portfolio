@@ -201,7 +201,7 @@ export default function Home() {
             tabIndex={-1}
             className={`content-section ${activeSection === "work" ? "active" : ""}`}
           >
-            <GalleryShowcase isActive={activeSection === "work"} />
+            <GalleryShowcase />
           </section>
 
           {/* Certificates Section */}

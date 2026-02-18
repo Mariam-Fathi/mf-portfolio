@@ -26,51 +26,40 @@ type Project = {
 
 type ProjectsProps = {
   scrollContainer?: HTMLDivElement | null;
-  isActive?: boolean;
 };
 
 const projects: Project[] = [
   {
     id: "homi",
     title: "Homi",
-    role: "Full-Stack Developer & Data Engineer",
+    role: "Full-Stack Engineer / Data Engineer",
     description:
       "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard for business intelligence. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
     links: [
-      { name: "Expo App", url: "#" },
+      { name: "Play Store", url: "#" },
       { name: "Dashboard", url: "#" },
-      { name: "Kaggle Notebooks: [1], [2], [3]", url: "#", isGrouped: true, groupedLinks: [
+      { name: "Kaggle Notebooks: [1], [2], [3] [4]", url: "#", isGrouped: true, groupedLinks: [
         { name: "Real Estate Data Discovery Analysis", url: "#" },
         { name: "38.19% SUSPICIOUS RECORDS", url: "#" },
+        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
         { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "#" },
       ]},
     ],
   },
   {
-    id: "smart-key",
-    title: "Smart Key",
-    role: "Lead Mobile Engineer",
+    id: "sanayat",
+    title: "Sanayat",
+    role: "Full-Stack Engineer",
     description:
-      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
+      "On-demand handyman services platform connecting customers with verified local workers. The system spans a customer mobile app, a handyman mobile app, an admin dashboard, and a scalable NestJS backend with 29+ modules. Features include OTP authentication, PostGIS-based location matching, real-time WebSocket chat, wallet payments, direct and broadcast bookings, scheduled jobs, multi-dimensional ratings, dispute resolution, and a referral/promo engine. Covered by 238 unit tests across 25 modules.",
     links: [
-      { name: "Play Store", url: "#" },
-      { name: "App Store", url: "#" },
-    ],
-  },
-  {
-    id: "home-services",
-    title: "Sanae3y Pro",
-    role: "Full-Stack Developer",
-    description:
-      "Multi-role marketplace application (client, worker, shop) with real-time order management, WebSocket-based live chat, and Google Maps integration. Features on-demand service booking with instant notifications and location tracking, enabling seamless coordination between customers, service providers, and merchants. The platform transforms service delivery through real-time communication and intelligent routing capabilities.",
-    links: [
-      { name: "Demo", url: "#" },
+      { name: "GitHub", url: "#" },
     ],
   },
   {
     id: "sales-ai",
     title: "Estimator",
-    role: "Full-Stack Developer",
+    role: "Full-Stack Engineer",
     description:
       "Internal tool using Hugging Face pre-trained models for instant cost estimation. Achieved 85% accuracy, reducing quotation time from days to minutes. Associated with Dracode, addressing critical sales bottleneck by automating complex estimation workflows and providing real-time pricing insights. Streamlines the sales process through intelligent automation and data-driven decision support.",
     links: [
@@ -80,7 +69,7 @@ const projects: Project[] = [
   {
     id: "personality-ai",
     title: "Multimodal Personality Analysis",
-    role: "AI Research Lead",
+    role: "AI Researcher / Machine Learning Engineer",
     description:
       "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
     links: [
@@ -88,11 +77,32 @@ const projects: Project[] = [
     ],
   },
   {
+    id: "smart-key",
+    title: "Smart Key",
+    role: "Mobile Engineer",
+    description:
+      "Production-deployed IoT solution replacing key cards with smartphone-based access control. Delivered cross-platform React Native applications for guests and staff, enabling secure and seamless keyless access across all properties. Successfully deployed at enterprise level, transforming the complete guest journey from reservation to checkout with modern mobile-first authentication technology.",
+    links: [
+      { name: "Play Store", url: "#" },
+      { name: "App Store", url: "#" },
+    ],
+  },
+  {
     id: "iot-portal",
     title: "Smart Key Operational Portal",
-    role: "Full-Stack Developer",
+    role: "Full-Stack Engineer",
     description:
       "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
+    links: [
+      { name: "Demo", url: "#" },
+    ],
+  },
+  {
+    id: "wheelchair-dashboard",
+    title: "Wheelchair Dashboard",
+    role: "Frontend Engineer",
+    description:
+      "Admin dashboard for a wheelchair rental management system built with React 19 and TypeScript. Features real-time KPI analytics with Recharts, Google Maps integration for contracting-party locations, role-based access control, and full CRUD management for assets, trips, and users. Supports Arabic/English with RTL layouts and data export to CSV and PDF.",
     links: [
       { name: "Demo", url: "#" },
     ],
@@ -141,35 +151,37 @@ const cardPalette = [
     accent: "#8A9EA7", // Blue-gray
   },
   {
-    // Project 5: Smart Key Operational Portal
     background: "#8A9EA7", // Blue-gray
-    headline: "#280B0B", // Dark brown (dark text on light bg - high contrast)
+    headline: "#280B0B", // Dark brown
     headlineStroke: "#280B0B",
-    body: "#280B0B", // Dark brown (readable on light background)
+    body: "#280B0B", // Dark brown
     link: "#280B0B", // Dark brown
     accent: "#6A0610", // Dark burgundy
   },
-
   {
-    // Project 2: Sanae3y Pro
     background: "#F9E7C9", // Cream
-    headline: "#6A0610", // Dark burgundy (dark text on light bg - high contrast)
+    headline: "#6A0610", // Dark burgundy
     headlineStroke: "#6A0610",
-    body: "#280B0B", // Dark brown (readable on light background)
+    body: "#280B0B", // Dark brown
     link: "#6A0610", // Dark burgundy
     accent: "#8A9EA7", // Blue-gray
+  },
+  {
+    background: "#8A9EA7", // Blue-gray
+    headline: "#280B0B", // Dark brown
+    headlineStroke: "#280B0B",
+    body: "#280B0B", // Dark brown
+    link: "#280B0B", // Dark brown
+    accent: "#6A0610", // Dark burgundy
   },
 ];
 
 export default function GalleryShowcase({
   scrollContainer = null,
-  isActive = false,
 }: ProjectsProps) {
   const container = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [linksYPosition, setLinksYPosition] = useState<number | null>(null);
-  const autoScrollTweenRef = useRef<gsap.core.Tween | null>(null);
-  const autoScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   // Get navigation Y position to align project links (centered between top and line)
   useEffect(() => {
@@ -280,75 +292,6 @@ export default function GalleryShowcase({
     { scope: container }
   );
 
-  // Auto-scroll: programmatically scroll the container so ScrollTrigger picks it up
-  useEffect(() => {
-    if (!isActive || !container.current) return;
-
-    // Find the scrollable parent (content-section) — same logic as useGSAP
-    let scroller: HTMLElement | null = container.current.parentElement;
-    while (scroller && !scroller.classList.contains("content-section")) {
-      scroller = scroller.parentElement;
-    }
-    if (!scroller) return;
-
-    // Reset scroll to top for a fresh auto-play each time the section becomes active
-    scroller.scrollTop = 0;
-    ScrollTrigger.refresh();
-
-    const totalCards = projects.length;
-    const viewportHeight = scroller.clientHeight;
-    let currentCard = 0;
-    let stopped = false;
-
-    const AUTO_SCROLL_INITIAL_DELAY = 2500; // Wait for section blur-in transition
-    const CARD_HOLD_DURATION = 4000;        // Time to display each card (ms)
-    const SCROLL_DURATION = 1.2;            // Smooth scroll duration (seconds)
-
-    const advanceToNextCard = () => {
-      if (stopped || currentCard >= totalCards - 1) return;
-
-      currentCard++;
-      const targetScroll = viewportHeight * currentCard;
-
-      autoScrollTweenRef.current = gsap.to(scroller!, {
-        scrollTop: targetScroll,
-        duration: SCROLL_DURATION,
-        ease: "power2.inOut",
-        onComplete: () => {
-          if (!stopped) {
-            autoScrollTimerRef.current = setTimeout(advanceToNextCard, CARD_HOLD_DURATION);
-          }
-        },
-      });
-    };
-
-    // Start auto-scroll after initial delay
-    autoScrollTimerRef.current = setTimeout(advanceToNextCard, AUTO_SCROLL_INITIAL_DELAY);
-
-    // Stop auto-scroll on any user interaction
-    const stopAutoScroll = () => {
-      stopped = true;
-      if (autoScrollTweenRef.current) {
-        autoScrollTweenRef.current.kill();
-        autoScrollTweenRef.current = null;
-      }
-      if (autoScrollTimerRef.current) {
-        clearTimeout(autoScrollTimerRef.current);
-        autoScrollTimerRef.current = null;
-      }
-      scroller!.removeEventListener("wheel", stopAutoScroll);
-      scroller!.removeEventListener("touchstart", stopAutoScroll);
-      scroller!.removeEventListener("pointerdown", stopAutoScroll);
-    };
-
-    scroller.addEventListener("wheel", stopAutoScroll, { passive: true });
-    scroller.addEventListener("touchstart", stopAutoScroll, { passive: true });
-    scroller.addEventListener("pointerdown", stopAutoScroll, { passive: true });
-
-    return () => {
-      stopAutoScroll();
-    };
-  }, [isActive]);
 
   return (
     <section
