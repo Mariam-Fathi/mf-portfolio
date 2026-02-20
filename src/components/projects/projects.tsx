@@ -128,72 +128,75 @@ const projects: Project[] = [
 const cardPalette = [
   {
     // Project 0: Homi
-    background: "#6A0610", // Dark burgundy
-    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
+    background: "#F9E7C9",
+    headline: "#6A0610",
+    headlineStroke: "#6A0610",
+    body: "#280B0B",
+    link: "#6A0610",
+    accent: "#8A9EA7",
+  },
+  {
+    // Project 1: Font Selection Agent
+    background: "#8A9EA7",
+    headline: "#280B0B",
+    headlineStroke: "#280B0B",
+    body: "#280B0B",
+    link: "#280B0B",
+    accent: "#6A0610",
+  },
+  {
+    // Project 2: Multimodal Personality Analysis
+    background: "#6A0610",
+    headline: "#F9E7C9",
     headlineStroke: "#F9E7C9",
-    body: "#F9E7C9", // Cream (readable on dark background)
-    link: "#F9E7C9", // Cream
-    accent: "#8A9EA7", // Blue-gray
+    body: "#F9E7C9",
+    link: "#F9E7C9",
+    accent: "#8A9EA7",
+  },
+  {
+    // Project 3: Estimator
+    background: "#F9E7C9",
+    headline: "#6A0610",
+    headlineStroke: "#6A0610",
+    body: "#280B0B",
+    link: "#6A0610",
+    accent: "#8A9EA7",
+  },
+  {
+    // Project 4: Smart Key
+    background: "#8A9EA7",
+    headline: "#280B0B",
+    headlineStroke: "#280B0B",
+    body: "#280B0B",
+    link: "#280B0B",
+    accent: "#6A0610",
   },
   {
     // Project 5: Smart Key Operational Portal
-    background: "#8A9EA7", // Blue-gray
-    headline: "#280B0B", // Dark brown (dark text on light bg - high contrast)
-    headlineStroke: "#280B0B",
-    body: "#280B0B", // Dark brown (readable on light background)
-    link: "#280B0B", // Dark brown
-    accent: "#6A0610", // Dark burgundy
-  },
-  {
-    // Project 2: Sanae3y Pro
-    background: "#F9E7C9", // Cream
-    headline: "#6A0610", // Dark burgundy (dark text on light bg - high contrast)
-    headlineStroke: "#6A0610",
-    body: "#280B0B", // Dark brown (readable on light background)
-    link: "#6A0610", // Dark burgundy
-    accent: "#8A9EA7", // Blue-gray
-  },
-  {
-    // Project 0: Homi
-    background: "#6A0610", // Dark burgundy
-    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
+    background: "#6A0610",
+    headline: "#F9E7C9",
     headlineStroke: "#F9E7C9",
-    body: "#F9E7C9", // Cream (readable on dark background)
-    link: "#F9E7C9", // Cream
-    accent: "#8A9EA7", // Blue-gray
+    body: "#F9E7C9",
+    link: "#F9E7C9",
+    accent: "#8A9EA7",
   },
   {
-    background: "#8A9EA7", // Blue-gray
-    headline: "#280B0B", // Dark brown
+    // Project 6: Sanayat
+    background: "#8A9EA7",
+    headline: "#280B0B",
     headlineStroke: "#280B0B",
-    body: "#280B0B", // Dark brown
-    link: "#280B0B", // Dark brown
-    accent: "#6A0610", // Dark burgundy
+    body: "#280B0B",
+    link: "#280B0B",
+    accent: "#6A0610",
   },
   {
-    background: "#F9E7C9", // Cream
-    headline: "#6A0610", // Dark burgundy
+    // Project 7: Wheelchair Dashboard
+    background: "#F9E7C9",
+    headline: "#6A0610",
     headlineStroke: "#6A0610",
-    body: "#280B0B", // Dark brown
-    link: "#6A0610", // Dark burgundy
-    accent: "#8A9EA7", // Blue-gray
-  },
-  {
-    background: "#8A9EA7", // Blue-gray
-    headline: "#280B0B", // Dark brown
-    headlineStroke: "#280B0B",
-    body: "#280B0B", // Dark brown
-    link: "#280B0B", // Dark brown
-    accent: "#6A0610", // Dark burgundy
-  },
-  {
-    // Project 7: Font Selection Agent
-    background: "#6A0610", // Dark burgundy
-    headline: "#F9E7C9", // Cream (light text on dark bg - high contrast)
-    headlineStroke: "#F9E7C9",
-    body: "#F9E7C9", // Cream (readable on dark background)
-    link: "#F9E7C9", // Cream
-    accent: "#8A9EA7", // Blue-gray
+    body: "#280B0B",
+    link: "#6A0610",
+    accent: "#8A9EA7",
   },
 ];
 
