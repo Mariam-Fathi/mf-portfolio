@@ -10,42 +10,7 @@
 
 @font-face {
     font-family: "Handwritten";
-    src: url("/fonts/handwritten_3/Handwritten.woff2") format("woff2"),
-         url("/fonts/handwritten_3/Handwritten.woff") format("woff"),
-         url("/fonts/handwritten_3/Handwritten.ttf") format("truetype"),
-         url("/fonts/handwritten_3/Handwritten.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "A Day in September";
-    src: url("/fonts/a_day_in_september/ADayinSeptember.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Karolina";
-    src: url("/fonts/karolina_2/Karolina.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Miserable Emillia";
-    src: url("/fonts/miserable_emillia/Miserable Emillia Demo.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Priestacy";
-    src: url("/fonts/priestacy/Priestacy.otf") format("opentype");
+    src: url("/fonts/handwritten_3/Handwritten.woff2") format("woff2");
     font-weight: normal;
     font-style: normal;
     font-display: swap;

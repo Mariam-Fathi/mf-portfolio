@@ -28,11 +28,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Allison&family=Comforter+Brush&family=Dancing+Script:wght@400;500;600;700&family=Meow+Script&family=Stack+Sans+Notch:opsz,wght@14..144,400..900&family=Caveat:wght@400;500;600&family=Corinthia:wght@400&family=Homemade+Apple&family=Indie+Flower&family=Inter:wght@300;400;500;600;700&family=Momo+Trust+Display:wght@400;500;600;700&family=Patrick+Hand&family=Rock+Salt&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.cdnfonts.com/css/libertinus"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Momo+Trust+Display:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
         />
       </head>
       <body className="antialiased">
