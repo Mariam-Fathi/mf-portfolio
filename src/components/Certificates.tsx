@@ -23,8 +23,8 @@ const certificates: Certificate[] = [
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    textColor: "#F9E7C9",
-    bgColor: "#280B0B",
+    textColor: "#F7E594",
+    bgColor: "#8B004D",
     infoPosition: "bottom-right",
   },
   {
@@ -33,8 +33,8 @@ const certificates: Certificate[] = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    textColor: "#F9E7C9",
-    bgColor: "#6A0610",
+    textColor: "#8B004D",
+    bgColor: "#C4D8FC",
     infoPosition: "bottom-left",
   },
   {
@@ -43,8 +43,8 @@ const certificates: Certificate[] = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#8A9EA7",
-    textColor: "#280B0B",
+    bgColor: "#FFDBFF",
+    textColor: "#8B004D",
     infoPosition: "bottom-right",
   },
   {
@@ -53,8 +53,8 @@ const certificates: Certificate[] = [
     words: ["AI", "AGENTS"],
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    bgColor: "#F5ECE1",
-    textColor: "#6A0610",
+    bgColor: "#F7E594",
+    textColor: "#8B004D",
     infoPosition: "bottom-right",
   },
 ];
@@ -67,54 +67,25 @@ const SCATTER = [
   { x: 400, y: 300, rotation: -12 },    // P3 bottom-right → flies from bottom-right
 ];
 
-// ── Puzzle geometry ──────────────────────────────────────────────────
+// ── Puzzle geometry — round circular connectors ─────────────────────
 const EXTENSIONS: React.CSSProperties[] = [
-  { top: 0, left: 0, right: "-8%", bottom: "-8%" },
-  { top: 0, left: "-8%", right: 0, bottom: "-8%" },
-  { top: "-8%", left: 0, right: "-8%", bottom: 0 },
-  { top: "-8%", left: "-8%", right: 0, bottom: 0 },
+  { top: 0, left: 0, right: "-12%", bottom: "-12%" },
+  { top: 0, left: "-12%", right: 0, bottom: "-12%" },
+  { top: "-12%", left: 0, right: "-12%", bottom: 0 },
+  { top: "-12%", left: "-12%", right: 0, bottom: 0 },
 ];
 
 const Z_ORDER = [1, 2, 2, 3];
 
-const TAB_R = `
-  L 0.926 0.36
-  C 0.926 0.40, 0.916 0.42, 0.916 0.44
-  C 0.916 0.46, 1.0   0.46, 1.0   0.50
-  C 1.0   0.54, 0.916 0.54, 0.916 0.56
-  C 0.916 0.58, 0.926 0.60, 0.926 0.64`;
-
-const TAB_B = `
-  L 0.64 0.926
-  C 0.60 0.926, 0.58 0.916, 0.56 0.916
-  C 0.54 0.916, 0.54 1.0,   0.50 1.0
-  C 0.46 1.0,   0.46 0.916, 0.44 0.916
-  C 0.42 0.916, 0.40 0.926, 0.36 0.926`;
-
-const SOCK_L = `
-  L 0.074 0.64
-  C 0.074 0.60, 0.064 0.58, 0.064 0.56
-  C 0.064 0.54, 0.148 0.54, 0.148 0.50
-  C 0.148 0.46, 0.064 0.46, 0.064 0.44
-  C 0.064 0.42, 0.074 0.40, 0.074 0.36`;
-
-const SOCK_T = `
-  L 0.36 0.074
-  C 0.40 0.074, 0.42 0.064, 0.44 0.064
-  C 0.46 0.064, 0.46 0.148, 0.50 0.148
-  C 0.54 0.148, 0.54 0.064, 0.56 0.064
-  C 0.58 0.064, 0.60 0.074, 0.64 0.074`;
-
-// Rounded outer corners (R = 0.06) — one per piece at the puzzle's outside edge
 const PATHS = [
   // P0: rounded top-left, tab right, tab bottom
-  `M 0.06 0 L 0.926 0 ${TAB_R} L 0.926 0.926 ${TAB_B} L 0 0.926 L 0 0.06 Q 0 0, 0.06 0 Z`,
+  `M 0.05 0 L 0.893 0 L 0.893 0.4 A 0.1 0.1 0 0 1 0.893 0.6 L 0.893 0.893 L 0.6 0.893 A 0.1 0.1 0 0 1 0.4 0.893 L 0 0.893 L 0 0.05 Q 0 0, 0.05 0 Z`,
   // P1: rounded top-right, tab bottom, socket left
-  `M 0.074 0 L 0.94 0 Q 1 0, 1 0.06 L 1 0.926 ${TAB_B} L 0.074 0.926 ${SOCK_L} Z`,
+  `M 0.107 0 L 0.95 0 Q 1 0, 1 0.05 L 1 0.893 L 0.6 0.893 A 0.1 0.1 0 0 1 0.4 0.893 L 0.107 0.893 L 0.107 0.6 A 0.1 0.1 0 0 0 0.107 0.4 L 0.107 0 Z`,
   // P2: rounded bottom-left, socket top, tab right
-  `M 0 0.074 ${SOCK_T} L 0.926 0.074 ${TAB_R} L 0.926 1 L 0.06 1 Q 0 1, 0 0.94 Z`,
+  `M 0 0.107 L 0.4 0.107 A 0.1 0.1 0 0 1 0.6 0.107 L 0.893 0.107 L 0.893 0.4 A 0.1 0.1 0 0 1 0.893 0.6 L 0.893 1 L 0.05 1 Q 0 1, 0 0.95 L 0 0.107 Z`,
   // P3: rounded bottom-right, socket top, socket left
-  `M 0.074 0.074 ${SOCK_T} L 1 0.074 L 1 0.94 Q 1 1, 0.94 1 L 0.074 1 ${SOCK_L} Z`,
+  `M 0.107 0.107 L 0.4 0.107 A 0.1 0.1 0 0 1 0.6 0.107 L 1 0.107 L 1 0.95 Q 1 1, 0.95 1 L 0.107 1 L 0.107 0.6 A 0.1 0.1 0 0 0 0.107 0.4 L 0.107 0.107 Z`,
 ];
 
 // ── Component ────────────────────────────────────────────────────────
@@ -241,17 +212,17 @@ const Certificates: React.FC = () => {
 
               {/* Content */}
               <div className="relative z-10 flex flex-col w-full h-full p-4 md:p-6 lg:p-8">
-                <div className="flex-1 flex flex-col items-center justify-center text-center gap-1">
+                <div className="flex-1 flex flex-col items-center justify-center text-center gap-1.5">
                   {cert.platform && (
                     <span
-                      className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-medium opacity-60"
+                      className="text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-medium opacity-50"
                       style={{ color: cert.textColor }}
                     >
                       {cert.platform}
                     </span>
                   )}
                   <h3
-                    className="font-bold text-xl sm:text-2xl lg:text-2xl xl:text-3xl uppercase tracking-tighter leading-none"
+                    className="font-semibold text-sm sm:text-base lg:text-lg xl:text-xl uppercase tracking-wide leading-snug"
                     style={{ color: cert.textColor }}
                   >
                     {cert.words.join(" ")}
@@ -264,7 +235,7 @@ const Certificates: React.FC = () => {
                       href={cert.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:opacity-70 transition-opacity text-xs md:text-sm"
+                      className="inline-flex items-center gap-1 hover:opacity-70 transition-opacity text-[10px] md:text-xs"
                       style={{ color: cert.textColor }}
                     >
                       <span>View Certificate</span>
