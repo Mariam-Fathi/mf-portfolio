@@ -77,26 +77,13 @@ const Contact: React.FC = () => {
   const mobileTilesRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
-  // ── Build character spans once (avoids innerHTML on every render) ──
-  const buildCharSpans = useCallback(() => {
+  // ── Prepare text for clip-reveal animation ──
+  const prepareText = useCallback(() => {
     const text = textRef.current;
     if (!text) return;
-    const content = text.textContent || "";
-    text.innerHTML = "";
-
-    content.split("").forEach((char) => {
-      const span = document.createElement("span");
-      span.textContent = char === " " ? "\u00A0" : char;
-      span.style.display = "inline-block";
-      span.style.opacity = "0";
-
-      // Controlled random scatter — bounded so no character flies off-screen
-      const rx = (Math.random() - 0.5) * 150;
-      const ry = (Math.random() - 0.5) * 150;
-      const rr = (Math.random() - 0.5) * 180;
-
-      gsap.set(span, { x: rx, y: ry, rotation: rr, opacity: 0 });
-      text.appendChild(span);
+    gsap.set(text, {
+      opacity: 1,
+      clipPath: "inset(-20% 100% -20% 0)",
     });
   }, []);
 
@@ -105,8 +92,7 @@ const Contact: React.FC = () => {
     const section = sectionRef.current;
     if (!section) return;
 
-    // Prepare character spans immediately so the text is invisible but in the DOM
-    buildCharSpans();
+    prepareText();
 
     // Collect everything that needs cleanup
     const tweens: gsap.core.Tween[] = [];
@@ -123,47 +109,19 @@ const Contact: React.FC = () => {
       if (hasAnimated.current) return;
       hasAnimated.current = true;
 
-      // ── 1. Text character entrance ───────────────────────────────
+      // ── 1. Text write-on clip reveal ──────────────────────────────
       const text = textRef.current;
-      if (text?.children.length) {
+      if (text) {
         tweens.push(
-          gsap.to(text.children, {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            rotation: 0,
-            duration: 1,
-            stagger: { each: 0.08, from: "random" },
-            ease: "back.out(1.4)",
+          gsap.to(text, {
+            clipPath: "inset(-20% 0% -20% 0)",
+            duration: 2,
+            ease: "power1.inOut",
+            onComplete: () => {
+              gsap.set(text, { clipPath: "none" });
+            },
           }),
         );
-
-        // Hover wobble on the heading
-        const onEnter = () => {
-          tweens.push(
-            gsap.to(text.children, {
-              rotation: () => gsap.utils.random(-8, 8),
-              y: () => gsap.utils.random(-4, 4),
-              duration: 0.3,
-              stagger: 0.03,
-              ease: "sine.out",
-            }),
-          );
-        };
-        const onLeave = () => {
-          tweens.push(
-            gsap.to(text.children, {
-              rotation: 0,
-              y: 0,
-              x: 0,
-              duration: 0.5,
-              stagger: 0.02,
-              ease: "elastic.out(1, 0.3)",
-            }),
-          );
-        };
-        addListener(text, "mouseenter", onEnter);
-        addListener(text, "mouseleave", onLeave);
       }
 
       // ── 2. Desktop tiles ─────────────────────────────────────────
@@ -242,7 +200,7 @@ const Contact: React.FC = () => {
       timelines.forEach((t) => t.kill());
       listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
     };
-  }, [buildCharSpans]);
+  }, [prepareText]);
 
   return (
     <section
@@ -269,9 +227,9 @@ const Contact: React.FC = () => {
       <div className="relative flex flex-col lg:flex-row min-h-screen w-full items-center justify-center lg:justify-center">
         <h1
           ref={textRef}
-          className="relative z-10 w-full text-left lg:text-center font-black uppercase leading-[0.78] text-[clamp(3rem,12vw,24rem)] md:text-[clamp(6rem,20vw,24rem)] cursor-pointer transition-none mb-8 lg:mb-0 px-6 lg:px-0"
+          className="relative z-10 w-full text-left lg:text-center font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none mb-8 lg:mb-0 px-6 lg:px-0"
           style={{
-            fontFamily: '"A Day in September", cursive',
+            fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
             color: "#280B0B",
             letterSpacing: "0.1em",
           }}
