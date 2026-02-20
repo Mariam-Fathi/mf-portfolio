@@ -208,43 +208,28 @@ export function usePortfolioAnimation(
       },
     });
 
-    // Step 2: Capture O start, anticipation + rotate I, push O
+    // Step 2: Capture O start, shift O first, then rotate I
     tl.call(() => {
       const oRect = oEl.getBoundingClientRect();
       const cRect = headerRef.current?.getBoundingClientRect();
       if (cRect) oStartX = oRect.left - cRect.left;
     });
 
-    // Anticipation: subtle squash-stretch wind-up (synced with dot wiggle)
-    tl.to(iEl, {
-      scaleX: 0.92,
-      scaleY: 1.08,
-      duration: 0.12,
-      ease: "power2.out",
-      delay: 0.35,
+    // O shifts right first — clearing space for I to rotate
+    tl.to(oEl, {
+      x: () => iWidth * 1.2,
+      duration: 0.5,
+      delay: 0.2,
+      ease: "power3.out",
     });
 
-    // Rotation with organic overshoot — O reacts like the I pushed it
+    // Then I rotates on its center
     tl.to(iEl, {
-      scaleX: 1,
-      scaleY: 1,
       rotation: 90,
       duration: TIMING.portfolioRotate,
       ease: "back.out(1.4)",
       transformOrigin: "center center",
-      onStart: () => {
-        if (iWidth > 0) {
-          // O reacts after a beat — the I needs to rotate enough
-          // to physically encroach on the O's space before it budges
-          gsap.to(oEl, {
-            x: iWidth,
-            delay: TIMING.portfolioRotate * 0.15,
-            duration: TIMING.portfolioRotate * 0.7,
-            ease: "power2.out",
-          });
-        }
-      },
-    });
+    }, "+=0.15");
 
     // Step 3: I fades + morphs into line (after landing horizontally)
     tl.to(iEl, {
