@@ -51,6 +51,14 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Hamburg Signature";
+    src: url("/fonts/hamburg-signature/Hamburg Signature.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
     --font-default: "Momo Trust Display", "Stack Sans", sans-serif;

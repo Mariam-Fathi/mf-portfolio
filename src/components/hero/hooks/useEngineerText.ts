@@ -69,14 +69,14 @@ export function useEngineerText(
       y: 0,
       rotation: 0,
       filter: "blur(0px)",
-      clipPath: "inset(0 100% 0 0)",
+      clipPath: "inset(-20% 100% -20% 0)",
     });
 
     const tid = setTimeout(() => {
       if (!el.parentElement) return;
 
       gsap.to(el, {
-        clipPath: "inset(0 0% 0 0)",
+        clipPath: "inset(-20% 0% -20% 0)",
         duration: 2,
         ease: "power1.inOut",
         delay: 0.2,

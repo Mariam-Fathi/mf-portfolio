@@ -23,8 +23,8 @@ const certificates: Certificate[] = [
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    textColor: "#E8CE89",
-    bgColor: "#91010F",
+    textColor: "#9EA6A1",
+    bgColor: "#7E0607",
     infoPosition: "bottom-right",
   },
   {
@@ -33,8 +33,8 @@ const certificates: Certificate[] = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    textColor: "#F9E7C9",
-    bgColor: "#7C1F31",
+    textColor: "#7E0607",
+    bgColor: "#9EA6A1",
     infoPosition: "bottom-left",
   },
   {
@@ -43,8 +43,8 @@ const certificates: Certificate[] = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#C92924",
-    textColor: "#F9E7C9",
+    bgColor: "#9EA6A1",
+    textColor: "#7E0607",
     infoPosition: "bottom-right",
   },
   {
@@ -53,8 +53,8 @@ const certificates: Certificate[] = [
     words: ["AI", "AGENTS"],
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    bgColor: "#6A0610",
-    textColor: "#E8CE89",
+    bgColor: "#7E0607",
+    textColor: "#9EA6A1",
     infoPosition: "bottom-right",
   },
 ];
@@ -215,14 +215,14 @@ const Certificates: React.FC = () => {
                 <div className="flex-1 flex flex-col items-center justify-center text-center gap-1.5">
                   {cert.platform && (
                     <span
-                      className="text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-medium opacity-50"
+                      className="text-[9px] uppercase tracking-[0.25em] font-medium opacity-50"
                       style={{ color: cert.textColor }}
                     >
                       {cert.platform}
                     </span>
                   )}
                   <h3
-                    className="font-semibold text-sm sm:text-base lg:text-lg xl:text-xl uppercase tracking-wide leading-snug"
+                    className="font-semibold text-sm sm:text-base lg:text-lg uppercase tracking-wide leading-snug"
                     style={{ color: cert.textColor }}
                   >
                     {cert.words.join(" ")}

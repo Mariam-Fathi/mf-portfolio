@@ -14,7 +14,7 @@ export const FONTS = {
   body: '"Space Grotesk", "Inter", sans-serif',
   script: '"Floralis Couture", cursive',
   handwritten: '"Handwritten", cursive',
-  priestacy: '"Priestacy", cursive',
+  priestacy: '"Hamburg Signature", cursive',
 } as const;
 
 // ── Z-index layering ────────────────────────────────────────────────
