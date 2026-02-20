@@ -568,7 +568,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               top: 0,
               right: 0,
               color: COLORS.primary,
-              fontFamily: FONTS.handwritten,
+              fontFamily: FONTS.priestacy,
               fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
               zIndex: Z_LAYERS.engineerText,
               pointerEvents: "none",

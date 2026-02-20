@@ -90,6 +90,11 @@ function colorLetters(
 // Narrative: dot starts on "ı", wiggles, breaks free across "a" & "m",
 // falls off-screen; a new dot drops from above, lands on "ı", rests,
 // then fades out — triggering the "software engineer" reveal.
+//
+// Physics model: gravity easing (power2.in = falling acceleration,
+// power2/3.out = rising deceleration), volume-preserving squash/stretch,
+// 3 diminishing bounces per landing, true parabolic arcs via separate
+// x (linear) and y (gravity) tweens.
 function buildDotTimeline(
   dot: HTMLDivElement,
   pos: DotPositions,
@@ -101,8 +106,8 @@ function buildDotTimeline(
 ): gsap.core.Timeline {
   const { iScreenX, iScreenY, a2ScreenX, a2ScreenY, m2ScreenX, m2ScreenY, finalDotSize } = pos;
   const d = finalDotSize;
+  const half = d / 2;
 
-  // Subtle colour variants for organic visual motion feedback
   const dotBase = COLORS.accent;      // #6A0610
   const dotMotion = "#882430";        // slightly lighter during fast arcs
   const dotLand = "#7A1822";          // slightly lighter during impacts
@@ -110,9 +115,6 @@ function buildDotTimeline(
   const dotFallLight = "#E8C4BC";     // light during new-dot fall
   const dotFallMid = "#D09890";       // mid during new-dot bounce
 
-  // Prepare the dot element
-  // When skipIntro is true the dot is already visible with correct size/pos
-  // from the pre-show effect — only reset what the timeline actually needs.
   if (!skipIntro) {
     Object.assign(dot.style, {
       width: `${d}px`,
@@ -129,25 +131,21 @@ function buildDotTimeline(
       transformOrigin: "center center",
     });
     gsap.set(dot, {
-      x: iScreenX - d / 2,
+      x: iScreenX - half,
       y: iScreenY,
       rotation: 0,
       scale: 1,
       opacity: 1,
     });
   } else {
-    // Ensure non-interactive during animation
     dot.style.pointerEvents = "none";
   }
 
-  // Single flat timeline — no nesting, no immediateRender (matches old code)
   const tl = gsap.timeline({ paused: true });
 
   if (!skipIntro) {
-    // ── Phase 1: Hold steady on "ı" in original colour ────────────
     tl.to(dot, { duration: 0.6 });
 
-    // ── Phase 2: Wiggle — micro-struggle before breaking free ──────
     tl.to(dot, {
       keyframes: [
         { y: iScreenY - 4, scaleY: 1.04, duration: 0.1, ease: "power2.out" },
@@ -156,8 +154,6 @@ function buildDotTimeline(
       ],
     });
   } else {
-    // ── Click-reaction: wiggle → colour shift → then break free ───
-    // Aggressive wiggle — the dot is reacting to the click
     tl.to(dot, {
       keyframes: [
         { y: iScreenY - 5, scaleY: 1.06, scaleX: 0.94, duration: 0.08, ease: "power3.out" },
@@ -166,7 +162,6 @@ function buildDotTimeline(
         { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" },
       ],
     });
-    // Colour shift — primary → accent (the dot is "activating")
     tl.to(dot, {
       backgroundColor: COLORS.accent,
       duration: 0.15,
@@ -174,59 +169,114 @@ function buildDotTimeline(
     });
   }
 
-  // ── Phase 3: Break free — realistic squash-and-stretch physics ──
+  // ── Break free + parabolic arc to "a" ────────────────────────────
+  // Parabolic path: x linear, y = start + dy·t − 4·h·t·(1−t)
+  const iaH = 210;
+  const iaDx = a2ScreenX - iScreenX;
+  const iaDy = a2ScreenY - iScreenY;
+  const iaX = (t: number) => iScreenX + iaDx * t - half;
+  const iaY = (t: number) => iScreenY + iaDy * t - iaH * 4 * t * (1 - t);
+
+  // Anticipation squash (on ground, before flight)
   tl.to(dot, {
     keyframes: [
-      // Anticipation — sink down + full squash (loading the spring)
-      { y: iScreenY + 4, scaleX: 1.2, scaleY: 0.65, duration: 0.2, ease: "power2.in" },
-      // EXPLOSIVE launch — stretch tall and thin, colour starts shifting
-      { y: iScreenY - 50, scaleY: 1.3, scaleX: 0.8, backgroundColor: dotLand, duration: 0.18, ease: "power3.out" },
-      // Rising — decelerating, colour deepening toward accent
-      { y: iScreenY - 80, scaleY: 1.05, scaleX: 0.95, backgroundColor: dotBase, duration: 0.3, ease: "power2.out" },
-      // Apex hang — brief float, round shape, fully accent
-      { y: iScreenY - 85, scaleY: 1, scaleX: 1, duration: 0.12, ease: "sine.out" },
-      // Parabolic arc toward "a" — lighter flash during speed
-      { x: a2ScreenX - d / 2, y: a2ScreenY - 50, scaleY: 0.8, scaleX: 1, backgroundColor: dotMotion, duration: 0.5, ease: "power1.in" },
+      { y: iScreenY + 5, scaleX: 1.25, scaleY: 0.75, duration: 0.19, ease: "power2.in" },
+      { y: iScreenY + 7, scaleX: 1.35, scaleY: 0.65, duration: 0.08, ease: "power1.in" },
     ],
   });
 
-  // ── Phase 3: Land on "a" ───────────────────────────────────────
-  tl.to(dot, { y: a2ScreenY - 70, duration: 0.2, ease: "sine.inOut" });
-  tl.to(dot, { y: a2ScreenY + 10, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" });
-  tl.to(dot, {
-    y: a2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
-    onComplete: () => { gsap.to(svgA2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
-  });
-  tl.to(dot, { scaleY: 1, duration: 0.1 });
-
-  // ── Phase 4: Jump to "m" ──────────────────────────────────────
+  // Full ballistic arc from "ı" to "a"
   tl.to(dot, {
     keyframes: [
-      { x: m2ScreenX - d / 2, y: m2ScreenY - 100, scaleY: 0.75, backgroundColor: dotMotion, duration: 0.3, ease: "power2.out" },
-      { y: m2ScreenY - 120, duration: 0.2, ease: "sine.inOut" },
-      { y: m2ScreenY + 20, scaleY: 1.2, backgroundColor: dotLand, duration: 0.25, ease: "power2.in" },
+      { x: iaX(0.08), y: iaY(0.08), scaleY: 1.2, scaleX: 0.84, backgroundColor: dotLand, duration: 0.1, ease: "power2.out" },
+      { x: iaX(0.18), y: iaY(0.18), scaleY: 1.12, scaleX: 0.9, backgroundColor: dotMotion, duration: 0.11, ease: "sine.out" },
+      { x: iaX(0.3), y: iaY(0.3), scaleY: 1.05, scaleX: 0.96, duration: 0.11, ease: "sine.out" },
+      { x: iaX(0.42), y: iaY(0.42), scaleY: 1.01, scaleX: 0.99, backgroundColor: dotBase, duration: 0.1, ease: "sine.inOut" },
+      { x: iaX(0.5), y: iaY(0.5), scaleY: 1, scaleX: 1, duration: 0.1, ease: "none" },
+      { x: iaX(0.58), y: iaY(0.58), scaleY: 1.01, scaleX: 0.99, duration: 0.1, ease: "sine.inOut" },
+      { x: iaX(0.7), y: iaY(0.7), scaleY: 1.05, scaleX: 0.96, backgroundColor: dotMotion, duration: 0.1, ease: "sine.in" },
+      { x: iaX(0.82), y: iaY(0.82), scaleY: 1.1, scaleX: 0.92, duration: 0.11, ease: "power1.in" },
+      { x: iaX(0.93), y: iaY(0.93), scaleY: 1.16, scaleX: 0.87, duration: 0.1, ease: "power1.in" },
+      { x: a2ScreenX - half, y: a2ScreenY, scaleY: 1.2, scaleX: 0.84, duration: 0.08, ease: "power2.in" },
+    ],
+  });
+
+  // ── Land on "a": impact + bounce — color fires on FIRST contact ─
+  tl.to(dot, {
+    keyframes: [
       {
-        y: m2ScreenY, scaleY: 0.8, backgroundColor: dotBase, duration: 0.15, ease: "bounce.out",
-        onComplete: () => { gsap.to(svgM2, { fill: COLORS.accent, duration: 0.3, ease: "power2.out" }); },
+        scaleY: 0.7, scaleX: 1.25, backgroundColor: dotLand, duration: 0.05, ease: "power2.in",
+        onComplete: () => { gsap.to(svgA2, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" }); },
       },
-      { scaleY: 1, duration: 0.1 },
+      { y: a2ScreenY - 22, scaleY: 1.08, scaleX: 0.94, backgroundColor: dotBase, duration: 0.19, ease: "power2.out" },
+      { y: a2ScreenY, scaleY: 1.05, scaleX: 0.96, duration: 0.17, ease: "power2.in" },
+      { scaleY: 0.85, scaleX: 1.1, duration: 0.05, ease: "power1.in" },
+      { y: a2ScreenY - 7, scaleY: 1.03, scaleX: 0.98, duration: 0.13, ease: "power2.out" },
+      { y: a2ScreenY, scaleY: 1, scaleX: 1, duration: 0.11, ease: "sine.inOut" },
     ],
-  }, "+=0.3");
+  });
 
-  // ── Phase 5: Rise then fall off screen (ghost colour fade) ─────
+  // ── Parabolic arc from "a" to "m" ────────────────────────────────
+  const amH = 200;
+  const amDx = m2ScreenX - a2ScreenX;
+  const amDy = m2ScreenY - a2ScreenY;
+  const amX = (t: number) => a2ScreenX + amDx * t - half;
+  const amY = (t: number) => a2ScreenY + amDy * t - amH * 4 * t * (1 - t);
+
+  // Anticipation squash on "a"
   tl.to(dot, {
     keyframes: [
-      { backgroundColor: dotGhost, y: m2ScreenY - 40, scaleY: 0.75, duration: 0.2, ease: "power2.out" },
-      { y: window.innerHeight + 100, scaleY: 1.2, opacity: 0, duration: 0.5, ease: "power2.in" },
+      { y: a2ScreenY + 4, scaleX: 1.2, scaleY: 0.8, duration: 0.16, ease: "power2.in" },
+      { y: a2ScreenY + 6, scaleX: 1.3, scaleY: 0.7, duration: 0.06, ease: "power1.in" },
     ],
-  }, "+=0.3");
+  }, "+=0.28");
 
-  // Hide original dot and brief pause before new dot
+  // Full ballistic arc from "a" to "m"
+  tl.to(dot, {
+    keyframes: [
+      { x: amX(0.08), y: amY(0.08), scaleY: 1.18, scaleX: 0.86, backgroundColor: dotMotion, duration: 0.09, ease: "power2.out" },
+      { x: amX(0.18), y: amY(0.18), scaleY: 1.1, scaleX: 0.92, duration: 0.1, ease: "sine.out" },
+      { x: amX(0.3), y: amY(0.3), scaleY: 1.04, scaleX: 0.97, duration: 0.1, ease: "sine.out" },
+      { x: amX(0.42), y: amY(0.42), scaleY: 1.01, scaleX: 0.99, backgroundColor: dotBase, duration: 0.1, ease: "sine.inOut" },
+      { x: amX(0.5), y: amY(0.5), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
+      { x: amX(0.58), y: amY(0.58), scaleY: 1.01, scaleX: 0.99, duration: 0.09, ease: "sine.inOut" },
+      { x: amX(0.7), y: amY(0.7), scaleY: 1.04, scaleX: 0.97, backgroundColor: dotMotion, duration: 0.1, ease: "sine.in" },
+      { x: amX(0.82), y: amY(0.82), scaleY: 1.1, scaleX: 0.92, duration: 0.1, ease: "power1.in" },
+      { x: amX(0.93), y: amY(0.93), scaleY: 1.14, scaleX: 0.88, duration: 0.09, ease: "power1.in" },
+      { x: m2ScreenX - half, y: m2ScreenY, scaleY: 1.18, scaleX: 0.86, duration: 0.08, ease: "power2.in" },
+    ],
+  });
+
+  // ── Land on "m": impact + bounce — color fires on FIRST contact ─
+  tl.to(dot, {
+    keyframes: [
+      {
+        scaleY: 0.7, scaleX: 1.25, backgroundColor: dotLand, duration: 0.05, ease: "power2.in",
+        onComplete: () => { gsap.to(svgM2, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" }); },
+      },
+      { y: m2ScreenY - 18, scaleY: 1.06, scaleX: 0.95, backgroundColor: dotBase, duration: 0.18, ease: "power2.out" },
+      { y: m2ScreenY, scaleY: 1.04, scaleX: 0.97, duration: 0.16, ease: "power2.in" },
+      { scaleY: 0.88, scaleX: 1.08, duration: 0.04, ease: "power1.in" },
+      { y: m2ScreenY - 5, scaleY: 1.02, scaleX: 0.99, duration: 0.11, ease: "power2.out" },
+      { y: m2ScreenY, scaleY: 1, scaleX: 1, duration: 0.1, ease: "sine.inOut" },
+    ],
+  });
+
+  // ── Rise then fall off screen (ghost colour fade) ─────────────
+  tl.to(dot, {
+    keyframes: [
+      { y: m2ScreenY + 3, scaleY: 0.9, scaleX: 1.08, duration: 0.12, ease: "power1.in" },
+      { backgroundColor: dotGhost, y: m2ScreenY - 50, scaleY: 1.08, scaleX: 0.94, duration: 0.28, ease: "power2.out" },
+      { y: m2ScreenY - 55, scaleY: 1, scaleX: 1, duration: 0.08, ease: "none" },
+      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
+    ],
+  }, "+=0.2");
+
   tl.set(dot, { display: "none" }, "+=0.3");
 
-  // ── Phase 6: New dot — teleport well above viewport ────────────
+  // ── New dot — teleport well above viewport ────────────────────
   tl.set(dot, {
-    x: iScreenX - d / 2,
+    x: iScreenX - half,
     y: -(d + 100),
     opacity: 1,
     scale: 1,
@@ -237,20 +287,17 @@ function buildDotTimeline(
     visibility: "visible",
   });
 
-  // Wiggle before dropping (same pattern as old code's finalDot)
   tl.to(dot, {
     keyframes: [
-      { x: iScreenX - d / 2 - 5, duration: 0.2, ease: "power1.inOut" },
-      { x: iScreenX - d / 2 + 5, duration: 0.2, ease: "power1.inOut" },
-      { x: iScreenX - d / 2, duration: 0.2, ease: "power1.inOut" },
+      { x: iScreenX - half - 5, duration: 0.2, ease: "power1.inOut" },
+      { x: iScreenX - half + 5, duration: 0.2, ease: "power1.inOut" },
+      { x: iScreenX - half, duration: 0.2, ease: "power1.inOut" },
     ],
   });
 
-  // Signal engineer text to start (synced with the drop, not after)
   tl.call(() => onComplete());
 
-  // Drop and land on "ı" with colour transitions
-  // The "ı" color change fires at impact (first contact) — not after settle
+  // ── Drop onto "ı" with colour transitions ──────────────────────
   tl.to(dot, {
     keyframes: [
       {

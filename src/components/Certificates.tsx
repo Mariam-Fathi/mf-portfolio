@@ -23,8 +23,8 @@ const certificates: Certificate[] = [
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    textColor: "#F7E594",
-    bgColor: "#8B004D",
+    textColor: "#E8CE89",
+    bgColor: "#91010F",
     infoPosition: "bottom-right",
   },
   {
@@ -33,8 +33,8 @@ const certificates: Certificate[] = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    textColor: "#8B004D",
-    bgColor: "#C4D8FC",
+    textColor: "#F9E7C9",
+    bgColor: "#7C1F31",
     infoPosition: "bottom-left",
   },
   {
@@ -43,8 +43,8 @@ const certificates: Certificate[] = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#FFDBFF",
-    textColor: "#8B004D",
+    bgColor: "#C92924",
+    textColor: "#F9E7C9",
     infoPosition: "bottom-right",
   },
   {
@@ -53,8 +53,8 @@ const certificates: Certificate[] = [
     words: ["AI", "AGENTS"],
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    bgColor: "#F7E594",
-    textColor: "#8B004D",
+    bgColor: "#6A0610",
+    textColor: "#E8CE89",
     infoPosition: "bottom-right",
   },
 ];
@@ -230,18 +230,23 @@ const Certificates: React.FC = () => {
                 </div>
 
                 {cert.link && (
-                  <div className={`flex ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                    <a
-                      href={cert.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 hover:opacity-70 transition-opacity text-[10px] md:text-xs"
-                      style={{ color: cert.textColor }}
-                    >
-                      <span>View Certificate</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
+                  <a
+                    href={cert.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`absolute inline-flex items-center gap-0.5 hover:opacity-70 transition-opacity text-[8px] md:text-[10px] ${
+                      [
+                        "top-3 left-3 lg:top-4 lg:left-4",
+                        "top-3 right-3 lg:top-4 lg:right-4",
+                        "bottom-3 left-3 lg:bottom-4 lg:left-4",
+                        "bottom-3 right-3 lg:bottom-4 lg:right-4",
+                      ][i]
+                    }`}
+                    style={{ color: cert.textColor }}
+                  >
+                    <span>View Certificate</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 )}
               </div>
             </div>
