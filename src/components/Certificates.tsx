@@ -23,8 +23,8 @@ const certificates: Certificate[] = [
     words: ["TIME", "SERIES"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    textColor: "#9EA6A1",
-    bgColor: "#7E0607",
+    textColor: "#8A9EA7",
+    bgColor: "#6A0610",
     infoPosition: "bottom-right",
   },
   {
@@ -33,8 +33,8 @@ const certificates: Certificate[] = [
     words: ["DATA", "ENGINEERING"],
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    textColor: "#7E0607",
-    bgColor: "#9EA6A1",
+    textColor: "#6A0610",
+    bgColor: "#8A9EA7",
     infoPosition: "bottom-left",
   },
   {
@@ -43,8 +43,8 @@ const certificates: Certificate[] = [
     words: ["COMPUTER", "VISION"],
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#9EA6A1",
-    textColor: "#7E0607",
+    bgColor: "#8A9EA7",
+    textColor: "#6A0610",
     infoPosition: "bottom-right",
   },
   {
@@ -53,8 +53,8 @@ const certificates: Certificate[] = [
     words: ["AI", "AGENTS"],
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    bgColor: "#7E0607",
-    textColor: "#9EA6A1",
+    bgColor: "#6A0610",
+    textColor: "#8A9EA7",
     infoPosition: "bottom-right",
   },
 ];
