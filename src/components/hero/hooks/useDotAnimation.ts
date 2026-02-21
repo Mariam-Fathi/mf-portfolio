@@ -201,49 +201,45 @@ function buildDotTimeline(
     ],
   });
 
-  // ── Land on "a": impact + bounce — color fires on FIRST contact ─
+  // ── Land on "a": reactive bounce — surface absorbs then fires ────
+  // The "a" acts like a trampoline: deep compression stores energy,
+  // then the surface launches the dot toward "m" with MORE force.
   tl.to(dot, {
     keyframes: [
+      // Impact — surface absorbs kinetic energy
       {
-        scaleY: 0.7, scaleX: 1.25, backgroundColor: dotLand, duration: 0.05, ease: "power2.in",
+        scaleY: 0.55, scaleX: 1.45, backgroundColor: dotLand, duration: 0.06, ease: "power3.in",
         onComplete: () => { gsap.to(svgA2, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" }); },
       },
-      { y: a2ScreenY - 22, scaleY: 1.08, scaleX: 0.94, backgroundColor: dotBase, duration: 0.19, ease: "power2.out" },
-      { y: a2ScreenY, scaleY: 1.05, scaleX: 0.96, duration: 0.17, ease: "power2.in" },
-      { scaleY: 0.85, scaleX: 1.1, duration: 0.05, ease: "power1.in" },
-      { y: a2ScreenY - 7, scaleY: 1.03, scaleX: 0.98, duration: 0.13, ease: "power2.out" },
-      { y: a2ScreenY, scaleY: 1, scaleX: 1, duration: 0.11, ease: "sine.inOut" },
+      // Maximum compression — surface fully loaded, slight sink
+      { y: a2ScreenY + 5, scaleY: 0.45, scaleX: 1.55, duration: 0.08, ease: "power1.in" },
+      // Surface fires back — explosive upward stretch into launch
+      { y: a2ScreenY - 25, scaleY: 1.4, scaleX: 0.72, backgroundColor: dotMotion, duration: 0.1, ease: "power3.out" },
     ],
   });
 
-  // ── Parabolic arc from "a" to "m" ────────────────────────────────
-  const amH = 200;
+  // ── Parabolic arc from "a" to "m" — powered by surface energy ───
+  // Higher arc (260 vs 210) — the "a" surface gave the dot extra energy
+  const amH = 260;
   const amDx = m2ScreenX - a2ScreenX;
   const amDy = m2ScreenY - a2ScreenY;
   const amX = (t: number) => a2ScreenX + amDx * t - half;
   const amY = (t: number) => a2ScreenY + amDy * t - amH * 4 * t * (1 - t);
 
-  // Anticipation squash on "a"
+  // Immediate arc — no pause, the surface energy propels directly
   tl.to(dot, {
     keyframes: [
-      { y: a2ScreenY + 4, scaleX: 1.2, scaleY: 0.8, duration: 0.16, ease: "power2.in" },
-      { y: a2ScreenY + 6, scaleX: 1.3, scaleY: 0.7, duration: 0.06, ease: "power1.in" },
-    ],
-  }, "+=0.28");
-
-  // Full ballistic arc from "a" to "m"
-  tl.to(dot, {
-    keyframes: [
-      { x: amX(0.08), y: amY(0.08), scaleY: 1.18, scaleX: 0.86, backgroundColor: dotMotion, duration: 0.09, ease: "power2.out" },
-      { x: amX(0.18), y: amY(0.18), scaleY: 1.1, scaleX: 0.92, duration: 0.1, ease: "sine.out" },
-      { x: amX(0.3), y: amY(0.3), scaleY: 1.04, scaleX: 0.97, duration: 0.1, ease: "sine.out" },
-      { x: amX(0.42), y: amY(0.42), scaleY: 1.01, scaleX: 0.99, backgroundColor: dotBase, duration: 0.1, ease: "sine.inOut" },
-      { x: amX(0.5), y: amY(0.5), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
-      { x: amX(0.58), y: amY(0.58), scaleY: 1.01, scaleX: 0.99, duration: 0.09, ease: "sine.inOut" },
-      { x: amX(0.7), y: amY(0.7), scaleY: 1.04, scaleX: 0.97, backgroundColor: dotMotion, duration: 0.1, ease: "sine.in" },
-      { x: amX(0.82), y: amY(0.82), scaleY: 1.1, scaleX: 0.92, duration: 0.1, ease: "power1.in" },
-      { x: amX(0.93), y: amY(0.93), scaleY: 1.14, scaleX: 0.88, duration: 0.09, ease: "power1.in" },
-      { x: m2ScreenX - half, y: m2ScreenY, scaleY: 1.18, scaleX: 0.86, duration: 0.08, ease: "power2.in" },
+      { x: amX(0.06), y: amY(0.06), scaleY: 1.3, scaleX: 0.78, duration: 0.06, ease: "power3.out" },
+      { x: amX(0.14), y: amY(0.14), scaleY: 1.18, scaleX: 0.86, duration: 0.08, ease: "power2.out" },
+      { x: amX(0.24), y: amY(0.24), scaleY: 1.08, scaleX: 0.93, duration: 0.09, ease: "sine.out" },
+      { x: amX(0.36), y: amY(0.36), scaleY: 1.02, scaleX: 0.98, backgroundColor: dotBase, duration: 0.1, ease: "sine.out" },
+      { x: amX(0.48), y: amY(0.48), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
+      { x: amX(0.58), y: amY(0.58), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
+      { x: amX(0.68), y: amY(0.68), scaleY: 1.03, scaleX: 0.97, backgroundColor: dotMotion, duration: 0.09, ease: "sine.in" },
+      { x: amX(0.78), y: amY(0.78), scaleY: 1.08, scaleX: 0.93, duration: 0.09, ease: "power1.in" },
+      { x: amX(0.87), y: amY(0.87), scaleY: 1.14, scaleX: 0.88, duration: 0.08, ease: "power1.in" },
+      { x: amX(0.94), y: amY(0.94), scaleY: 1.2, scaleX: 0.84, duration: 0.07, ease: "power2.in" },
+      { x: m2ScreenX - half, y: m2ScreenY, scaleY: 1.25, scaleX: 0.82, duration: 0.06, ease: "power2.in" },
     ],
   });
 
