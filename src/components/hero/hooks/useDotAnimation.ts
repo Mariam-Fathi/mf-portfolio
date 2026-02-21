@@ -243,30 +243,27 @@ function buildDotTimeline(
     ],
   });
 
-  // ── Land on "m": impact + bounce — color fires on FIRST contact ─
+  // ── Land on "m": impact + immediate fall off ────────────────────
   tl.to(dot, {
     keyframes: [
       {
-        scaleY: 0.7, scaleX: 1.25, backgroundColor: dotLand, duration: 0.05, ease: "power2.in",
+        scaleY: 0.6, scaleX: 1.35, backgroundColor: dotLand, duration: 0.05, ease: "power3.in",
         onComplete: () => { gsap.to(svgM2, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" }); },
       },
-      { y: m2ScreenY - 18, scaleY: 1.06, scaleX: 0.95, backgroundColor: dotBase, duration: 0.18, ease: "power2.out" },
-      { y: m2ScreenY, scaleY: 1.04, scaleX: 0.97, duration: 0.16, ease: "power2.in" },
-      { scaleY: 0.88, scaleX: 1.08, duration: 0.04, ease: "power1.in" },
-      { y: m2ScreenY - 5, scaleY: 1.02, scaleX: 0.99, duration: 0.11, ease: "power2.out" },
-      { y: m2ScreenY, scaleY: 1, scaleX: 1, duration: 0.1, ease: "sine.inOut" },
+      // Brief compression — surface doesn't hold, dot skids off
+      { y: m2ScreenY + 3, scaleY: 0.5, scaleX: 1.45, duration: 0.06, ease: "power1.in" },
+      // Weak rebound — not enough grip to stay
+      { y: m2ScreenY - 12, scaleY: 1.15, scaleX: 0.88, backgroundColor: dotGhost, duration: 0.1, ease: "power2.out" },
     ],
   });
 
-  // ── Rise then fall off screen (ghost colour fade) ─────────────
+  // ── Fall off screen — continuous from the weak rebound ─────────
   tl.to(dot, {
     keyframes: [
-      { y: m2ScreenY + 3, scaleY: 0.9, scaleX: 1.08, duration: 0.12, ease: "power1.in" },
-      { backgroundColor: dotGhost, y: m2ScreenY - 50, scaleY: 1.08, scaleX: 0.94, duration: 0.28, ease: "power2.out" },
-      { y: m2ScreenY - 55, scaleY: 1, scaleX: 1, duration: 0.08, ease: "none" },
-      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
+      { y: m2ScreenY - 14, scaleY: 1, scaleX: 1, duration: 0.05, ease: "none" },
+      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.4, ease: "power2.in" },
     ],
-  }, "+=0.2");
+  });
 
   tl.set(dot, { display: "none" }, "+=0.3");
 
