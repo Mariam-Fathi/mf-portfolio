@@ -128,21 +128,21 @@ const projects: Project[] = [
 const cardPalette = [
   {
     // Project 0: Homi
-    background: "#F9E7C9",
-    headline: "#6A0610",
-    headlineStroke: "#6A0610",
-    body: "#280B0B",
-    link: "#6A0610",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 1: Font Selection Agent
     background: "#8A9EA7",
     headline: "#280B0B",
     headlineStroke: "#280B0B",
     body: "#280B0B",
     link: "#280B0B",
     accent: "#6A0610",
+  },
+  {
+    // Project 1: Font Selection Agent
+    background: "#F9E7C9",
+    headline: "#6A0610",
+    headlineStroke: "#6A0610",
+    body: "#280B0B",
+    link: "#6A0610",
+    accent: "#8A9EA7",
   },
   {
     // Project 2: Multimodal Personality Analysis
@@ -155,21 +155,21 @@ const cardPalette = [
   },
   {
     // Project 3: Estimator
-    background: "#F9E7C9",
-    headline: "#6A0610",
-    headlineStroke: "#6A0610",
-    body: "#280B0B",
-    link: "#6A0610",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 4: Smart Key
     background: "#8A9EA7",
     headline: "#280B0B",
     headlineStroke: "#280B0B",
     body: "#280B0B",
     link: "#280B0B",
     accent: "#6A0610",
+  },
+  {
+    // Project 4: Smart Key
+    background: "#F9E7C9",
+    headline: "#6A0610",
+    headlineStroke: "#6A0610",
+    body: "#280B0B",
+    link: "#6A0610",
+    accent: "#8A9EA7",
   },
   {
     // Project 5: Smart Key Operational Portal
