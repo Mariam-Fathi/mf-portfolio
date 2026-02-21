@@ -252,16 +252,17 @@ function buildDotTimeline(
       },
       // Brief compression — surface doesn't hold, dot skids off
       { y: m2ScreenY + 3, scaleY: 0.5, scaleX: 1.45, duration: 0.06, ease: "power1.in" },
-      // Weak rebound — not enough grip to stay
-      { y: m2ScreenY - 12, scaleY: 1.15, scaleX: 0.88, backgroundColor: dotGhost, duration: 0.1, ease: "power2.out" },
+      // Small bounce up — just enough to leave the surface
+      { y: m2ScreenY - 30, scaleY: 1.12, scaleX: 0.9, backgroundColor: dotBase, duration: 0.14, ease: "power2.out" },
+      // Hang at the peak for a beat
+      { y: m2ScreenY - 32, scaleY: 1, scaleX: 1, backgroundColor: dotGhost, duration: 0.06, ease: "none" },
     ],
   });
 
-  // ── Fall off screen — continuous from the weak rebound ─────────
+  // ── Fall off screen — gravity wins ─────────────────────────────
   tl.to(dot, {
     keyframes: [
-      { y: m2ScreenY - 14, scaleY: 1, scaleX: 1, duration: 0.05, ease: "none" },
-      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.4, ease: "power2.in" },
+      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
     ],
   });
 
