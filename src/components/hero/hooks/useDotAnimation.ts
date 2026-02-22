@@ -143,47 +143,58 @@ function buildDotTimeline(
 
   const tl = gsap.timeline({ paused: true });
 
+  // Smooth dot motion inspired by Lottie-style easing: few keyframes, sine/cubic, organic settle.
+  const smoothEaseOut = "sine.out" as const;
+  const smoothEaseInOut = "sine.inOut" as const;
+
   if (!skipIntro) {
     tl.to(dot, { duration: 0.6 });
 
+    // One smooth cycle: slight dip down → gentle rise → settle (Lottie dot feel).
     tl.to(dot, {
       keyframes: [
-        { y: iScreenY - 4, scaleY: 1.04, duration: 0.1, ease: "power2.out" },
-        { y: iScreenY, scaleY: 0.96, duration: 0.08, ease: "power2.in" },
-        { scaleY: 1, duration: 0.05, ease: "power1.out" },
+        { y: iScreenY + 6, scaleY: 0.94, scaleX: 1.06, duration: 0.22, ease: smoothEaseOut },
+        { y: iScreenY - 5, scaleY: 1.05, scaleX: 0.96, duration: 0.28, ease: smoothEaseInOut },
+        { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.2, ease: smoothEaseInOut },
       ],
     });
   } else {
+    // Post-click: hover momentum channels into one motion — from hover pose straight into anticipation, then launch.
+    // Dot is at (baseX + ~10, baseY - 2), scaleX 1.08, scaleY 0.96; we flow into center squash and jump.
     tl.to(dot, {
-      keyframes: [
-        { y: iScreenY - 5, scaleY: 1.06, scaleX: 0.94, duration: 0.08, ease: "power3.out" },
-        { y: iScreenY + 2, scaleY: 0.92, scaleX: 1.08, duration: 0.06, ease: "power3.in" },
-        { y: iScreenY - 3, scaleY: 1.03, scaleX: 0.97, duration: 0.06, ease: "power2.out" },
-        { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" },
-      ],
+      x: iScreenX - half,
+      y: iScreenY + 5,
+      scaleX: 1.28,
+      scaleY: 0.72,
+      backgroundColor: COLORS.accent,
+      duration: 0.11,
+      ease: "power2.in",
     });
     tl.to(dot, {
-      backgroundColor: COLORS.accent,
-      duration: 0.15,
-      ease: "power2.inOut",
+      y: iScreenY + 7,
+      scaleX: 1.34,
+      scaleY: 0.66,
+      duration: 0.07,
+      ease: "sine.in",
     });
   }
 
   // ── Break free + parabolic arc to "a" ────────────────────────────
-  // Parabolic path: x linear, y = start + dy·t − 4·h·t·(1−t)
   const iaH = 210;
   const iaDx = a2ScreenX - iScreenX;
   const iaDy = a2ScreenY - iScreenY;
   const iaX = (t: number) => iScreenX + iaDx * t - half;
   const iaY = (t: number) => iScreenY + iaDy * t - iaH * 4 * t * (1 - t);
 
-  // Anticipation squash (on ground, before flight)
-  tl.to(dot, {
-    keyframes: [
-      { y: iScreenY + 5, scaleX: 1.25, scaleY: 0.75, duration: 0.19, ease: "power2.in" },
-      { y: iScreenY + 7, scaleX: 1.35, scaleY: 0.65, duration: 0.08, ease: "power1.in" },
-    ],
-  });
+  // Anticipation squash (only when not from hover — skipIntro already did hover→squash)
+  if (!skipIntro) {
+    tl.to(dot, {
+      keyframes: [
+        { y: iScreenY + 5, scaleX: 1.22, scaleY: 0.78, duration: 0.2, ease: smoothEaseOut },
+        { y: iScreenY + 7, scaleX: 1.32, scaleY: 0.68, duration: 0.1, ease: "sine.in" },
+      ],
+    });
+  }
 
   // Full ballistic arc from "ı" to "a"
   tl.to(dot, {
@@ -291,15 +302,60 @@ function buildDotTimeline(
 
   tl.call(() => onComplete());
 
-  // ── Drop onto "ı" with colour transitions ──────────────────────
+  // ── Drop onto "ı" — impact only at the exact touch moment ───────
+  const textEl = svgI.parentElement as SVGTextElement | null;
+  const runLetterTouch = () => {
+    gsap.to(svgI, { fill: COLORS.accent, duration: 0.28, ease: "sine.out" });
+    if (textEl) {
+      const textR = textEl.getBoundingClientRect();
+      const iR = svgI.getBoundingClientRect();
+      const originX = iR.left - textR.left + iR.width / 2;
+      const originY = iR.bottom - textR.top;
+      gsap.set(textEl, { transformOrigin: `${originX}px ${originY}px` });
+      gsap.to(textEl, {
+        scaleY: 0.88,
+        duration: TIMING.letterTouchSquash,
+        ease: "sine.in",
+        force3D: false,
+      });
+      gsap.to(textEl, {
+        scaleY: 1,
+        duration: TIMING.letterTouchSpring,
+        ease: "back.out(1.08)",
+        delay: TIMING.letterTouchSquash,
+        force3D: false,
+      });
+    }
+  };
+
+  // Fall: dot travels until it touches the "ı" — gravity-style (no slowdown near the end)
+  tl.to(dot, {
+    y: iScreenY,
+    backgroundColor: dotFallLight,
+    duration: TIMING.dotFall,
+    ease: "power2.in",
+  });
+
+  // Touch moment only: subtle squash then smooth settle (realistic, not exaggerated)
   tl.to(dot, {
     keyframes: [
       {
-        y: iScreenY + 60, backgroundColor: dotFallLight, duration: TIMING.dotFall, ease: "power2.in",
-        onComplete: () => { gsap.to(svgI, { fill: COLORS.accent, duration: 0.25, ease: "power2.out" }); },
+        y: iScreenY + 3,
+        scaleY: 0.88,
+        scaleX: 1.1,
+        backgroundColor: dotLand,
+        duration: TIMING.dotTouchSquash,
+        ease: "sine.in",
+        onComplete: runLetterTouch,
       },
-      { y: iScreenY + 30, scaleY: 0.7, backgroundColor: dotFallMid, duration: TIMING.dotBounce, ease: "power2.out" },
-      { y: iScreenY, scaleY: 1, backgroundColor: dotBase, duration: TIMING.dotSquash, ease: "power2.out" },
+      {
+        y: iScreenY,
+        scaleY: 1,
+        scaleX: 1,
+        backgroundColor: dotBase,
+        duration: TIMING.dotTouchSettle,
+        ease: "sine.out",
+      },
     ],
   });
 
@@ -333,17 +389,28 @@ export function useDotAnimation(
   const [isDotStarted, setIsDotStarted] = useState(false);
   const [isDotComplete, setIsDotComplete] = useState(false);
 
-  // ── Hide dots when hero is inactive ────────────────────────────
+  // ── Hide dots when hero is inactive; reset "ı" transform ───────
   useEffect(() => {
-    if (!isActive && dotRef.current) {
-      gsap.killTweensOf(dotRef.current);
-      Object.assign(dotRef.current.style, {
-        display: "none",
-        opacity: "0",
-        visibility: "hidden",
-      });
+    if (!isActive) {
+      if (dotRef.current) {
+        gsap.killTweensOf(dotRef.current);
+        Object.assign(dotRef.current.style, {
+          display: "none",
+          opacity: "0",
+          visibility: "hidden",
+        });
+      }
+      if (svgIRef.current) {
+        gsap.killTweensOf(svgIRef.current);
+        gsap.set(svgIRef.current, { scaleY: 1 });
+      }
+      const textEl = svgIRef.current?.parentElement;
+      if (textEl) {
+        gsap.killTweensOf(textEl);
+        gsap.set(textEl, { scaleY: 1 });
+      }
     }
-  }, [isActive, dotRef]);
+  }, [isActive, dotRef, svgIRef]);
 
   // ── Main animation trigger ─────────────────────────────────────
   useEffect(() => {

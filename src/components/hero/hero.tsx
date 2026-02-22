@@ -235,22 +235,29 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     }
 
-    // Hover wiggle — dot struggles to break free
-    let wiggleTl: gsap.core.Timeline | null = null;
+    // Hover: build momentum in the direction of the jump — up (stretch and lift).
+    const jumpDirY = -8;   // lift up (arc goes up first)
+    let hoverTl: gsap.core.Timeline | null = null;
     const onMouseEnter = () => {
-      if (wiggleTl) wiggleTl.kill();
-      wiggleTl = gsap.timeline();
-      wiggleTl
-        .to(dot, { y: baseY - 4, scaleY: 1.04, scaleX: 0.96, duration: 0.1, ease: "power2.out" })
-        .to(dot, { y: baseY, scaleY: 0.96, scaleX: 1.04, duration: 0.08, ease: "power2.in" })
-        .to(dot, { scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" })
-        .to(dot, { y: baseY - 3, scaleY: 1.03, scaleX: 0.97, duration: 0.1, ease: "power2.out" }, "+=0.15")
-        .to(dot, { y: baseY, scaleY: 0.97, scaleX: 1.03, duration: 0.08, ease: "power2.in" })
-        .to(dot, { scaleY: 1, scaleX: 1, duration: 0.05, ease: "power1.out" });
+      if (hoverTl) hoverTl.kill();
+      hoverTl = gsap.timeline();
+      hoverTl.to(dot, {
+        y: baseY + jumpDirY,
+        scaleX: 0.96,
+        scaleY: 1.08,
+        duration: 0.22,
+        ease: "sine.out",
+      });
     };
     const onMouseLeave = () => {
-      if (wiggleTl) wiggleTl.kill();
-      gsap.to(dot, { y: baseY, scaleY: 1, scaleX: 1, duration: 0.15, ease: "power1.out" });
+      if (hoverTl) hoverTl.kill();
+      gsap.to(dot, {
+        y: baseY,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 0.24,
+        ease: "sine.out",
+      });
     };
 
     dot.addEventListener("mouseenter", onMouseEnter);
@@ -259,7 +266,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     return () => {
       dot.removeEventListener("mouseenter", onMouseEnter);
       dot.removeEventListener("mouseleave", onMouseLeave);
-      if (wiggleTl) wiggleTl.kill();
+      if (hoverTl) hoverTl.kill();
       // Don't hide on resize re-runs (dotPreShownRef stays true).
       // Don't hide when isDotClicked transitions (animation takes over).
       // Only hide if the dot was never fully shown (e.g. early unmount).

@@ -34,6 +34,11 @@ export const TIMING = {
   dotSquash: 0.2,
   dotJump: 0.7,
   dotArc: 0.4,
+  /** Touch moment: subtle impact when dot meets "ı" */
+  dotTouchSquash: 0.06,
+  dotTouchSettle: 0.28,
+  letterTouchSquash: 0.08,
+  letterTouchSpring: 0.4,
   portfolioFade: 0.3,
   portfolioRotate: 1.4,
   portfolioExpand: 2.5,
