@@ -328,25 +328,27 @@ function buildDotTimeline(
     }
   };
 
-  // Fall: dot travels until it touches the "ı" — gravity-style (no slowdown near the end)
+  // Fall: dot travels until it touches the "ı" — gravity-style, snappier at the end so contact reads
   tl.to(dot, {
     y: iScreenY,
     backgroundColor: dotFallLight,
     duration: TIMING.dotFall,
-    ease: "power2.in",
+    ease: "power3.in",
   });
 
-  // Touch moment only: subtle squash then smooth settle (realistic, not exaggerated)
+  // Touch: letter and dot react at the exact same moment (immersive sync)
+  tl.call(runLetterTouch);
+
+  // Impact — dot compresses into surface (same instant as letter squash)
   tl.to(dot, {
     keyframes: [
       {
-        y: iScreenY + 3,
-        scaleY: 0.88,
-        scaleX: 1.1,
+        y: iScreenY + 4,
+        scaleY: 0.82,
+        scaleX: 1.14,
         backgroundColor: dotLand,
-        duration: TIMING.dotTouchSquash,
-        ease: "sine.in",
-        onComplete: runLetterTouch,
+        duration: TIMING.dotTouchImpact,
+        ease: "power2.in",
       },
       {
         y: iScreenY,
@@ -354,7 +356,7 @@ function buildDotTimeline(
         scaleX: 1,
         backgroundColor: dotBase,
         duration: TIMING.dotTouchSettle,
-        ease: "sine.out",
+        ease: "back.out(1.06)",
       },
     ],
   });

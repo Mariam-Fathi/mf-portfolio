@@ -235,7 +235,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     }
 
-    // Hover: build momentum in the direction of the jump — up (stretch and lift).
+    // Hover: build momentum in the direction of the jump — up (stretch and lift) + color change.
     const jumpDirY = -8;   // lift up (arc goes up first)
     let hoverTl: gsap.core.Timeline | null = null;
     const onMouseEnter = () => {
@@ -245,6 +245,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         y: baseY + jumpDirY,
         scaleX: 0.96,
         scaleY: 1.08,
+        backgroundColor: COLORS.accent,
         duration: 0.22,
         ease: "sine.out",
       });
@@ -255,6 +256,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         y: baseY,
         scaleX: 1,
         scaleY: 1,
+        backgroundColor: COLORS.primary,
         duration: 0.24,
         ease: "sine.out",
       });
