@@ -251,44 +251,76 @@ export function usePortfolioAnimation(
       dragTarget.style.cursor = "grab";
       dragTarget.style.pointerEvents = "auto";
 
-      // Auto: point first (Lottie 0–42), then O + line + hand in sync (hand frame driven by O progress).
+      // Auto: point first, then one smooth motion 0→1/4→0→1/2→end (single progress, no keyframe pause).
       const fps = 60;
       const pointingFrames = 42;
       const pointingDelay = pointingFrames / fps;
-      const autoExpandDuration = 3.2;
+      const quarterX = oFinalX * 0.25;
+      const halfX = oFinalX * 0.5;
+      const quarterLine = finalLineWidth * 0.25;
+      const halfLine = finalLineWidth * 0.5;
+      const durToQuarter = 0.8;
+      const durReverse = 0.6;
+      const durToHalf = 1;
+      const durToEnd = 1.4;
+      const totalDuration = durToQuarter + durReverse + durToHalf + durToEnd;
+      const p1 = durToQuarter / totalDuration;
+      const p2 = (durToQuarter + durReverse) / totalDuration;
+      const p3 = (durToQuarter + durReverse + durToHalf) / totalDuration;
+
+      const progressToX = (t: number): number => {
+        if (t <= p1) return (t / p1) * quarterX;
+        if (t <= p2) return quarterX * (1 - (t - p1) / (p2 - p1));
+        if (t <= p3) return ((t - p2) / (p3 - p2)) * halfX;
+        return halfX + ((t - p3) / (1 - p3)) * (oFinalX - halfX);
+      };
+      const progressToLine = (t: number): number => {
+        if (t <= p1) return (t / p1) * quarterLine;
+        if (t <= p2) return quarterLine * (1 - (t - p1) / (p2 - p1));
+        if (t <= p3) return ((t - p2) / (p3 - p2)) * halfLine;
+        return halfLine + ((t - p3) / (1 - p3)) * (finalLineWidth - halfLine);
+      };
+
+      let handHidden = false;
+      const applyProgress = (t: number) => {
+        const x = progressToX(t);
+        const lineW = progressToLine(t);
+        gsap.set(dragTarget, { x });
+        (lineEl as HTMLElement).style.width = `${lineW}px`;
+        const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 0;
+        syncHandProgressRef?.current?.(progress);
+        if (!handHidden && x >= halfX * 0.98) {
+          handHidden = true;
+          const handEl = dragHandRef?.current;
+          if (handEl) {
+            handEl.style.opacity = "0";
+            handEl.style.visibility = "hidden";
+          }
+          setShowDragHint(false);
+        }
+      };
+
       const finish = () => {
         gsap.set(dragTarget, { x: oFinalX });
         lineEl.style.width = `${finalLineWidth}px`;
         gsap.set(lineEl, { width: finalLineWidth });
-        const handEl = dragHandRef?.current;
-        if (handEl) {
-          handEl.style.opacity = "0";
-          handEl.style.visibility = "hidden";
-        }
         setShowDragHint(false);
         dragTarget.style.pointerEvents = "none";
         dragTarget.style.cursor = "";
         setIsComplete(true);
       };
+
+      const progressObj = { t: 0 };
       const autoTl = gsap.timeline({
         delay: pointingDelay,
         onComplete: finish,
       });
-      autoTl.to(
-        dragTarget,
-        {
-          x: oFinalX,
-          duration: autoExpandDuration,
-          ease: "sine.inOut",
-          onUpdate: () => {
-            const x = Number(gsap.getProperty(dragTarget, "x")) || 0;
-            const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 1;
-            syncHandProgressRef?.current?.(progress);
-          },
-        },
-        0
-      );
-      autoTl.to(lineEl, { width: finalLineWidth, duration: autoExpandDuration, ease: "sine.inOut" }, 0);
+      autoTl.to(progressObj, {
+        t: 1,
+        duration: totalDuration,
+        ease: "none",
+        onUpdate: () => applyProgress(progressObj.t),
+      });
 
       let startClientX = 0;
       let startX = 0;
