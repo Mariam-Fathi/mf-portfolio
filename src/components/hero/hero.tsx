@@ -26,19 +26,46 @@ import { useHeroNavigation } from "./hooks/useHeroNavigation";
 const HAND_CURSOR_HEIGHT = 108;
 const HAND_CURSOR_WIDTH = 162; // 3:2 aspect (Lottie)
 
-function HeroDragHandLottie({ animationData, loop = true }: { animationData: object; loop?: boolean }) {
-  const { View } = useLottie(
+// Lottie drag-hand: frames 0–42 = point, 42–124 = drag (sync hand to O progress)
+const LOTTIE_POINT_END_FRAME = 42;
+const LOTTIE_TOTAL_FRAMES = 124;
+
+function HeroDragHandLottie({
+  animationData,
+  loop = true,
+  syncHandProgressRef,
+  handRef,
+}: {
+  animationData: object;
+  loop?: boolean;
+  syncHandProgressRef?: React.MutableRefObject<((progress: number) => void) | null>;
+  handRef?: React.RefObject<HTMLSpanElement | null>;
+}) {
+  const { View, goToAndStop } = useLottie(
     { animationData, loop, autoplay: true },
     { height: `${HAND_CURSOR_HEIGHT}px`, width: `${HAND_CURSOR_WIDTH}px` }
   );
+  useEffect(() => {
+    if (!syncHandProgressRef) return;
+    const dragFrames = LOTTIE_TOTAL_FRAMES - LOTTIE_POINT_END_FRAME;
+    syncHandProgressRef.current = (progress: number) => {
+      const frame = LOTTIE_POINT_END_FRAME + Math.max(0, Math.min(1, progress)) * dragFrames;
+      goToAndStop(frame, true);
+    };
+    return () => {
+      syncHandProgressRef.current = null;
+    };
+  }, [goToAndStop, syncHandProgressRef]);
   return (
     <span
+      ref={handRef}
       className="hero-drag-hand"
       style={{
         position: "absolute",
         right: 0,
         top: "50%",
-        transform: "translate(50%, -50%) rotate(-90deg)",
+        // No horizontal shift: hand’s right edge at O’s right edge so it overlaps and touches the O
+        transform: "translate(0, -50%) rotate(-90deg)",
         display: "inline-block",
         pointerEvents: "none",
       }}
@@ -72,6 +99,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
   const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
+  const dragHandRef = useRef<HTMLSpanElement>(null);
+  const syncHandProgressRef = useRef<((progress: number) => void) | null>(null);
   const [dragHandData, setDragHandData] = useState<object | null>(null);
   const [userStartedDrag, setUserStartedDrag] = useState(false);
   const [isDotClicked, setIsDotClicked] = useState(false);
@@ -129,6 +158,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isMobile,
     handleDragStart,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
+    syncHandProgressRef,
+    dragHandRef,
   );
 
   // Drag phase starts after "Software Engineer" is fully revealed (not when dot touches)
@@ -245,7 +276,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       });
     }
 
-    // Hover: expand down (sag toward ı) + dot and "ı" match accent (touching).
+    // Hover on dot: expand down (sag toward ı) + dot and "ı" match accent (touching).
     const hoverDrop = 8;
     const svgI = svgIRef.current;
     let hoverTl: gsap.core.Timeline | null = null;
@@ -434,7 +465,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center", contain: "layout" }}>
                 <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Drag to expand navigation">O</span>
                 {showDragHint && dragHandData && (
-                  <HeroDragHandLottie animationData={dragHandData} loop={false} />
+                  <HeroDragHandLottie animationData={dragHandData} loop={false} syncHandProgressRef={syncHandProgressRef} handRef={dragHandRef} />
                 )}
               </span>
               <div
@@ -805,14 +836,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           cursor: pointer;
           display: inline;
           pointer-events: auto;
-          transition: color 0.3s ease;
           outline: none;
-        }
-        .hero-o-trigger:hover {
-          color: ${COLORS.accent};
-        }
-        .hero-o-trigger:focus-visible {
-          color: ${COLORS.accent};
         }
         .hero-click-svg {
           position: absolute;

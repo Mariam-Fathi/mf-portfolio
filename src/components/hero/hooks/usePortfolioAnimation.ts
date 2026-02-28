@@ -66,6 +66,8 @@ export function usePortfolioAnimation(
   isMobile: boolean,
   onDragStart?: () => void,
   oDragWrapperRef?: RefObject<HTMLDivElement | null>,
+  syncHandProgressRef?: RefObject<((progress: number) => void) | null>,
+  dragHandRef?: RefObject<HTMLElement | null>,
 ): { isPortfolioAnimationComplete: boolean; showDragHint: boolean } {
   const [isComplete, setIsComplete] = useState(false);
   const [showDragHint, setShowDragHint] = useState(false);
@@ -249,10 +251,10 @@ export function usePortfolioAnimation(
       dragTarget.style.cursor = "grab";
       dragTarget.style.pointerEvents = "auto";
 
-      // Auto: point first (Lottie frames 0–42), then O/line expand in sync with hold/drag (starts at frame 42).
+      // Auto: point first (Lottie 0–42), then O + line + hand in sync (hand frame driven by O progress).
       const fps = 60;
-      const pointingFrames = 42; // Lottie drag position keyframes start at t:42
-      const pointingDelay = pointingFrames / fps; // ~0.7s — O stays at 0 while hand points
+      const pointingFrames = 42;
+      const pointingDelay = pointingFrames / fps;
       const autoExpandDuration = 2;
       const autoTl = gsap.timeline({
         delay: pointingDelay,
@@ -265,17 +267,39 @@ export function usePortfolioAnimation(
           setIsComplete(true);
         },
       });
-      autoTl.to(dragTarget, { x: oFinalX, duration: autoExpandDuration, ease: "sine.inOut" });
+      autoTl.to(
+        dragTarget,
+        {
+          x: oFinalX,
+          duration: autoExpandDuration,
+          ease: "sine.inOut",
+          onUpdate: () => {
+            gsap.set(oEl, { x: 0 });
+            const x = Number(gsap.getProperty(dragTarget, "x")) || 0;
+            const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 1;
+            syncHandProgressRef?.current?.(progress);
+          },
+        },
+        0
+      );
       autoTl.to(lineEl, { width: finalLineWidth, duration: autoExpandDuration, ease: "sine.inOut" }, 0);
 
       let startClientX = 0;
       let startX = 0;
 
+      // Smooth follow so O and line feel like they're being dragged together
+      const quickToX = gsap.quickTo(dragTarget, "x", { duration: 0.12, ease: "power2.out" });
+      const quickToLineWidth = gsap.quickTo(lineEl as unknown as gsap.TweenTarget, "width", {
+        duration: 0.12,
+        ease: "power2.out",
+        unit: "px",
+      });
       const applyDrag = (x: number) => {
         const clamped = Math.max(0, Math.min(x, oFinalX));
-        gsap.set(dragTarget, { x: clamped });
+        quickToX(clamped);
+        gsap.set(oEl, { x: 0 });
         const lineW = Math.max(0, Math.min(clamped, finalLineWidth));
-        lineEl.style.width = `${lineW}px`;
+        quickToLineWidth(lineW);
       };
 
       const onPointerMove = (e: PointerEvent) => {
@@ -291,7 +315,7 @@ export function usePortfolioAnimation(
         const currentX = Number(gsap.getProperty(dragTarget, "x")) || 0;
         const threshold = oFinalX * 0.6;
         if (currentX >= threshold) {
-          gsap.to(dragTarget, { x: oFinalX, duration: 0.35, ease: "power2.out" });
+          gsap.to(dragTarget, { x: oFinalX, duration: 0.35, ease: "power2.out", onUpdate: () => gsap.set(oEl, { x: 0 }) });
           gsap.to(lineEl, { width: finalLineWidth, duration: 0.35, ease: "power2.out", onComplete: () => {
             lineEl.style.width = `${finalLineWidth}px`;
             gsap.set(lineEl, { width: finalLineWidth });
