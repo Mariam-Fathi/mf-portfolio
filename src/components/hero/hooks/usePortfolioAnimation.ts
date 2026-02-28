@@ -289,7 +289,7 @@ export function usePortfolioAnimation(
         (lineEl as HTMLElement).style.width = `${lineW}px`;
         const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 0;
         syncHandProgressRef?.current?.(progress);
-        if (!handHidden && x >= halfX * 0.98) {
+        if (!handHidden && x >= oFinalX * 0.92) {
           handHidden = true;
           const handEl = dragHandRef?.current;
           if (handEl) {
