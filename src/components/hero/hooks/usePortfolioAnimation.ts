@@ -255,7 +255,7 @@ export function usePortfolioAnimation(
       const fps = 60;
       const pointingFrames = 42;
       const pointingDelay = pointingFrames / fps;
-      const autoExpandDuration = 2;
+      const autoExpandDuration = 3.2;
       const finish = () => {
         gsap.set(dragTarget, { x: oFinalX });
         lineEl.style.width = `${finalLineWidth}px`;

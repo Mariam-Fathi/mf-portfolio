@@ -23,8 +23,8 @@ import { useEngineerText } from "./hooks/useEngineerText";
 import { useHeroNavigation } from "./hooks/useHeroNavigation";
 
 // Hand larger than default for visibility (bigger than native cursor)
-const HAND_CURSOR_HEIGHT = 108;
-const HAND_CURSOR_WIDTH = 162; // 3:2 aspect (Lottie)
+const HAND_CURSOR_HEIGHT = 140;
+const HAND_CURSOR_WIDTH = 210; // 3:2 aspect (Lottie)
 
 // Lottie drag-hand: frames 0–42 = point, 42–124 = drag (sync hand to O progress)
 const LOTTIE_POINT_END_FRAME = 42;
@@ -65,7 +65,7 @@ function HeroDragHandLottie({
         right: 0,
         top: "50%",
         // translate(100%, -50%): hand sits to the right of O, grip (left edge) on O’s right border
-        transform: "translate(12%, -50%) rotate(-90deg)",
+        transform: "translate(22%, -50%) rotate(-90deg)",
         display: "inline-block",
         pointerEvents: "none",
       }}
