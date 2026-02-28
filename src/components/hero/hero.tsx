@@ -64,8 +64,8 @@ function HeroDragHandLottie({
         position: "absolute",
         right: 0,
         top: "50%",
-        // No horizontal shift: hand’s right edge at O’s right edge so it overlaps and touches the O
-        transform: "translate(0, -50%) rotate(-90deg)",
+        // translate(100%, -50%): hand sits to the right of O, grip (left edge) on O’s right border
+        transform: "translate(12%, -50%) rotate(-90deg)",
         display: "inline-block",
         pointerEvents: "none",
       }}
@@ -463,10 +463,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
               <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
               <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center", contain: "layout" }}>
-                <span className="hero-cover-title-o" style={{ display: "none", opacity: 1 }} aria-label="Drag to expand navigation">O</span>
-                {showDragHint && dragHandData && (
-                  <HeroDragHandLottie animationData={dragHandData} loop={false} syncHandProgressRef={syncHandProgressRef} handRef={dragHandRef} />
-                )}
+                <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
+                  O
+                  {showDragHint && dragHandData && (
+                    <HeroDragHandLottie animationData={dragHandData} loop={false} syncHandProgressRef={syncHandProgressRef} handRef={dragHandRef} />
+                  )}
+                </span>
               </span>
               <div
                 className="hero-cover-title-line"
