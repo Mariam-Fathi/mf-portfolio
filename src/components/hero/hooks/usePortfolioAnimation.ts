@@ -289,9 +289,16 @@ export function usePortfolioAnimation(
         (lineEl as HTMLElement).style.width = `${lineW}px`;
         const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 0;
         syncHandProgressRef?.current?.(progress);
+        const handEl = dragHandRef?.current;
+        if (handEl && !handHidden) {
+          let handOffsetPx = 0;
+          if (progress >= 0.75) {
+            handOffsetPx = ((progress - 0.75) / 0.25) * 52;
+          }
+          handEl.style.transform = `translate(calc(22% + ${handOffsetPx}px), -50%) rotate(-90deg)`;
+        }
         if (!handHidden && x >= oFinalX * 0.92) {
           handHidden = true;
-          const handEl = dragHandRef?.current;
           if (handEl) {
             handEl.style.opacity = "0";
             handEl.style.visibility = "hidden";
