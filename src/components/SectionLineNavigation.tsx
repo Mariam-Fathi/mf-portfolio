@@ -81,27 +81,27 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     // Use oPositionX if available, otherwise use lineEndX (line end position)
     const navFinalX = lineData.oPositionX || lineData.lineEndX; // O's position (where navigation should be)
 
-    // If already animated, just ensure O and navigation are visible at final position
+    // If already animated, just ensure O and navigation are at final position
     if (hasAnimated) {
       gsap.set(oRef.current, {
-        left: navFinalX, // O at final position
+        left: navFinalX,
         opacity: 1,
-        display: "inline-flex", // Match hero
-        alignItems: "center", // Match hero
-        transform: "translateY(-50%)", // Center vertically with line (exact alignment)
+        display: "inline-flex",
+        alignItems: "center",
+        transform: "translateY(-50%)",
       });
       gsap.set(navRef.current, { 
         opacity: 1, 
         display: "flex",
         visibility: "visible",
-        left: navFinalX, // At final position (where O is)
-        top: navY, // Center between top of viewport and line
-        transform: "translate(-100%, -50%)", // Align right edge like hero
+        left: navFinalX,
+        top: navY,
+        transform: "translate(-100%, -50%)",
       });
       gsap.set(lineRef.current, { 
         opacity: 0.4, 
         width: targetLineWidth,
-        transform: "translateY(-50%)" // Maintain vertical centering
+        transform: "translateY(-50%)"
       });
       return;
     }
@@ -121,20 +121,19 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     });
 
     // Position O at start (left edge, where line begins) - will move along with line
-    // Match hero O exactly: same font size, same alignment with line
     gsap.set(oRef.current, {
       position: "fixed",
-      left: 0, // Start at left edge (where line starts)
+      left: 0,
       top: lineY,
-      transform: "translateY(-50%)", // Center vertically - same as line (exact alignment)
-      opacity: 1, // O is visible from start (like hero)
-      display: "inline-flex", // Match hero: inline-flex
-      alignItems: "center", // Match hero: align-items center
+      transform: "translateY(-50%)",
+      opacity: 1,
+      display: "inline-flex",
+      alignItems: "center",
       visibility: "visible",
       zIndex: 20,
       immediateRender: true,
     });
-    
+
     // Position navigation at O's final position (hidden initially, appears after O reaches end)
     // Center links in the space between top of viewport and the line
     if (navRef.current) {
@@ -172,7 +171,6 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       onComplete: () => {
         setIsAnimationComplete(true);
         setHasAnimated(true);
-        // Keep navigation visible after animation
         if (navRef.current) {
           gsap.set(navRef.current, { 
             opacity: 1, 
@@ -183,8 +181,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       },
     });
 
-    // Step 1: Line expands from left edge to end (exactly like hero, 2.5 seconds)
-    // Step 2: O moves along with line expansion (same duration, simultaneous)
+    // Line expands right; O moves with it
     tl.to(lineRef.current, {
       width: targetLineWidth,
       opacity: 0.4,
@@ -192,12 +189,11 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       ease: "power2.out",
     });
     
-    // O moves along with line expansion (like hero)
     tl.to(oRef.current, {
-      left: navFinalX, // Move to final position (where O should be)
+      left: navFinalX,
       duration: 2.5,
       ease: "power2.out",
-    }, 0); // Start at same time as line expansion
+    }, 0);
     
     // Step 3: Navigation appears at O's position AFTER O reaches end
     // Just like hero: navigation appears after portfolio animation completes
@@ -221,7 +217,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         tl.kill();
       }
     };
-  }, [lineData, hasAnimated]); // Only animate once
+  }, [lineData, hasAnimated]);
 
   // Update positions on window resize
   useEffect(() => {
@@ -233,21 +229,19 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         setLineData(updatedData);
       }
       
-      // Update line width and navigation position on resize to match hero line
+      // Update line and nav position on resize to match hero line
       if (lineRef.current && navRef.current && hasAnimated) {
         const updatedLineData = getHeroLineData();
         if (updatedLineData) {
           const targetLineWidth = updatedLineData.lineEndX;
           const navX = updatedLineData.oPositionX || updatedLineData.lineEndX;
-          const navY = updatedLineData.lineY / 2; // Center between top of viewport and line
+          const navY = updatedLineData.lineY / 2;
           gsap.set(lineRef.current, { 
             width: targetLineWidth,
-            transform: "translateY(-50%)" // Maintain vertical centering
+            transform: "translateY(-50%)"
           });
-          gsap.set(navRef.current, { 
-            left: navX,
-            top: navY // Center between top of viewport and line
-          });
+          gsap.set(navRef.current, { left: navX, top: navY });
+          if (oRef.current) gsap.set(oRef.current, { left: navX });
         }
       }
     };

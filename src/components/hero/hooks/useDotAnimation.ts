@@ -104,6 +104,7 @@ function buildDotTimeline(
   onComplete: () => void,
   skipIntro = false,
   onDotFallenFromM?: () => void,
+  onDotLandedOnI?: () => void,
   liquidDropsRef?: RefObject<HTMLDivElement | null>,
   portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
 ): gsap.core.Timeline {
@@ -366,6 +367,7 @@ function buildDotTimeline(
     ease: "power3.in",
   });
   tl.call(runLetterTouch);
+  tl.call(() => onDotLandedOnI?.()); // exact moment dot touches ı — trigger engineer text & portfolio
   tl.to(dot, {
     keyframes: [
       {
@@ -428,6 +430,7 @@ export function useDotAnimation(
   isMobile: boolean,
   shouldAnimate: boolean,
   portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
+  onDotLandedOnI?: () => void,
 ): { isDotAnimationStarted: boolean; isDotAnimationComplete: boolean; isDotFallenFromM: boolean } {
   const [isDotStarted, setIsDotStarted] = useState(false);
   const [isDotComplete, setIsDotComplete] = useState(false);
@@ -530,7 +533,7 @@ export function useDotAnimation(
         requestAnimationFrame(() => {
           activeTl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
             setIsDotComplete(true);
-          }, dotAlreadyVisible, () => setIsDotFallenFromM(true), liquidDropsRef, portfolioHeaderRef);
+          }, dotAlreadyVisible, () => setIsDotFallenFromM(true), onDotLandedOnI, liquidDropsRef, portfolioHeaderRef);
           if (!dotAlreadyVisible) {
             gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
             gsap.to(dot, {

@@ -65,8 +65,10 @@ export function usePortfolioAnimation(
   isActive: boolean,
   isMobile: boolean,
   onDragStart?: () => void,
-): { isPortfolioAnimationComplete: boolean } {
+  oDragWrapperRef?: RefObject<HTMLDivElement | null>,
+): { isPortfolioAnimationComplete: boolean; showDragHint: boolean } {
   const [isComplete, setIsComplete] = useState(false);
+  const [showDragHint, setShowDragHint] = useState(false);
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
@@ -75,6 +77,7 @@ export function usePortfolioAnimation(
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
       setIsComplete(false);
+      setShowDragHint(false);
       if (!everCompleted) {
         const els = getHeaderElements(headerRef);
         if (els) {
@@ -92,6 +95,8 @@ export function usePortfolioAnimation(
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           restoreFinalState(headerRef, cachedData!);
+          setShowDragHint(false);
+          if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
         });
       });
@@ -105,6 +110,8 @@ export function usePortfolioAnimation(
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           restoreFinalState(headerRef, cachedData!);
+          setShowDragHint(false);
+          if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
         });
       });
@@ -184,29 +191,25 @@ export function usePortfolioAnimation(
 
     const tl = gsap.timeline({ delay: 0 });
 
-    // Step 1: Fade out full text, show PORTFOL + I + O (I stays as letter)
-    tl.to(full, {
-      opacity: 0,
-      duration: TIMING.portfolioFade,
-      ease: "power2.in",
-      onComplete: () => {
-        full.style.display = "none";
-        portfol.style.display = "inline";
-        iEl.style.display = "inline";
-        oEl.style.display = "inline";
-        lineEl.style.display = "none";
-        gsap.set([portfol, iEl, oEl], { display: "inline", opacity: 1, rotation: 0 });
-        gsap.set(oEl, { position: "static", x: 0 });
-        gsap.set(lineEl, { display: "none", width: 0 });
-      },
+    // Step 1: Show PORTFOL + I + O (no fade/blur — instant)
+    tl.call(() => {
+      full.style.display = "none";
+      portfol.style.display = "inline";
+      iEl.style.display = "inline";
+      oEl.style.display = "inline";
+      lineEl.style.display = "none";
+      gsap.set([portfol, iEl, oEl], { display: "inline", opacity: 1, rotation: 0 });
+      gsap.set(oEl, { position: "static", x: 0 });
+      gsap.set(lineEl, { display: "none", width: 0 });
     });
 
-    // Step 2: O and line ready; capture positions; expand immediately (one click total)
+    // Step 2: O and line ready; enable drag (pull O to the right with hand)
     tl.call(() => {
       const cRect = headerRef.current?.getBoundingClientRect();
       if (!cRect) return;
 
       void oEl.offsetWidth; // force reflow after step 1 display change
+      const dragTarget = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
       const oRect = oEl.getBoundingClientRect();
       const oWidth = oRect.width;
       const padding = window.innerWidth < 768 ? 16 : 32;
@@ -238,20 +241,90 @@ export function usePortfolioAnimation(
       dataCalculated = true;
       everCompleted = true;
 
-      onDragStart?.();
-      oEl.style.pointerEvents = "none";
-      oEl.style.cursor = "";
+      // Freeze wrapper width so letters don't shift when hand mounts (hand is position:absolute but can still trigger reflow)
+      const wrapperWidth = dragTarget.offsetWidth;
+      (dragTarget as HTMLElement).style.minWidth = `${wrapperWidth}px`;
+      setShowDragHint(true);
 
-      // Expand immediately: animate O and line to final position
-      const expandDuration = 1.6;
-      const expandEase = "sine.inOut";
-      gsap.to(oEl, { x: oFinalX, duration: expandDuration, ease: expandEase });
-      gsap.to(lineEl, { width: finalLineWidth, duration: expandDuration, ease: expandEase, onComplete: () => {
-        gsap.set(oEl, { x: oFinalX });
-        lineEl.style.width = `${finalLineWidth}px`;
-        gsap.set(lineEl, { width: finalLineWidth });
-        setIsComplete(true);
-      }});
+      dragTarget.style.cursor = "grab";
+      dragTarget.style.pointerEvents = "auto";
+
+      // Auto: point first (Lottie frames 0–42), then O/line expand in sync with hold/drag (starts at frame 42).
+      const fps = 60;
+      const pointingFrames = 42; // Lottie drag position keyframes start at t:42
+      const pointingDelay = pointingFrames / fps; // ~0.7s — O stays at 0 while hand points
+      const autoExpandDuration = 2;
+      const autoTl = gsap.timeline({
+        delay: pointingDelay,
+        onComplete: () => {
+          lineEl.style.width = `${finalLineWidth}px`;
+          gsap.set(lineEl, { width: finalLineWidth });
+          setShowDragHint(false);
+          dragTarget.style.pointerEvents = "none";
+          dragTarget.style.cursor = "";
+          setIsComplete(true);
+        },
+      });
+      autoTl.to(dragTarget, { x: oFinalX, duration: autoExpandDuration, ease: "sine.inOut" });
+      autoTl.to(lineEl, { width: finalLineWidth, duration: autoExpandDuration, ease: "sine.inOut" }, 0);
+
+      let startClientX = 0;
+      let startX = 0;
+
+      const applyDrag = (x: number) => {
+        const clamped = Math.max(0, Math.min(x, oFinalX));
+        gsap.set(dragTarget, { x: clamped });
+        const lineW = Math.max(0, Math.min(clamped, finalLineWidth));
+        lineEl.style.width = `${lineW}px`;
+      };
+
+      const onPointerMove = (e: PointerEvent) => {
+        const dx = e.clientX - startClientX;
+        applyDrag(startX + dx);
+      };
+
+      const onPointerUp = () => {
+        document.removeEventListener("pointermove", onPointerMove);
+        document.removeEventListener("pointerup", onPointerUp);
+        document.removeEventListener("pointercancel", onPointerUp);
+        dragTarget.style.cursor = "grab";
+        const currentX = Number(gsap.getProperty(dragTarget, "x")) || 0;
+        const threshold = oFinalX * 0.6;
+        if (currentX >= threshold) {
+          gsap.to(dragTarget, { x: oFinalX, duration: 0.35, ease: "power2.out" });
+          gsap.to(lineEl, { width: finalLineWidth, duration: 0.35, ease: "power2.out", onComplete: () => {
+            lineEl.style.width = `${finalLineWidth}px`;
+            gsap.set(lineEl, { width: finalLineWidth });
+            setShowDragHint(false);
+            dragTarget.style.pointerEvents = "none";
+            dragTarget.style.cursor = "";
+            setIsComplete(true);
+          }});
+        } else {
+          // Snap back; show hand again so user can redrag to open
+          gsap.to(dragTarget, { x: 0, duration: 0.3, ease: "power2.out" });
+          gsap.to(lineEl, { width: 0, duration: 0.3, ease: "power2.out", onComplete: () => {
+            const w = (dragTarget as HTMLElement).offsetWidth;
+            (dragTarget as HTMLElement).style.minWidth = `${w}px`;
+            setShowDragHint(true);
+          }});
+        }
+      };
+
+      const onPointerDown = (e: PointerEvent) => {
+        e.preventDefault();
+        autoTl.kill();
+        setShowDragHint(false);
+        onDragStart?.();
+        startClientX = e.clientX;
+        startX = Number(gsap.getProperty(dragTarget, "x")) || 0;
+        dragTarget.style.cursor = "grabbing";
+        document.addEventListener("pointermove", onPointerMove);
+        document.addEventListener("pointerup", onPointerUp);
+        document.addEventListener("pointercancel", onPointerUp);
+      };
+
+      dragTarget.addEventListener("pointerdown", onPointerDown as EventListener);
     });
 
     // Resize handler — line from O start, O at end (thread ball)
@@ -274,7 +347,8 @@ export function usePortfolioAnimation(
         const oFinalX = oFinalLeft - lineStartX;
         const finalLineWidth = Math.max(0, oFinalLeft - lineStartX - 8);
 
-        gsap.set(oEl, { x: oFinalX });
+        const targetEl = oDragWrapperRef?.current ?? oEl;
+        gsap.set(targetEl, { x: oFinalX });
         lineEl.style.left = `${lineStartX}px`;
         gsap.set(lineEl, { width: finalLineWidth });
 
@@ -297,7 +371,7 @@ export function usePortfolioAnimation(
       window.removeEventListener("resize", handleResize);
       if (resizeTimer) clearTimeout(resizeTimer);
     };
-  }, [isActive, shouldAnimate, isMobile, headerRef]);
+  }, [isActive, shouldAnimate, isMobile, headerRef, oDragWrapperRef]);
 
-  return { isPortfolioAnimationComplete: isComplete };
+  return { isPortfolioAnimationComplete: isComplete, showDragHint };
 }
