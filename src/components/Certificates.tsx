@@ -1,260 +1,240 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { ExternalLink } from "lucide-react";
-import { gsap } from "gsap";
+import { cn } from "@/lib/utils";
+import {
+  DraggableCardBody,
+  DraggableCardContainer,
+} from "@/components/ui/draggable-card";
 
-// ── Certificate data ─────────────────────────────────────────────────
+const AUTO_TOUCH_DELAY_MS = 1200;
+const AUTO_TOUCH_DURATION_MS = 700;
+const AUTO_TOUCH_PAUSE_BETWEEN_MS = 300;
+
 type Certificate = {
   id: string;
   title: string;
-  words: string[];
+  image: string;
   platform: string;
   link: string;
-  textColor: string;
-  bgColor: string;
-  infoPosition: "bottom-left" | "bottom-right";
+  className: string;
+  cardBgClass: string;
+  linkColor: string;
+  /** Hex color for card (used as avatar in following pointer). */
+  cardColorHex: string;
 };
+
+// Palette: Mint, White Smoke, Claret (+ Sinopia, Vanilla, Caribbean for variety)
+// View credential link uses a different color than its card on each certificate.
+const CERT_PALETTE = {
+  mint: "#69A481",
+  whiteSmoke: "#E7EDEB",
+  claret: "#7C1F31",
+  sinopia: "#D7340B",
+  vanilla: "#E0DDAE",
+  caribbean: "#336467",
+} as const;
 
 const certificates: Certificate[] = [
   {
     id: "time-series",
-    title: "TIME SERIES",
-    words: ["TIME", "SERIES"],
+    title: "Time Series",
+    image: "/certificates/Mariam Fathi - Time Series.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    textColor: "#FFF8E7",
-    bgColor: "#6A0610",
-    infoPosition: "bottom-right",
+    className: "absolute left-[18%] top-[40%] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] md:left-[20%] md:top-[38%]",
+    cardBgClass: "!bg-[#69A481]", // Mint
+    linkColor: CERT_PALETTE.claret,
+    cardColorHex: CERT_PALETTE.mint,
   },
   {
     id: "data-engineering",
-    title: "DATA ENGINEERING",
-    words: ["DATA", "ENGINEERING"],
+    title: "Data Engineering",
+    image: "/certificates/data-engineering.jpeg",
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    textColor: "#280B0B",
-    bgColor: "#8A9EA7",
-    infoPosition: "bottom-left",
+    className: "absolute left-[35%] top-[68%] -translate-x-1/2 -translate-y-1/2 rotate-[-7deg] md:left-[38%] md:top-[66%]",
+    cardBgClass: "!bg-[#E0DDAE]", // Vanilla
+    linkColor: CERT_PALETTE.claret,
+    cardColorHex: CERT_PALETTE.vanilla,
   },
   {
     id: "computer-vision",
-    title: "COMPUTER VISION",
-    words: ["COMPUTER", "VISION"],
+    title: "Computer Vision",
+    image: "/certificates/Mariam Fathi - Computer Vision.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    bgColor: "#280B0B",
-    textColor: "#8A9EA7",
-    infoPosition: "bottom-right",
+    className: "absolute left-[58%] top-[36%] -translate-x-1/2 -translate-y-1/2 rotate-[8deg] md:left-[55%] md:top-[36%]",
+    cardBgClass: "!bg-[#336467]", // Caribbean
+    linkColor: CERT_PALETTE.vanilla,
+    cardColorHex: CERT_PALETTE.caribbean,
   },
   {
     id: "ai-agents",
-    title: "AI AGENTS",
-    words: ["AI", "AGENTS"],
+    title: "AI Agents Intensive",
+    image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    bgColor: "#FFF8E7",
-    textColor: "#6A0610",
-    infoPosition: "bottom-right",
+    className: "absolute left-[75%] top-[62%] -translate-x-1/2 -translate-y-1/2 rotate-[10deg] md:left-[72%] md:top-[62%]",
+    cardBgClass: "!bg-[#7C1F31]", // Claret
+    linkColor: CERT_PALETTE.vanilla,
+    cardColorHex: CERT_PALETTE.claret,
+  },
+  {
+    id: "ieee",
+    title: "IEEE Certificate",
+    image: "/certificates/IEEE Certificate.jpeg",
+    platform: "IEEE",
+    link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
+    className: "absolute left-[52%] top-[72%] -translate-x-1/2 -translate-y-1/2 rotate-[-3deg] md:left-[50%] md:top-[70%]",
+    cardBgClass: "!bg-[#D7340B]", // Sinopia
+    linkColor: CERT_PALETTE.whiteSmoke,
+    cardColorHex: CERT_PALETTE.sinopia,
   },
 ];
 
-// ── Scatter directions — each piece flies outward from its quadrant ──
-const SCATTER = [
-  { x: -400, y: -300, rotation: -12 },  // P0 top-left → flies from top-left
-  { x: 400, y: -300, rotation: 12 },    // P1 top-right → flies from top-right
-  { x: -400, y: 300, rotation: 12 },    // P2 bottom-left → flies from bottom-left
-  { x: 400, y: 300, rotation: -12 },    // P3 bottom-right → flies from bottom-right
-];
+function dispatchMouseEvent(
+  el: HTMLElement,
+  type: "mouseenter" | "mousemove" | "mouseleave",
+  clientX: number,
+  clientY: number,
+) {
+  el.dispatchEvent(
+    new MouseEvent(type, {
+      clientX,
+      clientY,
+      bubbles: true,
+      view: window,
+    }),
+  );
+}
 
-// ── Puzzle geometry — round circular connectors ─────────────────────
-const EXTENSIONS: React.CSSProperties[] = [
-  { top: 0, left: 0, right: "-12%", bottom: "-12%" },
-  { top: 0, left: "-12%", right: 0, bottom: "-12%" },
-  { top: "-12%", left: 0, right: "-12%", bottom: 0 },
-  { top: "-12%", left: "-12%", right: 0, bottom: 0 },
-];
-
-const Z_ORDER = [1, 2, 2, 3];
-
-const PATHS = [
-  // P0: rounded top-left, tab right, tab bottom
-  `M 0.05 0 L 0.893 0 L 0.893 0.4 A 0.1 0.1 0 0 1 0.893 0.6 L 0.893 0.893 L 0.6 0.893 A 0.1 0.1 0 0 1 0.4 0.893 L 0 0.893 L 0 0.05 Q 0 0, 0.05 0 Z`,
-  // P1: rounded top-right, tab bottom, socket left
-  `M 0.107 0 L 0.95 0 Q 1 0, 1 0.05 L 1 0.893 L 0.6 0.893 A 0.1 0.1 0 0 1 0.4 0.893 L 0.107 0.893 L 0.107 0.6 A 0.1 0.1 0 0 0 0.107 0.4 L 0.107 0 Z`,
-  // P2: rounded bottom-left, socket top, tab right
-  `M 0 0.107 L 0.4 0.107 A 0.1 0.1 0 0 1 0.6 0.107 L 0.893 0.107 L 0.893 0.4 A 0.1 0.1 0 0 1 0.893 0.6 L 0.893 1 L 0.05 1 Q 0 1, 0 0.95 L 0 0.107 Z`,
-  // P3: rounded bottom-right, socket top, socket left
-  `M 0.107 0.107 L 0.4 0.107 A 0.1 0.1 0 0 1 0.6 0.107 L 1 0.107 L 1 0.95 Q 1 1, 0.95 1 L 0.107 1 L 0.107 0.6 A 0.1 0.1 0 0 0 0.107 0.4 L 0.107 0.107 Z`,
-];
-
-// ── Component ────────────────────────────────────────────────────────
-const Certificates: React.FC = () => {
+const Certificates: React.FC<{ isActive?: boolean }> = ({ isActive = false }) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const piecesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const hasAnimated = useRef(false);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const autoTouchTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // When section becomes active, auto-touch each certificate (simulate mouse over each) in sequence
   useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    const pieces = piecesRef.current.filter(Boolean) as HTMLDivElement[];
-    if (pieces.length === 0) return;
-
-    const isMobile = window.matchMedia("(max-width: 1023px)").matches;
-
-    // ── Set initial scattered state ──────────────────────────────
-    pieces.forEach((piece, i) => {
-      if (isMobile) {
-        gsap.set(piece, { x: i % 2 === 0 ? -200 : 200, opacity: 0 });
-      } else {
-        const s = SCATTER[i];
-        gsap.set(piece, {
-          x: s.x,
-          y: s.y,
-          rotation: s.rotation,
-          scale: 0.85,
-          opacity: 0,
-        });
-      }
-    });
-
-    const tweens: gsap.core.Tween[] = [];
-
-    // ── Snap animation ───────────────────────────────────────────
-    const runAnimation = () => {
-      if (hasAnimated.current) return;
-      hasAnimated.current = true;
-
-      if (isMobile) {
-        tweens.push(
-          gsap.to(pieces, {
-            x: 0,
-            opacity: 1,
-            duration: 0.7,
-            stagger: 0.12,
-            ease: "power3.out",
-          }),
+    if (!isActive) return;
+    const timeouts = autoTouchTimeoutsRef.current;
+    timeouts.length = 0;
+    const refs = cardRefs.current;
+    let i = 0;
+    const step = () => {
+      if (i >= refs.length) return;
+      const el = refs[i];
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        dispatchMouseEvent(el, "mouseenter", centerX, centerY);
+        dispatchMouseEvent(el, "mousemove", centerX, centerY);
+        timeouts.push(
+          setTimeout(() => {
+            dispatchMouseEvent(el, "mouseleave", centerX, centerY);
+            i += 1;
+            timeouts.push(setTimeout(step, AUTO_TOUCH_PAUSE_BETWEEN_MS));
+          }, AUTO_TOUCH_DURATION_MS),
         );
       } else {
-        pieces.forEach((piece, i) => {
-          tweens.push(
-            gsap.to(piece, {
-              x: 0,
-              y: 0,
-              rotation: 0,
-              scale: 1,
-              opacity: 1,
-              duration: 1.1,
-              delay: i * 0.04,
-              ease: "back.out(1.4)",
-            }),
-          );
-        });
+        i += 1;
+        timeouts.push(setTimeout(step, AUTO_TOUCH_PAUSE_BETWEEN_MS));
       }
     };
+    timeouts.push(setTimeout(step, AUTO_TOUCH_DELAY_MS));
+    return () => timeouts.forEach(clearTimeout);
+  }, [isActive]);
 
-    // ── IntersectionObserver — fire once at 15% visible ──────────
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          runAnimation();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(section);
-
-    return () => {
-      observer.disconnect();
-      tweens.forEach((t) => t.kill());
-    };
+  const setCardRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    cardRefs.current[index] = el;
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="absolute inset-0 w-full overflow-hidden bg-[#F9E7C9]"
-      style={{ height: "100vh" }}
+      className="absolute inset-0 flex w-full items-center justify-center overflow-hidden"
+      style={{ height: "100vh", backgroundColor: "#F9E7C9" }}
     >
-      {/* Hidden SVG with clip-path definitions */}
-      <svg width="0" height="0" style={{ position: "absolute" }}>
-        <defs>
-          {PATHS.map((d, i) => (
-            <clipPath key={i} id={`puzzle-${i}`} clipPathUnits="objectBoundingBox">
-              <path d={d} />
-            </clipPath>
-          ))}
-        </defs>
-      </svg>
-
-      {/* Centered puzzle — smaller than viewport so pieces fly in from corners */}
-      <div className="flex items-center justify-center w-full h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 grid-rows-4 lg:grid-rows-2 w-full h-full lg:w-[70vmin] lg:h-[70vmin] lg:max-w-[750px] lg:max-h-[750px]">
-          {certificates.map((cert, i) => (
-            <div
-              key={cert.id}
-              ref={(el) => { piecesRef.current[i] = el; }}
-              className="relative"
-              style={{ overflow: "visible", zIndex: Z_ORDER[i] }}
-            >
-              {/* Desktop: puzzle-shaped background */}
-              <div
-                className="absolute hidden lg:block"
-                style={{ ...EXTENSIONS[i], backgroundColor: cert.bgColor, clipPath: `url(#puzzle-${i})` }}
-              />
-              {/* Mobile: plain rectangle background */}
-              <div
-                className="absolute inset-0 lg:hidden"
-                style={{ backgroundColor: cert.bgColor }}
-              />
-
-              {/* Content */}
-              <div className="relative z-10 flex flex-col w-full h-full p-4 md:p-6 lg:p-8">
-                <div className="flex-1 flex flex-col items-center justify-center text-center gap-1.5">
-                  {cert.platform && (
-                    <span
-                      className="text-[9px] uppercase tracking-[0.25em] font-medium opacity-50"
-                      style={{ color: cert.textColor }}
-                    >
-                      {cert.platform}
-                    </span>
-                  )}
-                  <h3
-                    className="font-semibold text-sm sm:text-base lg:text-lg uppercase tracking-wide leading-snug"
-                    style={{ color: cert.textColor }}
-                  >
-                    {cert.words.join(" ")}
-                  </h3>
-                </div>
-
-                {cert.link && (
-                  <a
-                    href={cert.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`absolute inline-flex items-center gap-0.5 hover:opacity-70 transition-opacity text-[8px] md:text-[10px] ${
-                      [
-                        "top-3 left-3 lg:top-4 lg:left-4",
-                        "top-3 right-3 lg:top-4 lg:right-4",
-                        "bottom-3 left-3 lg:bottom-4 lg:left-4",
-                        "bottom-3 right-3 lg:bottom-4 lg:right-4",
-                      ][i]
-                    }`}
-                    style={{ color: cert.textColor }}
-                  >
-                    <span>View Certificate</span>
-                    <ExternalLink className="w-2.5 h-2.5" />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      <DraggableCardContainer className="relative h-full w-full max-w-[1600px] flex-1 overflow-visible">
+        {certificates.map((cert, index) => (
+          <CertificateCard
+            key={cert.id}
+            cert={cert}
+            dragConstraintsRef={sectionRef}
+            cardRef={(el) => setCardRef(index, el)}
+          />
+        ))}
+      </DraggableCardContainer>
     </section>
   );
 };
+
+function CertificateCard({
+  cert,
+  dragConstraintsRef,
+  cardRef,
+}: {
+  cert: Certificate;
+  dragConstraintsRef?: React.RefObject<HTMLElement | null>;
+  cardRef?: (el: HTMLDivElement | null) => void;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div className={cert.className}>
+      <DraggableCardBody
+        ref={cardRef}
+        className={cn(cert.cardBgClass, "!min-h-0 !w-auto !max-w-[min(90vw,420px)] !p-0 !shadow-xl overflow-hidden rounded-md outline-none ring-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0")}
+        dragConstraintsRef={dragConstraintsRef}
+      >
+        <div className="group relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-md">
+          <div className="pointer-events-none select-none w-fit flex-shrink-0 opacity-100">
+            <a
+              href={cert.link}
+              aria-hidden
+              tabIndex={-1}
+              className="block overflow-hidden rounded-sm focus:outline-none"
+            >
+              {!imgError ? (
+                <img
+                  src={encodeURI(cert.image)}
+                  alt={cert.title}
+                  onError={() => setImgError(true)}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  className="relative z-10 block h-auto w-auto max-h-[70vh] max-w-full object-contain object-center opacity-100 visible"
+                  style={{ display: "block", visibility: "visible", opacity: 1 }}
+                />
+              ) : (
+                <div className="flex h-48 w-64 items-center justify-center" style={{ backgroundColor: CERT_PALETTE.claret }}>
+                  <span className="px-4 text-center text-sm font-semibold uppercase tracking-wide" style={{ color: CERT_PALETTE.vanilla }}>
+                    {cert.title}
+                  </span>
+                </div>
+              )}
+            </a>
+          </div>
+          {cert.link !== "#" && (
+            <div className="flex w-full justify-center pb-3 pt-2">
+              <a
+                href={cert.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pointer-events-auto relative z-20 inline-flex items-center gap-2 text-base font-normal opacity-80 hover:opacity-100 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#336467] focus-visible:ring-offset-2 rounded md:text-lg transition-opacity"
+                style={{ color: cert.linkColor }}
+              >
+                View credential
+                <ExternalLink className="h-5 w-5 md:h-6 md:w-6" style={{ color: cert.linkColor }} />
+              </a>
+            </div>
+          )}
+        </div>
+      </DraggableCardBody>
+    </div>
+  );
+}
 
 export { Certificates };

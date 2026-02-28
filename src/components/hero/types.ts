@@ -16,6 +16,12 @@ export interface DotPositions {
   m2ScreenY: number;
   dotSize: number;
   finalDotSize: number;
+  /** Portfolio header "O" position for exact dot landing (desktop) */
+  oPortfolioScreenX?: number;
+  oPortfolioCenterY?: number;
+  oPortfolioWidth?: number;
+  oPortfolioHeight?: number;
+  oPortfolioTop?: number;
 }
 
 export interface PortfolioData {

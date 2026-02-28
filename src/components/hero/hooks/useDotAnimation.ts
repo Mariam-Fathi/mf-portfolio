@@ -103,17 +103,23 @@ function buildDotTimeline(
   svgM2: SVGTSpanElement,
   onComplete: () => void,
   skipIntro = false,
+  onDotFallenFromM?: () => void,
+  liquidDropsRef?: RefObject<HTMLDivElement | null>,
+  portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
 ): gsap.core.Timeline {
   const { iScreenX, iScreenY, a2ScreenX, a2ScreenY, m2ScreenX, m2ScreenY, finalDotSize } = pos;
   const d = finalDotSize;
   const half = d / 2;
 
-  const dotBase = COLORS.accent;      // #6A0610
-  const dotMotion = "#882430";        // slightly lighter during fast arcs
-  const dotLand = "#7A1822";          // slightly lighter during impacts
-  const dotGhost = "#F2DDD8";         // very light for ghost exit
-  const dotFallLight = "#E8C4BC";     // light during new-dot fall
-  const dotFallMid = "#D09890";       // mid during new-dot bounce
+  const dotBase = COLORS.accent;
+  const dotMotion = COLORS.dotMotion;
+  const dotLand = COLORS.dotLand;
+  const dotGhost = COLORS.dotGhost;
+  const dotFallLight = COLORS.dotFallLight;
+  const dotFallMid = COLORS.dotFallMid;
+  const dotOnIFloor = COLORS.accent;
+
+  const dropHeight = 72; // height above "ı" when not clicked (auto fall)
 
   if (!skipIntro) {
     Object.assign(dot.style, {
@@ -132,9 +138,11 @@ function buildDotTimeline(
     });
     gsap.set(dot, {
       x: iScreenX - half,
-      y: iScreenY,
+      y: iScreenY - dropHeight,
       rotation: 0,
       scale: 1,
+      scaleX: 1,
+      scaleY: 1,
       opacity: 1,
     });
   } else {
@@ -143,72 +151,93 @@ function buildDotTimeline(
 
   const tl = gsap.timeline({ paused: true });
 
-  // Smooth dot motion inspired by Lottie-style easing: few keyframes, sine/cubic, organic settle.
+  // When starting from hover (skipIntro), set dot size and origin as timeline runs so jumps use correct state
+  if (skipIntro) {
+    tl.call(() => {
+      dot.style.width = `${d}px`;
+      dot.style.height = `${d}px`;
+      dot.style.transformOrigin = "50% 50%";
+    }, [], 0);
+  }
+
   const smoothEaseOut = "sine.out" as const;
   const smoothEaseInOut = "sine.inOut" as const;
 
-  if (!skipIntro) {
-    tl.to(dot, { duration: 0.6 });
-
-    // One smooth cycle: slight dip down → gentle rise → settle (Lottie dot feel).
-    tl.to(dot, {
-      keyframes: [
-        { y: iScreenY + 6, scaleY: 0.94, scaleX: 1.06, duration: 0.22, ease: smoothEaseOut },
-        { y: iScreenY - 5, scaleY: 1.05, scaleX: 0.96, duration: 0.28, ease: smoothEaseInOut },
-        { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.2, ease: smoothEaseInOut },
-      ],
-    });
-  } else {
-    // Post-click: hover momentum channels into one motion — from hover pose straight into anticipation, then launch.
-    // Dot is at (baseX + ~10, baseY - 2), scaleX 1.08, scaleY 0.96; we flow into center squash and jump.
-    tl.to(dot, {
-      x: iScreenX - half,
-      y: iScreenY + 5,
-      scaleX: 1.28,
-      scaleY: 0.72,
-      backgroundColor: COLORS.accent,
-      duration: 0.11,
-      ease: "power2.in",
-    });
-    tl.to(dot, {
-      y: iScreenY + 7,
-      scaleX: 1.34,
-      scaleY: 0.66,
-      duration: 0.07,
-      ease: "sine.in",
-    });
-  }
-
-  // ── Break free + parabolic arc to "a" ────────────────────────────
-  const iaH = 210;
+  // ── Jump from "ı" to "a" — same arc realism as jump from "a" to "m" ────
+  const iaH = 260;
   const iaDx = a2ScreenX - iScreenX;
   const iaDy = a2ScreenY - iScreenY;
   const iaX = (t: number) => iScreenX + iaDx * t - half;
   const iaY = (t: number) => iScreenY + iaDy * t - iaH * 4 * t * (1 - t);
 
-  // Anticipation squash (only when not from hover — skipIntro already did hover→squash)
-  if (!skipIntro) {
+  if (skipIntro) {
+    // Click from hover: continue from expand motion — no fall into ı. Flow from current (expanded) pose into launch squash, then arc.
+    tl.to(dot, {
+      x: iScreenX - half,
+      y: iScreenY + 5,
+      scaleX: 1.28,
+      scaleY: 0.7,
+      backgroundColor: dotOnIFloor,
+      duration: 0.14,
+      ease: "power2.in",
+      onStart: () => {
+        if (svgI) gsap.to(svgI, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" });
+      },
+    });
+  } else {
+    // Intro: fall onto "ı", impact, pause, then anticipation and jump
+    // Fall onto "ı" — from above, one gravity drop
+    tl.to(dot, {
+      y: iScreenY,
+      scaleY: 1.08,
+      scaleX: 0.94,
+      backgroundColor: dotFallLight,
+      duration: 0.4,
+      ease: "power3.in",
+    });
+
+    // Impact on "ı" — same 3-phase physics as land on "a": absorb, compress, settle
     tl.to(dot, {
       keyframes: [
-        { y: iScreenY + 5, scaleX: 1.22, scaleY: 0.78, duration: 0.2, ease: smoothEaseOut },
-        { y: iScreenY + 7, scaleX: 1.32, scaleY: 0.68, duration: 0.1, ease: "sine.in" },
+        {
+          scaleY: 0.55,
+          scaleX: 1.45,
+          backgroundColor: dotOnIFloor,
+          duration: 0.06,
+          ease: "power3.in",
+          onComplete: () => { gsap.to(svgI, { fill: COLORS.accent, duration: 0.35, ease: "power2.out" }); },
+        },
+        { y: iScreenY + 5, scaleY: 0.45, scaleX: 1.55, duration: 0.08, ease: "power1.in" },
+        { y: iScreenY, scaleY: 1, scaleX: 1, duration: 0.24, ease: "power2.out" },
+      ],
+    });
+
+    // Pause on "ı" so we read: landed, then jump to "a"
+    tl.to(dot, { duration: 0.28 });
+
+    // Anticipation then launch (match a→m style)
+    tl.to(dot, {
+      keyframes: [
+        { y: iScreenY + 3, scaleX: 1.2, scaleY: 0.8, backgroundColor: dotOnIFloor, duration: 0.14, ease: "power2.in" },
+        { y: iScreenY + 5, scaleX: 1.28, scaleY: 0.7, duration: 0.06, ease: "sine.in" },
       ],
     });
   }
 
-  // Full ballistic arc from "ı" to "a"
+  // Parabolic arc ı→a — same keyframe structure and stretch as a→m
   tl.to(dot, {
     keyframes: [
-      { x: iaX(0.08), y: iaY(0.08), scaleY: 1.2, scaleX: 0.84, backgroundColor: dotLand, duration: 0.1, ease: "power2.out" },
-      { x: iaX(0.18), y: iaY(0.18), scaleY: 1.12, scaleX: 0.9, backgroundColor: dotMotion, duration: 0.11, ease: "sine.out" },
-      { x: iaX(0.3), y: iaY(0.3), scaleY: 1.05, scaleX: 0.96, duration: 0.11, ease: "sine.out" },
-      { x: iaX(0.42), y: iaY(0.42), scaleY: 1.01, scaleX: 0.99, backgroundColor: dotBase, duration: 0.1, ease: "sine.inOut" },
-      { x: iaX(0.5), y: iaY(0.5), scaleY: 1, scaleX: 1, duration: 0.1, ease: "none" },
-      { x: iaX(0.58), y: iaY(0.58), scaleY: 1.01, scaleX: 0.99, duration: 0.1, ease: "sine.inOut" },
-      { x: iaX(0.7), y: iaY(0.7), scaleY: 1.05, scaleX: 0.96, backgroundColor: dotMotion, duration: 0.1, ease: "sine.in" },
-      { x: iaX(0.82), y: iaY(0.82), scaleY: 1.1, scaleX: 0.92, duration: 0.11, ease: "power1.in" },
-      { x: iaX(0.93), y: iaY(0.93), scaleY: 1.16, scaleX: 0.87, duration: 0.1, ease: "power1.in" },
-      { x: a2ScreenX - half, y: a2ScreenY, scaleY: 1.2, scaleX: 0.84, duration: 0.08, ease: "power2.in" },
+      { x: iaX(0.06), y: iaY(0.06), scaleY: 1.3, scaleX: 0.78, backgroundColor: dotLand, duration: 0.06, ease: "power3.out" },
+      { x: iaX(0.14), y: iaY(0.14), scaleY: 1.18, scaleX: 0.86, backgroundColor: dotMotion, duration: 0.08, ease: "power2.out" },
+      { x: iaX(0.24), y: iaY(0.24), scaleY: 1.08, scaleX: 0.93, duration: 0.09, ease: "sine.out" },
+      { x: iaX(0.36), y: iaY(0.36), scaleY: 1.02, scaleX: 0.98, backgroundColor: dotBase, duration: 0.1, ease: "sine.out" },
+      { x: iaX(0.48), y: iaY(0.48), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
+      { x: iaX(0.58), y: iaY(0.58), scaleY: 1, scaleX: 1, duration: 0.09, ease: "none" },
+      { x: iaX(0.68), y: iaY(0.68), scaleY: 1.03, scaleX: 0.97, backgroundColor: dotMotion, duration: 0.09, ease: "sine.in" },
+      { x: iaX(0.78), y: iaY(0.78), scaleY: 1.08, scaleX: 0.93, duration: 0.09, ease: "power1.in" },
+      { x: iaX(0.87), y: iaY(0.87), scaleY: 1.14, scaleX: 0.88, duration: 0.08, ease: "power1.in" },
+      { x: iaX(0.94), y: iaY(0.94), scaleY: 1.2, scaleX: 0.84, duration: 0.07, ease: "power2.in" },
+      { x: a2ScreenX - half, y: a2ScreenY, scaleY: 1.25, scaleX: 0.82, duration: 0.06, ease: "power2.in" },
     ],
   });
 
@@ -276,12 +305,20 @@ function buildDotTimeline(
       { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
     ],
   });
-
+  tl.call(() => onDotFallenFromM?.());
   tl.set(dot, { display: "none" }, "+=0.3");
 
-  // ── New dot — teleport well above viewport ────────────────────
+  // ── New dot drops onto "ı" and rests (close the loop) ─────────────
+  const dropX = iScreenX - half;
+  const dropY = iScreenY;
+  tl.call(() => {
+    dot.style.width = `${d}px`;
+    dot.style.height = `${d}px`;
+    dot.style.borderRadius = "50%";
+    dot.style.transformOrigin = "50% 50%";
+  });
   tl.set(dot, {
-    x: iScreenX - half,
+    x: dropX,
     y: -(d + 100),
     opacity: 1,
     scale: 1,
@@ -291,18 +328,13 @@ function buildDotTimeline(
     display: "block",
     visibility: "visible",
   });
-
   tl.to(dot, {
     keyframes: [
-      { x: iScreenX - half - 5, duration: 0.2, ease: "power1.inOut" },
-      { x: iScreenX - half + 5, duration: 0.2, ease: "power1.inOut" },
-      { x: iScreenX - half, duration: 0.2, ease: "power1.inOut" },
+      { x: dropX - 5, duration: 0.2, ease: "power1.inOut" },
+      { x: dropX + 5, duration: 0.2, ease: "power1.inOut" },
+      { x: dropX, duration: 0.2, ease: "power1.inOut" },
     ],
   });
-
-  tl.call(() => onComplete());
-
-  // ── Drop onto "ı" — impact only at the exact touch moment ───────
   const textEl = svgI.parentElement as SVGTextElement | null;
   const runLetterTouch = () => {
     gsap.to(svgI, { fill: COLORS.accent, duration: 0.28, ease: "sine.out" });
@@ -327,19 +359,13 @@ function buildDotTimeline(
       });
     }
   };
-
-  // Fall: dot travels until it touches the "ı" — gravity-style, snappier at the end so contact reads
   tl.to(dot, {
-    y: iScreenY,
+    y: dropY,
     backgroundColor: dotFallLight,
     duration: TIMING.dotFall,
     ease: "power3.in",
   });
-
-  // Touch: letter and dot react at the exact same moment (immersive sync)
   tl.call(runLetterTouch);
-
-  // Impact — dot compresses into surface (same instant as letter squash)
   tl.to(dot, {
     keyframes: [
       {
@@ -360,8 +386,6 @@ function buildDotTimeline(
       },
     ],
   });
-
-  // ── Lock at final position on "ı" ─────────────────────────────
   tl.to(dot, {
     opacity: 1,
     scale: 1,
@@ -370,10 +394,25 @@ function buildDotTimeline(
     onComplete: () => {
       setDotAtFinal(dot, pos);
       animationEverCompleted = true;
+      onComplete();
     },
   }, "+=0.5");
 
   return tl;
+}
+
+// ── Get portfolio header "O" center and bounds for exact landing position ─
+function getPortfolioOData(headerRef: RefObject<HTMLDivElement | null>): { x: number; centerY: number; top: number; width: number; height: number } | null {
+  const oEl = headerRef.current?.querySelector(".hero-o-trigger") as HTMLElement | null;
+  if (!oEl) return null;
+  const r = oEl.getBoundingClientRect();
+  return {
+    x: r.left + r.width / 2,
+    centerY: r.top + r.height / 2,
+    top: r.top,
+    width: r.width,
+    height: r.height,
+  };
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────
@@ -383,15 +422,18 @@ export function useDotAnimation(
   svgA2Ref: RefObject<SVGTSpanElement | null>,
   svgM2Ref: RefObject<SVGTSpanElement | null>,
   dotRef: RefObject<HTMLDivElement | null>,
+  liquidDropsRef: RefObject<HTMLDivElement | null>,
   isActive: boolean,
   isMariamReady: boolean,
   isMobile: boolean,
   shouldAnimate: boolean,
-): { isDotAnimationStarted: boolean; isDotAnimationComplete: boolean } {
+  portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
+): { isDotAnimationStarted: boolean; isDotAnimationComplete: boolean; isDotFallenFromM: boolean } {
   const [isDotStarted, setIsDotStarted] = useState(false);
   const [isDotComplete, setIsDotComplete] = useState(false);
+  const [isDotFallenFromM, setIsDotFallenFromM] = useState(false);
 
-  // ── Hide dots when hero is inactive; reset "ı" transform ───────
+  // ── Hide dots and liquid drops when hero is inactive; reset "ı" transform ───────
   useEffect(() => {
     if (!isActive) {
       if (dotRef.current) {
@@ -401,6 +443,10 @@ export function useDotAnimation(
           opacity: "0",
           visibility: "hidden",
         });
+      }
+      if (liquidDropsRef?.current) {
+        liquidDropsRef.current.style.display = "none";
+        liquidDropsRef.current.style.visibility = "hidden";
       }
       if (svgIRef.current) {
         gsap.killTweensOf(svgIRef.current);
@@ -424,10 +470,9 @@ export function useDotAnimation(
     const dot = dotRef.current;
     if (!svg || !svgI || !svgA2 || !svgM2 || !dot) return;
 
-    // ── Restore from cache (skip animation replay) ──────────────
+    // ── Restore from cache (dot at rest on ı) ────────────────────
     if (cachedPositions && positionsCalculated) {
       setDotAtFinal(dot, cachedPositions);
-      // Fade in synced with the hero blur entrance on return visits
       gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
       gsap.to(dot, {
         opacity: 1,
@@ -437,6 +482,7 @@ export function useDotAnimation(
       });
       colorLetters(svgI, svgA2, svgM2);
       setIsDotComplete(true);
+      setIsDotFallenFromM(true);
       setIsDotStarted(true);
       return;
     }
@@ -446,15 +492,24 @@ export function useDotAnimation(
 
     // ── Calculate fresh positions ────────────────────────────────
     const pos = calculatePositions(svgI, svgA2, svgM2);
+    const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
+    if (oData) {
+      pos.oPortfolioScreenX = oData.x;
+      pos.oPortfolioCenterY = oData.centerY;
+      pos.oPortfolioTop = oData.top;
+      pos.oPortfolioWidth = oData.width;
+      pos.oPortfolioHeight = oData.height;
+    }
     cachedPositions = pos;
     positionsCalculated = true;
 
-    // ── Mobile: skip to final state ──────────────────────────────
+    // ── Mobile: dot hidden, complete; user clicks O to trigger portfolio ──
     if (isMobile) {
       const tid = setTimeout(() => {
-        setDotAtFinal(dot, pos);
         colorLetters(svgI, svgA2, svgM2);
+        Object.assign(dot.style, { display: "none", opacity: "0", visibility: "hidden" });
         setIsDotComplete(true);
+        setIsDotFallenFromM(true);
         setIsDotStarted(true);
         animationEverCompleted = true;
       }, 200);
@@ -475,7 +530,7 @@ export function useDotAnimation(
         requestAnimationFrame(() => {
           activeTl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
             setIsDotComplete(true);
-          }, dotAlreadyVisible);
+          }, dotAlreadyVisible, () => setIsDotFallenFromM(true), liquidDropsRef, portfolioHeaderRef);
           if (!dotAlreadyVisible) {
             gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
             gsap.to(dot, {
@@ -498,7 +553,7 @@ export function useDotAnimation(
         activeTl = null;
       }
     };
-  }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
+  }, [isActive, isMariamReady, isMobile, shouldAnimate, svgRef, svgIRef, svgA2Ref, svgM2Ref, dotRef, liquidDropsRef, portfolioHeaderRef]);
 
   // ── Resize handler — recalculate positions after Mariam re-layouts ──
   useEffect(() => {
@@ -515,6 +570,14 @@ export function useDotAnimation(
         if (animationEverCompleted && svgIRef.current && svgA2Ref.current && svgM2Ref.current && dotRef.current) {
           requestAnimationFrame(() => requestAnimationFrame(() => {
             const pos = calculatePositions(svgIRef.current!, svgA2Ref.current!, svgM2Ref.current!);
+            const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
+            if (oData) {
+              pos.oPortfolioScreenX = oData.x;
+              pos.oPortfolioCenterY = oData.centerY;
+              pos.oPortfolioTop = oData.top;
+              pos.oPortfolioWidth = oData.width;
+              pos.oPortfolioHeight = oData.height;
+            }
             cachedPositions = pos;
             positionsCalculated = true;
             setDotAtFinal(dotRef.current!, pos);
@@ -528,7 +591,7 @@ export function useDotAnimation(
       window.removeEventListener("resize", handleResize);
       if (resizeTimer) clearTimeout(resizeTimer);
     };
-  }, [isActive, isMariamReady, svgIRef, svgA2Ref, svgM2Ref, dotRef]);
+  }, [isActive, isMariamReady, svgIRef, svgA2Ref, svgM2Ref, dotRef, portfolioHeaderRef]);
 
-  return { isDotAnimationStarted: isDotStarted, isDotAnimationComplete: isDotComplete };
+  return { isDotAnimationStarted: isDotStarted, isDotAnimationComplete: isDotComplete, isDotFallenFromM };
 }

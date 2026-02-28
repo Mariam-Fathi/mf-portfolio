@@ -24,7 +24,38 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Moonlight Dreaming";
+    src: url("/fonts/moonlight-dreaming-free/Moonlight%20Dreaming%20Free.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Hey Flamingo";
+    src: url("/fonts/heyflamingo/HeyFlamingo.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Vanilla Starfruit";
+    src: url("/fonts/vanilla-starfruit/Vanilla%20Starfruit.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
+    /* Palette: frames and text */
+    --color-cherry-red: #74070E;
+    --color-butter-yellow: #FFEDA8;
+    --color-aura-indigo: #B0A6DF;
+    --color-dill-green: #4E6813;
+    --color-alpine-oat: #F0E7DA;
+
     --gradient: radial-gradient(circle, #e5e5e5 0%, #fff 100%);
     --font-default: "Momo Trust Display", "Stack Sans", sans-serif;
     --font-headline: var(--font-default);

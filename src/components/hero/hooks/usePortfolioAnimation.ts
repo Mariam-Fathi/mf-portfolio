@@ -32,7 +32,7 @@ function getHeaderElements(headerRef: RefObject<HTMLDivElement | null>) {
   return { full, portfol, i, o, line };
 }
 
-// ── Restore the final state of the PORTFOLIO animation ───────────────
+// ── Restore the final state: line from O, I stays, O (letter) at end ─
 function restoreFinalState(
   headerRef: RefObject<HTMLDivElement | null>,
   data: PortfolioData,
@@ -43,20 +43,19 @@ function restoreFinalState(
 
   full.style.display = "none";
   portfol.style.display = "inline";
-  i.style.display = "none";
+  i.style.display = "inline";
   o.style.display = "inline";
   line.style.display = "block";
 
-  gsap.set([portfol, o], { display: "inline", opacity: 1 });
-  gsap.set(i, { display: "none", opacity: 0, rotation: 90 });
+  gsap.set([portfol, i, o], { display: "inline", opacity: 1, rotation: 0 });
   gsap.set(o, { x: data.oFinalX });
-  gsap.set(line, {
+  Object.assign(line.style, {
     display: "block",
-    opacity: 1,
-    x: data.iOriginalPosition,
-    width: data.lineFinalWidth,
-    transformOrigin: "left center",
+    opacity: "1",
+    left: `${data.iOriginalPosition}px`,
+    width: `${data.lineFinalWidth}px`,
   });
+  gsap.set(line, { opacity: 1, width: data.lineFinalWidth });
 }
 
 // ── Hook ─────────────────────────────────────────────────────────────
@@ -65,6 +64,7 @@ export function usePortfolioAnimation(
   shouldAnimate: boolean,
   isActive: boolean,
   isMobile: boolean,
+  onDragStart?: () => void,
 ): { isPortfolioAnimationComplete: boolean } {
   const [isComplete, setIsComplete] = useState(false);
 
@@ -79,8 +79,9 @@ export function usePortfolioAnimation(
         const els = getHeaderElements(headerRef);
         if (els) {
           gsap.set(els.full, { opacity: 1, display: "block" });
-          gsap.set([els.portfol, els.i, els.o], { opacity: 0, display: "none", x: 0, rotation: 0 });
-          gsap.set(els.line, { opacity: 0, display: "none", width: 0, x: 0 });
+          gsap.set([els.portfol, els.i, els.o], { opacity: 0, display: "none", x: 0, y: 0, rotation: 0 });
+          gsap.set(els.line, { opacity: 0, display: "none", width: 0 });
+          els.line.style.left = "";
         }
       }
       return;
@@ -117,12 +118,13 @@ export function usePortfolioAnimation(
     if (!els) return;
     const { full, portfol, i: iEl, o: oEl, line: lineEl } = els;
 
-    // ── Mobile: skip animation ───────────────────────────────────
+    // ── Mobile: skip animation — line from O, thread ball at end ───
     if (isMobile) {
       full.style.display = "none";
       portfol.style.display = "inline";
       portfol.style.opacity = "1";
-      iEl.style.display = "none";
+      iEl.style.display = "inline";
+      iEl.style.opacity = "1";
       oEl.style.display = "inline";
       oEl.style.opacity = "1";
       lineEl.style.display = "block";
@@ -141,21 +143,15 @@ export function usePortfolioAnimation(
           const oRect = oEl.getBoundingClientRect();
           const oWidth = oRect.width;
           const oFinalLeft = absoluteEnd - oWidth / 2;
-
-          const portfolRect = portfol.getBoundingClientRect();
-          const lEnd = portfolRect.right - containerRect.left;
-          const lineStartX = lEnd + 8;
-          const lineEndPos = oFinalLeft - 8;
-          const finalLineWidth = Math.max(0, lineEndPos - lineStartX);
-
-          const oStartX = oRect.left - containerRect.left;
-          const oFinalX = oFinalLeft - oStartX;
+          const oStartLeft = oRect.left - containerRect.left;
+          const oFinalX = oFinalLeft - oStartLeft;
+          const finalLineWidth = Math.max(0, oFinalLeft - oStartLeft - 8);
 
           gsap.set(oEl, { x: oFinalX, opacity: 1 });
           Object.assign(lineEl.style, {
             top: "50%",
             position: "absolute",
-            left: `${lineStartX}px`,
+            left: `${oStartLeft}px`,
             width: `${finalLineWidth}px`,
             opacity: "1",
             display: "block",
@@ -163,14 +159,13 @@ export function usePortfolioAnimation(
             zIndex: "1",
           });
 
-          // Cache data
-          const pWidth = portfolRect.width;
+          const portfolRect = portfol.getBoundingClientRect();
           cachedData = {
-            portfolWidth: pWidth,
+            portfolWidth: portfolRect.width,
             oFinalX,
             lineFinalWidth: finalLineWidth,
-            iOriginalPosition: lineStartX,
-            oStartX,
+            iOriginalPosition: oStartLeft,
+            oStartX: oStartLeft,
             iWidth: 0,
             containerWidth: containerRect.width,
           };
@@ -182,14 +177,14 @@ export function usePortfolioAnimation(
       return;
     }
 
-    // ── Desktop animation ────────────────────────────────────────
-    let iOriginalPosition = 0;
-    let oStartX = 0;
-    let iWidth = 0;
+    // ── Desktop: O and line revealed; expand immediately after step 1 ──
+    let lineStartX = 0;
+    let oFinalX = 0;
+    let finalLineWidth = 0;
 
     const tl = gsap.timeline({ delay: 0 });
 
-    // Step 1: Fade out full text, show split parts
+    // Step 1: Fade out full text, show PORTFOL + I + O (I stays as letter)
     tl.to(full, {
       opacity: 0,
       duration: TIMING.portfolioFade,
@@ -200,106 +195,66 @@ export function usePortfolioAnimation(
         iEl.style.display = "inline";
         oEl.style.display = "inline";
         lineEl.style.display = "none";
-        gsap.set([portfol, iEl, oEl], { display: "inline", opacity: 1 });
-        gsap.set(lineEl, { display: "none", width: 0, transformOrigin: "left center" });
+        gsap.set([portfol, iEl, oEl], { display: "inline", opacity: 1, rotation: 0 });
         gsap.set(oEl, { position: "static", x: 0 });
-        void iEl.offsetWidth;
-        iWidth = iEl.getBoundingClientRect().width;
+        gsap.set(lineEl, { display: "none", width: 0 });
       },
     });
 
-    // Step 2: Capture O start, shift O first, then rotate I
+    // Step 2: O and line ready; capture positions; expand immediately (one click total)
     tl.call(() => {
-      const oRect = oEl.getBoundingClientRect();
       const cRect = headerRef.current?.getBoundingClientRect();
-      if (cRect) oStartX = oRect.left - cRect.left;
+      if (!cRect) return;
+
+      void oEl.offsetWidth; // force reflow after step 1 display change
+      const oRect = oEl.getBoundingClientRect();
+      const oWidth = oRect.width;
+      const padding = window.innerWidth < 768 ? 16 : 32;
+      const absoluteEnd = cRect.width - padding;
+      const oFinalLeft = absoluteEnd - oWidth / 2;
+      const oStartLeft = oRect.left - cRect.left;
+
+      lineStartX = oStartLeft;
+      oFinalX = oFinalLeft - oStartLeft;
+      finalLineWidth = Math.max(0, oFinalLeft - oStartLeft - 8);
+
+      lineEl.style.display = "block";
+      lineEl.style.left = `${lineStartX}px`;
+      lineEl.style.width = "0px";
+      lineEl.style.opacity = "1";
+      gsap.set(lineEl, { opacity: 1, width: 0 });
+      gsap.set(oEl, { x: 0 });
+
+      const portfolRect = portfol.getBoundingClientRect();
+      cachedData = {
+        portfolWidth: portfolRect.width,
+        oFinalX,
+        lineFinalWidth: finalLineWidth,
+        iOriginalPosition: lineStartX,
+        oStartX: oStartLeft,
+        iWidth: 0,
+        containerWidth: cRect.width,
+      };
+      dataCalculated = true;
+      everCompleted = true;
+
+      onDragStart?.();
+      oEl.style.pointerEvents = "none";
+      oEl.style.cursor = "";
+
+      // Expand immediately: animate O and line to final position
+      const expandDuration = 1.6;
+      const expandEase = "sine.inOut";
+      gsap.to(oEl, { x: oFinalX, duration: expandDuration, ease: expandEase });
+      gsap.to(lineEl, { width: finalLineWidth, duration: expandDuration, ease: expandEase, onComplete: () => {
+        gsap.set(oEl, { x: oFinalX });
+        lineEl.style.width = `${finalLineWidth}px`;
+        gsap.set(lineEl, { width: finalLineWidth });
+        setIsComplete(true);
+      }});
     });
 
-    // O shifts right first — clearing space for I to rotate
-    tl.to(oEl, {
-      x: () => iWidth * 1.2,
-      duration: 0.5,
-      delay: 0.2,
-      ease: "power3.out",
-    });
-
-    // Then I rotates on its center
-    tl.to(iEl, {
-      rotation: 90,
-      duration: TIMING.portfolioRotate,
-      ease: "back.out(1.4)",
-      transformOrigin: "center center",
-    }, "+=0.15");
-
-    // Step 3: I fades + morphs into line (after landing horizontally)
-    tl.to(iEl, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in",
-      onStart: () => {
-        const iRect = iEl.getBoundingClientRect();
-        const cRect = headerRef.current?.getBoundingClientRect();
-        if (cRect) iOriginalPosition = iRect.left - cRect.left;
-      },
-      onComplete: () => {
-        iEl.style.display = "none";
-        lineEl.style.display = "block";
-        gsap.set(lineEl, { opacity: 0, x: iOriginalPosition, width: 0, transformOrigin: "left center" });
-        gsap.to(lineEl, { opacity: 1, duration: 0.2, ease: "power2.out" });
-      },
-    }, "+=0.35");
-
-    // Step 4: Expand line + slide O to end
-    tl.call(() => {
-      requestAnimationFrame(() => {
-        const cRect = headerRef.current?.getBoundingClientRect();
-        if (!cRect) return;
-
-        const oRect = oEl.getBoundingClientRect();
-        const oWidth = oRect.width;
-        const padding = window.innerWidth < 768 ? 16 : 32;
-        const absoluteEnd = cRect.width - padding;
-        const oFinalLeft = absoluteEnd - oWidth / 2;
-
-        const portfolRect = portfol.getBoundingClientRect();
-        const pWidth = portfolRect.width;
-        const lEnd = portfolRect.right - cRect.left;
-        const gap = Math.max(0, iOriginalPosition - lEnd);
-
-        const lineEndPos = oFinalLeft - gap - 10;
-        const oFinalX = oFinalLeft - oStartX + 40;
-        const finalLineWidth = Math.max(0, Math.min(lineEndPos - iOriginalPosition, cRect.width - iOriginalPosition));
-
-        cachedData = {
-          portfolWidth: pWidth,
-          oFinalX,
-          lineFinalWidth: finalLineWidth,
-          iOriginalPosition,
-          oStartX,
-          iWidth,
-          containerWidth: cRect.width,
-        };
-        dataCalculated = true;
-
-        gsap.to(oEl, {
-          x: oFinalX,
-          duration: 2.2,
-          ease: "expo.out",
-          onComplete: () => {
-            everCompleted = true;
-            setIsComplete(true);
-          },
-        });
-        gsap.to(lineEl, {
-          width: finalLineWidth,
-          duration: 2.2,
-          ease: "expo.out",
-        });
-      });
-    });
-
-    // Resize handler — recalculates from live DOM positions rather than
-    // stale cached pixel offsets (font size is viewport-relative via clamp).
+    // Resize handler — line from O start, O at end (thread ball)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
@@ -308,39 +263,28 @@ export function usePortfolioAnimation(
         const cRect = headerRef.current?.getBoundingClientRect();
         if (!cRect) return;
 
-        const portfolRect = (headerRef.current?.querySelector(
-          ".hero-cover-title-portfol",
-        ) as HTMLElement | null)?.getBoundingClientRect();
-        if (!portfolRect) return;
-
         const padding = window.innerWidth < 768 ? 16 : 32;
         const absoluteEnd = cRect.width - padding;
         const oWidth = oEl.getBoundingClientRect().width;
         const oFinalLeft = absoluteEnd - oWidth / 2;
 
-        // Derive O's natural DOM position by subtracting its current GSAP x
         const currentOGsapX = Number(gsap.getProperty(oEl, "x")) || 0;
         const currentOLeft = oEl.getBoundingClientRect().left - cRect.left;
-        const naturalOLeft = currentOLeft - currentOGsapX;
-
-        const oFinalX = oFinalLeft - naturalOLeft;
-
-        // Line: starts right after "PORTFOL", ends just before O
-        const lineStartX = portfolRect.right - cRect.left + 8;
-        const lineEndPos = oFinalLeft - 8;
-        const finalLineWidth = Math.max(0, lineEndPos - lineStartX);
+        const lineStartX = currentOLeft - currentOGsapX;
+        const oFinalX = oFinalLeft - lineStartX;
+        const finalLineWidth = Math.max(0, oFinalLeft - lineStartX - 8);
 
         gsap.set(oEl, { x: oFinalX });
-        gsap.set(lineEl, { x: lineStartX, width: finalLineWidth });
+        lineEl.style.left = `${lineStartX}px`;
+        gsap.set(lineEl, { width: finalLineWidth });
 
-        // Update cache so subsequent restores use new dimensions
         if (cachedData) {
           cachedData = {
             ...cachedData,
             oFinalX,
             lineFinalWidth: finalLineWidth,
             iOriginalPosition: lineStartX,
-            oStartX: naturalOLeft,
+            oStartX: lineStartX,
             containerWidth: cRect.width,
           };
         }

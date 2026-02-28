@@ -1,11 +1,18 @@
 /** Design tokens for the hero section */
 
-// ── Colors ──────────────────────────────────────────────────────────
+// ── Colors (Carmine #91010F — single source for accent and dot) ────
 export const COLORS = {
   primary: "#280B0B",
-  accent: "#6A0610",
+  /** Carmine — "iam" letters, dot, O hover/focus, all accent UI */
+  accent: "#91010F",
   heroBackground: "#F9E7C9",
   line: "#280B0B",
+  /** Dot animation variants (derived from accent so one change updates all) */
+  dotMotion: "#B8221E",   // slightly lighter during arcs
+  dotLand: "#6B0109",     // darker on impact
+  dotGhost: "#F5D4D2",    // very light when falling off
+  dotFallLight: "#E8B4B2", // light when dropping from above
+  dotFallMid: "#C94A46",  // mid during bounce
 } as const;
 
 // ── Font families ───────────────────────────────────────────────────
@@ -15,6 +22,9 @@ export const FONTS = {
   script: '"Floralis Couture", cursive',
   handwritten: '"Handwritten", cursive',
   priestacy: '"Hamburg Signature", cursive',
+  moonlightDreaming: '"Moonlight Dreaming", cursive',
+  heyFlamingo: '"Hey Flamingo", cursive',
+  vanillaStarfruit: '"Vanilla Starfruit", cursive',
 } as const;
 
 // ── Z-index layering ────────────────────────────────────────────────
@@ -39,9 +49,9 @@ export const TIMING = {
   dotTouchSettle: 0.26,
   letterTouchSquash: 0.08,
   letterTouchSpring: 0.4,
-  portfolioFade: 0.3,
+  portfolioFade: 0.4,
   portfolioRotate: 1.4,
-  portfolioExpand: 2.5,
+  portfolioExpand: 3.8,
   typewriterPerChar: 0.05,
   blurReveal: 1.2,
   blurRevealDelay: 0.3,

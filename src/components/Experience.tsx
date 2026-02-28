@@ -2,11 +2,12 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useRef, useEffect, useState } from "react";
+import { COLORS } from "@/components/hero/constants";
 
 const experienceItems = [
   {
     number: "01",
-    title: "Frontend Engineer",
+    title: "Mobile Engineer",
     company: "Tarqia",
     type: "Full-time",
     fromDate: "Jan 2024",
@@ -24,7 +25,7 @@ const experienceItems = [
     toDate: "Jan 2026",
     position: 0.55, // Position along path (0-1) - right side (moved slightly left to avoid edge)
     side: "below", // "above" or "below" the path
-    color: "#6A0610", // Fire Red from color palette
+    color: COLORS.accent, // Same as hero "iam" / accent (Carmine)
   },
 ];
 

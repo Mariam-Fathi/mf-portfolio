@@ -205,12 +205,12 @@ export default function Home() {
           </section>
 
           {/* Certificates Section */}
-          <section 
-            id="certificates-content" 
+          <section
+            id="certificates-content"
             tabIndex={-1}
             className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
           >
-            <Certificates/>
+            <Certificates isActive={activeSection === "certificates"} />
           </section>
 
           {/* Contact Section */}

@@ -110,41 +110,37 @@ export function useEngineerText(
       const iEl = svgIRef.current;
       if (!iEl || !a2 || !m2 || !el) return;
 
-      // Horizontal: use "am" getBoundingClientRect (left/right are reliable)
+      // Width: use "iam" (ı + a + m) getBoundingClientRect
+      const iRect = iEl.getBoundingClientRect();
       const a2Rect = a2.getBoundingClientRect();
       const m2Rect = m2.getBoundingClientRect();
-      const amRightScreen = m2Rect.right;
-      const amWidth = amRightScreen - a2Rect.left;
+      const iamWidth = m2Rect.right - iRect.left;
 
       // Vertical: use "ı" position — the same proven reference the dot uses.
-      const iRect = iEl.getBoundingClientRect();
       const dotY = iRect.top + iRect.height * 0.19;
 
-      if (amWidth <= 0) return;
+      if (iamWidth <= 0) return;
 
-      // Measure at a known reference size, then scale to fit amWidth.
-      // Done every call to handle font-load timing correctly.
+      // Scale font so "Software Engineer" width matches iam width.
       const REF = 48;
       el.style.fontSize = `${REF}px`;
       const refWidth = el.getBoundingClientRect().width;
       if (refWidth <= 0) return;
 
-      const targetFontSize = (amWidth / refWidth) * REF * 0.90;
+      const targetFontSize = (iamWidth / refWidth) * REF * 0.95;
       const minFontSize = checkIsMobile() ? 14 : 20;
       el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
       // Measure height after font resize (triggers sync reflow).
-      // Handwritten fonts have large ascender/descender space in the
-      // line box — roughly 30% is whitespace above the visible glyphs.
-      // Compensate by shifting down by that fraction.
       const engRect = el.getBoundingClientRect();
       const descenderOffset = engRect.height * 0.4;
 
-      // Center horizontally over "am"
-      const amCenterX = a2Rect.left + amWidth / 2;
-      const engLeft = amCenterX - engRect.width / 2;
+      // Center horizontally over "iam"
+      const iamCenterX = iRect.left + iamWidth / 2;
+      const engLeft = iamCenterX - engRect.width / 2;
 
-      el.style.setProperty("top", `${dotY - engRect.height + descenderOffset}px`, "important");
+      const shiftDown = 17;
+      el.style.setProperty("top", `${dotY - engRect.height + descenderOffset + shiftDown}px`, "important");
       el.style.setProperty("bottom", "auto", "important");
       el.style.setProperty("left", `${engLeft}px`, "important");
       el.style.setProperty("right", "auto", "important");
