@@ -62,12 +62,12 @@ const contactTiles: ContactTile[] = [
   },
 ];
 
-// ── Entrance directions for desktop tiles ──────────────────────────
+// ── Entrance: horizontal from both sides (left tiles from left, right tiles from right) ──
 const TILE_DIRS = [
-  { x: -200, y: -100, rotation: -45 },
-  { x: 200, y: -100, rotation: 45 },
-  { x: -200, y: 100, rotation: -30 },
-  { x: 200, y: 100, rotation: 30 },
+  { x: -200, y: 0, rotation: 0 },  // Kaggle (left)
+  { x: 200, y: 0, rotation: 0 },   // GitHub (right)
+  { x: -200, y: 0, rotation: 0 },  // LinkedIn (left)
+  { x: 200, y: 0, rotation: 0 },   // Email (right)
 ];
 
 const Contact: React.FC = () => {
