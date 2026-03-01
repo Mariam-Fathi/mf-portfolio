@@ -30,33 +30,52 @@ type ProjectsProps = {
 
 const projects: Project[] = [
   {
-    id: "homi",
-    title: "Homi",
-    role: "Full-Stack Engineer / Data Engineer",
+    id: "sales-ai",
+    title: "Estima",
+    role: "Full-Stack Engineer",
     description:
-      "Full-stack real estate application (React Native) with Stripe payments, Firebase push notifications, and AppWrite OAuth authentication. Built analytics dashboard for business intelligence. Inspired by DeepLearning.AI Data Engineering coursework, sourced 'USA Real Estate Dataset' (2.2M+ records) to build a recommendation engine. Conducted exploratory analysis revealing critical data integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Pivoted to data engineering, building memory-optimized auditing pipelines achieving 87.4% memory reduction and documenting 57k suspicious patterns.",
+      "AI-powered project estimation SaaS for the Egypt market. Delivers instant, structured cost breakdowns in EGP with region and business-type adjustments (Cairo, Alexandria, Giza, Delta & Canal; startup, SME, enterprise, government, NGO). Built with Next.js 15, React 19, and Gemini 2.5 Flash Lite. Features: AI-driven complexity scoring and effort multipliers, risk factors and confidence levels, exchange-rate-aware pricing, and export to JSON. Reduces quotation time from days to minutes with data-driven estimates.",
     links: [
-      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
-      { name: "Kaggle Notebooks: [1], [2], [3] [4]", url: "#", isGrouped: true, groupedLinks: [
-        { name: "Real Estate Data Discovery Analysis", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis" },
-        { name: "38.19% SUSPICIOUS RECORDS", url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records" },
-        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
-        { name: "87.4% Memory Opt + Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
-      ]},
+      { name: "Live", url: "https://ai-saas-app-nu-nine.vercel.app" },
     ],
   },
   {
     id: "font-selection-agent",
-    title: "Font Selection Agent",
+    title: "Font  Agent",
     role: "AI Engineer",
     description:
-      "AI-powered assistant that automates font selection for UI projects. It prompts for your UI file (HTML/React/Vue/Angular), searches a curated set of Google Fonts by category, injects fonts into the running page, and captures automated Playwright screenshots for side-by-side visual comparison—then safely restores the original file. Built with Google ADK + GenAI tooling and a screenshot pipeline to make typography exploration fast and reproducible.",
+      "Agents Intensive Capstone: AI agent that automates font discovery and visual comparison for any UI file (HTML, React, Vue, Angular). Reduces font-selection time by 95% and evaluates 10× more fonts in the same time. Prompts for file path and URL, offers five curated categories (handwriting, serif, sans-serif, display, monospace) across 40 Google Fonts, then chains search and Playwright-based screenshot capture with automatic file modification and restoration. Built with Google ADK, Gemini 2.5 Flash Lite, and a safe file pipeline (regex-based pattern matching, CSS injection, 100% restoration). Delivers side-by-side previews for confident typography decisions.",
     links: [
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/font-selection-agent" },
       {
         name: "Kaggle Capstone Writeup",
         url: "https://www.kaggle.com/competitions/agents-intensive-capstone-project/writeups/new-writeup-1763196957997",
       },
+    ],
+  },
+  {
+    id: "homi",
+    title: "Homi",
+    role: "Full-Stack Engineer",
+    description:
+      "Full-stack real estate mobile app (React Native / Expo) shipped on the Play Store. Users sign in with AppWrite OAuth, browse listings, and complete flows with Stripe; Firebase powers push notifications so they stay updated on listings and activity. Built an analytics dashboard for business intelligence so stakeholders can track engagement and conversions. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments. Delivered a production-ready, cross-platform experience with OTA updates and modern tooling.",
+    links: [
+      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
+    ],
+  },
+  {
+    id: "real-estate-data",
+    title: "Data Auditing",
+    role: "Data Engineer",
+    description:
+      "Data engineering on the USA Real Estate Dataset (2.2M+ records). Exploratory analysis revealed critical integrity issues: 38.19% anomalous records (734k placeholder dates, 115k duplicate prices). Built memory-optimized auditing pipelines achieving 87.4% memory reduction and documented 57k suspicious patterns. Delivered discovery analysis, anomaly detection, and data quality visuals as reproducible Kaggle notebooks.",
+    links: [
+      { name: "Kaggle Notebooks: [1], [2], [3], [4]", url: "#", isGrouped: true, groupedLinks: [
+        { name: "Real Estate Data Discovery Analysis", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-discovery-analysis" },
+        { name: "38.19% SUSPICIOUS RECORDS", url: "https://www.kaggle.com/code/mariamfathiamin/38-19-suspicious-records" },
+        { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
+        { name: "87.4% Memory Opt + Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
+      ]},
     ],
   },
   {
@@ -67,16 +86,6 @@ const projects: Project[] = [
       "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
     links: [
       { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
-    ],
-  },
-  {
-    id: "sales-ai",
-    title: "Estimator",
-    role: "Full-Stack Engineer",
-    description:
-      "Internal tool using Hugging Face pre-trained models for instant cost estimation. Achieved 85% accuracy, reducing quotation time from days to minutes. Associated with Dracode, addressing critical sales bottleneck by automating complex estimation workflows and providing real-time pricing insights. Streamlines the sales process through intelligent automation and data-driven decision support.",
-    links: [
-      { name: "Demo", url: "https://drive.google.com/file/d/1Xt8ge6XRi22h3r8goPqdKWxAZBFO5Fbo/view" },
     ],
   },
   {
@@ -124,10 +133,10 @@ const projects: Project[] = [
 ];
 
 // Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
-// One palette per project (6 projects = 6 palettes)
+// One palette per project (index matches project order)
 const cardPalette = [
   {
-    // Project 0: Homi
+    // Project 0: Estima
     background: "#8A9EA7",
     headline: "#280B0B",
     headlineStroke: "#280B0B",
@@ -145,16 +154,7 @@ const cardPalette = [
     accent: "#8A9EA7",
   },
   {
-    // Project 2: Multimodal Personality Analysis
-    background: "#6A0610",
-    headline: "#F9E7C9",
-    headlineStroke: "#F9E7C9",
-    body: "#F9E7C9",
-    link: "#F9E7C9",
-    accent: "#8A9EA7",
-  },
-  {
-    // Project 3: Estimator
+    // Project 2: Homi
     background: "#8A9EA7",
     headline: "#280B0B",
     headlineStroke: "#280B0B",
@@ -163,7 +163,25 @@ const cardPalette = [
     accent: "#6A0610",
   },
   {
-    // Project 4: Smart Key
+    // Project 3: Real Estate Data Auditing
+    background: "#6A0610",
+    headline: "#F9E7C9",
+    headlineStroke: "#F9E7C9",
+    body: "#F9E7C9",
+    link: "#F9E7C9",
+    accent: "#8A9EA7",
+  },
+  {
+    // Project 4: Multimodal Personality Analysis
+    background: "#6A0610",
+    headline: "#F9E7C9",
+    headlineStroke: "#F9E7C9",
+    body: "#F9E7C9",
+    link: "#F9E7C9",
+    accent: "#8A9EA7",
+  },
+  {
+    // Project 5: Smart Key
     background: "#F9E7C9",
     headline: "#6A0610",
     headlineStroke: "#6A0610",
@@ -172,7 +190,7 @@ const cardPalette = [
     accent: "#8A9EA7",
   },
   {
-    // Project 5: Smart Key Operational Portal
+    // Project 6: Smart Key Operational Portal
     background: "#6A0610",
     headline: "#F9E7C9",
     headlineStroke: "#F9E7C9",
@@ -181,7 +199,7 @@ const cardPalette = [
     accent: "#8A9EA7",
   },
   {
-    // Project 6: Sanayat
+    // Project 7: Sanayat
     background: "#8A9EA7",
     headline: "#280B0B",
     headlineStroke: "#280B0B",
@@ -190,7 +208,7 @@ const cardPalette = [
     accent: "#6A0610",
   },
   {
-    // Project 7: Wheelchair Dashboard
+    // Project 8: Wheelchair Dashboard
     background: "#F9E7C9",
     headline: "#6A0610",
     headlineStroke: "#6A0610",
