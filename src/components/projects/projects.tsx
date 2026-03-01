@@ -133,8 +133,8 @@ const projects: Project[] = [
 ];
 
 // Color palette: [6A0610, 8A9EA7, F9E7C9, 280B0B]
-// One palette per project (index matches project order)
-const cardPalette = [
+// One palette per project (index matches project order). Exported for use in Certificates.
+export const cardPalette = [
   {
     // Project 0: Estima
     background: "#8A9EA7",
@@ -172,13 +172,13 @@ const cardPalette = [
     accent: "#8A9EA7",
   },
   {
-    // Project 4: Multimodal Personality Analysis
-    background: "#6A0610",
+    // Project 4: Multimodal Personality Analysis (distinct from project 3)
+    background: "#8A9EA7",
     headline: "#F9E7C9",
     headlineStroke: "#F9E7C9",
-    body: "#F9E7C9",
+    body: "#280B0B",
     link: "#F9E7C9",
-    accent: "#8A9EA7",
+    accent: "#6A0610",
   },
   {
     // Project 5: Smart Key

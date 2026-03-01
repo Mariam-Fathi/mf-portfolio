@@ -19,22 +19,16 @@ type Certificate = {
   platform: string;
   link: string;
   className: string;
-  cardBgClass: string;
-  linkColor: string;
-  /** Hex color for card (used as avatar in following pointer). */
-  cardColorHex: string;
+  /** Index into CERT_CARD_COLORS. */
+  colorIndex: number;
 };
 
-// Palette: Mint, White Smoke, Claret (+ Sinopia, Vanilla, Caribbean for variety)
-// View credential link uses a different color than its card on each certificate.
-const CERT_PALETTE = {
-  mint: "#69A481",
-  whiteSmoke: "#E7EDEB",
-  claret: "#7C1F31",
-  sinopia: "#D7340B",
-  vanilla: "#E0DDAE",
-  caribbean: "#336467",
-} as const;
+// Only #8A9EA7 (slate), #6A0610 (red), #1e140b (dark). Link color chosen for contrast.
+const CERT_CARD_COLORS = [
+  { background: "#8A9EA7", link: "#1e140b" },
+  { background: "#6A0610", link: "#8A9EA7" },
+  { background: "#1e140b", link: "#8A9EA7" },
+] as const;
 
 const certificates: Certificate[] = [
   {
@@ -44,9 +38,7 @@ const certificates: Certificate[] = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     className: "absolute left-[18%] top-[40%] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] md:left-[20%] md:top-[38%]",
-    cardBgClass: "!bg-[#69A481]", // Mint
-    linkColor: CERT_PALETTE.claret,
-    cardColorHex: CERT_PALETTE.mint,
+    colorIndex: 1,
   },
   {
     id: "data-engineering",
@@ -55,9 +47,7 @@ const certificates: Certificate[] = [
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
     className: "absolute left-[35%] top-[68%] -translate-x-1/2 -translate-y-1/2 rotate-[-7deg] md:left-[38%] md:top-[66%]",
-    cardBgClass: "!bg-[#E0DDAE]", // Vanilla
-    linkColor: CERT_PALETTE.claret,
-    cardColorHex: CERT_PALETTE.vanilla,
+    colorIndex: 2,
   },
   {
     id: "computer-vision",
@@ -66,9 +56,7 @@ const certificates: Certificate[] = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
     className: "absolute left-[58%] top-[36%] -translate-x-1/2 -translate-y-1/2 rotate-[8deg] md:left-[55%] md:top-[36%]",
-    cardBgClass: "!bg-[#336467]", // Caribbean
-    linkColor: CERT_PALETTE.vanilla,
-    cardColorHex: CERT_PALETTE.caribbean,
+    colorIndex: 0,
   },
   {
     id: "ai-agents",
@@ -77,9 +65,7 @@ const certificates: Certificate[] = [
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
     className: "absolute left-[75%] top-[62%] -translate-x-1/2 -translate-y-1/2 rotate-[10deg] md:left-[72%] md:top-[62%]",
-    cardBgClass: "!bg-[#7C1F31]", // Claret
-    linkColor: CERT_PALETTE.vanilla,
-    cardColorHex: CERT_PALETTE.claret,
+    colorIndex: 4,
   },
   {
     id: "ieee",
@@ -88,9 +74,7 @@ const certificates: Certificate[] = [
     platform: "IEEE",
     link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
     className: "absolute left-[52%] top-[72%] -translate-x-1/2 -translate-y-1/2 rotate-[-3deg] md:left-[50%] md:top-[70%]",
-    cardBgClass: "!bg-[#D7340B]", // Sinopia
-    linkColor: CERT_PALETTE.whiteSmoke,
-    cardColorHex: CERT_PALETTE.sinopia,
+    colorIndex: 3,
   },
 ];
 
@@ -158,14 +142,18 @@ const Certificates: React.FC<{ isActive?: boolean }> = ({ isActive = false }) =>
       style={{ height: "100vh", backgroundColor: "#F9E7C9" }}
     >
       <DraggableCardContainer className="relative h-full w-full max-w-[1600px] flex-1 overflow-visible">
-        {certificates.map((cert, index) => (
-          <CertificateCard
-            key={cert.id}
-            cert={cert}
-            dragConstraintsRef={sectionRef}
-            cardRef={(el) => setCardRef(index, el)}
-          />
-        ))}
+        {certificates.map((cert, index) => {
+          const colors = CERT_CARD_COLORS[cert.colorIndex % CERT_CARD_COLORS.length];
+          return (
+            <CertificateCard
+              key={cert.id}
+              cert={cert}
+              colors={colors}
+              dragConstraintsRef={sectionRef}
+              cardRef={(el) => setCardRef(index, el)}
+            />
+          );
+        })}
       </DraggableCardContainer>
     </section>
   );
@@ -173,10 +161,12 @@ const Certificates: React.FC<{ isActive?: boolean }> = ({ isActive = false }) =>
 
 function CertificateCard({
   cert,
+  colors,
   dragConstraintsRef,
   cardRef,
 }: {
   cert: Certificate;
+  colors: (typeof CERT_CARD_COLORS)[number];
   dragConstraintsRef?: React.RefObject<HTMLElement | null>;
   cardRef?: (el: HTMLDivElement | null) => void;
 }) {
@@ -186,7 +176,8 @@ function CertificateCard({
     <div className={cert.className}>
       <DraggableCardBody
         ref={cardRef}
-        className={cn(cert.cardBgClass, "!min-h-0 !w-auto !max-w-[min(90vw,420px)] !p-0 !shadow-xl overflow-hidden rounded-md outline-none ring-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0")}
+        className={cn("!min-h-0 !w-auto !max-w-[min(90vw,420px)] !p-0 !shadow-xl overflow-hidden rounded-md outline-none ring-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0")}
+        backgroundColor={colors.background}
         dragConstraintsRef={dragConstraintsRef}
       >
         <div className="group relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-md">
@@ -209,8 +200,8 @@ function CertificateCard({
                   style={{ display: "block", visibility: "visible", opacity: 1 }}
                 />
               ) : (
-                <div className="flex h-48 w-64 items-center justify-center" style={{ backgroundColor: CERT_PALETTE.claret }}>
-                  <span className="px-4 text-center text-sm font-semibold uppercase tracking-wide" style={{ color: CERT_PALETTE.vanilla }}>
+                <div className="flex h-48 w-64 items-center justify-center" style={{ backgroundColor: colors.background }}>
+                  <span className="px-4 text-center text-sm font-semibold uppercase tracking-wide" style={{ color: colors.link }}>
                     {cert.title}
                   </span>
                 </div>
@@ -218,16 +209,16 @@ function CertificateCard({
             </a>
           </div>
           {cert.link !== "#" && (
-            <div className="flex w-full justify-center pb-3 pt-2">
+            <div className="flex w-full justify-end items-center pb-3 pt-2 px-2">
               <a
                 href={cert.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="pointer-events-auto relative z-20 inline-flex items-center gap-2 text-base font-normal opacity-80 hover:opacity-100 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#336467] focus-visible:ring-offset-2 rounded md:text-lg transition-opacity"
-                style={{ color: cert.linkColor }}
+                aria-label="View credential"
+                className="pointer-events-auto relative z-20 inline-flex items-center justify-center opacity-80 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded transition-opacity"
+                style={{ color: "#F9E7C9" }}
               >
-                View credential
-                <ExternalLink className="h-5 w-5 md:h-6 md:w-6" style={{ color: cert.linkColor }} />
+                <ExternalLink className="h-4 w-4" style={{ color: "#F9E7C9" }} />
               </a>
             </div>
           )}
