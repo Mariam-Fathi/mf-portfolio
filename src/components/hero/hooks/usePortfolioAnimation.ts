@@ -66,11 +66,8 @@ export function usePortfolioAnimation(
   isMobile: boolean,
   onDragStart?: () => void,
   oDragWrapperRef?: RefObject<HTMLDivElement | null>,
-  syncHandProgressRef?: RefObject<((progress: number) => void) | null>,
-  dragHandRef?: RefObject<HTMLElement | null>,
-): { isPortfolioAnimationComplete: boolean; showDragHint: boolean } {
+): { isPortfolioAnimationComplete: boolean } {
   const [isComplete, setIsComplete] = useState(false);
-  const [showDragHint, setShowDragHint] = useState(false);
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
@@ -79,7 +76,6 @@ export function usePortfolioAnimation(
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
       setIsComplete(false);
-      setShowDragHint(false);
       if (!everCompleted) {
         const els = getHeaderElements(headerRef);
         if (els) {
@@ -97,7 +93,6 @@ export function usePortfolioAnimation(
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           restoreFinalState(headerRef, cachedData!);
-          setShowDragHint(false);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
         });
@@ -112,7 +107,6 @@ export function usePortfolioAnimation(
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           restoreFinalState(headerRef, cachedData!);
-          setShowDragHint(false);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
         });
@@ -243,10 +237,9 @@ export function usePortfolioAnimation(
       dataCalculated = true;
       everCompleted = true;
 
-      // Freeze wrapper width so letters don't shift when hand mounts (hand is position:absolute but can still trigger reflow)
+      // Freeze wrapper width so letters don't shift during drag
       const wrapperWidth = dragTarget.offsetWidth;
       (dragTarget as HTMLElement).style.minWidth = `${wrapperWidth}px`;
-      setShowDragHint(true);
 
       dragTarget.style.cursor = "grab";
       dragTarget.style.pointerEvents = "auto";
@@ -276,28 +269,12 @@ export function usePortfolioAnimation(
         const lineW = progressToLine(t);
         gsap.set(dragTarget, { x });
         (lineEl as HTMLElement).style.width = `${lineW}px`;
-        const progress = oFinalX > 0 ? Math.max(0, Math.min(1, x / oFinalX)) : 0;
-        syncHandProgressRef?.current?.(progress);
-        const handEl = dragHandRef?.current;
-        if (handEl) {
-          let handOffsetPx = 0;
-          if (progress >= 0.75) {
-            handOffsetPx = ((progress - 0.75) / 0.25) * 52;
-          }
-          handEl.style.transform = `translate(calc(22% + ${handOffsetPx}px), -50%) rotate(-90deg)`;
-        }
       };
 
       const finish = () => {
         gsap.set(dragTarget, { x: oFinalX });
         lineEl.style.width = `${finalLineWidth}px`;
         gsap.set(lineEl, { width: finalLineWidth });
-        const handEl = dragHandRef?.current;
-        if (handEl) {
-          handEl.style.opacity = "0";
-          handEl.style.visibility = "hidden";
-        }
-        setShowDragHint(false);
         dragTarget.style.pointerEvents = "none";
         dragTarget.style.cursor = "";
         setIsComplete(true);
@@ -349,12 +326,6 @@ export function usePortfolioAnimation(
             gsap.set(dragTarget, { x: oFinalX });
             lineEl.style.width = `${finalLineWidth}px`;
             gsap.set(lineEl, { width: finalLineWidth });
-            const handEl = dragHandRef?.current;
-            if (handEl) {
-              handEl.style.opacity = "0";
-              handEl.style.visibility = "hidden";
-            }
-            setShowDragHint(false);
             dragTarget.style.pointerEvents = "none";
             dragTarget.style.cursor = "";
             setIsComplete(true);
@@ -362,12 +333,11 @@ export function usePortfolioAnimation(
           gsap.to(dragTarget, { x: oFinalX, duration: 0.35, ease: "power2.out" });
           gsap.to(lineEl, { width: finalLineWidth, duration: 0.35, ease: "power2.out", onComplete: finishDrag });
         } else {
-          // Snap back; show hand again so user can redrag to open
+          // Snap back so user can redrag to open
           gsap.to(dragTarget, { x: 0, duration: 0.3, ease: "power2.out" });
           gsap.to(lineEl, { width: 0, duration: 0.3, ease: "power2.out", onComplete: () => {
             const w = (dragTarget as HTMLElement).offsetWidth;
             (dragTarget as HTMLElement).style.minWidth = `${w}px`;
-            setShowDragHint(true);
           }});
         }
       };
@@ -375,7 +345,6 @@ export function usePortfolioAnimation(
       const onPointerDown = (e: PointerEvent) => {
         e.preventDefault();
         autoTl.kill();
-        setShowDragHint(false);
         onDragStart?.();
         startClientX = e.clientX;
         startX = Number(gsap.getProperty(dragTarget, "x")) || 0;
@@ -434,5 +403,5 @@ export function usePortfolioAnimation(
     };
   }, [isActive, shouldAnimate, isMobile, headerRef, oDragWrapperRef]);
 
-  return { isPortfolioAnimationComplete: isComplete, showDragHint };
+  return { isPortfolioAnimationComplete: isComplete };
 }

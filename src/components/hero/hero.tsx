@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
-import { useLottie } from "lottie-react";
 import { COLORS, FONTS, Z_LAYERS } from "./constants";
 
 const pouitiesFont = localFont({
@@ -21,60 +20,6 @@ import { usePortfolioAnimation, hasPortfolioEverCompleted } from "./hooks/usePor
 import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
 import { useHeroNavigation } from "./hooks/useHeroNavigation";
-
-// Hand larger than default for visibility (bigger than native cursor)
-const HAND_CURSOR_HEIGHT = 140;
-const HAND_CURSOR_WIDTH = 210; // 3:2 aspect (Lottie)
-
-// Lottie drag-hand: frames 0–42 = point, 42–124 = drag (sync hand to O progress)
-const LOTTIE_POINT_END_FRAME = 42;
-const LOTTIE_TOTAL_FRAMES = 124;
-
-function HeroDragHandLottie({
-  animationData,
-  loop = true,
-  syncHandProgressRef,
-  handRef,
-}: {
-  animationData: object;
-  loop?: boolean;
-  syncHandProgressRef?: React.MutableRefObject<((progress: number) => void) | null>;
-  handRef?: React.RefObject<HTMLSpanElement | null>;
-}) {
-  const { View, goToAndStop } = useLottie(
-    { animationData, loop, autoplay: true },
-    { height: `${HAND_CURSOR_HEIGHT}px`, width: `${HAND_CURSOR_WIDTH}px` }
-  );
-  useEffect(() => {
-    if (!syncHandProgressRef) return;
-    const dragFrames = LOTTIE_TOTAL_FRAMES - LOTTIE_POINT_END_FRAME;
-    syncHandProgressRef.current = (progress: number) => {
-      const frame = LOTTIE_POINT_END_FRAME + Math.max(0, Math.min(1, progress)) * dragFrames;
-      goToAndStop(frame, true);
-    };
-    return () => {
-      syncHandProgressRef.current = null;
-    };
-  }, [goToAndStop, syncHandProgressRef]);
-  return (
-    <span
-      ref={handRef}
-      className="hero-drag-hand"
-      style={{
-        position: "absolute",
-        right: 0,
-        top: "50%",
-        // translate(100%, -50%): hand sits to the right of O, grip (left edge) on O’s right border
-        transform: "translate(22%, -50%) rotate(-90deg)",
-        display: "inline-block",
-        pointerEvents: "none",
-      }}
-      aria-hidden
-    >
-      {View}
-    </span>
-  );
-}
 
 // ─────────────────────────────────────────────────────────────────────
 // Hero Component
@@ -99,10 +44,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
   const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
-  const dragHandRef = useRef<HTMLSpanElement>(null);
-  const syncHandProgressRef = useRef<((progress: number) => void) | null>(null);
-  const [dragHandData, setDragHandData] = useState<object | null>(null);
-  const [userStartedDrag, setUserStartedDrag] = useState(false);
   const [isDotClicked, setIsDotClicked] = useState(false);
   const isDotClickedRef = useRef(false);
   const dotPreShownRef = useRef(false);
@@ -150,27 +91,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     onDotLandedOnI,
   );
 
-  const handleDragStart = useCallback(() => setUserStartedDrag(true), []);
-  const { isPortfolioAnimationComplete, showDragHint } = usePortfolioAnimation(
+  const { isPortfolioAnimationComplete } = usePortfolioAnimation(
     portfolioHeaderRef,
     engineerRevealComplete,
     isActive,
     isMobile,
-    handleDragStart,
+    undefined,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
-    syncHandProgressRef,
-    dragHandRef,
   );
-
-  // Drag phase starts after "Software Engineer" is fully revealed (not when dot touches)
-
-  // Load hand Lottie for hero drag hint
-  useEffect(() => {
-    fetch("/animations/drag-hand.json")
-      .then((r) => r.json())
-      .then(setDragHandData)
-      .catch(() => {});
-  }, []);
 
   useEngineerText(
     engineerTextRef,
@@ -465,9 +393,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center", contain: "layout" }}>
                 <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
                   O
-                  {showDragHint && dragHandData && (
-                    <HeroDragHandLottie animationData={dragHandData} loop={false} syncHandProgressRef={syncHandProgressRef} handRef={dragHandRef} />
-                  )}
                 </span>
               </span>
               <div
