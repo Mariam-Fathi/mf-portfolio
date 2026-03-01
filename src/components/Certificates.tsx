@@ -38,7 +38,7 @@ const certificates: Certificate[] = [
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     className: "absolute left-[18%] top-[40%] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] md:left-[20%] md:top-[38%]",
-    colorIndex: 1,
+    colorIndex: 2,
   },
   {
     id: "data-engineering",
@@ -47,7 +47,7 @@ const certificates: Certificate[] = [
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
     className: "absolute left-[35%] top-[68%] -translate-x-1/2 -translate-y-1/2 rotate-[-7deg] md:left-[38%] md:top-[66%]",
-    colorIndex: 2,
+    colorIndex: 4,
   },
   {
     id: "computer-vision",
@@ -65,7 +65,7 @@ const certificates: Certificate[] = [
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
     className: "absolute left-[75%] top-[62%] -translate-x-1/2 -translate-y-1/2 rotate-[10deg] md:left-[72%] md:top-[62%]",
-    colorIndex: 4,
+    colorIndex: 1,
   },
   {
     id: "ieee",
