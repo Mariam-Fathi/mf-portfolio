@@ -24,31 +24,28 @@ function getHeaderElements(headerRef: RefObject<HTMLDivElement | null>) {
   const el = headerRef.current;
   if (!el) return null;
   const full = el.querySelector(".hero-cover-title-full") as HTMLElement | null;
-  const portfol = el.querySelector(".hero-cover-title-portfol") as HTMLElement | null;
-  const i = el.querySelector(".hero-cover-title-i") as HTMLElement | null;
+  const portfoli = el.querySelector(".hero-cover-title-portfoli") as HTMLElement | null;
   const o = el.querySelector(".hero-cover-title-o") as HTMLElement | null;
   const line = el.querySelector(".hero-cover-title-line") as HTMLElement | null;
-  if (!full || !portfol || !i || !o || !line) return null;
-  return { full, portfol, i, o, line };
+  if (!full || !portfoli || !o || !line) return null;
+  return { full, portfoli, o, line };
 }
 
-// ── Restore the final state: line from O, I stays, O (letter) at end ─
+// ── Restore the final state: fixed PORTFOLI + line from O + O (letter) at end ─
 function restoreFinalState(
   headerRef: RefObject<HTMLDivElement | null>,
   data: PortfolioData,
 ) {
   const els = getHeaderElements(headerRef);
   if (!els) return;
-  const { full, portfol, i, o, line } = els;
+  const { full, portfoli, o, line } = els;
 
   full.style.display = "none";
-  portfol.style.display = "inline";
-  i.style.display = "inline";
+  portfoli.style.display = "inline";
   o.style.display = "inline";
   line.style.display = "block";
 
-  // Only the wrapper gets x (desktop); inner O must stay at 0 or we double-apply and the O goes off-screen when returning to hero
-  gsap.set([portfol, i, o], { display: "inline", opacity: 1, rotation: 0, x: 0 });
+  gsap.set([portfoli, o], { display: "inline", opacity: 1, rotation: 0, x: 0 });
   Object.assign(line.style, {
     display: "block",
     opacity: "1",
@@ -80,7 +77,7 @@ export function usePortfolioAnimation(
         const els = getHeaderElements(headerRef);
         if (els) {
           gsap.set(els.full, { opacity: 1, display: "block" });
-          gsap.set([els.portfol, els.i, els.o], { opacity: 0, display: "none", x: 0, y: 0, rotation: 0 });
+          gsap.set([els.portfoli, els.o], { opacity: 0, display: "none", x: 0, y: 0, rotation: 0 });
           gsap.set(els.line, { opacity: 0, display: "none", width: 0 });
           els.line.style.left = "";
         }
@@ -119,15 +116,13 @@ export function usePortfolioAnimation(
 
     const els = getHeaderElements(headerRef);
     if (!els) return;
-    const { full, portfol, i: iEl, o: oEl, line: lineEl } = els;
+    const { full, portfoli, o: oEl, line: lineEl } = els;
 
     // ── Mobile: skip animation — line from O, thread ball at end ───
     if (isMobile) {
       full.style.display = "none";
-      portfol.style.display = "inline";
-      portfol.style.opacity = "1";
-      iEl.style.display = "inline";
-      iEl.style.opacity = "1";
+      portfoli.style.display = "inline";
+      portfoli.style.opacity = "1";
       oEl.style.display = "inline";
       oEl.style.opacity = "1";
       lineEl.style.display = "block";
@@ -140,7 +135,7 @@ export function usePortfolioAnimation(
 
           const padding = window.innerWidth < 768 ? 16 : 32;
           const absoluteEnd = containerRect.width - padding;
-          void portfol.offsetWidth;
+          void portfoli.offsetWidth;
           void oEl.offsetWidth;
 
           const oRect = oEl.getBoundingClientRect();
@@ -162,9 +157,9 @@ export function usePortfolioAnimation(
             zIndex: "1",
           });
 
-          const portfolRect = portfol.getBoundingClientRect();
+          const portfoliRect = portfoli.getBoundingClientRect();
           cachedData = {
-            portfolWidth: portfolRect.width,
+            portfolWidth: portfoliRect.width,
             oFinalX,
             lineFinalWidth: finalLineWidth,
             iOriginalPosition: oStartLeft,
@@ -187,8 +182,7 @@ export function usePortfolioAnimation(
 
     const tl = gsap.timeline({ delay: 0 });
 
-    // Step 1: Show PORTFOL + I + O (no fade/blur — instant)
-    // Reset wrapper so it doesn't keep a previous x/minWidth and cause I to jump right
+    // Step 1: Show fixed PORTFOLI + O (no fade/blur — instant)
     tl.call(() => {
       const wrapper = oDragWrapperRef?.current;
       if (wrapper) {
@@ -196,11 +190,10 @@ export function usePortfolioAnimation(
         gsap.set(wrapper, { x: 0 });
       }
       full.style.display = "none";
-      portfol.style.display = "inline";
-      iEl.style.display = "inline";
+      portfoli.style.display = "inline";
       oEl.style.display = "inline";
       lineEl.style.display = "none";
-      gsap.set([portfol, iEl, oEl], { display: "inline", opacity: 1, rotation: 0 });
+      gsap.set([portfoli, oEl], { display: "inline", opacity: 1, rotation: 0 });
       gsap.set(oEl, { position: "relative", x: 0 });
       gsap.set(lineEl, { display: "none", width: 0 });
     });
@@ -230,9 +223,9 @@ export function usePortfolioAnimation(
       gsap.set(lineEl, { opacity: 1, width: 0 });
       gsap.set(oEl, { clearProps: "x" });
 
-      const portfolRect = portfol.getBoundingClientRect();
+      const portfoliRect = portfoli.getBoundingClientRect();
       cachedData = {
-        portfolWidth: portfolRect.width,
+        portfolWidth: portfoliRect.width,
         oFinalX,
         lineFinalWidth: finalLineWidth,
         iOriginalPosition: lineStartX,
@@ -243,7 +236,7 @@ export function usePortfolioAnimation(
       dataCalculated = true;
       everCompleted = true;
 
-      // Freeze wrapper width so letters don't shift during drag
+      // Freeze wrapper width so O doesn't shift layout during drag
       const wrapperWidth = dragTarget.offsetWidth;
       (dragTarget as HTMLElement).style.minWidth = `${wrapperWidth}px`;
 

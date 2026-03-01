@@ -388,9 +388,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
               <span className="hero-cover-title-full" aria-label="Portfolio">{"PORTFOLI"}
                 <span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
               </span>
-              <span className="hero-cover-title-portfol" style={{ display: "none" }} aria-hidden="true">PORTFOL</span>
-              <span className="hero-cover-title-i" style={{ display: "none", opacity: 1 }} aria-hidden="true">I</span>
-              <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center", contain: "layout" }}>
+              <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
+              <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
                 <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
                   O
                 </span>
@@ -714,8 +713,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
         /* ── PORTFOLIO title elements ──────────────────────────── */
         .hero-cover-title-full,
-        .hero-cover-title-portfol,
-        .hero-cover-title-i,
+        .hero-cover-title-portfoli,
         .hero-cover-title-o {
           font-size: clamp(2rem, 8vw, 6rem);
           text-transform: uppercase;
@@ -730,17 +728,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
         @media (max-width: 768px) {
           .hero-cover-title-full,
-          .hero-cover-title-portfol,
-          .hero-cover-title-i,
+          .hero-cover-title-portfoli,
           .hero-cover-title-o {
             font-size: clamp(1.5rem, 6vw, 3rem);
             height: clamp(50px, 12vw, 80px);
           }
-        }
-        .hero-cover-title-i {
-          display: inline;
-          transform-origin: center center;
-          will-change: transform, opacity;
         }
         .hero-cover-title-o {
           will-change: transform;

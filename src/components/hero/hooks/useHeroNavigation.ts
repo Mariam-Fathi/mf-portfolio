@@ -19,7 +19,7 @@ export function useHeroNavigation(
       const header = portfolioHeaderRef.current;
       if (!nav || !header) return;
 
-      const portfolEl = header.querySelector(".hero-cover-title-portfol") as HTMLElement | null;
+      const portfolEl = header.querySelector(".hero-cover-title-portfoli") as HTMLElement | null;
       const oEl = header.querySelector(".hero-cover-title-o") as HTMLElement | null;
       const lineEl = header.querySelector(".hero-cover-title-line") as HTMLElement | null;
       if (!portfolEl || !oEl || !lineEl) {

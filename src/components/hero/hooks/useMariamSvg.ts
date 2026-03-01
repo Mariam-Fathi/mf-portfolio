@@ -74,7 +74,7 @@ function layoutMariam(
   onDone?: () => void,
 ) {
   const portfolEl = portfolioHeaderRef.current?.querySelector(
-    ".hero-cover-title-portfol",
+    ".hero-cover-title-portfoli",
   ) as HTMLElement | null;
   if (!portfolEl) { onDone?.(); return; }
 

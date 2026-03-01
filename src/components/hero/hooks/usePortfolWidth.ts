@@ -15,7 +15,7 @@ export function usePortfolWidth(
 
     const measure = () => {
       const el = headerRef.current?.querySelector(
-        ".hero-cover-title-portfol",
+        ".hero-cover-title-portfoli",
       ) as HTMLElement | null;
       if (!el) return;
       const orig = el.style.display;
