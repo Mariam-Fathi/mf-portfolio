@@ -188,7 +188,13 @@ export function usePortfolioAnimation(
     const tl = gsap.timeline({ delay: 0 });
 
     // Step 1: Show PORTFOL + I + O (no fade/blur — instant)
+    // Reset wrapper so it doesn't keep a previous x/minWidth and cause I to jump right
     tl.call(() => {
+      const wrapper = oDragWrapperRef?.current;
+      if (wrapper) {
+        wrapper.style.minWidth = "";
+        gsap.set(wrapper, { x: 0 });
+      }
       full.style.display = "none";
       portfol.style.display = "inline";
       iEl.style.display = "inline";
