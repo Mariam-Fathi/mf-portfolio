@@ -47,8 +47,8 @@ function restoreFinalState(
   o.style.display = "inline";
   line.style.display = "block";
 
-  gsap.set([portfol, i, o], { display: "inline", opacity: 1, rotation: 0 });
-  gsap.set(o, { x: data.oFinalX });
+  // Only the wrapper gets x (desktop); inner O must stay at 0 or we double-apply and the O goes off-screen when returning to hero
+  gsap.set([portfol, i, o], { display: "inline", opacity: 1, rotation: 0, x: 0 });
   Object.assign(line.style, {
     display: "block",
     opacity: "1",
