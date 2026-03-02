@@ -119,7 +119,7 @@ const projects: Project[] = [
 
   {
     id: "wheelchair-dashboard",
-    title: "Wheelchair EL-Haram Admin Portal ",
+    title: "Wheelchair EL-Haram Dashboard ",
     role: "Frontend Engineer",
     description:"Developed a secure, multilingual (EN/AR/UR) React/TypeScript admin dashboard for wheelchair service operations. Delivered full CRUD for contracted partners, assets, services, and pricing; real-time dashboard with KPIs and maps; trip tracking and detail views; JWT auth, RBAC-ready flows, and CSV/PDF export. Integrated REST APIs, TanStack Query, Tailwind CSS, and Google Maps in a responsive, RTL-capable SPA.",
     links: [
