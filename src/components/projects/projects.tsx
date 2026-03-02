@@ -110,7 +110,7 @@ const projects: Project[] = [
   },
   {
     id: "iot-portal",
-    title: "IoT Operational Portal",
+    title: "Operational Portal",
     role: "Full-Stack Engineer",
     description:
       "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
