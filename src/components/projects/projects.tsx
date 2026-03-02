@@ -33,8 +33,7 @@ const projects: Project[] = [
     id: "sales-ai",
     title: "Estima",
     role: "Full-Stack Engineer",
-    description:
-      "AI-powered project estimation SaaS for the Egypt market. Delivers instant, structured cost breakdowns in EGP with region and business-type adjustments (Cairo, Alexandria, Giza, Delta & Canal; startup, SME, enterprise, government, NGO). Built with Next.js 15, React 19, and Gemini 2.5 Flash Lite. Features: AI-driven complexity scoring and effort multipliers, risk factors and confidence levels, exchange-rate-aware pricing, and export to JSON. Reduces quotation time from days to minutes with data-driven estimates.",
+    description:"Built a full-stack Next.js 15 app that turns project briefs into cost and timeline estimates using Google Gemini 2.5 Flash Lite. Implemented structured AI prompts (complexity scores, effort multipliers, risk factors), rule-based fallback when the API is unavailable, multi-department configs (tech stack, team size, hourly rates), and EGP/USD conversion. Delivered landing page, estimation wizard, results breakdown with confidence and risks, and download estimation as JSON for sharing or records. UI built with Radix UI and Framer Motion for founders and agencies.",
     links: [
       { name: "Live", url: "https://ai-saas-app-nu-nine.vercel.app" },
     ],
@@ -112,19 +111,17 @@ const projects: Project[] = [
     id: "iot-portal",
     title: "Operational Portal",
     role: "Full-Stack Engineer",
-    description:
-      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
-    links: [
+    description:"Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind."
+,    links: [
       { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
     ],
   },
 
   {
     id: "wheelchair-dashboard",
-    title: "Wheelchair Dashboard",
+    title: "Wheelchair EL-Haram Admin Portal ",
     role: "Frontend Engineer",
-    description:
-      "Admin dashboard for a wheelchair rental management system built with React 19 and TypeScript. Features real-time KPI analytics with Recharts, Google Maps integration for contracting-party locations, role-based access control, and full CRUD management for assets, trips, and users. Supports Arabic/English with RTL layouts and data export to CSV and PDF.",
+    description:"Developed a secure, multilingual (EN/AR/UR) React/TypeScript admin dashboard for wheelchair service operations. Delivered full CRUD for contracted partners, assets, services, and pricing; real-time dashboard with KPIs and maps; trip tracking and detail views; JWT auth, RBAC-ready flows, and CSV/PDF export. Integrated REST APIs, TanStack Query, Tailwind CSS, and Google Maps in a responsive, RTL-capable SPA.",
     links: [
       // { name: "Demo", url: "#" },
     ],
