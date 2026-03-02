@@ -174,10 +174,10 @@ export const cardPalette = [
   {
     // Project 4: Multimodal Personality Analysis (distinct from project 3)
     background: "#8A9EA7",
-    headline: "#F9E7C9",
-    headlineStroke: "#F9E7C9",
+    headline: "#280B0B",
+    headlineStroke: "#280B0B",
     body: "#280B0B",
-    link: "#F9E7C9",
+    link: "#280B0B",
     accent: "#6A0610",
   },
   {

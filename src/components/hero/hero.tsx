@@ -91,13 +91,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     onDotLandedOnI,
   );
 
-  const { isPortfolioAnimationComplete } = usePortfolioAnimation(
+  const { isPortfolioAnimationComplete, collapsePortfolio } = usePortfolioAnimation(
     portfolioHeaderRef,
-    engineerRevealComplete,
+    isActive && isMariamReady,
     isActive,
     isMobile,
     undefined,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
+    portfolioRevealReady || isDotAnimationComplete,
   );
 
   useEngineerText(
@@ -416,7 +417,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
                       <li key={s.id}>
                         <a
                           href={`#${s.id}`}
-                          onClick={(e) => { e.preventDefault(); onNavigate(s.id); }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            collapsePortfolio();
+                            onNavigate(s.id);
+                          }}
                         >
                           {s.label}
                         </a>
@@ -736,6 +741,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         }
         .hero-cover-title-o {
           will-change: transform;
+        }
+        .hero-o-drag-wrapper {
+          touch-action: none; /* first touch starts drag, not scroll */
         }
         .hero-cover-title-line {
           will-change: width, transform;
