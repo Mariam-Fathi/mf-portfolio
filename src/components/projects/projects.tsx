@@ -83,8 +83,7 @@ const projects: Project[] = [
     title: "Multimodal Personality Analysis",
     role: "AI Researcher / Machine Learning Engineer",
     description:
-      "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
-    links: [
+"Bachelor project (Computer Systems Engineering). Engineered an end-to-end system predicting Big Five traits from short videos using computer vision (facial action units), audio (PyAudioAnalysis), and NLP (BERT) on First Impressions V2 (10K videos), with LSTNet and XGBoost late fusion (MAE 0.0489). Built a full-stack Node.js/Express/MongoDB app with secure auth, upload pipeline, admin dashboard, and radar-chart visualization.",    links: [
       { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
       { name: "GitHub", url: "https://github.com/Mariam-Fathi/multimodal-personality-analysis.git" },
     ],
