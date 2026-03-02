@@ -86,6 +86,16 @@ const projects: Project[] = [
       "Engineered an end-to-end multimodal AI system predicting Big Five personality traits from short video clips, integrating computer vision, audio processing, and NLP. Processed First Impressions V2 dataset (10K videos) using facial action units, emotional features, PyAudioAnalysis, and BERT embeddings. Implemented LSTNet architectures for time-series modeling and late fusion with XGBoost, achieving MAE of 0.0489 on personality trait prediction.",
     links: [
       { name: "Graduation Thesis", url: "https://drive.google.com/file/d/1YwWHlXiXh3pCK1MlZxDT9HE5RtQQfu_C/view" },
+      { name: "GitHub", url: "https://github.com/Mariam-Fathi/multimodal-personality-analysis.git" },
+    ],
+  },
+  {
+    id: "sanayat",
+    title: "Sanayat",
+    role: "Mobile Engineer",
+    description:"As the mobile engineer on Sanayat, an on-demand handyman platform, I designed and built both client applications from the ground up. The Customer App enables users to discover handymen, create broadcast or direct bookings, track jobs in real time, chat with providers, complete payments, and manage wallet and reviews. The Handyman App gives providers a job feed with bidding and direct/scheduled requests, availability and calendar management, verification onboarding, in-app chat and location sharing, wallet and payouts, and a referral program. Both apps are built with Expo and React Native in a TypeScript monorepo, sharing types and i18n (English and Arabic) with the backend, and use NativeWind, React Query, and Zustand for a consistent, maintainable codebase. The result is a production-ready, two-sided marketplace experience with end-to-end flows for booking, payment, and communication.",
+    links: [
+      // { name: "GitHub", url: "#" },
     ],
   },
   {
@@ -109,16 +119,7 @@ const projects: Project[] = [
       { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
     ],
   },
-  {
-    id: "sanayat",
-    title: "Sanayat",
-    role: "Full-Stack Engineer",
-    description:
-      "On-demand handyman services platform connecting customers with verified local workers. The system spans a customer mobile app, a handyman mobile app, an admin dashboard, and a scalable NestJS backend with 29+ modules. Features include OTP authentication, PostGIS-based location matching, real-time WebSocket chat, wallet payments, direct and broadcast bookings, scheduled jobs, multi-dimensional ratings, dispute resolution, and a referral/promo engine. Covered by 238 unit tests across 25 modules.",
-    links: [
-      // { name: "GitHub", url: "#" },
-    ],
-  },
+
   {
     id: "wheelchair-dashboard",
     title: "Wheelchair Dashboard",
