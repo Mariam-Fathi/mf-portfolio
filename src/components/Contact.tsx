@@ -62,13 +62,7 @@ const contactTiles: ContactTile[] = [
   },
 ];
 
-// ── Entrance: horizontal from both sides (left tiles from left, right tiles from right) ──
-const TILE_DIRS = [
-  { x: -200, y: 0, rotation: 0 },  // Kaggle (left)
-  { x: 200, y: 0, rotation: 0 },   // GitHub (right)
-  { x: -200, y: 0, rotation: 0 },  // LinkedIn (left)
-  { x: 200, y: 0, rotation: 0 },   // Email (right)
-];
+const TEXT_REVEAL_DURATION_S = 2;
 
 const Contact: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -111,11 +105,12 @@ const Contact: React.FC = () => {
 
       // ── 1. Text write-on clip reveal ──────────────────────────────
       const text = textRef.current;
+      const baseDelayAfterText = text ? TEXT_REVEAL_DURATION_S + 0.15 : 0;
       if (text) {
         tweens.push(
           gsap.to(text, {
             clipPath: "inset(-20% 0% -20% 0)",
-            duration: 2,
+            duration: TEXT_REVEAL_DURATION_S,
             ease: "power1.inOut",
             onComplete: () => {
               gsap.set(text, { clipPath: "none" });
@@ -129,21 +124,19 @@ const Contact: React.FC = () => {
         const tiles = Array.from(tilesRef.current.children);
 
         tiles.forEach((tile, i) => {
-          const dir = TILE_DIRS[i % TILE_DIRS.length];
-
           tweens.push(
             gsap.fromTo(
               tile,
-              { opacity: 0, x: dir.x, y: dir.y, rotation: dir.rotation, scale: 0 },
+              { opacity: 0, x: 0, y: 0, rotation: 0, scale: 0.2, transformOrigin: "50% 50%" },
               {
                 opacity: 1,
                 x: 0,
                 y: 0,
                 rotation: 0,
                 scale: 1,
-                duration: 1.5,
-                delay: 0.5 + i * 0.2,
-                ease: "back.out(1.7)",
+                duration: 0.9,
+                delay: baseDelayAfterText + i * 0.14,
+                ease: "expo.out",
               },
             ),
           );
@@ -151,7 +144,11 @@ const Contact: React.FC = () => {
           // Continuous float — uses absolute yoyo so values never drift
           const floatH = 12 + i * 3;
           const floatD = 2.5 + i * 0.4;
-          const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: 1.5 + i * 0.2 });
+          const tl = gsap.timeline({
+            repeat: -1,
+            yoyo: true,
+            delay: baseDelayAfterText + 0.9 + i * 0.14,
+          });
           tl.to(tile, { y: -floatH, duration: floatD, ease: "sine.inOut" });
           timelines.push(tl);
 
@@ -166,15 +163,14 @@ const Contact: React.FC = () => {
         tweens.push(
           gsap.fromTo(
             mobileTilesRef.current.children,
-            { opacity: 0, x: -100, scale: 0.8 },
+            { opacity: 0, x: 0, scale: 0.6, transformOrigin: "50% 50%" },
             {
               opacity: 1,
-              x: 0,
               scale: 1,
-              duration: 0.8,
+              duration: 0.55,
               stagger: 0.2,
-              ease: "bounce.out",
-              delay: 0.6,
+              ease: "expo.out",
+              delay: baseDelayAfterText,
             },
           ),
         );
