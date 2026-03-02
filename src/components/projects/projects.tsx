@@ -97,6 +97,15 @@ const projects: Project[] = [
     ],
   },
   {
+    id: "iot-portal",
+    title: "Operational Portal",
+    role: "Full-Stack Engineer",
+    description:"Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind."
+,    links: [
+      { name: "Live", url: "https://operational-portal.vercel.app/" },
+    ],
+  },
+  {
     id: "smart-key",
     title: "Smart Key",
     role: "Mobile Engineer",
@@ -107,16 +116,6 @@ const projects: Project[] = [
       { name: "App Store", url: "https://apps.apple.com/eg/app/smartkeylb/id6753882015" },
     ],
   },
-  {
-    id: "iot-portal",
-    title: "Operational Portal",
-    role: "Full-Stack Engineer",
-    description:"Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind."
-,    links: [
-      { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
-    ],
-  },
-
   {
     id: "wheelchair-dashboard",
     title: "Wheelchair EL-Haram Dashboard ",
