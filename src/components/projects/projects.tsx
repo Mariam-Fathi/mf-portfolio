@@ -57,7 +57,7 @@ const projects: Project[] = [
     title: "Homi",
     role: "Full-Stack Engineer",
     description:
-      "Full-stack real estate mobile app (React Native / Expo) shipped on the Play Store. Users sign in with AppWrite OAuth, browse listings, and complete flows with Stripe; Firebase powers push notifications so they stay updated on listings and activity. Built an analytics dashboard for business intelligence so stakeholders can track engagement and conversions. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments. Delivered a production-ready, cross-platform experience with OTA updates and modern tooling.",
+      "Full-stack mobile property marketplace (React Native / Expo) shipped on the Play Store. Users sign in securely with AppWrite OAuth, search and filter properties, browse rich listing details, and complete payment flows with Stripe; Firebase powers push notifications so they stay updated on new homes, price changes, and status updates. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments, with OTA updates for fast iteration. Delivered a production-ready, cross-platform app focused on making it easy to find and secure the right home from a phone.",
     links: [
       { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
     ],
