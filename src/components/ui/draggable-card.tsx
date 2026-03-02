@@ -164,6 +164,7 @@ export const DraggableCardBody = React.forwardRef<
       }}
       animate={controls}
       whileHover={{ scale: 1.02 }}
+      whileDrag={{ zIndex: 50 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={cn(

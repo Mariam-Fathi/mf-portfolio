@@ -37,7 +37,7 @@ const certificates: Certificate[] = [
     image: "/certificates/Mariam Fathi - Time Series.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-    className: "absolute left-[18%] top-[40%] -translate-x-1/2 -translate-y-1/2 rotate-[-5deg] md:left-[20%] md:top-[38%]",
+    className: "relative flex-1 min-w-0 max-w-[280px]",
     colorIndex: 2,
   },
   {
@@ -46,7 +46,7 @@ const certificates: Certificate[] = [
     image: "/certificates/data-engineering.jpeg",
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
-    className: "absolute left-[35%] top-[68%] -translate-x-1/2 -translate-y-1/2 rotate-[-7deg] md:left-[38%] md:top-[66%]",
+    className: "relative flex-1 min-w-0 max-w-[280px]",
     colorIndex: 4,
   },
   {
@@ -55,7 +55,7 @@ const certificates: Certificate[] = [
     image: "/certificates/Mariam Fathi - Computer Vision.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
-    className: "absolute left-[58%] top-[36%] -translate-x-1/2 -translate-y-1/2 rotate-[8deg] md:left-[55%] md:top-[36%]",
+    className: "relative flex-1 min-w-0 max-w-[280px]",
     colorIndex: 0,
   },
   {
@@ -64,7 +64,7 @@ const certificates: Certificate[] = [
     image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
-    className: "absolute left-[75%] top-[62%] -translate-x-1/2 -translate-y-1/2 rotate-[10deg] md:left-[72%] md:top-[62%]",
+    className: "relative flex-1 min-w-0 max-w-[280px]",
     colorIndex: 1,
   },
   {
@@ -73,7 +73,7 @@ const certificates: Certificate[] = [
     image: "/certificates/IEEE Certificate.jpeg",
     platform: "IEEE",
     link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
-    className: "absolute left-[52%] top-[72%] -translate-x-1/2 -translate-y-1/2 rotate-[-3deg] md:left-[50%] md:top-[70%]",
+    className: "relative flex-1 min-w-0 max-w-[280px]",
     colorIndex: 3,
   },
 ];
@@ -138,22 +138,27 @@ const Certificates: React.FC<{ isActive?: boolean }> = ({ isActive = false }) =>
   return (
     <section
       ref={sectionRef}
-      className="absolute inset-0 flex w-full items-center justify-center overflow-hidden"
+      className="absolute inset-0 w-full overflow-x-hidden overflow-y-visible"
       style={{ height: "100vh", backgroundColor: "#F9E7C9" }}
     >
-      <DraggableCardContainer className="relative h-full w-full max-w-[1600px] flex-1 overflow-visible">
-        {certificates.map((cert, index) => {
-          const colors = CERT_CARD_COLORS[cert.colorIndex % CERT_CARD_COLORS.length];
-          return (
-            <CertificateCard
-              key={cert.id}
-              cert={cert}
-              colors={colors}
-              dragConstraintsRef={sectionRef}
-              cardRef={(el) => setCardRef(index, el)}
-            />
-          );
-        })}
+      <DraggableCardContainer className="relative h-full w-full overflow-visible">
+        <div className="absolute inset-x-0 bottom-0 px-4 pb-6 md:px-10">
+          <div className="mx-auto flex w-full max-w-[1600px] flex-nowrap items-end justify-between gap-3 md:gap-4">
+            {certificates.map((cert, index) => {
+              const colors =
+                CERT_CARD_COLORS[cert.colorIndex % CERT_CARD_COLORS.length];
+              return (
+                <CertificateCard
+                  key={cert.id}
+                  cert={cert}
+                  colors={colors}
+                  dragConstraintsRef={sectionRef}
+                  cardRef={(el) => setCardRef(index, el)}
+                />
+              );
+            })}
+          </div>
+        </div>
       </DraggableCardContainer>
     </section>
   );
@@ -176,11 +181,25 @@ function CertificateCard({
     <div className={cert.className}>
       <DraggableCardBody
         ref={cardRef}
-        className={cn("!min-h-0 !w-auto !max-w-[min(90vw,420px)] !p-0 !shadow-xl overflow-hidden rounded-md outline-none ring-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0")}
+        className={cn(
+          "!min-h-0 !w-full !max-w-none !p-0 !shadow-xl overflow-hidden rounded-md outline-none ring-0 hover:outline-none hover:ring-0 focus:outline-none focus:ring-0",
+        )}
         backgroundColor={colors.background}
         dragConstraintsRef={dragConstraintsRef}
       >
         <div className="group relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-md">
+          {/* {cert.link !== "#" && (
+            <a
+              href={cert.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View certificate"
+              className="pointer-events-auto absolute right-2 bottom-2 z-20 inline-flex items-center justify-center rounded transition-opacity opacity-80 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              style={{ color: "#280B0B" }}
+            >
+              <ExternalLink className="h-4 w-4" style={{ color: "#F14657" }} />
+            </a>
+          )} */}
           <div className="pointer-events-none select-none w-fit flex-shrink-0 opacity-100">
             <a
               href={cert.link}
@@ -196,7 +215,7 @@ function CertificateCard({
                   loading="eager"
                   fetchPriority="high"
                   decoding="async"
-                  className="relative z-10 block h-auto w-auto max-h-[70vh] max-w-full object-contain object-center opacity-100 visible"
+                  className="relative z-10 block h-auto w-auto max-h-[36vh] md:max-h-[42vh] max-w-full object-contain object-center opacity-100 visible"
                   style={{ display: "block", visibility: "visible", opacity: 1 }}
                 />
               ) : (
@@ -208,20 +227,6 @@ function CertificateCard({
               )}
             </a>
           </div>
-          {cert.link !== "#" && (
-            <div className="flex w-full justify-end items-center pb-3 pt-2 px-2">
-              <a
-                href={cert.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="View credential"
-                className="pointer-events-auto relative z-20 inline-flex items-center justify-center opacity-80 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded transition-opacity"
-                style={{ color: "#F9E7C9" }}
-              >
-                <ExternalLink className="h-4 w-4" style={{ color: "#F9E7C9" }} />
-              </a>
-            </div>
-          )}
         </div>
       </DraggableCardBody>
     </div>
