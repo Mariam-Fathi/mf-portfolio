@@ -113,7 +113,7 @@ const projects: Project[] = [
     title: "Smart Key Operational Portal",
     role: "Full-Stack Engineer",
     description:
-      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Associated with Tarqia, providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
+      "Real-time device connectivity monitoring dashboard with automated critical event detection, WhatsApp alerting, and live updates via Appwrite subscriptions. Providing comprehensive operational visibility and instant notifications for IoT infrastructure management. Enables proactive monitoring and rapid response to connectivity issues across distributed smart key systems.",
     links: [
       { name: "Demo", url: "https://drive.google.com/file/d/1osJqLEpwdrXw6MCiounsw5sfvAVIPHh5/view" },
     ],
