@@ -7,7 +7,7 @@ import { COLORS } from "@/components/hero/constants";
 const experienceItems = [
   {
     number: "01",
-    title: "Mobile Engineer",
+    title: "Software Engineer",
     company: "Tarqia",
     type: "Full-time",
     fromDate: "Jan 2024",
