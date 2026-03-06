@@ -55,6 +55,7 @@ function restoreCollapsedState(
   oDragWrapperRef: RefObject<HTMLDivElement | null> | undefined,
   setIsComplete: (v: boolean) => void,
   onDragStart?: () => void,
+  onUserExpandChange?: (expanded: boolean) => void,
 ) {
   const els = getHeaderElements(headerRef);
   if (!els) return;
@@ -77,7 +78,7 @@ function restoreCollapsedState(
   gsap.set(line, { opacity: 1, width: 0 });
 
   setIsComplete(false);
-  return attachODragAfterRestore(headerRef, oDragWrapperRef, data, setIsComplete, onDragStart);
+  return attachODragAfterRestore(headerRef, oDragWrapperRef, data, setIsComplete, onDragStart, onUserExpandChange);
 }
 
 // ── Resize handler: reposition O and line when expanded so they stay in view (shared by desktop & mobile) ─
@@ -185,6 +186,7 @@ function attachODragAfterRestore(
   data: PortfolioData,
   setIsComplete: (v: boolean) => void,
   onDragStart?: () => void,
+  onUserExpandChange?: (expanded: boolean) => void,
 ): () => void {
   const els = getHeaderElements(headerRef);
   if (!els) return () => {};
@@ -229,7 +231,9 @@ function attachODragAfterRestore(
     document.removeEventListener("pointercancel", onPointerUpBound);
     dragTarget.style.cursor = "grab";
     const currentX = Number(gsap.getProperty(dragTarget, "x")) || 0;
-    if (currentX >= threshold) {
+    const expanded = currentX >= threshold;
+    onUserExpandChange?.(expanded);
+    if (expanded) {
       gsap.set(dragTarget, { x: oFinalX });
       lineEl.style.width = `${finalLineWidth}px`;
       gsap.set(lineEl, { width: finalLineWidth });
@@ -282,36 +286,34 @@ export function usePortfolioAnimation(
   const dragCleanupRef = useRef<(() => void) | null>(null);
   const pendingAutoTlRef = useRef<gsap.core.Timeline | null>(null);
   const wasExpandedRef = useRef(false);
+  /** True only when the user manually dragged the O to expand (not auto-expand or static layout). Used so resize lg→md→lg doesn’t show links if user never dragged. */
+  const userExpandedRef = useRef(false);
   const mobileResizeCleanupRef = useRef<(() => void) | null>(null);
   const restoreResizeCleanupRef = useRef<(() => void) | null>(null);
   const hasSeenExpandedThisMountRef = useRef(false);
 
   useEffect(() => {
     wasExpandedRef.current = isComplete;
-    // Only update portfolioCache.lastExpandedWhenLeavingHero while hero is active (user expanding/collapsing).
-    // When navigating away we set isComplete to false in the main effect; without this guard
-    // we would overwrite portfolioCache.lastExpandedWhenLeavingHero to false and lose the restored state on return.
+    // Only persist when user actually dragged to expand (userExpandedRef), not when auto-expand or static layout set isComplete.
     if (!isActive) return;
-    if (isComplete) {
-      hasSeenExpandedThisMountRef.current = true;
-      portfolioCache.lastExpandedWhenLeavingHero = true;
-    } else if (hasSeenExpandedThisMountRef.current) {
-      portfolioCache.lastExpandedWhenLeavingHero = false;
-    }
-  }, [isComplete, isActive]);
+    if (isComplete && !staticExpand) hasSeenExpandedThisMountRef.current = true;
+    if (!staticExpand) portfolioCache.lastExpandedWhenLeavingHero = userExpandedRef.current;
+  }, [isComplete, isActive, staticExpand]);
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
     const saveExpandedStateOnCleanup = () => {
-      portfolioCache.lastExpandedWhenLeavingHero = wasExpandedRef.current;
+      if (!staticExpand) portfolioCache.lastExpandedWhenLeavingHero = userExpandedRef.current;
+    };
+    const onUserExpandChange = (expanded: boolean) => {
+      userExpandedRef.current = expanded;
     };
 
     if (!headerRef.current) return saveExpandedStateOnCleanup;
 
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
-      // Save expanded state before clearing so we restore it when returning to hero.
-      portfolioCache.lastExpandedWhenLeavingHero = wasExpandedRef.current;
+      portfolioCache.lastExpandedWhenLeavingHero = userExpandedRef.current;
       if (dragCleanupRef.current) {
         dragCleanupRef.current();
         dragCleanupRef.current = null;
@@ -349,14 +351,16 @@ export function usePortfolioAnimation(
             return;
           }
           if (!portfolioCache.lastExpandedWhenLeavingHero) {
-            dragCleanupRef.current = restoreCollapsedState(headerRef, portfolioCache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
+            userExpandedRef.current = false;
+            dragCleanupRef.current = restoreCollapsedState(headerRef, portfolioCache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart, onUserExpandChange) ?? null;
             return;
           }
+          userExpandedRef.current = true;
           restoreFinalState(headerRef, portfolioCache.cachedData!);
           recalculateAndApplyExpandedState(headerRef, oDragWrapperRef);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: portfolioCache.cachedData!.oFinalX });
           setIsComplete(true);
-          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart);
+          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart, onUserExpandChange);
           window.addEventListener("resize", handleResize);
           restoreResizeCleanupRef.current = () => window.removeEventListener("resize", handleResize);
         });
@@ -387,14 +391,16 @@ export function usePortfolioAnimation(
             return;
           }
           if (!wasExpandedRef.current) {
-            dragCleanupRef.current = restoreCollapsedState(headerRef, portfolioCache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
+            userExpandedRef.current = false;
+            dragCleanupRef.current = restoreCollapsedState(headerRef, portfolioCache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart, onUserExpandChange) ?? null;
             return;
           }
+          userExpandedRef.current = true;
           restoreFinalState(headerRef, portfolioCache.cachedData!);
           recalculateAndApplyExpandedState(headerRef, oDragWrapperRef);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: portfolioCache.cachedData!.oFinalX });
           setIsComplete(true);
-          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart);
+          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart, onUserExpandChange);
         });
       });
       return saveExpandedStateOnCleanup;
@@ -475,7 +481,7 @@ export function usePortfolioAnimation(
           setIsComplete(true);
           if (!staticExpand) {
             if (dragCleanupRef.current) dragCleanupRef.current();
-            dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData, setIsComplete, onDragStart);
+            dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData, setIsComplete, onDragStart, onUserExpandChange);
           }
           // Resize handler so O and line stay in view when user resizes after expansion
           const handleResizeMobile = createResizeHandler(headerRef, oDragWrapperRef);
@@ -635,7 +641,9 @@ export function usePortfolioAnimation(
         document.removeEventListener("pointercancel", onPointerUpWithEvent);
         dragTarget.style.cursor = "grab";
         const currentX = Number(gsap.getProperty(dragTarget, "x")) || 0;
-        if (currentX >= threshold) {
+        const expanded = currentX >= threshold;
+        userExpandedRef.current = expanded;
+        if (expanded) {
           const finishDrag = () => {
             gsap.set(dragTarget, { x: oFinalX });
             lineEl.style.width = `${finalLineWidth}px`;

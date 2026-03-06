@@ -111,13 +111,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isMd, // static expand: final state, no drag
   );
 
+  // On lg: only show "Software Engineer" after the dot lands (isDotAnimationComplete). On md/sm: show when portfolio is ready (no dot animation).
   useEngineerText(
     engineerTextRef,
     numberSevenRef,
     svgIRef,
     svgA2Ref,
     svgM2Ref,
-    portfolioRevealReady || isDotAnimationComplete,
+    isLg ? isDotAnimationComplete : (portfolioRevealReady || isDotAnimationComplete),
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
