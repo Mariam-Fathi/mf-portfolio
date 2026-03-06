@@ -3,11 +3,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { getHeroLineData } from "@/utils/navigationPosition";
+import { useHeroBreakpoints } from "@/components/hero/hooks/useHeroBreakpoints";
+import { COLORS, FONTS, Z_LAYERS } from "@/components/hero/constants";
 
 interface SectionLineNavigationProps {
   onNavigate: (section: string) => void;
   currentSection: string;
 }
+
+const sections = [
+  { id: "hero", label: "home" },
+  { id: "experience", label: "experience" },
+  { id: "work", label: "projects" },
+  { id: "certificates", label: "certificates" },
+  { id: "contact", label: "contact" },
+];
 
 const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigate, currentSection }) => {
   const lineRef = useRef<HTMLDivElement>(null);
@@ -16,17 +26,11 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [lineData, setLineData] = useState<{ lineY: number; lineEndX: number; lineWidth: number; oPositionX: number } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { isLg, isMd, isSm } = useHeroBreakpoints();
 
   // Track section changes to replay the line expansion animation
   const prevSectionRef = useRef(currentSection);
-
-  const sections = [
-    { id: "hero", label: "home" },
-    { id: "experience", label: "experience" },
-    { id: "work", label: "projects" },
-    { id: "certificates", label: "certificates" },
-    { id: "contact", label: "contact" },
-  ];
 
   // Reset animation when navigating to a different section
   useEffect(() => {
@@ -42,8 +46,9 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
     }
   }, [currentSection]);
 
+  // Only need line data for lg (line + O + nav); md/sm use menu
   useEffect(() => {
-    // Get line data from hero
+    if (!isLg) return;
     const getData = () => {
       const data = getHeroLineData();
       if (data) {
@@ -52,23 +57,19 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
       }
       return false;
     };
-    
     if (!getData()) {
-      // Retry if data not available yet - keep retrying until we get it
       let retries = 0;
-      const maxRetries = 20; // Try for 2 seconds
+      const maxRetries = 20;
       const interval = setInterval(() => {
         retries++;
-        if (getData() || retries >= maxRetries) {
-          clearInterval(interval);
-        }
+        if (getData() || retries >= maxRetries) clearInterval(interval);
       }, 100);
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [isLg]);
 
   useEffect(() => {
-    if (!lineData || !lineRef.current || !navRef.current || !oRef.current) {
+    if (!isLg || !lineData || !lineRef.current || !navRef.current || !oRef.current) {
       return;
     }
 
@@ -217,11 +218,11 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         tl.kill();
       }
     };
-  }, [lineData, hasAnimated]);
+  }, [isLg, lineData, hasAnimated]);
 
-  // Update positions on window resize
+  // Update positions on window resize (lg only)
   useEffect(() => {
-    if (!lineData) return;
+    if (!isLg || !lineData) return;
 
     const handleResize = () => {
       const updatedData = getHeroLineData();
@@ -248,21 +249,146 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [lineData, hasAnimated]);
+  }, [isLg, lineData, hasAnimated]);
+
+  // Md/sm: menu button + overlay (same as hero)
+  if (isMd || isSm) {
+    return (
+      <>
+        <button
+          type="button"
+          className="section-menu-button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+        >
+          <span className="section-menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M3 12h18M3 6h18M3 18h18" />
+            </svg>
+          </span>
+        </button>
+        {menuOpen && (
+          <nav className="section-menu-overlay" aria-label="Main navigation">
+            <button
+              type="button"
+              className="section-menu-close"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <ul className="section-menu-links">
+              {sections.map((section) => (
+                <li key={section.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onNavigate(section.id);
+                    }}
+                    className={currentSection === section.id ? "active" : ""}
+                  >
+                    {section.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+        <style jsx>{`
+          .section-menu-button {
+            position: fixed;
+            top: clamp(0.5rem, 2vw, 1rem);
+            right: clamp(1rem, 3vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: ${COLORS.primary};
+            cursor: pointer;
+            z-index: ${Z_LAYERS.frame + 50};
+          }
+          .section-menu-icon {
+            display: block;
+            width: 24px;
+            height: 24px;
+          }
+          .section-menu-icon svg {
+            width: 100%;
+            height: 100%;
+          }
+          .section-menu-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: ${Z_LAYERS.frame + 100};
+            background: ${COLORS.heroBackground};
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+          }
+          .section-menu-close {
+            position: absolute;
+            top: clamp(1rem, 3vw, 1.5rem);
+            right: clamp(1rem, 3vw, 1.5rem);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: ${COLORS.primary};
+            cursor: pointer;
+          }
+          .section-menu-close:hover { opacity: 0.85; }
+          .section-menu-close svg { width: 28px; height: 28px; }
+          .section-menu-links {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            font-family: ${FONTS.display};
+          }
+          .section-menu-links button {
+            background: none;
+            border: none;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            text-transform: lowercase;
+            letter-spacing: 0.05em;
+            color: ${COLORS.primary};
+            cursor: pointer;
+            opacity: 0.9;
+            padding: 0;
+          }
+          .section-menu-links button:hover,
+          .section-menu-links button.active { opacity: 1; }
+        `}</style>
+      </>
+    );
+  }
 
   if (!lineData) {
-    return null; // Don't render until we have line data
+    return null;
   }
 
   return (
     <>
-      {/* Line expanding from left */}
+      {/* Lg: line + O + nav */}
       <div ref={lineRef} className="section-line" />
-
-      {/* O letter - moves along with line expansion */}
       <span ref={oRef} className="section-line-o" aria-label="Navigation menu toggle">O</span>
-
-      {/* Navigation menu */}
       <nav ref={navRef} className="section-line-navigation">
         <ul className="section-line-nav-links">
           {sections.map((section) => (
@@ -270,9 +396,7 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  // Don't hide anything if clicking the already-active section
                   if (currentSection === section.id) return;
-                  // Immediately hide nav and disable clicks before navigating
                   if (navRef.current) {
                     navRef.current.style.pointerEvents = "none";
                     gsap.to(navRef.current, { opacity: 0, duration: 0.2, ease: "power2.in" });
