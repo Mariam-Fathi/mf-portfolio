@@ -484,16 +484,21 @@ export function usePortfolioAnimation(
       pendingAutoTlRef.current = autoTl;
     });
 
-    // Resize handler — line from O start, O at end (thread ball)
+    // Resize handler — only reposition when portfolio is *already* expanded (O at end, nav visible)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
-        if (!everCompleted || !oEl || !lineEl) return;
+        if (!everCompleted || !cachedData || !oEl || !lineEl) return;
+        const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
+        const currentOGsapX = Number(gsap.getProperty(targetEl, "x")) || 0;
+        const threshold = cachedData.oFinalX * 0.6;
+        const isCurrentlyExpanded = currentOGsapX >= threshold;
+        if (!isCurrentlyExpanded) return;
+
         const cRect = headerRef.current?.getBoundingClientRect();
         if (!cRect) return;
 
-        const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
         const padding = window.innerWidth < 768 ? 16 : 32;
         const viewportRight = window.innerWidth - padding;
         const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
@@ -501,7 +506,6 @@ export function usePortfolioAnimation(
         const oWidth = oEl.getBoundingClientRect().width;
         const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
 
-        const currentOGsapX = Number(gsap.getProperty(targetEl, "x")) || 0;
         const targetRect = targetEl.getBoundingClientRect();
         const currentOLeft = targetRect.left - cRect.left;
         const lineStartX = currentOLeft - currentOGsapX;
@@ -512,16 +516,14 @@ export function usePortfolioAnimation(
         lineEl.style.left = `${lineStartX}px`;
         gsap.set(lineEl, { width: finalLineWidth });
 
-        if (cachedData) {
-          cachedData = {
-            ...cachedData,
-            oFinalX,
-            lineFinalWidth: finalLineWidth,
-            iOriginalPosition: lineStartX,
-            oStartX: lineStartX,
-            containerWidth: cRect.width,
-          };
-        }
+        cachedData = {
+          ...cachedData,
+          oFinalX,
+          lineFinalWidth: finalLineWidth,
+          iOriginalPosition: lineStartX,
+          oStartX: lineStartX,
+          containerWidth: cRect.width,
+        };
       }, 150);
     };
     window.addEventListener("resize", handleResize);
