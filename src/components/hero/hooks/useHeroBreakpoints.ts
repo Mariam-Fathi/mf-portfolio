@@ -39,12 +39,13 @@ export function useHeroBreakpoints(): {
     const onChange = () => update();
     mqLg.addEventListener("change", onChange);
     mqMd.addEventListener("change", onChange);
-    window.addEventListener("resize", onChange);
+    // NOTE: No window "resize" listener here — matchMedia fires exactly once per
+    // threshold crossing, which is all we need. A resize listener would fire on
+    // every pixel of resize and cause redundant re-renders.
 
     return () => {
       mqLg.removeEventListener("change", onChange);
       mqMd.removeEventListener("change", onChange);
-      window.removeEventListener("resize", onChange);
     };
   }, []);
 

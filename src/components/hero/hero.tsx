@@ -39,7 +39,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const dotRef = useRef<HTMLDivElement>(null);
   const liquidDropsRef = useRef<HTMLDivElement>(null);
   const engineerTextRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement | null>(null);
 
   const [isMounted, setIsMounted] = useState(false);
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
@@ -104,7 +104,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     onDotLandedOnI,
   );
 
-  const { isPortfolioAnimationComplete, collapsePortfolio } = usePortfolioAnimation(
+  const { isPortfolioAnimationComplete } = usePortfolioAnimation(
     portfolioHeaderRef,
     isActive && isMariamReady,
     isActive,
@@ -257,6 +257,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       dot.removeEventListener("mouseenter", onMouseEnter);
       dot.removeEventListener("mouseleave", onMouseLeave);
       if (hoverTl) hoverTl.kill();
+      // Kill any standalone svgI tweens that were fired outside hoverTl
+      if (svgI) gsap.killTweensOf(svgI);
       // Don't hide on resize re-runs (dotPreShownRef stays true).
       // Don't hide when isDotClicked transitions (animation takes over).
       // Only hide if the dot was never fully shown (e.g. early unmount).
@@ -271,6 +273,15 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
       }
     };
   }, [isLg, isMariamReady, isDotClicked, dotClickPos]);
+
+  // Reset isDotClickedRef on unmount so a future remount starts fresh
+  // (avoids stale ref suppressing the pre-show dot cleanup on remount).
+  useEffect(() => {
+    return () => {
+      isDotClickedRef.current = false;
+      dotPreShownRef.current = false;
+    };
+  }, []);
 
   // Show dot click prompt (lg only)
   useEffect(() => {
@@ -582,8 +593,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
             className={`hero-engineer-text ${pouitiesFont.className}`}
             style={{
               position: "fixed",
-              top: 0,
-              right: 0,
+              // top/left/right/bottom are intentionally omitted here.
+              // useEngineerText owns all positional styles and sets them directly,
+              // so there is no specificity conflict and no !important needed.
               color: COLORS.primary,
               fontFamily: pouitiesFont.style.fontFamily,
               fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
@@ -992,19 +1004,19 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           color: ${COLORS.primary};
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
           user-select: none;
-          z-index: ${Z_LAYERS.engineerText} !important;
-          position: fixed !important;
+          z-index: ${Z_LAYERS.engineerText};
+          position: fixed;
           overflow: visible;
         }
         @media (max-width: 768px) {
           :global(.hero-engineer-text) {
-            bottom: auto !important;
-            font-size: clamp(1.5rem, 5vw, 3.5rem) !important;
+            bottom: auto;
+            font-size: clamp(1.5rem, 5vw, 3.5rem);
           }
         }
         @media (max-width: 480px) {
           :global(.hero-engineer-text) {
-            font-size: clamp(1.2rem, 4.5vw, 2.8rem) !important;
+            font-size: clamp(1.2rem, 4.5vw, 2.8rem);
           }
         }
 

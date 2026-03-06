@@ -4,6 +4,10 @@ import { checkIsMobile } from "./useIsMobile";
 import type { MariamSvgData } from "../types";
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
+// IMPORTANT – React 18 Strict Mode double-invokes effects in development.
+// The first invocation may set svgDataCalculated = true, causing the second
+// invocation to skip the layout calculation and use cached (possibly stale)
+// data. This is expected in development only; production builds are unaffected.
 let cachedSvgData: MariamSvgData | null = null;
 let svgDataCalculated = false;
 
@@ -59,8 +63,11 @@ function alignTextToBottom(
     const target = mariamHeight - bottomMargin;
     const yAdjustment = target - (bbox.y + bbox.height);
     textEl.setAttribute("y", yAdjustment.toString());
-  } catch {
-    // Ignore — getBBox can throw if element is not rendered
+  } catch (err) {
+    // getBBox can throw if the element is not yet rendered (e.g. display:none parent).
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[useMariamSvg] alignTextToBottom: getBBox failed — text may render at y=0. Cause:", err);
+    }
   }
 }
 
@@ -243,7 +250,11 @@ export function useMariamSvg(
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        // Skip tiny changes on mobile (virtual keyboard, etc.)
+        // Skip tiny changes on mobile (virtual keyboard, URL bar resize, etc.).
+        // Uses a 100px delta threshold — coarse but sufficient for most devices.
+        // NOTE: On some tablets a portrait↔landscape flip changes width by exactly
+        // ~100px, which could cause this guard to skip a needed recalculation.
+        // A more robust solution would check `screen.orientation` instead.
         if (checkIsMobile() && cachedSvgData) {
           const w = window.innerWidth;
           const h = getViewportHeight();

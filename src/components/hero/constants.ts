@@ -32,6 +32,10 @@ export const Z_LAYERS = {
 } as const;
 
 // ── Animation durations (seconds) ───────────────────────────────────
+// NOTE: dotTouchImpact (0.04s) and letterTouchSquash (0.08s) are intentionally
+// very short — on 60 Hz that's ~2–5 frames. On 30 fps low-power devices these
+// may be imperceptible, but the visual result is still correct because GSAP
+// snaps to the end state when the frame budget is exceeded.
 export const TIMING = {
   dotFall: 0.4,
   dotBounce: 0.15,
@@ -49,6 +53,17 @@ export const TIMING = {
   typewriterPerChar: 0.05,
   blurReveal: 1.2,
   blurRevealDelay: 0.3,
+} as const;
+
+// ── Engineer text layout constants ──────────────────────────────────
+export const ENGINEER_TEXT = {
+  /**
+   * Pixels to shift "Software Engineer" downward from the computed top edge
+   * of the "ı" dot. Compensates for the visual gap between the SVG baseline
+   * and the actual rendered top of the descender-adjusted text block.
+   * Derived empirically from the Pouities font metrics at all tested sizes.
+   */
+  VERTICAL_NUDGE_PX: 17,
 } as const;
 
 // ── Breakpoints (px) ───────────────────────────────────────────────

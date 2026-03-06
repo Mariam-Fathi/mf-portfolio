@@ -1,18 +1,41 @@
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { checkIsMobile } from "./useIsMobile";
+import { ENGINEER_TEXT } from "../constants";
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
+// IMPORTANT – React 18 Strict Mode double-invokes effects in development.
+// The first invocation may set engineerTextEverShown = true, causing the
+// second invocation to skip to the blur-in path instead of the write-on.
+// This is expected in development only and does NOT happen in production.
 let engineerTextEverShown = false;
 
+// ── Cached width-per-font-size ratio (font is deterministic, measure once) ──
+// Avoids two forced reflows per position() call by pre-computing how wide the
+// text is at a reference size and scaling from that ratio.
+let cachedWidthRatio: number | null = null;
+
+function getWidthRatio(el: HTMLDivElement): number {
+  if (cachedWidthRatio !== null) return cachedWidthRatio;
+  const REF = 48;
+  el.style.fontSize = `${REF}px`;
+  const refWidth = el.getBoundingClientRect().width;
+  cachedWidthRatio = refWidth > 0 ? refWidth / REF : null;
+  return cachedWidthRatio ?? 1;
+}
 
 /**
  * Animates the "Software Engineer" text with a write-on (clip reveal) effect
- * and positions it dynamically above the "am" portion of "Mariam".
+ * and positions it dynamically above the "ıam" portion of "Mariam".
  * Reveal starts when the dot lands on "ı" (cause: the fall triggers the appearance).
  *
  * On mobile the final state is applied immediately — no animation.
  * On subsequent visits (cache hit), the final state is restored instantly.
+ *
+ * Positioning note: this hook owns ALL positional inline styles on the element
+ * (top, left, bottom, right, fontSize). The portal in hero.tsx sets only
+ * non-positional defaults (opacity, filter, zIndex) so there is no specificity
+ * conflict — no !important needed.
  */
 export function useEngineerText(
   engineerRef: RefObject<HTMLDivElement | null>,
@@ -25,6 +48,15 @@ export function useEngineerText(
   onEngineerRevealComplete?: () => void,
 ) {
   const revealStartedRef = useRef(false);
+
+  // ── Always kill tweens on cleanup, regardless of which branch ran ──
+  // Separate effect so the cleanup always registers even when the reveal
+  // effect exits early (mobile path, cache-hit path, !startEngineerReveal).
+  useEffect(() => {
+    return () => {
+      if (engineerRef.current) gsap.killTweensOf(engineerRef.current);
+    };
+  }, [engineerRef]);
 
   // ── Write-on reveal (starts when dot lands on "ı") ──────────────
   useEffect(() => {
@@ -63,12 +95,12 @@ export function useEngineerText(
 
     // ── Desktop: write-on effect (first visit only) ──────────────
     const el = engineerRef.current;
-    if (!el) return;
+    if (!el || !el.parentElement) return;
 
     gsap.killTweensOf(el);
     if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
-    // Start fully clipped (hidden) — reveal from left to right (no delay: starts at touch)
+    // Start fully clipped (hidden) — reveal left-to-right, no delay (starts at dot touch)
     gsap.set(el, {
       opacity: 1,
       x: 0,
@@ -78,7 +110,6 @@ export function useEngineerText(
       clipPath: "inset(-20% 100% -20% 0)",
     });
 
-    if (!el.parentElement) return;
     revealStartedRef.current = true;
     gsap.to(el, {
       clipPath: "inset(-20% 0% -20% 0)",
@@ -91,14 +122,17 @@ export function useEngineerText(
         onEngineerRevealComplete?.();
       },
     });
-    return () => {
-      if (engineerRef.current) gsap.killTweensOf(engineerRef.current);
-    };
-  }, [startEngineerReveal, engineerRef]);
+  // onEngineerRevealComplete is stable (useCallback [] deps in hero.tsx).
+  // Listed here to satisfy exhaustive-deps without causing extra re-runs.
+  }, [startEngineerReveal, engineerRef, onEngineerRevealComplete]);
 
-  // ── Position & scale relative to the "am" in Mariam ────────────
-  // Run only when Mariam is ready (not when reveal starts) so the text never
-  // re-positions mid-reveal — avoids "starts writing then shifts up".
+  // ── Position & scale relative to the "ıam" in Mariam ───────────
+  // Runs only when Mariam is ready (not when reveal starts) so the text never
+  // re-positions mid-reveal — avoids "starts writing then jumps".
+  //
+  // This hook owns the element's positional styles (top/left/bottom/right/
+  // fontSize) via direct assignment. No !important is needed because the
+  // portal in hero.tsx intentionally sets only non-positional defaults.
   useEffect(() => {
     if (!isMariamReady) return;
     const el = engineerRef.current;
@@ -106,10 +140,13 @@ export function useEngineerText(
     const m2 = svgM2Ref.current;
     if (!el || !a2 || !m2) return;
 
-    // Ensure text content exists for measurement
     if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
     const position = () => {
+      // Don't reposition while the write-on is mid-reveal on first visit.
+      // revealStartedRef is instance-level (resets on remount);
+      // engineerTextEverShown is module-level (survives remount).
+      // Together they cover both cases: in-progress first visit, and returning visit.
       if (revealStartedRef.current && !engineerTextEverShown) return;
       const iEl = svgIRef.current;
       if (!iEl || !a2 || !m2 || !el) return;
@@ -121,12 +158,10 @@ export function useEngineerText(
 
       if (iamWidth <= 0) return;
 
-      const REF = 48;
-      el.style.fontSize = `${REF}px`;
-      const refWidth = el.getBoundingClientRect().width;
-      if (refWidth <= 0) return;
-
-      const targetFontSize = (iamWidth / refWidth) * REF * 0.95;
+      // Single reflow: use cached ratio to compute target fontSize, then set once.
+      // getWidthRatio() measures at 48px the first time and caches the px-per-px ratio.
+      const ratio = getWidthRatio(el);
+      const targetFontSize = (iamWidth / ratio) * 0.95;
       const minFontSize = checkIsMobile() ? 14 : 20;
       el.style.fontSize = `${Math.max(minFontSize, targetFontSize)}px`;
 
@@ -134,18 +169,28 @@ export function useEngineerText(
       const descenderOffset = engRect.height * 0.4;
       const iamCenterX = iRect.left + iamWidth / 2;
       const engLeft = iamCenterX - engRect.width / 2;
-      const shiftDown = 17;
-      el.style.setProperty("top", `${dotY - engRect.height + descenderOffset + shiftDown}px`, "important");
-      el.style.setProperty("bottom", "auto", "important");
-      el.style.setProperty("left", `${engLeft}px`, "important");
-      el.style.setProperty("right", "auto", "important");
 
-      // Hide until reveal starts (so we don't re-run position when reveal starts)
+      // ENGINEER_TEXT.VERTICAL_NUDGE_PX compensates for the gap between the SVG
+      // baseline and the rendered top of the descender-adjusted text block.
+      // Value is Pouities-font-specific; derived empirically across all tested sizes.
+      const top = dotY - engRect.height + descenderOffset + ENGINEER_TEXT.VERTICAL_NUDGE_PX;
+
+      el.style.top = `${top}px`;
+      el.style.bottom = "auto";
+      el.style.left = `${engLeft}px`;
+      el.style.right = "auto";
+
+      // Keep hidden until reveal starts (clip-path covers the text from the right)
       if (!engineerTextEverShown) {
         gsap.set(el, { opacity: 1, clipPath: "inset(-20% 100% -20% 0)" });
       }
     };
 
+    // Three staggered calls defend against SVG not being fully painted yet:
+    // rAF fires before paint, 100ms catches post-font-load shifts, 300ms
+    // catches any remaining async layout from useMariamSvg's rAF chain.
+    // TODO: replace with a shared "mariamLayoutReady" signal from useMariamSvg
+    // so this hook doesn't need to guess the right delay after resize.
     requestAnimationFrame(position);
     const t1 = setTimeout(position, 100);
     const t2 = setTimeout(position, 300);
@@ -153,7 +198,12 @@ export function useEngineerText(
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
+      // 250ms > useMariamSvg's 150ms debounce + 3-frame rAF chain so SVG
+      // rects are stable before we re-measure.
+      // TODO: replace once a shared mariamLayoutReady signal exists.
       resizeTimer = setTimeout(() => {
+        resizeTimer = null;
+        cachedWidthRatio = null; // invalidate — fontSize changes on resize
         requestAnimationFrame(() => requestAnimationFrame(position));
       }, 250);
     };
@@ -162,7 +212,10 @@ export function useEngineerText(
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      if (resizeTimer) clearTimeout(resizeTimer);
+      if (resizeTimer) {
+        clearTimeout(resizeTimer);
+        resizeTimer = null;
+      }
       window.removeEventListener("resize", onResize);
     };
   }, [isMariamReady, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);

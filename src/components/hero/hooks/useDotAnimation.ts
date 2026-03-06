@@ -5,6 +5,12 @@ import { checkIsMobile } from "./useIsMobile";
 import type { DotPositions } from "../types";
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
+// IMPORTANT – React 18 Strict Mode double-invokes effects in development.
+// The first invocation may set animationEverCompleted = true, causing the
+// second invocation to skip the animation and restore the cached final state.
+// This is expected in development and does NOT happen in production builds.
+// If you need to test the first-visit animation locally, disable Strict Mode
+// temporarily or use a private/incognito window and hard-reload.
 let cachedPositions: DotPositions | null = null;
 let positionsCalculated = false;
 let animationEverCompleted = false;
@@ -95,22 +101,37 @@ function colorLetters(
 // power2/3.out = rising deceleration), volume-preserving squash/stretch,
 // 3 diminishing bounces per landing, true parabolic arcs via separate
 // x (linear) and y (gravity) tweens.
+//
+// Parameters are grouped into two objects to prevent the 11-argument smell
+// and make call-sites resilient to future additions.
+interface DotTimelineRefs {
+  svgI: SVGTSpanElement;
+  svgA2: SVGTSpanElement;
+  svgM2: SVGTSpanElement;
+  portfolioHeaderRef?: RefObject<HTMLDivElement | null>;
+}
+interface DotTimelineCallbacks {
+  onComplete: () => void;
+  onDotFallenFromM?: () => void;
+  onDotLandedOnI?: () => void;
+}
 function buildDotTimeline(
   dot: HTMLDivElement,
   pos: DotPositions,
-  svgI: SVGTSpanElement,
-  svgA2: SVGTSpanElement,
-  svgM2: SVGTSpanElement,
-  onComplete: () => void,
+  refs: DotTimelineRefs,
+  callbacks: DotTimelineCallbacks,
   skipIntro = false,
-  onDotFallenFromM?: () => void,
-  onDotLandedOnI?: () => void,
-  liquidDropsRef?: RefObject<HTMLDivElement | null>,
-  portfolioHeaderRef?: RefObject<HTMLDivElement | null>,
 ): gsap.core.Timeline {
+  const { svgI, svgA2, svgM2 } = refs;
+  const { onComplete, onDotFallenFromM, onDotLandedOnI } = callbacks;
   const { iScreenX, iScreenY, a2ScreenX, a2ScreenY, m2ScreenX, m2ScreenY, finalDotSize } = pos;
   const d = finalDotSize;
   const half = d / 2;
+  // Capture viewport height at build time. We add a generous buffer (+200) so
+  // the dot always falls well below the fold even if the user resizes the
+  // viewport taller during the animation. If the window shrinks, the dot is
+  // already off-screen before it reaches the computed target, which is fine.
+  const viewportBottom = window.innerHeight + 200;
 
   const dotBase = COLORS.accent;
   const dotMotion = COLORS.dotMotion;
@@ -303,7 +324,7 @@ function buildDotTimeline(
   // ── Fall off screen — gravity wins ─────────────────────────────
   tl.to(dot, {
     keyframes: [
-      { y: window.innerHeight + 100, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
+      { y: viewportBottom, scaleY: 1.2, scaleX: 0.84, opacity: 0, duration: 0.45, ease: "power2.in" },
     ],
   });
   tl.call(() => onDotFallenFromM?.());
@@ -424,6 +445,9 @@ export function useDotAnimation(
   svgA2Ref: RefObject<SVGTSpanElement | null>,
   svgM2Ref: RefObject<SVGTSpanElement | null>,
   dotRef: RefObject<HTMLDivElement | null>,
+  /** Used to hide/show the liquid-drop elements when the hero section becomes
+   *  inactive. It is NOT passed into buildDotTimeline — liquid-drop animation
+   *  logic lives separately and will be wired up there when implemented. */
   liquidDropsRef: RefObject<HTMLDivElement | null>,
   isActive: boolean,
   isMariamReady: boolean,
@@ -531,9 +555,17 @@ export function useDotAnimation(
     const tid = setTimeout(() => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          activeTl = buildDotTimeline(dot, pos, svgI, svgA2, svgM2, () => {
-            setIsDotComplete(true);
-          }, dotAlreadyVisible, () => setIsDotFallenFromM(true), onDotLandedOnI, liquidDropsRef, portfolioHeaderRef);
+          activeTl = buildDotTimeline(
+            dot,
+            pos,
+            { svgI, svgA2, svgM2, portfolioHeaderRef },
+            {
+              onComplete: () => setIsDotComplete(true),
+              onDotFallenFromM: () => setIsDotFallenFromM(true),
+              onDotLandedOnI,
+            },
+            dotAlreadyVisible,
+          );
           if (!dotAlreadyVisible) {
             gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
             gsap.to(dot, {

@@ -7,10 +7,17 @@ import { BREAKPOINTS } from "../constants";
  * once per threshold crossing, not on every pixel of resize.
  */
 export function useIsMobile(breakpoint = BREAKPOINTS.lg): boolean {
-  const [isMobile, setIsMobile] = useState(false);
+  // Lazy initializer reads the real viewport on first render (client only).
+  // Falls back to false during SSR so the server render always matches the
+  // "desktop" default — the effect below corrects it before first paint.
+  const [isMobile, setIsMobile] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < breakpoint;
+  });
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    // Sync in case the breakpoint prop changed between renders
     setIsMobile(mql.matches);
 
     const onChange = (e: MediaQueryListEvent) => setIsMobile(e.matches);

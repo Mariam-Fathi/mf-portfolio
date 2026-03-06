@@ -58,7 +58,12 @@ function restoreCollapsedState(
   onUserExpandChange?: (expanded: boolean) => void,
 ) {
   const els = getHeaderElements(headerRef);
-  if (!els) return;
+  if (!els) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[usePortfolioAnimation] restoreCollapsedState: header sub-elements not found — drag not attached. The portfolio header may not have rendered yet.");
+    }
+    return;
+  }
   const { full, portfoli, o, line } = els;
 
   full.style.display = "none";
@@ -82,14 +87,18 @@ function restoreCollapsedState(
 }
 
 // ── Resize handler: reposition O and line when expanded so they stay in view (shared by desktop & mobile) ─
+// Returns both the handler (to add/remove from the event) and a cancel function
+// (to clear any pending debounce timeout on unmount, preventing stale callbacks
+// from firing after the component has been torn down).
 function createResizeHandler(
   headerRef: RefObject<HTMLDivElement | null>,
   oDragWrapperRef: RefObject<HTMLDivElement | null> | undefined,
-): () => void {
+): { handler: () => void; cancel: () => void } {
   let resizeTimer: ReturnType<typeof setTimeout> | null = null;
-  return () => {
+  const handler = () => {
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
+      resizeTimer = null;
       if (!portfolioCache.everCompleted || !portfolioCache.cachedData) return;
       const els = getHeaderElements(headerRef);
       if (!els) return;
@@ -132,6 +141,13 @@ function createResizeHandler(
       };
     }, 150);
   };
+  const cancel = () => {
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
+      resizeTimer = null;
+    }
+  };
+  return { handler, cancel };
 }
 
 // ── Recalculate line/O positions from current layout and apply (for restore after resize or return to hero) ─
@@ -336,7 +352,7 @@ export function usePortfolioAnimation(
     // ── Restore cached state when returning to hero or after resize (e.g. lg→md → lg) ──────────────
     // Use portfolioCache.lastExpandedWhenLeavingHero so we restore the same state (expanded vs collapsed) the user had when they left.
     if (isActive && portfolioCache.cachedData && portfolioCache.dataCalculated && portfolioCache.everCompleted) {
-      const handleResize = createResizeHandler(headerRef, oDragWrapperRef);
+      const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragCleanupRef.current) dragCleanupRef.current();
@@ -362,7 +378,10 @@ export function usePortfolioAnimation(
           setIsComplete(true);
           dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart, onUserExpandChange);
           window.addEventListener("resize", handleResize);
-          restoreResizeCleanupRef.current = () => window.removeEventListener("resize", handleResize);
+          restoreResizeCleanupRef.current = () => {
+            cancelResize();
+            window.removeEventListener("resize", handleResize);
+          };
         });
       });
       return () => {
@@ -484,9 +503,10 @@ export function usePortfolioAnimation(
             dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData, setIsComplete, onDragStart, onUserExpandChange);
           }
           // Resize handler so O and line stay in view when user resizes after expansion
-          const handleResizeMobile = createResizeHandler(headerRef, oDragWrapperRef);
+          const { handler: handleResizeMobile, cancel: cancelResizeMobile } = createResizeHandler(headerRef, oDragWrapperRef);
           window.addEventListener("resize", handleResizeMobile);
           mobileResizeCleanupRef.current = () => {
+            cancelResizeMobile();
             window.removeEventListener("resize", handleResizeMobile);
           };
         });
@@ -703,11 +723,12 @@ export function usePortfolioAnimation(
     });
 
     // Resize handler — only reposition when portfolio is *already* expanded (O at end, nav visible)
-    const handleResize = createResizeHandler(headerRef, oDragWrapperRef);
+    const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef);
     window.addEventListener("resize", handleResize);
 
     return () => {
       saveExpandedStateOnCleanup();
+      cancelResize();
       pendingAutoTlRef.current = null;
       if (dragCleanupRef.current) {
         dragCleanupRef.current();
