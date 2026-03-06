@@ -302,7 +302,11 @@ export function usePortfolioAnimation(
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
-    if (!headerRef.current) return;
+    const saveExpandedStateOnCleanup = () => {
+      portfolioCache.lastExpandedWhenLeavingHero = wasExpandedRef.current;
+    };
+
+    if (!headerRef.current) return saveExpandedStateOnCleanup;
 
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
@@ -324,7 +328,7 @@ export function usePortfolioAnimation(
           els.line.style.left = "";
         }
       }
-      return;
+      return saveExpandedStateOnCleanup;
     }
 
     // ── Restore cached state when returning to hero or after resize (e.g. lg→md → lg) ──────────────
@@ -358,6 +362,7 @@ export function usePortfolioAnimation(
         });
       });
       return () => {
+        saveExpandedStateOnCleanup();
         restoreResizeCleanupRef.current?.();
         restoreResizeCleanupRef.current = null;
         if (dragCleanupRef.current) {
@@ -368,7 +373,7 @@ export function usePortfolioAnimation(
     }
 
     // ── Wait for dot animation to start ──────────────────────────
-    if (!shouldAnimate) return;
+    if (!shouldAnimate) return saveExpandedStateOnCleanup;
 
     // ── Cached: jump to final state (e.g. same session, effect re-ran after resize) ──────────────────────────────
     if (portfolioCache.cachedData && portfolioCache.dataCalculated) {
@@ -392,14 +397,14 @@ export function usePortfolioAnimation(
           dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, portfolioCache.cachedData!, setIsComplete, onDragStart);
         });
       });
-      return;
+      return saveExpandedStateOnCleanup;
     }
 
     // ── Fresh animation ──────────────────────────────────────────
     setIsComplete(false);
 
     const els = getHeaderElements(headerRef);
-    if (!els) return;
+    if (!els) return saveExpandedStateOnCleanup;
     const { full, portfoli, o: oEl, line: lineEl } = els;
 
     // ── Mobile or static (md): show final state immediately; only attach drag when mobile and not static ───
@@ -481,6 +486,7 @@ export function usePortfolioAnimation(
         });
       });
       return () => {
+        saveExpandedStateOnCleanup();
         if (dragCleanupRef.current) {
           dragCleanupRef.current();
           dragCleanupRef.current = null;
@@ -693,6 +699,7 @@ export function usePortfolioAnimation(
     window.addEventListener("resize", handleResize);
 
     return () => {
+      saveExpandedStateOnCleanup();
       pendingAutoTlRef.current = null;
       if (dragCleanupRef.current) {
         dragCleanupRef.current();
