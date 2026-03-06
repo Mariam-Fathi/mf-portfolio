@@ -639,7 +639,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           inset: 0;
           pointer-events: auto;
           z-index: ${Z_LAYERS.frame};
-          overflow: hidden;
+          overflow-x: visible;
+          overflow-y: hidden;
           margin: 0;
           padding: 0;
         }
@@ -648,7 +649,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         .hero-frame-marquee {
           position: absolute;
           background-color: transparent;
-          overflow: hidden;
+          overflow-x: visible;
+          overflow-y: hidden;
           display: flex;
           align-items: center;
           margin: 0;
@@ -685,6 +687,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           overflow: visible;
           box-shadow: none;
           padding-right: clamp(1rem, 2vw, 2rem);
+          min-width: 0;
         }
         .hero-frame-marquee-top::before,
         .hero-frame-marquee-top::after {
@@ -711,9 +714,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           display: flex;
           align-items: center;
           width: 100%;
+          min-width: 0;
           height: 100%;
           gap: 0;
           position: relative;
+          overflow: visible;
         }
 
         /* ── PORTFOLIO title elements ──────────────────────────── */

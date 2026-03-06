@@ -233,13 +233,14 @@ export function usePortfolioAnimation(
           if (!containerRect) return;
 
           const padding = window.innerWidth < 768 ? 16 : 32;
-          const absoluteEnd = containerRect.width - padding;
+          const viewportRight = window.innerWidth - padding;
+          const absoluteEnd = Math.min(containerRect.width - padding, viewportRight - containerRect.left);
           void portfoli.offsetWidth;
           void oEl.offsetWidth;
 
           const oRect = oEl.getBoundingClientRect();
           const oWidth = oRect.width;
-          const oFinalLeft = absoluteEnd - oWidth / 2;
+          const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - containerRect.left - oWidth / 2);
           const oStartLeft = oRect.left - containerRect.left;
           const oFinalX = oFinalLeft - oStartLeft;
           const finalLineWidth = Math.max(0, oFinalLeft - oStartLeft - 8);
@@ -316,8 +317,9 @@ export function usePortfolioAnimation(
       const oRect = oEl.getBoundingClientRect();
       const oWidth = oRect.width;
       const padding = window.innerWidth < 768 ? 16 : 32;
-      const absoluteEnd = cRect.width - padding;
-      const oFinalLeft = absoluteEnd - oWidth / 2;
+      const viewportRight = window.innerWidth - padding;
+      const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
+      const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
       const oStartLeft = oRect.left - cRect.left;
 
       lineStartX = oStartLeft;
@@ -491,18 +493,21 @@ export function usePortfolioAnimation(
         const cRect = headerRef.current?.getBoundingClientRect();
         if (!cRect) return;
 
+        const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
         const padding = window.innerWidth < 768 ? 16 : 32;
-        const absoluteEnd = cRect.width - padding;
+        const viewportRight = window.innerWidth - padding;
+        const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
+
         const oWidth = oEl.getBoundingClientRect().width;
-        const oFinalLeft = absoluteEnd - oWidth / 2;
+        const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
 
-        const currentOGsapX = Number(gsap.getProperty(oEl, "x")) || 0;
-        const currentOLeft = oEl.getBoundingClientRect().left - cRect.left;
+        const currentOGsapX = Number(gsap.getProperty(targetEl, "x")) || 0;
+        const targetRect = targetEl.getBoundingClientRect();
+        const currentOLeft = targetRect.left - cRect.left;
         const lineStartX = currentOLeft - currentOGsapX;
-        const oFinalX = oFinalLeft - lineStartX;
-        const finalLineWidth = Math.max(0, oFinalLeft - lineStartX - 8);
+        const oFinalX = Math.max(0, oFinalLeft - lineStartX);
+        const finalLineWidth = Math.max(0, Math.min(oFinalLeft - lineStartX - 8, cRect.width - lineStartX - 8));
 
-        const targetEl = oDragWrapperRef?.current ?? oEl;
         gsap.set(targetEl, { x: oFinalX });
         lineEl.style.left = `${lineStartX}px`;
         gsap.set(lineEl, { width: finalLineWidth });
