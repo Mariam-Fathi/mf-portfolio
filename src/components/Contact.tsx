@@ -20,7 +20,6 @@ type ContactTile = {
   href: string;
   accent: string;
   icon: TablerIcon;
-  position: React.CSSProperties;
 };
 
 const contactTiles: ContactTile[] = [
@@ -31,7 +30,6 @@ const contactTiles: ContactTile[] = [
     href: "https://www.kaggle.com/mariamfathiamin",
     accent: "#20BEFF",
     icon: IconLetterK,
-    position: { top: "20%", left: "18%" },
   },
   {
     id: "github",
@@ -40,7 +38,6 @@ const contactTiles: ContactTile[] = [
     href: "https://github.com/Mariam-Fathi",
     accent: "#24292e",
     icon: IconBrandGithub,
-    position: { top: "18%", right: "18%" },
   },
   {
     id: "linkedin",
@@ -49,7 +46,6 @@ const contactTiles: ContactTile[] = [
     href: "https://www.linkedin.com/in/mariam-fathi-siam",
     accent: "#0077b5",
     icon: IconBrandLinkedin,
-    position: { bottom: "20%", left: "20%" },
   },
   {
     id: "email",
@@ -58,7 +54,6 @@ const contactTiles: ContactTile[] = [
     href: "mailto:mariam.f.siam@gmail.com",
     accent: "#0078d4",
     icon: IconMail,
-    position: { bottom: "18%", right: "18%" },
   },
 ];
 
@@ -67,7 +62,6 @@ const TEXT_REVEAL_DURATION_S = 2;
 const Contact: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
-  const tilesRef = useRef<HTMLDivElement>(null);
   const mobileTilesRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
@@ -90,13 +84,6 @@ const Contact: React.FC = () => {
 
     // Collect everything that needs cleanup
     const tweens: gsap.core.Tween[] = [];
-    const timelines: gsap.core.Timeline[] = [];
-    const listeners: { el: Element | HTMLElement; type: string; fn: EventListener }[] = [];
-
-    const addListener = (el: Element | HTMLElement, type: string, fn: EventListener) => {
-      el.addEventListener(type, fn);
-      listeners.push({ el, type, fn });
-    };
 
     // ── Animate when section scrolls into view ─────────────────────
     const runAnimations = () => {
@@ -119,46 +106,7 @@ const Contact: React.FC = () => {
         );
       }
 
-      // ── 2. Desktop tiles ─────────────────────────────────────────
-      if (tilesRef.current) {
-        const tiles = Array.from(tilesRef.current.children);
-
-        tiles.forEach((tile, i) => {
-          tweens.push(
-            gsap.fromTo(
-              tile,
-              { opacity: 0, x: 0, y: 0, rotation: 0, scale: 0.2, transformOrigin: "50% 50%" },
-              {
-                opacity: 1,
-                x: 0,
-                y: 0,
-                rotation: 0,
-                scale: 1,
-                duration: 0.9,
-                delay: baseDelayAfterText + i * 0.14,
-                ease: "expo.out",
-              },
-            ),
-          );
-
-          // Continuous float — uses absolute yoyo so values never drift
-          const floatH = 12 + i * 3;
-          const floatD = 2.5 + i * 0.4;
-          const tl = gsap.timeline({
-            repeat: -1,
-            yoyo: true,
-            delay: baseDelayAfterText + 0.9 + i * 0.14,
-          });
-          tl.to(tile, { y: -floatH, duration: floatD, ease: "sine.inOut" });
-          timelines.push(tl);
-
-          // Pause float on hover
-          addListener(tile, "mouseenter", () => tl.pause());
-          addListener(tile, "mouseleave", () => tl.resume());
-        });
-      }
-
-      // ── 3. Mobile tiles ──────────────────────────────────────────
+      // ── 2. Link tiles (all screen sizes) ─────────────────────────
       if (mobileTilesRef.current) {
         tweens.push(
           gsap.fromTo(
@@ -193,8 +141,6 @@ const Contact: React.FC = () => {
     return () => {
       observer.disconnect();
       tweens.forEach((t) => t.kill());
-      timelines.forEach((t) => t.kill());
-      listeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
     };
   }, [prepareText]);
 
@@ -220,44 +166,21 @@ const Contact: React.FC = () => {
         <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_bottom_right,_rgba(229,246,255,0.7),_transparent_55%)]" />
       </div>
 
-      <div className="relative flex flex-col lg:flex-row min-h-screen w-full items-center justify-center lg:justify-center">
-        <h1
-          ref={textRef}
-          className="relative z-10 w-full text-left lg:text-center font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none mb-8 lg:mb-0 px-6 lg:px-0"
-          style={{
-            fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-            color: "#280B0B",
-            letterSpacing: "0.1em",
-          }}
-        >
-          LET&apos;S TALK
-        </h1>
+      <div className="relative flex flex-col min-h-screen w-full items-center justify-center gap-10">
+        <div className="relative flex flex-col items-end">
+          <h1
+            ref={textRef}
+            className="relative z-10 whitespace-nowrap font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none px-6"
+            style={{
+              fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
+              color: "#280B0B",
+              letterSpacing: "0.1em",
+            }}
+          >
+            LET&apos;S TALK
+          </h1>
 
-        <div ref={tilesRef} className="absolute inset-0 z-20 hidden lg:block">
-          {contactTiles.map(({ id, label, caption, href, accent, icon: Icon, position }) => (
-            <a
-              key={id}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="group absolute flex items-center gap-3 cursor-pointer"
-              style={position}
-            >
-              <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
-                <Icon className="h-7 w-7" stroke={1.7} />
-              </span>
-              <span
-                className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
-                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
-              >
-                <span className="text-xs uppercase tracking-wide" style={{ color: "#280B0B" }}>{label}</span>
-                <span className="text-sm font-semibold" style={{ color: "#6A0610" }}>{caption}</span>
-              </span>
-            </a>
-          ))}
-        </div>
-
-        <div ref={mobileTilesRef} className="relative z-20 flex w-full flex-col gap-4 px-6 lg:hidden">
+          <div ref={mobileTilesRef} className="relative z-20 flex flex-col gap-4 pt-4 pr-6 items-end">
           {contactTiles.map(({ id, label, caption, href, accent, icon: Icon }) => (
             <a
               key={id}
@@ -278,6 +201,7 @@ const Contact: React.FC = () => {
               </span>
             </a>
           ))}
+          </div>
         </div>
       </div>
 
