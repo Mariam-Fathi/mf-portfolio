@@ -43,6 +43,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
 
   const [isMounted, setIsMounted] = useState(false);
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
+  const [dotLandedOnI, setDotLandedOnI] = useState(false); // true the moment dot touches "ı" — used to sync engineer text
   const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
   const [isDotClicked, setIsDotClicked] = useState(false);
@@ -84,7 +85,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isActive,
   );
 
-  const onDotLandedOnI = useCallback(() => setPortfolioRevealReady(true), []);
+  const onDotLandedOnI = useCallback(() => {
+    setPortfolioRevealReady(true);
+    setDotLandedOnI(true); // sync "Software Engineer" reveal with dot hitting the ı
+  }, []);
   const { isDotAnimationStarted, isDotAnimationComplete, isDotFallenFromM } = useDotAnimation(
     numberSevenRef,
     svgIRef,
@@ -111,14 +115,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     isMd, // static expand: final state, no drag
   );
 
-  // On lg: only show "Software Engineer" after the dot lands (isDotAnimationComplete). On md/sm: show when portfolio is ready (no dot animation).
+  // On lg: show "Software Engineer" the moment the dot hits the ı (dotLandedOnI), not after the 0.5s settle — synced for realism. On md/sm: show when portfolio is ready (no dot animation).
   useEngineerText(
     engineerTextRef,
     numberSevenRef,
     svgIRef,
     svgA2Ref,
     svgM2Ref,
-    isLg ? isDotAnimationComplete : (portfolioRevealReady || isDotAnimationComplete),
+    isLg ? (dotLandedOnI || isDotAnimationComplete) : (portfolioRevealReady || isDotAnimationComplete),
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
