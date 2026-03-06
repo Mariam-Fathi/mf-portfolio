@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useCallback, useRef, useState } from "react";
+// Keep portfolio cache in page chunk so it survives Hero unmount (production chunk loading)
+import "@/components/hero/portfolioCache";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
