@@ -55,6 +55,38 @@ function restoreFinalState(
   gsap.set(line, { opacity: 1, width: data.lineFinalWidth });
 }
 
+// ── Restore to collapsed: PORTFOLI + O with O at start, line at 0 (e.g. after resize lg→md when not expanded) ─
+function restoreCollapsedState(
+  headerRef: RefObject<HTMLDivElement | null>,
+  data: PortfolioData,
+  oDragWrapperRef: RefObject<HTMLDivElement | null> | undefined,
+  setIsComplete: (v: boolean) => void,
+  onDragStart?: () => void,
+) {
+  const els = getHeaderElements(headerRef);
+  if (!els) return;
+  const { full, portfoli, o, line } = els;
+
+  full.style.display = "none";
+  portfoli.style.display = "inline";
+  o.style.display = "inline";
+  line.style.display = "block";
+
+  const target = (oDragWrapperRef?.current ?? o) as HTMLElement;
+  gsap.set([portfoli, o], { display: "inline", opacity: 1, rotation: 0, x: 0 });
+  gsap.set(target, { x: 0 });
+  Object.assign(line.style, {
+    display: "block",
+    opacity: "1",
+    left: `${data.iOriginalPosition}px`,
+    width: "0px",
+  });
+  gsap.set(line, { opacity: 1, width: 0 });
+
+  setIsComplete(false);
+  return attachODragAfterRestore(headerRef, oDragWrapperRef, data, setIsComplete, onDragStart);
+}
+
 // ── Attach drag-to-open/close for O when restored from cache (keeps O always draggable) ─
 function attachODragAfterRestore(
   headerRef: RefObject<HTMLDivElement | null>,
@@ -156,6 +188,11 @@ export function usePortfolioAnimation(
   const [isComplete, setIsComplete] = useState(false);
   const dragCleanupRef = useRef<(() => void) | null>(null);
   const pendingAutoTlRef = useRef<gsap.core.Timeline | null>(null);
+  const wasExpandedRef = useRef(false);
+
+  useEffect(() => {
+    wasExpandedRef.current = isComplete;
+  }, [isComplete]);
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
@@ -180,27 +217,36 @@ export function usePortfolioAnimation(
       return;
     }
 
-    // ── Restore cached state when returning to hero ──────────────
+    // ── Restore cached state when returning to hero or after resize (e.g. lg→md) ──────────────
     if (isActive && cachedData && dataCalculated && everCompleted) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragCleanupRef.current) dragCleanupRef.current();
+          if (!wasExpandedRef.current) {
+            dragCleanupRef.current = restoreCollapsedState(headerRef, cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
+            return;
+          }
           restoreFinalState(headerRef, cachedData!);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
           dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cachedData!, setIsComplete, onDragStart);
         });
       });
+      return;
     }
 
     // ── Wait for dot animation to start ──────────────────────────
     if (!shouldAnimate) return;
 
-    // ── Cached: jump to final state ──────────────────────────────
+    // ── Cached: jump to final state (e.g. same session, effect re-ran) ──────────────────────────────
     if (cachedData && dataCalculated) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragCleanupRef.current) dragCleanupRef.current();
+          if (!wasExpandedRef.current) {
+            dragCleanupRef.current = restoreCollapsedState(headerRef, cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
+            return;
+          }
           restoreFinalState(headerRef, cachedData!);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
