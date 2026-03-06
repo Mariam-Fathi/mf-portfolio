@@ -298,13 +298,17 @@ export function usePortfolioAnimation(
 
   useEffect(() => {
     wasExpandedRef.current = isComplete;
+    // Only update lastExpandedWhenLeavingHero while hero is active (user expanding/collapsing).
+    // When navigating away we set isComplete to false in the main effect; without this guard
+    // we would overwrite lastExpandedWhenLeavingHero to false and lose the restored state on return.
+    if (!isActive) return;
     if (isComplete) {
       hasSeenExpandedThisMountRef.current = true;
       lastExpandedWhenLeavingHero = true;
     } else if (hasSeenExpandedThisMountRef.current) {
       lastExpandedWhenLeavingHero = false;
     }
-  }, [isComplete]);
+  }, [isComplete, isActive]);
 
   // ── Main animation effect ──────────────────────────────────────
   useEffect(() => {
@@ -312,6 +316,8 @@ export function usePortfolioAnimation(
 
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
+      // Save expanded state before clearing so we restore it when returning to hero.
+      lastExpandedWhenLeavingHero = wasExpandedRef.current;
       if (dragCleanupRef.current) {
         dragCleanupRef.current();
         dragCleanupRef.current = null;
