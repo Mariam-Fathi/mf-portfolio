@@ -8,11 +8,14 @@ import type { PortfolioData } from "../types";
 let cachedData: PortfolioData | null = null;
 let dataCalculated = false;
 let everCompleted = false;
+/** When user leaves hero (navigate away), remember if line was expanded so we restore that state on return (lg only). */
+let lastExpandedWhenLeavingHero = false;
 
 export function resetPortfolioCache() {
   cachedData = null;
   dataCalculated = false;
   everCompleted = false;
+  lastExpandedWhenLeavingHero = false;
 }
 
 export function hasPortfolioEverCompleted() {
@@ -85,6 +88,104 @@ function restoreCollapsedState(
 
   setIsComplete(false);
   return attachODragAfterRestore(headerRef, oDragWrapperRef, data, setIsComplete, onDragStart);
+}
+
+// ── Resize handler: reposition O and line when expanded so they stay in view (shared by desktop & mobile) ─
+function createResizeHandler(
+  headerRef: RefObject<HTMLDivElement | null>,
+  oDragWrapperRef: RefObject<HTMLDivElement | null> | undefined,
+): () => void {
+  let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+  return () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!everCompleted || !cachedData) return;
+      const els = getHeaderElements(headerRef);
+      if (!els) return;
+      const { o: oEl, line: lineEl } = els;
+
+      const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
+      const currentOGsapX = Number(gsap.getProperty(targetEl, "x")) || 0;
+      const threshold = cachedData.oFinalX * 0.6;
+      const isCurrentlyExpanded = currentOGsapX >= threshold;
+      if (!isCurrentlyExpanded) return;
+
+      const cRect = headerRef.current?.getBoundingClientRect();
+      if (!cRect) return;
+
+      const padding = window.innerWidth < 768 ? 16 : 32;
+      const viewportRight = window.innerWidth - padding;
+      const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
+
+      const oWidth = oEl.getBoundingClientRect().width;
+      const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
+
+      const targetRect = targetEl.getBoundingClientRect();
+      const currentOLeft = targetRect.left - cRect.left;
+      const lineStartX = currentOLeft - currentOGsapX;
+      const oFinalX = Math.max(0, oFinalLeft - lineStartX);
+      const finalLineWidth = Math.max(0, Math.min(oFinalLeft - lineStartX - 8, cRect.width - lineStartX - 8));
+
+      gsap.set(targetEl, { x: oFinalX });
+      lineEl.style.left = `${lineStartX}px`;
+      lineEl.style.width = `${finalLineWidth}px`;
+      gsap.set(lineEl, { width: finalLineWidth });
+
+      cachedData = {
+        ...cachedData,
+        oFinalX,
+        lineFinalWidth: finalLineWidth,
+        iOriginalPosition: lineStartX,
+        oStartX: lineStartX,
+        containerWidth: cRect.width,
+      };
+    }, 150);
+  };
+}
+
+// ── Recalculate line/O positions from current layout and apply (for restore after resize or return to hero) ─
+function recalculateAndApplyExpandedState(
+  headerRef: RefObject<HTMLDivElement | null>,
+  oDragWrapperRef: RefObject<HTMLDivElement | null> | undefined,
+): boolean {
+  const els = getHeaderElements(headerRef);
+  if (!els || !cachedData) return false;
+  const { portfoli, o: oEl, line: lineEl } = els;
+  const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
+
+  const cRect = headerRef.current?.getBoundingClientRect();
+  if (!cRect) return false;
+
+  void portfoli.offsetWidth;
+  void oEl.offsetWidth;
+  const oWidth = oEl.getBoundingClientRect().width;
+  const padding = window.innerWidth < 768 ? 16 : 32;
+  const viewportRight = window.innerWidth - padding;
+  const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
+  const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
+  const oStartLeft = oEl.getBoundingClientRect().left - cRect.left;
+  const lineStartX = oStartLeft;
+  const oFinalX = Math.max(0, oFinalLeft - lineStartX);
+  const finalLineWidth = Math.max(0, Math.min(oFinalLeft - lineStartX - 8, cRect.width - lineStartX - 8));
+
+  gsap.set(targetEl, { x: oFinalX });
+  Object.assign(lineEl.style, {
+    display: "block",
+    opacity: "1",
+    left: `${lineStartX}px`,
+    width: `${finalLineWidth}px`,
+  });
+  gsap.set(lineEl, { opacity: 1, width: finalLineWidth });
+
+  cachedData = {
+    ...cachedData,
+    oFinalX,
+    lineFinalWidth: finalLineWidth,
+    iOriginalPosition: lineStartX,
+    oStartX: lineStartX,
+    containerWidth: cRect.width,
+  };
+  return true;
 }
 
 // ── Attach drag-to-open/close for O when restored from cache (keeps O always draggable) ─
@@ -184,14 +285,25 @@ export function usePortfolioAnimation(
   onDragStart?: () => void,
   oDragWrapperRef?: RefObject<HTMLDivElement | null>,
   startAutoExpand?: boolean,
+  /** When true (md range): show final state immediately, no drag/click on O */
+  staticExpand?: boolean,
 ): { isPortfolioAnimationComplete: boolean } {
   const [isComplete, setIsComplete] = useState(false);
   const dragCleanupRef = useRef<(() => void) | null>(null);
   const pendingAutoTlRef = useRef<gsap.core.Timeline | null>(null);
   const wasExpandedRef = useRef(false);
+  const mobileResizeCleanupRef = useRef<(() => void) | null>(null);
+  const restoreResizeCleanupRef = useRef<(() => void) | null>(null);
+  const hasSeenExpandedThisMountRef = useRef(false);
 
   useEffect(() => {
     wasExpandedRef.current = isComplete;
+    if (isComplete) {
+      hasSeenExpandedThisMountRef.current = true;
+      lastExpandedWhenLeavingHero = true;
+    } else if (hasSeenExpandedThisMountRef.current) {
+      lastExpandedWhenLeavingHero = false;
+    }
   }, [isComplete]);
 
   // ── Main animation effect ──────────────────────────────────────
@@ -204,6 +316,8 @@ export function usePortfolioAnimation(
         dragCleanupRef.current();
         dragCleanupRef.current = null;
       }
+      restoreResizeCleanupRef.current?.();
+      restoreResizeCleanupRef.current = null;
       setIsComplete(false);
       if (!everCompleted) {
         const els = getHeaderElements(headerRef);
@@ -217,37 +331,66 @@ export function usePortfolioAnimation(
       return;
     }
 
-    // ── Restore cached state when returning to hero or after resize (e.g. lg→md) ──────────────
+    // ── Restore cached state when returning to hero or after resize (e.g. lg→md → lg) ──────────────
+    // Use lastExpandedWhenLeavingHero so we restore the same state (expanded vs collapsed) the user had when they left.
     if (isActive && cachedData && dataCalculated && everCompleted) {
+      const handleResize = createResizeHandler(headerRef, oDragWrapperRef);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragCleanupRef.current) dragCleanupRef.current();
-          if (!wasExpandedRef.current) {
+          dragCleanupRef.current = null;
+          restoreResizeCleanupRef.current?.();
+          restoreResizeCleanupRef.current = null;
+
+          if (staticExpand) {
+            restoreFinalState(headerRef, cachedData!);
+            if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
+            setIsComplete(true);
+            return;
+          }
+          if (!lastExpandedWhenLeavingHero) {
             dragCleanupRef.current = restoreCollapsedState(headerRef, cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
             return;
           }
           restoreFinalState(headerRef, cachedData!);
+          recalculateAndApplyExpandedState(headerRef, oDragWrapperRef);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
           dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cachedData!, setIsComplete, onDragStart);
+          window.addEventListener("resize", handleResize);
+          restoreResizeCleanupRef.current = () => window.removeEventListener("resize", handleResize);
         });
       });
-      return;
+      return () => {
+        restoreResizeCleanupRef.current?.();
+        restoreResizeCleanupRef.current = null;
+        if (dragCleanupRef.current) {
+          dragCleanupRef.current();
+          dragCleanupRef.current = null;
+        }
+      };
     }
 
     // ── Wait for dot animation to start ──────────────────────────
     if (!shouldAnimate) return;
 
-    // ── Cached: jump to final state (e.g. same session, effect re-ran) ──────────────────────────────
+    // ── Cached: jump to final state (e.g. same session, effect re-ran after resize) ──────────────────────────────
     if (cachedData && dataCalculated) {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (dragCleanupRef.current) dragCleanupRef.current();
+          if (staticExpand) {
+            restoreFinalState(headerRef, cachedData!);
+            if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
+            setIsComplete(true);
+            return;
+          }
           if (!wasExpandedRef.current) {
             dragCleanupRef.current = restoreCollapsedState(headerRef, cachedData!, oDragWrapperRef, setIsComplete, onDragStart) ?? null;
             return;
           }
           restoreFinalState(headerRef, cachedData!);
+          recalculateAndApplyExpandedState(headerRef, oDragWrapperRef);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cachedData!.oFinalX });
           setIsComplete(true);
           dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cachedData!, setIsComplete, onDragStart);
@@ -263,8 +406,8 @@ export function usePortfolioAnimation(
     if (!els) return;
     const { full, portfoli, o: oEl, line: lineEl } = els;
 
-    // ── Mobile: show O at end but keep it draggable (touch-friendly) ───
-    if (isMobile) {
+    // ── Mobile or static (md): show final state immediately; only attach drag when mobile and not static ───
+    if (isMobile || staticExpand) {
       full.style.display = "none";
       portfoli.style.display = "inline";
       portfoli.style.opacity = "1";
@@ -294,9 +437,14 @@ export function usePortfolioAnimation(
           const mobileWrapper = oDragWrapperRef?.current;
           if (mobileWrapper) {
             gsap.set(mobileWrapper, { x: oFinalX });
-            (mobileWrapper as HTMLElement).style.touchAction = "none";
-            (mobileWrapper as HTMLElement).style.pointerEvents = "auto";
-            (mobileWrapper as HTMLElement).style.cursor = "grab";
+            if (!staticExpand) {
+              (mobileWrapper as HTMLElement).style.touchAction = "none";
+              (mobileWrapper as HTMLElement).style.pointerEvents = "auto";
+              (mobileWrapper as HTMLElement).style.cursor = "grab";
+            } else {
+              (mobileWrapper as HTMLElement).style.pointerEvents = "none";
+              (mobileWrapper as HTMLElement).style.cursor = "default";
+            }
           } else {
             gsap.set(oEl, { x: oFinalX, opacity: 1 });
           }
@@ -324,12 +472,26 @@ export function usePortfolioAnimation(
           dataCalculated = true;
           everCompleted = true;
           setIsComplete(true);
-          // Make O draggable on mobile too (drag back to start or re-expand)
-          if (dragCleanupRef.current) dragCleanupRef.current();
-          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cachedData, setIsComplete, onDragStart);
+          if (!staticExpand) {
+            if (dragCleanupRef.current) dragCleanupRef.current();
+            dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cachedData, setIsComplete, onDragStart);
+          }
+          // Resize handler so O and line stay in view when user resizes after expansion
+          const handleResizeMobile = createResizeHandler(headerRef, oDragWrapperRef);
+          window.addEventListener("resize", handleResizeMobile);
+          mobileResizeCleanupRef.current = () => {
+            window.removeEventListener("resize", handleResizeMobile);
+          };
         });
       });
-      return;
+      return () => {
+        if (dragCleanupRef.current) {
+          dragCleanupRef.current();
+          dragCleanupRef.current = null;
+        }
+        mobileResizeCleanupRef.current?.();
+        mobileResizeCleanupRef.current = null;
+      };
     }
 
     // ── Desktop: O and line revealed; expand immediately after step 1 ──
@@ -531,47 +693,7 @@ export function usePortfolioAnimation(
     });
 
     // Resize handler — only reposition when portfolio is *already* expanded (O at end, nav visible)
-    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
-    const handleResize = () => {
-      if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (!everCompleted || !cachedData || !oEl || !lineEl) return;
-        const targetEl = (oDragWrapperRef?.current ?? oEl) as HTMLElement;
-        const currentOGsapX = Number(gsap.getProperty(targetEl, "x")) || 0;
-        const threshold = cachedData.oFinalX * 0.6;
-        const isCurrentlyExpanded = currentOGsapX >= threshold;
-        if (!isCurrentlyExpanded) return;
-
-        const cRect = headerRef.current?.getBoundingClientRect();
-        if (!cRect) return;
-
-        const padding = window.innerWidth < 768 ? 16 : 32;
-        const viewportRight = window.innerWidth - padding;
-        const absoluteEnd = Math.min(cRect.width - padding, viewportRight - cRect.left);
-
-        const oWidth = oEl.getBoundingClientRect().width;
-        const oFinalLeft = Math.min(absoluteEnd - oWidth / 2, viewportRight - cRect.left - oWidth / 2);
-
-        const targetRect = targetEl.getBoundingClientRect();
-        const currentOLeft = targetRect.left - cRect.left;
-        const lineStartX = currentOLeft - currentOGsapX;
-        const oFinalX = Math.max(0, oFinalLeft - lineStartX);
-        const finalLineWidth = Math.max(0, Math.min(oFinalLeft - lineStartX - 8, cRect.width - lineStartX - 8));
-
-        gsap.set(targetEl, { x: oFinalX });
-        lineEl.style.left = `${lineStartX}px`;
-        gsap.set(lineEl, { width: finalLineWidth });
-
-        cachedData = {
-          ...cachedData,
-          oFinalX,
-          lineFinalWidth: finalLineWidth,
-          iOriginalPosition: lineStartX,
-          oStartX: lineStartX,
-          containerWidth: cRect.width,
-        };
-      }, 150);
-    };
+    const handleResize = createResizeHandler(headerRef, oDragWrapperRef);
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -582,9 +704,8 @@ export function usePortfolioAnimation(
       }
       tl.kill();
       window.removeEventListener("resize", handleResize);
-      if (resizeTimer) clearTimeout(resizeTimer);
     };
-  }, [isActive, shouldAnimate, isMobile, headerRef, oDragWrapperRef]);
+  }, [isActive, shouldAnimate, isMobile, staticExpand, headerRef, oDragWrapperRef]);
 
   // When startAutoExpand becomes true (e.g. dot landed / Software Engineer appears), run auto animation only if user hasn't expanded yet
   useEffect(() => {

@@ -13,6 +13,7 @@ const pouitiesFont = localFont({
 import { NAV_SECTIONS } from "./types";
 import type { HeroProps } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
+import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
 import { useMariamSvg } from "./hooks/useMariamSvg";
 import { useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
@@ -52,9 +53,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
   const dotClickSvgRef = useRef<SVGSVGElement>(null);
   const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
   const isMobile = useIsMobile();
+  const { isLg, isMd, isSm } = useHeroBreakpoints();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Flip once on the client so portals are never rendered during SSR
   useEffect(() => setIsMounted(true), []);
+
+  // Md or sm only: show portfolio + engineer final state immediately (no dot animation).
+  // Use isMd || isSm (not !isLg) so we never run on initial render when isLg is still false before breakpoints hydrate — otherwise lg screens would wrongly get portfolioRevealReady and Software Engineer would appear from the start.
+  useEffect(() => {
+    if (isMd || isSm) setPortfolioRevealReady(true);
+  }, [isMd, isSm]);
 
   // ── Hooks — each owns one animation phase ──────────────────────
   //
@@ -99,6 +108,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     undefined,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
     portfolioRevealReady || isDotAnimationComplete,
+    isMd, // static expand: final state, no drag
   );
 
   useEngineerText(
@@ -148,11 +158,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     };
   }, [isMariamReady]);
 
-  // Pre-show the actual dot at "ı" position before click.
-  // Separates the one-time blur-in entrance from resize repositioning
-  // so the dot doesn't flash/re-animate whenever dotClickPos updates.
+  // Pre-show the actual dot at "ı" position before click (lg only).
   useEffect(() => {
-    if (!isMariamReady || isDotClicked || !dotRef.current || !dotClickPos) return;
+    if (!isLg || !isMariamReady || isDotClicked || !dotRef.current || !dotClickPos) return;
     if (hasDotAnimationEverCompleted()) return;
 
     const dot = dotRef.current;
@@ -257,16 +265,16 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         });
       }
     };
-  }, [isMariamReady, isDotClicked, dotClickPos]);
+  }, [isLg, isMariamReady, isDotClicked, dotClickPos]);
 
-  // Show dot click prompt
+  // Show dot click prompt (lg only)
   useEffect(() => {
-    if (isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
+    if (isLg && isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
       const timer = setTimeout(() => setShowDotClickPrompt(true), 1200);
       return () => clearTimeout(timer);
     }
-    if (isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
-  }, [isMariamReady, isDotClicked, isActive, dotClickPos]);
+    if (!isLg || isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
+  }, [isLg, isMariamReady, isDotClicked, isActive, dotClickPos]);
 
   // Animate dot click SVG: draw once, then sway
   useEffect(() => {
@@ -386,49 +394,101 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         <div className="hero-frame-marquee hero-frame-marquee-top">
           <div className="hero-cover-header">
             <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-              <span className="hero-cover-title-full" aria-label="Portfolio">{"PORTFOLI"}
-                <span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
-              </span>
-              <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
-              <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-                <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
-                  O
-                </span>
-              </span>
-              <div
-                className="hero-cover-title-line"
-                style={{
-                  display: "none",
-                  height: "1px",
-                  backgroundColor: COLORS.line,
-                  opacity: 0.4,
-                  position: "absolute",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                }}
-                aria-hidden="true"
-              />
+              {(isMd || isSm) ? (
+                <>
+                  {/* Md + Sm: PORTFOLIO whole + menu icon; hidden portfoli for layout measurement */}
+                  <span className="hero-cover-title-portfoli hero-cover-title-portfoli-hidden" aria-hidden="true">PORTFOLI</span>
+                  <span className="hero-cover-title-full-sm" aria-label="Portfolio">PORTFOLIO</span>
+                  <button
+                    type="button"
+                    className="hero-menu-button"
+                    onClick={() => setMenuOpen((o) => !o)}
+                    aria-label={menuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={menuOpen}
+                  >
+                    <span className="hero-menu-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <path d="M3 12h18M3 6h18M3 18h18" />
+                      </svg>
+                    </span>
+                  </button>
+                  {menuOpen && (
+                    <nav className="hero-menu-overlay" aria-label="Main navigation">
+                      <button
+                        type="button"
+                        className="hero-menu-close"
+                        onClick={() => setMenuOpen(false)}
+                        aria-label="Close menu"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                          <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                      </button>
+                      <ul className="hero-menu-links">
+                        {NAV_SECTIONS.map((s) => (
+                          <li key={s.id}>
+                            <a
+                              href={`#${s.id}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setMenuOpen(false);
+                                onNavigate(s.id);
+                              }}
+                            >
+                              {s.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  )}
+                </>
+              ) : (
+                <>
+                  <span className="hero-cover-title-full" aria-label="Portfolio">{"PORTFOLI"}
+                    <span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
+                  </span>
+                  <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
+                  <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+                    <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
+                      O
+                    </span>
+                  </span>
+                  <div
+                    className="hero-cover-title-line"
+                    style={{
+                      display: "none",
+                      height: "1px",
+                      backgroundColor: COLORS.line,
+                      opacity: 0.4,
+                      position: "absolute",
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                    }}
+                    aria-hidden="true"
+                  />
 
-              {/* Navigation links — rendered after portfolio animation */}
-              {isPortfolioAnimationComplete && (
-                <nav ref={navRef} className="hero-site-navigation">
-                  <ul className="hero-nav-links">
-                    {NAV_SECTIONS.map((s) => (
-                      <li key={s.id}>
-                        <a
-                          href={`#${s.id}`}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            collapsePortfolio();
-                            onNavigate(s.id);
-                          }}
-                        >
-                          {s.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
+                  {/* Navigation links — rendered after portfolio animation (md/lg) */}
+                  {isPortfolioAnimationComplete && (
+                    <nav ref={navRef} className="hero-site-navigation">
+                      <ul className="hero-nav-links">
+                        {NAV_SECTIONS.map((s) => (
+                          <li key={s.id}>
+                            <a
+                              href={`#${s.id}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                onNavigate(s.id);
+                              }}
+                            >
+                              {s.label}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -536,7 +596,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
         )}
 
       {/* ── Dot click SVG (React Portal) ───────────────────────── */}
-      {isMounted && showDotClickPrompt && dotClickPos && !isDotClicked &&
+      {isMounted && isLg && showDotClickPrompt && dotClickPos && !isDotClicked &&
         createPortal(
           <div
             style={{
@@ -761,6 +821,103 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
           transform: translateY(-50%);
           left: 0;
         }
+
+        /* ── Small: full PORTFOLIO + menu (no line/O) ───────────── */
+        .hero-cover-title-portfoli-hidden {
+          position: absolute;
+          left: -9999px;
+          top: 0;
+          visibility: hidden;
+          pointer-events: none;
+          display: inline;
+        }
+        .hero-cover-title-full-sm {
+          font-size: clamp(1.5rem, 6vw, 3rem);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
+          line-height: 1;
+          display: inline-flex;
+          align-items: center;
+          height: clamp(50px, 12vw, 80px);
+          flex: 1;
+          min-width: 0;
+        }
+        .hero-menu-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 48px;
+          height: 48px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${COLORS.primary};
+          cursor: pointer;
+          margin-left: auto;
+          flex-shrink: 0;
+        }
+        .hero-menu-icon {
+          display: block;
+          width: 24px;
+          height: 24px;
+        }
+        .hero-menu-icon svg {
+          width: 100%;
+          height: 100%;
+        }
+        .hero-menu-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: ${Z_LAYERS.frame + 100};
+          background: ${COLORS.heroBackground};
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+        .hero-menu-close {
+          position: absolute;
+          top: clamp(1rem, 3vw, 1.5rem);
+          right: clamp(1rem, 3vw, 1.5rem);
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${COLORS.primary};
+          cursor: pointer;
+          border-radius: 4px;
+        }
+        .hero-menu-close:hover { opacity: 0.85; }
+        .hero-menu-close svg {
+          width: 28px;
+          height: 28px;
+        }
+        .hero-menu-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5rem;
+          align-items: center;
+          font-family: ${FONTS.display};
+        }
+        .hero-menu-links a {
+          font-size: clamp(1rem, 4vw, 1.5rem);
+          text-transform: lowercase;
+          letter-spacing: 0.05em;
+          color: ${COLORS.primary};
+          text-decoration: none;
+          opacity: 0.9;
+        }
+        .hero-menu-links a:hover { opacity: 1; }
 
         /* ── O click trigger ──────────────────────────────────── */
         .hero-o-trigger {
