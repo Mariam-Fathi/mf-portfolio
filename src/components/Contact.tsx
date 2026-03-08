@@ -1,42 +1,37 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useState } from "react";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
   IconMail,
   IconLetterK,
 } from "@tabler/icons-react";
-import { gsap } from "gsap";
+import { cn } from "@/lib/utils";
 
-type TablerIcon = React.ComponentType<
-  React.ComponentProps<typeof IconBrandGithub>
->;
+const EMAIL = "mariam.f.siam@gmail.com";
 
-type ContactTile = {
+type ContactChannel = {
   id: string;
   label: string;
   caption: string;
   href: string;
-  accent: string;
-  icon: TablerIcon;
+  icon: React.ComponentType<{ className?: string; stroke?: number }>;
 };
 
-const contactTiles: ContactTile[] = [
+const contactChannels: ContactChannel[] = [
   {
-    id: "kaggle",
-    label: "Kaggle",
-    caption: "kaggle.com/mariamfathi",
-    href: "https://www.kaggle.com/mariamfathiamin",
-    accent: "#20BEFF",
-    icon: IconLetterK,
+    id: "email",
+    label: "Direct message",
+    caption: "Send an email",
+    href: "#",
+    icon: IconMail,
   },
   {
     id: "github",
     label: "GitHub",
     caption: "github.com/mariamfathi",
     href: "https://github.com/Mariam-Fathi",
-    accent: "#24292e",
     icon: IconBrandGithub,
   },
   {
@@ -44,244 +39,303 @@ const contactTiles: ContactTile[] = [
     label: "LinkedIn",
     caption: "linkedin.com/in/mariamfathi",
     href: "https://www.linkedin.com/in/mariam-fathi-siam",
-    accent: "#0077b5",
     icon: IconBrandLinkedin,
   },
   {
-    id: "email",
-    label: "Email",
-    caption: "mariam.f.siam@gmail.com",
-    href: "mailto:mariam.f.siam@gmail.com",
-    accent: "#0078d4",
-    icon: IconMail,
+    id: "kaggle",
+    label: "Kaggle",
+    caption: "kaggle.com/mariamfathi",
+    href: "https://www.kaggle.com/mariamfathiamin",
+    icon: IconLetterK,
   },
 ];
 
-const TEXT_REVEAL_DURATION_S = 2;
+const FolderIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+    <path
+      d="M1 3.5a.5.5 0 01.5-.5H5l1.5 2H12.5a.5.5 0 01.5.5V11a.5.5 0 01-.5.5h-11A.5.5 0 011 11V3.5z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+function ContactDirItem({
+  channel,
+  index,
+  isSelected,
+  onSelect,
+}: {
+  channel: ContactChannel;
+  index: number;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const folderLabel = channel.id;
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer rounded-sm transition-all duration-100",
+        isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40",
+      )}
+      style={{ paddingLeft: "8px" }}
+      onClick={onSelect}
+    >
+      <span className={isSelected ? "text-[#c8b97a]" : "text-[#8a7a5a]"}>
+        <FolderIcon />
+      </span>
+      <span
+        className={cn(
+          "text-[11px] font-bold tracking-tight font-sans",
+          isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]",
+        )}
+      >
+        {folderLabel}
+      </span>
+    </div>
+  );
+}
 
 const Contact: React.FC = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const textRef = useRef<HTMLHeadingElement>(null);
-  const topTilesRef = useRef<HTMLDivElement>(null);
-  const bottomTilesRef = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [name, setName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
+  const [message, setMessage] = useState("");
 
-  // ── Prepare text for clip-reveal animation ──
-  const prepareText = useCallback(() => {
-    const text = textRef.current;
-    if (!text) return;
-    gsap.set(text, {
-      opacity: 1,
-      clipPath: "inset(-20% 100% -20% 0)",
-    });
-  }, []);
+  const channel = contactChannels[selectedIndex];
+  const isEmail = channel?.id === "email";
 
-  // ── Main animation (triggered by IntersectionObserver) ────────────
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-
-    prepareText();
-
-    // Collect everything that needs cleanup
-    const tweens: gsap.core.Tween[] = [];
-
-    // ── Animate when section scrolls into view ─────────────────────
-    const runAnimations = () => {
-      if (hasAnimated.current) return;
-      hasAnimated.current = true;
-
-      // ── 1. Text write-on clip reveal ──────────────────────────────
-      const text = textRef.current;
-      const baseDelayAfterText = text ? TEXT_REVEAL_DURATION_S + 0.15 : 0;
-      if (text) {
-        tweens.push(
-          gsap.to(text, {
-            clipPath: "inset(-20% 0% -20% 0)",
-            duration: TEXT_REVEAL_DURATION_S,
-            ease: "power1.inOut",
-            onComplete: () => {
-              gsap.set(text, { clipPath: "none" });
-            },
-          }),
-        );
-      }
-
-      // ── 2. Link tiles (zigzag: top row + bottom row) ──
-      const runTilesAnimation = () => {
-        const topEl = topTilesRef.current;
-        const bottomEl = bottomTilesRef.current;
-        const els = [topEl, bottomEl].filter(Boolean) as HTMLElement[];
-        if (els.length > 0) {
-          tweens.push(
-            gsap.fromTo(
-              els,
-              { opacity: 0, scale: 0.95, transformOrigin: "50% 50%" },
-              {
-                opacity: 1,
-                scale: 1,
-                duration: 0.55,
-                stagger: 0.1,
-                ease: "expo.out",
-                delay: baseDelayAfterText,
-              },
-            ),
-          );
-        }
-      };
-      requestAnimationFrame(() => requestAnimationFrame(runTilesAnimation));
-    };
-
-    // ── IntersectionObserver — fire once when 20% visible ──────────
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          runAnimations();
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.2 },
-    );
-    observer.observe(section);
-
-    // ── Cleanup ────────────────────────────────────────────────────
-    return () => {
-      observer.disconnect();
-      tweens.forEach((t) => t.kill());
-    };
-  }, [prepareText]);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const subject = name ? `Contact from ${name}` : "Contact from portfolio";
+    const body = [
+      message || "(No message)",
+      "",
+      "---",
+      replyTo ? `Reply to: ${replyTo}` : "",
+      name ? `From: ${name}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const mailto = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+  };
 
   return (
     <section
-      ref={sectionRef}
       id="contact"
-      className="relative flex min-h-screen w-full items-center justify-center overflow-visible bg-[#F9E7C9] text-[#111827]"
+      className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
+      style={{ background: "#F9E7C9" }}
     >
-      {/* SVG Filter for Liquid Glass Effect */}
-      <svg width="0" height="0" style={{ position: "absolute" }}>
-        <defs>
-          <filter id="glass-distortion-contact" x="0%" y="0%" width="100%" height="100%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.02 0.02" numOctaves="2" seed="92" result="noise" />
-            <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
-            <feDisplacementMap in="SourceGraphic" in2="blurred" scale="110" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-      </svg>
-
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_top_left,_rgba(255,246,223,0.65),_transparent_55%)]" />
-        <div className="absolute inset-0 opacity-[0.35] bg-[radial-gradient(circle_at_bottom_right,_rgba(229,246,255,0.7),_transparent_55%)]" />
-      </div>
-
-      <div className="relative flex flex-col min-h-screen w-full items-center justify-center gap-10">
-        <div className="relative flex flex-col items-center w-full max-w-[90vw] px-6">
-          <div ref={topTilesRef} className="relative z-20 flex flex-row flex-wrap justify-center gap-[10rem] pb-4 opacity-0">
-            {[contactTiles[1], contactTiles[3]].map(({ id, label, caption, href, accent, icon: Icon }) => (
-              <a
-                key={id}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-3 active:scale-95 transition-transform"
-              >
-                <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
-                  <Icon className="h-6 w-6" stroke={1.7} />
-                </span>
-                <span
-                  className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
-                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
-                >
-                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
-                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
-                </span>
-              </a>
-            ))}
+      <div
+        className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
+        style={{
+          background: "#F9E7C9",
+          boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
+        }}
+      >
+        {/* Title Bar */}
+        <div
+          className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
+          style={{ background: "#F9E7C9" }}
+        >
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
           </div>
-          <div className="flex flex-col items-center" style={{ width: "fit-content" }}>
-            <h1
-              ref={textRef}
-              className="relative z-10 whitespace-nowrap font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none"
-              style={{
-                fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-                color: "#280B0B",
-                letterSpacing: "0.1em",
-              }}
-            >
-              LET&apos;S TALK
-            </h1>
-            <div ref={bottomTilesRef} className="relative z-20 flex flex-row justify-between items-start w-full pt-4 opacity-0 gap-4 min-w-0">
-            {[contactTiles[0], contactTiles[2]].map(({ id, label, caption, href, accent, icon: Icon }) => (
-              <a
-                key={id}
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                className="flex items-center gap-3 active:scale-95 transition-transform flex-shrink-0"
+          <span
+            className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase"
+            style={{ color: "#280B0B" }}
+          >
+            Contact Explorer
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+          {/* Sidebar */}
+          <div
+            className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
+            style={{ background: "#F9E7C9" }}
+          >
+            <div className="px-3 py-2.5 border-b border-[#c8b97a]/50">
+              <div
+                className="flex items-center justify-between text-[11px] font-bold px-2.5 py-1.5 rounded-sm cursor-pointer"
+                style={{ background: "#280B0B", color: "#F9E7C9" }}
               >
-                <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
-                  <Icon className="h-6 w-6" stroke={1.7} />
-                </span>
+                <span>Portfolio</span>
+                <span className="text-[9px]">▾</span>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto py-2 no-visible-scrollbar">
+              <div className="px-3 pb-1">
                 <span
-                  className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
-                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
+                  className="text-[10px] font-bold tracking-widest uppercase"
+                  style={{ color: "#6A0610" }}
                 >
-                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
-                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
+                  Contacts
                 </span>
-              </a>
-            ))}
+              </div>
+              {contactChannels.map((ch, i) => (
+                <ContactDirItem
+                  key={ch.id}
+                  channel={ch}
+                  index={i}
+                  isSelected={selectedIndex === i}
+                  onSelect={() => setSelectedIndex(i)}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col min-h-[400px]">
+            {channel && (
+              <>
+                <div
+                  className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
+                  style={{ background: "#F9E7C9" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[13px] font-bold tracking-tight"
+                      style={{ color: "#280B0B" }}
+                    >
+                      # {channel.id}
+                    </span>
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: "#6A0610" }}
+                    />
+                  </div>
+                  <span className="text-[11px]" style={{ color: "#6A0610" }}>
+                    {channel.caption}
+                  </span>
+                </div>
+
+                <div
+                  className="flex-1 overflow-y-auto px-4 md:px-5 py-4 no-visible-scrollbar"
+                  style={{ background: "#F9E7C9" }}
+                >
+                  {isEmail ? (
+                    <>
+                 
+
+                      <form onSubmit={handleSubmit} className="space-y-3 max-w-md">
+                        <div>
+                          <label
+                            htmlFor="contact-name"
+                            className="block text-[10px] font-bold tracking-widest uppercase mb-1"
+                            style={{ color: "#6A0610" }}
+                          >
+                            Name
+                          </label>
+                          <input
+                            id="contact-name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Your name"
+                            className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
+                            style={{
+                              background: "#F9E7C9",
+                              color: "#280B0B",
+                              boxShadow: "2px 2px 0 #1a1a1a",
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="contact-email"
+                            className="block text-[10px] font-bold tracking-widest uppercase mb-1"
+                            style={{ color: "#6A0610" }}
+                          >
+                            Your email (reply-to)
+                          </label>
+                          <input
+                            id="contact-email"
+                            type="email"
+                            value={replyTo}
+                            onChange={(e) => setReplyTo(e.target.value)}
+                            placeholder="you@example.com"
+                            className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
+                            style={{
+                              background: "#F9E7C9",
+                              color: "#280B0B",
+                              boxShadow: "2px 2px 0 #1a1a1a",
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="contact-message"
+                            className="block text-[10px] font-bold tracking-widest uppercase mb-1"
+                            style={{ color: "#6A0610" }}
+                          >
+                            Message
+                          </label>
+                          <textarea
+                            id="contact-message"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Your message..."
+                            rows={5}
+                            className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0 resize-y min-h-[100px]"
+                            style={{
+                              background: "#F9E7C9",
+                              color: "#280B0B",
+                              boxShadow: "2px 2px 0 #1a1a1a",
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 text-[11px] font-bold font-sans rounded-sm border-2 border-[#1a1a1a] transition-colors hover:opacity-90"
+                          style={{
+                            background: "#280B0B",
+                            color: "#F9E7C9",
+                            boxShadow: "2px 2px 0 #1a1a1a",
+                          }}
+                        >
+                          Send email
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <a
+                      href={channel.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 w-fit"
+                      style={{
+                        background: "#F9E7C9",
+                        borderColor: "#6A0610",
+                        boxShadow: "2px 2px 0 #6A0610",
+                      }}
+                    >
+                      <span className="text-[10px] font-sans" style={{ color: "#280B0B" }}>
+                        Open {channel.label}
+                      </span>
+                      <span style={{ color: "#6A0610" }}>↗</span>
+                    </a>
+                  )}
+                </div>
+
+                <div
+                  className="border-t-2 border-[#2a2a2a] px-4 py-2.5"
+                  style={{ background: "#F9E7C9" }}
+                >
+                  <span
+                    className="text-[10px] font-sans"
+                    style={{ color: "#8a7a5a" }}
+                  >
+                    {channel.label} — {channel.caption}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        /* ── Shared Liquid Glass ──────────────────────────────────── */
-        .contact-glass {
-          position: relative;
-          width: fit-content;
-          height: fit-content;
-          overflow: hidden;
-          transition: all 0.3s ease;
-          isolation: isolate;
-          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
-        }
-        .contact-glass::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
-          background-color: rgba(109, 109, 109, 0);
-          pointer-events: none;
-          border-radius: inherit;
-        }
-        .contact-glass::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          filter: url(#glass-distortion-contact);
-          -webkit-filter: url(#glass-distortion-contact);
-          isolation: isolate;
-          pointer-events: none;
-          border-radius: inherit;
-        }
-        .contact-glass > * {
-          position: relative;
-          z-index: 10;
-        }
-
-        /* Shape variants */
-        .contact-glass--icon {
-          border-radius: 9999px;
-        }
-        .contact-glass--text {
-          border-radius: 1rem;
-        }
-      `}</style>
     </section>
   );
 };
