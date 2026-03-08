@@ -2,14 +2,7 @@
 
 import React, { useRef, useState } from "react";
 import Image from "next/image";
-import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
-import { COLORS } from "@/components/hero/constants";
-
-const pouitiesFont = localFont({
-  src: "../../public/fonts/pouities/Pouities.ttf",
-  display: "swap",
-});
 
 type Certificate = {
   id: string;
@@ -60,114 +53,274 @@ const certificates: Certificate[] = [
 /** Exported for preloading certificate images from the main page. */
 export const CERTIFICATE_IMAGE_URLS = certificates.map((c) => c.image);
 
+const FolderIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+    <path
+      d="M1 3.5a.5.5 0 01.5-.5H5l1.5 2H12.5a.5.5 0 01.5.5V11a.5.5 0 01-.5.5h-11A.5.5 0 011 11V3.5z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+function CertDirItem({
+  cert,
+  index,
+  isSelected,
+  onSelect,
+}: {
+  cert: Certificate;
+  index: number;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const folderLabel = `${String(index + 1).padStart(2, "0")}_${cert.id}`;
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group rounded-sm transition-all duration-100",
+        isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40",
+      )}
+      style={{ paddingLeft: "8px" }}
+      onClick={onSelect}
+    >
+      <span className={isSelected ? "text-[#c8b97a]" : "text-[#8a7a5a]"}>
+        <FolderIcon />
+      </span>
+      <span
+        className={cn(
+          "text-[11px] font-bold tracking-tight font-sans",
+          isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]",
+        )}
+      >
+        {folderLabel}
+      </span>
+    </div>
+  );
+}
+
 const Certificates: React.FC<{ isActive?: boolean }> = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const cert = certificates[selectedIndex];
 
   return (
     <section
       ref={sectionRef}
-      className="absolute inset-0 w-full overflow-x-hidden overflow-y-visible"
-      style={{ height: "100vh", backgroundColor: COLORS.heroBackground }}
+      className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
+      style={{ background: "#F5ECE1" }}
     >
-      <div className="absolute inset-x-0 bottom-0 px-4 pb-6 md:px-10">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-nowrap items-end gap-3 md:gap-4">
-          {certificates.map((cert, index) => {
-            const alignEnd = index % 2 === 1;
-            return (
+      {/* Main Window — same vibe as Project Explorer */}
+      <div
+        className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
+        style={{
+          background: "#F5ECE1",
+          boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
+        }}
+      >
+        {/* Title Bar */}
+        <div
+          className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
+          style={{ background: "#F5ECE1" }}
+        >
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
+            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
+          </div>
+          <span
+            className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase"
+            style={{ color: "#280B0B" }}
+          >
+            Certificate Explorer
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+          {/* Sidebar — certificate list */}
+          <div
+            className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
+            style={{ background: "#F5ECE1" }}
+          >
+            <div className="px-3 py-2.5 border-b border-[#c8b97a]/50">
               <div
-                key={cert.id}
-                className={cn(
-                  "flex flex-1 min-w-0 flex-col",
-                  alignEnd ? "items-end" : "items-start",
-                )}
+                className="flex items-center justify-between text-[11px] font-bold px-2.5 py-1.5 rounded-sm cursor-pointer"
+                style={{ background: "#280B0B", color: "#F9E7C9" }}
               >
-                <CertificateItem cert={cert} index={index} />
+                <span>Portfolio</span>
+                <span className="text-[9px]">▾</span>
               </div>
-            );
-          })}
+            </div>
+            <div className="flex-1 overflow-y-auto py-2 no-visible-scrollbar">
+              <div className="px-3 pb-1">
+                <span
+                  className="text-[10px] font-bold tracking-widest uppercase"
+                  style={{ color: "#6A0610" }}
+                >
+                  Certificates
+                </span>
+              </div>
+              {certificates.map((c, i) => (
+                <CertDirItem
+                  key={c.id}
+                  cert={c}
+                  index={i}
+                  isSelected={selectedIndex === i}
+                  onSelect={() => setSelectedIndex(i)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Main Content — selected certificate */}
+          <div className="flex-1 flex flex-col min-h-[400px]">
+            {cert && (
+              <>
+                {/* Channel-style header */}
+                <div
+                  className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
+                  style={{ background: "#F5ECE1" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[13px] font-bold tracking-tight"
+                      style={{ color: "#280B0B" }}
+                    >
+                      # {cert.id}
+                    </span>
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: "#6A0610" }}
+                    />
+                  </div>
+                  <span className="text-[11px]" style={{ color: "#6A0610" }}>
+                    {cert.platform}
+                  </span>
+                </div>
+
+                {/* Content: image */}
+                <div
+                  className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-4 no-visible-scrollbar"
+                  style={{ background: "#F5ECE1" }}
+                >
+                  <div className="flex gap-3">
+                    <div
+                      className="w-8 h-8 rounded-sm flex items-center justify-center text-[10px] font-bold flex-shrink-0 border border-[#1a1a1a]"
+                      style={{ background: "#280B0B", color: "#F9E7C9" }}
+                    >
+                      {cert.title.slice(0, 1)}
+                    </div>
+                    <div className="flex-1">
+                      <p
+                        className="text-[11px] leading-relaxed mb-3"
+                        style={{ color: "#280B0B" }}
+                      >
+                        {cert.title} — {cert.platform}
+                      </p>
+                      <CertificateImage cert={cert} />
+                    </div>
+                  </div>
+
+                  {/* Project Files — View credential link */}
+                  <div className="pt-2">
+                    <div
+                      className="text-[10px] font-bold tracking-widest uppercase mb-2"
+                      style={{ color: "#6A0610" }}
+                    >
+                      Certificate Files
+                    </div>
+                    <a
+                      href={cert.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150"
+                      style={{
+                        background: "#F5ECE1",
+                        borderColor: "#6A0610",
+                        boxShadow: "2px 2px 0 #6A0610",
+                      }}
+                    >
+                      <span className="text-[10px] font-sans" style={{ color: "#280B0B" }}>
+                        View credential
+                      </span>
+                      <span className="text-[10px]" style={{ color: "#6A0610" }}>↗</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Footer bar */}
+                <div
+                  className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
+                  style={{ background: "#F5ECE1" }}
+                >
+                  <span
+                    className="text-[10px] font-sans"
+                    style={{ color: "#8a7a5a" }}
+                  >
+                    {cert.title} — {cert.platform}
+                  </span>
+                  <span
+                    className="text-[9px] font-sans"
+                    style={{ color: "#8a7a5a" }}
+                  >
+                    {String(selectedIndex + 1).padStart(2, "0")} /{" "}
+                    {String(certificates.length).padStart(2, "0")}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </section>
   );
 };
 
-function CertificateItem({ cert, index }: { cert: Certificate; index: number }) {
+function CertificateImage({ cert }: { cert: Certificate }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const numberLabel = String(index + 1).padStart(2, "0");
 
   return (
-    <article className="relative flex max-w-[280px] flex-col">
-      {/* Number + View credential above */}
-      <div
-        className={cn(
-          "flex items-center justify-start gap-2 pb-2",
-          pouitiesFont.className,
-        )}
-      >
-        <span
-          className="text-sm tracking-wide md:text-base"
-          style={{ color: COLORS.primary }}
-        >
-          {numberLabel}
-        </span>
-        <a
-          href={cert.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="View credential"
-          className="text-sm tracking-wide underline underline-offset-2 transition-opacity hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 md:text-base"
-          style={{ color: COLORS.primary }}
-        >
-          View credential
-        </a>
-      </div>
-
-      {/* Image — Next/Image for optimization; fade in when loaded to reduce perceived lag */}
-      <a
-        href={cert.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#91010F]"
-        aria-label={`View ${cert.title} certificate`}
-      >
-        {!imgError ? (
-          <span className="relative block w-full max-h-[36vh] md:max-h-[42vh] min-h-[120px]">
-            <Image
-              src={encodeURI(cert.image)}
-              alt={cert.title}
-              width={280}
-              height={360}
-              sizes="(max-width: 768px) 50vw, 280px"
-              className={cn(
-                "block h-auto w-full max-h-[36vh] md:max-h-[42vh] object-contain object-center transition-opacity duration-300",
-                imgLoaded ? "opacity-100" : "opacity-0",
-              )}
-              onLoad={() => setImgLoaded(true)}
-              onError={() => setImgError(true)}
-              unoptimized
-            />
-            {!imgLoaded && (
-              <span
-                className="absolute inset-0 animate-pulse opacity-60"
-                style={{ backgroundColor: COLORS.heroBackground }}
-                aria-hidden
-              />
-            )}
-          </span>
-        ) : (
-          <span
+    <a
+      href={cert.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6A0610]"
+      aria-label={`View ${cert.title} certificate`}
+    >
+      {!imgError ? (
+        <span className="relative block w-full max-w-[280px] max-h-[32vh] min-h-[100px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden" style={{ boxShadow: "3px 3px 0 #1a1a1a" }}>
+          <Image
+            src={encodeURI(cert.image)}
+            alt={cert.title}
+            width={280}
+            height={360}
+            sizes="(max-width: 768px) 80vw, 280px"
             className={cn(
-              "block py-8 text-center text-sm font-medium",
-              pouitiesFont.className,
+              "block h-auto w-full max-h-[32vh] object-contain object-center transition-opacity duration-300",
+              imgLoaded ? "opacity-100" : "opacity-0",
             )}
-            style={{ color: COLORS.primary }}
-          >
-            {cert.title}
-          </span>
-        )}
-      </a>
-    </article>
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+            unoptimized
+          />
+          {!imgLoaded && (
+            <span
+              className="absolute inset-0 animate-pulse opacity-60"
+              style={{ backgroundColor: "#F5ECE1" }}
+              aria-hidden
+            />
+          )}
+        </span>
+      ) : (
+        <span
+          className="block py-6 text-center text-[11px] font-sans font-medium rounded-sm border border-[#2a2a2a]"
+          style={{ color: "#280B0B", background: "#F5ECE1" }}
+        >
+          {cert.title}
+        </span>
+      )}
+    </a>
   );
 }
 
