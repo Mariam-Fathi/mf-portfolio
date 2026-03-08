@@ -255,7 +255,7 @@ function ProjectDirItem({
       <span className={isSelected ? "text-[#c8b97a]" : "text-[#8a7a5a]"}>
         <FolderIcon open={false} />
       </span>
-      <span className={`text-[11px] font-bold tracking-tight font-sans ${isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]"}`}>
+      <span className={`text-[11px] leading-relaxed font-sans ${isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]"}`}>
         {folderLabel}
       </span>
     </div>
@@ -312,7 +312,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
             style={{ background: "#F9E7C9" }}
           >
             <div className="flex-1 overflow-y-auto py-2 scrollbar-hide no-visible-scrollbar">
-              <div className="px-3 pb-1">
+              <div className="px-2 pb-1">
                 <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6A0610" }}>
                   Projects
                 </span>
@@ -339,14 +339,11 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                   style={{ background: "#F9E7C9" }}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold tracking-tight" style={{ color: colors.headline }}>
-                      # {project.title.toLowerCase().replace(/\s+/g, "-")}
+                    <span className="text-[11px] leading-relaxed" style={{ color: colors.headline }}>
+                      # {project.title} — {project.role}
                     </span>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: colors.accent }} />
                   </div>
-                  <span className="text-[11px]" style={{ color: colors.link }}>
-                    {project.role}
-                  </span>
+                
                 </div>
 
                 {/* Messages-style: role + description */}
@@ -438,7 +435,6 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                   style={{ background: "#F9E7C9" }}
                 >
                   <span className="text-[10px] font-sans" style={{ color: "#8a7a5a" }}>
-                    {project.title} — {project.role}
                   </span>
                   <span className="text-[9px] font-sans" style={{ color: "#8a7a5a" }}>
                     {String(selectedIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
