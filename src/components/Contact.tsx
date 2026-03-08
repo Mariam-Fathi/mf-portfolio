@@ -147,7 +147,7 @@ const Contact: React.FC = () => {
             className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase"
             style={{ color: "#280B0B" }}
           >
-            Contact Explorer
+            We Must Discuss
           </span>
         </div>
 
