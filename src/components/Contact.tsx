@@ -249,7 +249,7 @@ const Contact: React.FC = () => {
                             className="block text-[10px] font-bold tracking-widest uppercase mb-1"
                             style={{ color: "#6A0610" }}
                           >
-                            Your email (reply-to)
+                            Your email
                           </label>
                           <input
                             id="contact-email"
