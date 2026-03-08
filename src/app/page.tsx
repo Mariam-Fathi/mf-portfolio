@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 // Keep portfolio cache in page chunk so it survives Hero unmount (production chunk loading)
-import "@/components/hero/portfolioCache";
+import { portfolioCache } from "@/components/hero/portfolioCache";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
@@ -57,8 +57,9 @@ export default function Home() {
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
     
-    // Hide any dots when navigating away from hero
+    // When leaving hero: mark so portfolio restores expanded when we come back (set here, not in Hero cleanup — production may unload Hero chunk before cleanup runs)
     if (activeSection === "hero" && sectionId !== "hero") {
+      portfolioCache.returnedFromSection = true;
       const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
       dots.forEach((dot) => {
         const htmlDot = dot as HTMLElement;
