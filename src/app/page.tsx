@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 // Keep portfolio cache in page chunk so it survives Hero unmount (production chunk loading)
 import "@/components/hero/portfolioCache";
 import Hero from "@/components/hero/hero";
 import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
-import { Certificates } from "@/components/Certificates";
+import { Certificates, CERTIFICATE_IMAGE_URLS } from "@/components/Certificates";
 import Contact from "@/components/Contact";
 import SectionNavigation from "@/components/SectionNavigation";
 import SectionLineNavigation from "@/components/SectionLineNavigation";
@@ -18,10 +18,18 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isHeroReady, setIsHeroReady] = useState(false);
-  
+
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const heroInitRef = useRef(false);
+
+  // Preload certificate images in the background so they’re ready when the user opens the section
+  useEffect(() => {
+    CERTIFICATE_IMAGE_URLS.forEach((src) => {
+      const img = new Image();
+      img.src = encodeURI(src);
+    });
+  }, []);
 
   const handleHeroReady = useCallback(() => {
     setIsHeroReady(true);

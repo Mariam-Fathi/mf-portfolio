@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Image from "next/image";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 import { COLORS } from "@/components/hero/constants";
@@ -56,6 +57,9 @@ const certificates: Certificate[] = [
   },
 ];
 
+/** Exported for preloading certificate images from the main page. */
+export const CERTIFICATE_IMAGE_URLS = certificates.map((c) => c.image);
+
 const Certificates: React.FC<{ isActive?: boolean }> = () => {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -89,6 +93,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
 
 function CertificateItem({ cert, index }: { cert: Certificate; index: number }) {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const numberLabel = String(index + 1).padStart(2, "0");
 
   return (
@@ -118,7 +123,7 @@ function CertificateItem({ cert, index }: { cert: Certificate; index: number }) 
         </a>
       </div>
 
-      {/* Image only — no card */}
+      {/* Image — Next/Image for optimization; fade in when loaded to reduce perceived lag */}
       <a
         href={cert.link}
         target="_blank"
@@ -127,14 +132,29 @@ function CertificateItem({ cert, index }: { cert: Certificate; index: number }) 
         aria-label={`View ${cert.title} certificate`}
       >
         {!imgError ? (
-          <img
-            src={encodeURI(cert.image)}
-            alt={cert.title}
-            onError={() => setImgError(true)}
-            loading="eager"
-            decoding="async"
-            className="block h-auto w-full max-h-[36vh] md:max-h-[42vh] object-contain object-center"
-          />
+          <span className="relative block w-full max-h-[36vh] md:max-h-[42vh] min-h-[120px]">
+            <Image
+              src={encodeURI(cert.image)}
+              alt={cert.title}
+              width={280}
+              height={360}
+              sizes="(max-width: 768px) 50vw, 280px"
+              className={cn(
+                "block h-auto w-full max-h-[36vh] md:max-h-[42vh] object-contain object-center transition-opacity duration-300",
+                imgLoaded ? "opacity-100" : "opacity-0",
+              )}
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+              unoptimized
+            />
+            {!imgLoaded && (
+              <span
+                className="absolute inset-0 animate-pulse opacity-60"
+                style={{ backgroundColor: COLORS.heroBackground }}
+                aria-hidden
+              />
+            )}
+          </span>
         ) : (
           <span
             className={cn(
