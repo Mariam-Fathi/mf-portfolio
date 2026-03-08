@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
@@ -44,6 +44,23 @@ const Contact: React.FC = () => {
   const [name, setName] = useState("");
   const [replyTo, setReplyTo] = useState("");
   const [message, setMessage] = useState("");
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Format in visitor's locale and timezone (e.g. Italy → Europe/Rome, Italian format)
+  const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +231,16 @@ const Contact: React.FC = () => {
                   Send email
                 </button>
               </form>
+            </div>
+
+            {/* Footer — current date & time */}
+            <div
+              className="border-t-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 min-h-[40px] flex items-center justify-end"
+              style={{ background: "#F9E7C9" }}
+            >
+              <span className="text-[12px] font-sans tabular-nums" style={{ color: "#280B0B" }}>
+                {dateTimeFormatter.format(now)}
+              </span>
             </div>
           </div>
         </div>
