@@ -20,9 +20,11 @@ export const DraggableCardBody = React.forwardRef<
     dragConstraintsRef?: React.RefObject<HTMLElement | null>;
     /** Card background color (e.g. CSS variable or hex). */
     backgroundColor?: string;
+    /** If true, no tilt or scale on hover (card stays static). */
+    disableHoverEffects?: boolean;
   }
 >(function DraggableCardBody(
-  { className, children, dragConstraintsRef, backgroundColor },
+  { className, children, dragConstraintsRef, backgroundColor, disableHoverEffects = false },
   ref,
 ) {
   const mouseX = useMotionValue(0);
@@ -81,6 +83,7 @@ export const DraggableCardBody = React.forwardRef<
   }, [dragConstraintsRef]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (disableHoverEffects) return;
     const { clientX, clientY } = e;
     const { width, height, left, top } =
       cardRef.current?.getBoundingClientRect() ?? {
@@ -98,6 +101,7 @@ export const DraggableCardBody = React.forwardRef<
   };
 
   const handleMouseLeave = () => {
+    if (disableHoverEffects) return;
     mouseX.set(0);
     mouseY.set(0);
   };
@@ -112,8 +116,7 @@ export const DraggableCardBody = React.forwardRef<
       dragMomentum={true}
       style={{
         cursor: "grab",
-        rotateX,
-        rotateY,
+        ...(disableHoverEffects ? { rotateX: 0, rotateY: 0 } : { rotateX, rotateY }),
         opacity: 1,
         willChange: "transform",
         backfaceVisibility: "visible",
@@ -163,7 +166,7 @@ export const DraggableCardBody = React.forwardRef<
         });
       }}
       animate={controls}
-      whileHover={{ scale: 1.02 }}
+      whileHover={disableHoverEffects ? undefined : { scale: 1.02 }}
       whileDrag={{ zIndex: 50 }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
