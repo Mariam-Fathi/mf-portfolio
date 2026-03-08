@@ -108,20 +108,20 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
     <section
       ref={sectionRef}
       className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
-      style={{ background: "#F5ECE1" }}
+      style={{ background: "#F9E7C9" }}
     >
       {/* Main Window — same vibe as Project Explorer */}
       <div
         className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
         style={{
-          background: "#F5ECE1",
+          background: "#F9E7C9",
           boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
         }}
       >
         {/* Title Bar */}
         <div
           className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
-          style={{ background: "#F5ECE1" }}
+          style={{ background: "#F9E7C9" }}
         >
           <div className="flex gap-1.5">
             <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
@@ -140,7 +140,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
           {/* Sidebar — certificate list */}
           <div
             className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: "#F5ECE1" }}
+            style={{ background: "#F9E7C9" }}
           >
             <div className="px-3 py-2.5 border-b border-[#c8b97a]/50">
               <div
@@ -179,7 +179,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Channel-style header */}
                 <div
                   className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
-                  style={{ background: "#F5ECE1" }}
+                  style={{ background: "#F9E7C9" }}
                 >
                   <div className="flex items-center gap-2">
                     <span
@@ -201,7 +201,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Content: image */}
                 <div
                   className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-4 no-visible-scrollbar"
-                  style={{ background: "#F5ECE1" }}
+                  style={{ background: "#F9E7C9" }}
                 >
                   <div className="flex gap-3">
                     <div
@@ -235,7 +235,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150"
                       style={{
-                        background: "#F5ECE1",
+                        background: "#F9E7C9",
                         borderColor: "#6A0610",
                         boxShadow: "2px 2px 0 #6A0610",
                       }}
@@ -251,7 +251,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Footer bar */}
                 <div
                   className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: "#F5ECE1" }}
+                  style={{ background: "#F9E7C9" }}
                 >
                   <span
                     className="text-[10px] font-sans"
@@ -307,7 +307,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
           {!imgLoaded && (
             <span
               className="absolute inset-0 animate-pulse opacity-60"
-              style={{ backgroundColor: "#F5ECE1" }}
+              style={{ backgroundColor: "#F9E7C9" }}
               aria-hidden
             />
           )}
@@ -315,7 +315,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       ) : (
         <span
           className="block py-6 text-center text-[11px] font-sans font-medium rounded-sm border border-[#2a2a2a]"
-          style={{ color: "#280B0B", background: "#F5ECE1" }}
+          style={{ color: "#280B0B", background: "#F9E7C9" }}
         >
           {cert.title}
         </span>
