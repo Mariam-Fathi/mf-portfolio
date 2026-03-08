@@ -88,7 +88,7 @@ function CertDirItem({
       </span>
       <span
         className={cn(
-          "text-[11px] font-bold tracking-tight font-sans",
+          "text-[11px] leading-relaxed font-sans",
           isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]",
         )}
       >
@@ -143,7 +143,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
             style={{ background: "#F9E7C9" }}
           >
             <div className="flex-1 overflow-y-auto py-2 no-visible-scrollbar">
-              <div className="px-3 pb-1">
+              <div className="px-2 pb-1">
                 <span
                   className="text-[10px] font-bold tracking-widest uppercase"
                   style={{ color: "#6A0610" }}
@@ -174,18 +174,15 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 >
                   <div className="flex items-center gap-2">
                     <span
-                      className="text-[13px] font-bold tracking-tight"
-                      style={{ color: "#280B0B" }}
+                        className="text-[11px] leading-relaxed"
+                        style={{ color: "#280B0B" }}
                     >
-                      # {cert.id}
+                      # {cert.title} - {cert.platform}
                     </span>
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ background: "#6A0610" }}
-                    />
+            
                   </div>
                   <span className="text-[11px]" style={{ color: "#6A0610" }}>
-                    {cert.platform}
+                    
                   </span>
                 </div>
 
@@ -202,13 +199,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                       {selectedIndex + 1}
                     </div>
                     <div className="flex-1">
-                      <p
-                        className="text-[11px] leading-relaxed mb-3"
-                        style={{ color: "#280B0B" }}
-                      >
-                        {cert.title} — {cert.platform}
-                      </p>
-                      <div className="w-full max-w-[280px] space-y-2">
+                      <div className="w-full max-w-[420px] space-y-2">
                         <CertificateImage cert={cert} />
                         <a
                           href={cert.link}
@@ -240,7 +231,6 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                     className="text-[10px] font-sans"
                     style={{ color: "#8a7a5a" }}
                   >
-                    {cert.title} — {cert.platform}
                   </span>
                   <span
                     className="text-[9px] font-sans"
@@ -272,15 +262,15 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       aria-label={`View ${cert.title} certificate`}
     >
       {!imgError ? (
-        <span className="relative block w-full max-w-[280px] max-h-[32vh] min-h-[100px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden" style={{ boxShadow: "3px 3px 0 #1a1a1a" }}>
+        <span className="relative block w-full max-w-[420px] max-h-[55vh] min-h-[160px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden" style={{ boxShadow: "3px 3px 0 #1a1a1a" }}>
           <Image
             src={encodeURI(cert.image)}
             alt={cert.title}
-            width={280}
-            height={360}
-            sizes="(max-width: 768px) 80vw, 280px"
+            width={420}
+            height={560}
+            sizes="(max-width: 768px) 80vw, 420px"
             className={cn(
-              "block h-auto w-full max-h-[32vh] object-contain object-center transition-opacity duration-300",
+              "block h-auto w-full max-h-[55vh] object-contain object-center transition-opacity duration-300",
               imgLoaded ? "opacity-100" : "opacity-0",
             )}
             onLoad={() => setImgLoaded(true)}

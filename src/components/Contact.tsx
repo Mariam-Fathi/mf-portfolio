@@ -238,7 +238,7 @@ const Contact: React.FC = () => {
               className="border-t-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 min-h-[40px] flex items-center justify-end"
               style={{ background: "#F9E7C9" }}
             >
-              <span className="text-[12px] font-sans tabular-nums" style={{ color: "#280B0B" }}>
+              <span className="text-[10px] font-sans tabular-nums" style={{ color: "#8a7a5a" }}>
                 {dateTimeFormatter.format(now)}
               </span>
             </div>
