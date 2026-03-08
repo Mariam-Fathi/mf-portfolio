@@ -62,7 +62,8 @@ const TEXT_REVEAL_DURATION_S = 2;
 const Contact: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLHeadingElement>(null);
-  const mobileTilesRef = useRef<HTMLDivElement>(null);
+  const topTilesRef = useRef<HTMLDivElement>(null);
+  const bottomTilesRef = useRef<HTMLDivElement>(null);
   const hasAnimated = useRef(false);
 
   // ── Prepare text for clip-reveal animation ──
@@ -106,23 +107,29 @@ const Contact: React.FC = () => {
         );
       }
 
-      // ── 2. Link tiles (all screen sizes) ─────────────────────────
-      if (mobileTilesRef.current) {
-        tweens.push(
-          gsap.fromTo(
-            mobileTilesRef.current.children,
-            { opacity: 0, x: 0, scale: 0.6, transformOrigin: "50% 50%" },
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.55,
-              stagger: 0.2,
-              ease: "expo.out",
-              delay: baseDelayAfterText,
-            },
-          ),
-        );
-      }
+      // ── 2. Link tiles (zigzag: top row + bottom row) ──
+      const runTilesAnimation = () => {
+        const topEl = topTilesRef.current;
+        const bottomEl = bottomTilesRef.current;
+        const els = [topEl, bottomEl].filter(Boolean) as HTMLElement[];
+        if (els.length > 0) {
+          tweens.push(
+            gsap.fromTo(
+              els,
+              { opacity: 0, scale: 0.95, transformOrigin: "50% 50%" },
+              {
+                opacity: 1,
+                scale: 1,
+                duration: 0.55,
+                stagger: 0.1,
+                ease: "expo.out",
+                delay: baseDelayAfterText,
+              },
+            ),
+          );
+        }
+      };
+      requestAnimationFrame(() => requestAnimationFrame(runTilesAnimation));
     };
 
     // ── IntersectionObserver — fire once when 20% visible ──────────
@@ -167,40 +174,63 @@ const Contact: React.FC = () => {
       </div>
 
       <div className="relative flex flex-col min-h-screen w-full items-center justify-center gap-10">
-        <div className="relative flex flex-col items-end">
-          <h1
-            ref={textRef}
-            className="relative z-10 whitespace-nowrap font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none px-6"
-            style={{
-              fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
-              color: "#280B0B",
-              letterSpacing: "0.1em",
-            }}
-          >
-            LET&apos;S TALK
-          </h1>
-
-          <div ref={mobileTilesRef} className="relative z-20 flex flex-col gap-4 pt-4 pr-6 items-end">
-          {contactTiles.map(({ id, label, caption, href, accent, icon: Icon }) => (
-            <a
-              key={id}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="flex items-center gap-3 active:scale-95 transition-transform"
-            >
-              <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
-                <Icon className="h-6 w-6" stroke={1.7} />
-              </span>
-              <span
-                className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
-                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
+        <div className="relative flex flex-col items-center w-full max-w-[90vw] px-6">
+          <div ref={topTilesRef} className="relative z-20 flex flex-row flex-wrap justify-center gap-[10rem] pb-4 opacity-0">
+            {[contactTiles[1], contactTiles[3]].map(({ id, label, caption, href, accent, icon: Icon }) => (
+              <a
+                key={id}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="flex items-center gap-3 active:scale-95 transition-transform"
               >
-                <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
-                <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
-              </span>
-            </a>
-          ))}
+                <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
+                  <Icon className="h-6 w-6" stroke={1.7} />
+                </span>
+                <span
+                  className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
+                >
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
+                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+          <div className="flex flex-col items-center" style={{ width: "fit-content" }}>
+            <h1
+              ref={textRef}
+              className="relative z-10 whitespace-nowrap font-black uppercase leading-[0.78] text-[clamp(2rem,8vw,12rem)] md:text-[clamp(4rem,14vw,14rem)] cursor-pointer transition-none"
+              style={{
+                fontFamily: '"Momo Trust Display", "Stack Sans", sans-serif',
+                color: "#280B0B",
+                letterSpacing: "0.1em",
+              }}
+            >
+              LET&apos;S TALK
+            </h1>
+            <div ref={bottomTilesRef} className="relative z-20 flex flex-row justify-between items-start w-full pt-4 opacity-0 gap-4 min-w-0">
+            {[contactTiles[0], contactTiles[2]].map(({ id, label, caption, href, accent, icon: Icon }) => (
+              <a
+                key={id}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
+                className="flex items-center gap-3 active:scale-95 transition-transform flex-shrink-0"
+              >
+                <span className="contact-glass contact-glass--icon flex items-center justify-center rounded-full p-2" style={{ color: accent }}>
+                  <Icon className="h-6 w-6" stroke={1.7} />
+                </span>
+                <span
+                  className="contact-glass contact-glass--text flex flex-col gap-0 rounded-2xl px-4 py-3 text-sm font-semibold"
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif', color: "#280B0B" }}
+                >
+                  <span className="text-xs uppercase tracking-wide" style={{ color: "#C92924" }}>{label}</span>
+                  <span className="text-sm font-semibold" style={{ color: "#280B0B" }}>{caption}</span>
+                </span>
+              </a>
+            ))}
+          </div>
           </div>
         </div>
       </div>
