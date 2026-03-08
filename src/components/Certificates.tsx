@@ -208,7 +208,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                       className="w-8 h-8 rounded-sm flex items-center justify-center text-[10px] font-bold flex-shrink-0 border border-[#1a1a1a]"
                       style={{ background: "#280B0B", color: "#F9E7C9" }}
                     >
-                      {cert.title.slice(0, 1)}
+                      {selectedIndex + 1}
                     </div>
                     <div className="flex-1">
                       <p
