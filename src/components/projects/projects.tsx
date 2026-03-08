@@ -311,15 +311,6 @@ export default function GalleryShowcase(_props: ProjectsProps) {
             className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
             style={{ background: "#F9E7C9" }}
           >
-            <div className="px-3 py-2.5 border-b border-[#c8b97a]/50">
-              <div
-                className="flex items-center justify-between text-[11px] font-bold px-2.5 py-1.5 rounded-sm cursor-pointer"
-                style={{ background: "#280B0B", color: "#F9E7C9" }}
-              >
-                <span>Portfolio</span>
-                <span className="text-[9px]">▾</span>
-              </div>
-            </div>
             <div className="flex-1 overflow-y-auto py-2 scrollbar-hide no-visible-scrollbar">
               <div className="px-3 pb-1">
                 <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6A0610" }}>
