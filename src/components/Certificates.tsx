@@ -208,34 +208,26 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                       >
                         {cert.title} — {cert.platform}
                       </p>
-                      <CertificateImage cert={cert} />
+                      <div className="w-full max-w-[280px] space-y-2">
+                        <CertificateImage cert={cert} />
+                        <a
+                          href={cert.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2 w-full border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150"
+                          style={{
+                            background: "#F9E7C9",
+                            borderColor: "#6A0610",
+                            boxShadow: "2px 2px 0 #6A0610",
+                          }}
+                        >
+                          <span className="text-[10px] font-sans" style={{ color: "#280B0B" }}>
+                            View credential
+                          </span>
+                          <span className="text-[10px]" style={{ color: "#6A0610" }}>↗</span>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Project Files — View credential link */}
-                  <div className="pt-2">
-                    <div
-                      className="text-[10px] font-bold tracking-widest uppercase mb-2"
-                      style={{ color: "#6A0610" }}
-                    >
-                      Certificate Files
-                    </div>
-                    <a
-                      href={cert.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150"
-                      style={{
-                        background: "#F9E7C9",
-                        borderColor: "#6A0610",
-                        boxShadow: "2px 2px 0 #6A0610",
-                      }}
-                    >
-                      <span className="text-[10px] font-sans" style={{ color: "#280B0B" }}>
-                        View credential
-                      </span>
-                      <span className="text-[10px]" style={{ color: "#6A0610" }}>↗</span>
-                    </a>
                   </div>
                 </div>
 
