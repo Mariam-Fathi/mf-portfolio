@@ -308,6 +308,13 @@ export function usePortfolioAnimation(
   const restoreResizeCleanupRef = useRef<(() => void) | null>(null);
   const hasSeenExpandedThisMountRef = useRef(false);
 
+  // When Hero unmounts (navigate to another section), set flag so we expand on return.
+  useEffect(() => {
+    return () => {
+      portfolioCache.returnedFromSection = true;
+    };
+  }, []);
+
   useEffect(() => {
     // Only track expanded state while hero is active.
     // When !isActive, the main effect already wrote the correct value to cache
@@ -363,10 +370,13 @@ export function usePortfolioAnimation(
     }
 
     // ── Restore cached state when returning to hero or after resize (e.g. lg→md → lg) ──────────────
-    // Use portfolioCache.lastExpandedWhenLeavingHero so we restore the same state (expanded vs collapsed) the user had when they left.
+    // When we returned from another section (flag set on unmount), always restore expanded.
     if (isActive && portfolioCache.cachedData && portfolioCache.dataCalculated && portfolioCache.everCompleted) {
+      const justReturnedFromSection = portfolioCache.returnedFromSection;
+      if (justReturnedFromSection) portfolioCache.returnedFromSection = false;
+      const shouldExpand = justReturnedFromSection || portfolioCache.lastExpandedWhenLeavingHero;
       if (process.env.NODE_ENV !== "production") {
-        console.log("[portfolio] restore branch: lastExpandedWhenLeavingHero=", portfolioCache.lastExpandedWhenLeavingHero);
+        console.log("[portfolio] restore branch: justReturnedFromSection=", justReturnedFromSection, "lastExpandedWhenLeavingHero=", portfolioCache.lastExpandedWhenLeavingHero, "→ shouldExpand=", shouldExpand);
       }
       const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef);
       requestAnimationFrame(() => {
@@ -382,7 +392,7 @@ export function usePortfolioAnimation(
             setIsComplete(true);
             return;
           }
-          if (!portfolioCache.lastExpandedWhenLeavingHero) {
+          if (!shouldExpand) {
             userExpandedRef.current = false;
             dragCleanupRef.current = restoreCollapsedState(headerRef, portfolioCache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart, onUserExpandChange) ?? null;
             return;

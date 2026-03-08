@@ -12,6 +12,8 @@ export const portfolioCache = {
   dataCalculated: false,
   everCompleted: false,
   lastExpandedWhenLeavingHero: false,
+  /** Set to true when Hero unmounts (navigate away). Cleared when we restore expanded on return. */
+  returnedFromSection: false,
 };
 
 export function resetPortfolioCache(): void {
@@ -19,6 +21,7 @@ export function resetPortfolioCache(): void {
   portfolioCache.dataCalculated = false;
   portfolioCache.everCompleted = false;
   portfolioCache.lastExpandedWhenLeavingHero = false;
+  portfolioCache.returnedFromSection = false;
 }
 
 export function hasPortfolioEverCompleted(): boolean {
