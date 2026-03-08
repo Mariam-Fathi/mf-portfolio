@@ -309,16 +309,15 @@ export function usePortfolioAnimation(
   const hasSeenExpandedThisMountRef = useRef(false);
 
   useEffect(() => {
+    // Only track expanded state while hero is active.
+    // When !isActive, the main effect already wrote the correct value to cache
+    // before calling setIsComplete(false) — we must not overwrite it here.
+    if (!isActive) return;
     wasExpandedRef.current = isComplete;
     if (process.env.NODE_ENV !== "production") {
       console.log("[portfolio] tracking effect: isComplete=", isComplete, "isActive=", isActive, "→ wasExpandedRef=", wasExpandedRef.current);
     }
-    if (!isActive) return;
     if (isComplete && !staticExpand) hasSeenExpandedThisMountRef.current = true;
-    // Persist whether the portfolio is currently expanded, regardless of whether
-    // it was expanded by the user dragging or by the auto-expand animation.
-    // Guard: only write when isActive, so the setIsComplete(false) called inside
-    // the !isActive branch can't race and overwrite the value we just saved.
     if (!staticExpand) portfolioCache.lastExpandedWhenLeavingHero = isComplete;
   }, [isComplete, isActive, staticExpand]);
 
@@ -559,10 +558,9 @@ export function usePortfolioAnimation(
       full.style.display     = "none";
       portfoli.style.display = "inline";
       oEl.style.display      = "inline";
-      lineEl.style.display   = "none";
       gsap.set([portfoli, oEl], { display: "inline", opacity: 1, rotation: 0, x: 0 });
       gsap.set(oEl, { position: "relative" });
-      gsap.set(lineEl, { display: "none", width: 0 });
+      // lineEl display:block is set below after oStartLeft is computed
 
       const cRect = headerRef.current?.getBoundingClientRect();
       if (!cRect) return;
@@ -580,10 +578,12 @@ export function usePortfolioAnimation(
       oFinalX        = oFinalLeft - oStartLeft;
       finalLineWidth = Math.max(0, oFinalLeft - oStartLeft - 8);
 
+      // Keep display:block from the start so GSAP width tweens are visible immediately.
+      // Only hide via width:0 — never display:none after this point.
       Object.assign(lineEl.style, {
-        display: "block", left: `${oStartLeft}px`, width: "0px", opacity: "1",
+        display: "block", left: `${oStartLeft}px`, width: "0px", opacity: "0",
       });
-      gsap.set(lineEl, { opacity: 1, width: 0, display: "none" });
+      gsap.set(lineEl, { opacity: 0, width: 0 });
       gsap.set(oEl, { clearProps: "x" });
 
       const portfoliRect = portfoli.getBoundingClientRect();
@@ -615,21 +615,28 @@ export function usePortfolioAnimation(
 
       const rollTl = gsap.timeline({ paused: true });
 
-      // ── Phase 1: Impact shake (x only, no scale/rotation) ────────────────
-      rollTl.to([portfoli, dragTarget], {
-        keyframes: [
-          { x: -9,  duration: 0.12, ease: "power3.out"  },
-          { x:  6,  duration: 0.11, ease: "power2.inOut"},
-          { x: -4,  duration: 0.10, ease: "power2.inOut"},
-          { x:  2,  duration: 0.10, ease: "power2.out"  },
-          { x:  0,  duration: 0.07, ease: "power2.out"  },
-        ],
+      // ── Phase 1: Impact shake — vertical squash like Mariam ────────────
+      // Mariam scaleY squashes to 0.88 then springs back with back.out.
+      // PORTFOLIO mirrors that: squash down, spring up.
+      // Target the header container so all letters compress together.
+      const headerEl = headerRef.current!;
+      gsap.set(headerEl, { transformOrigin: "50% 100%" });
+      rollTl.to(headerEl, {
+        scaleY: 0.88,
+        duration: 0.13,
+        ease: "sine.in",
+        force3D: false,
       }, 0);
+      rollTl.to(headerEl, {
+        scaleY: 1,
+        duration: 0.38,
+        ease: "back.out(1.08)",
+        force3D: false,
+        onComplete() { gsap.set(headerEl, { clearProps: "scaleY,transformOrigin" }); },
+      }, 0.13);
 
-      // Show the line just as the roll begins
-      rollTl.call(() => {
-        gsap.set(lineEl, { display: "block", width: 0, opacity: 1 });
-      }, [], rollStart);
+      // Fade the line in just as the roll begins (already display:block)
+      rollTl.to(lineEl, { opacity: 1, duration: 0.18, ease: "power2.out" }, rollStart);
 
       // ── Phase 2: Roll (x only) ────────────────────────────────────────────
       // Two tweens give an asymmetric curve: slow friction start, then ease out.
@@ -730,9 +737,11 @@ export function usePortfolioAnimation(
         if (rollTl.isActive()) {
           rollTl.kill();
           pendingAutoTlRef.current = null;
-          gsap.set([portfoli, dragTarget], { x: 0 });
-          gsap.set(lineEl, { display: "block" });
+          gsap.set(headerEl, { clearProps: "scaleY,transformOrigin" });
         }
+        // Always ensure line is visible before drag starts —
+        // opacity may still be 0 if user grabs before rollTl ever plays
+        gsap.set(lineEl, { opacity: 1, display: "block" });
         onDragStart?.();
         startCX  = e.clientX;
         startX2  = (gsap.getProperty(dragTarget, "x") as number) || 0;
