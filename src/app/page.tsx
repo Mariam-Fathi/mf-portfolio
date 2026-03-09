@@ -60,7 +60,6 @@ export default function Home() {
     // When leaving hero: mark "expand portfolio when they come back" (page sets it so it works even if Hero chunk unloads on Vercel)
     if (activeSection === "hero" && sectionId !== "hero") {
       portfolioCache.expandOnReturnToHero = true;
-      console.log("[hero-nav] LEAVE hero → set expandOnReturnToHero = true");
       const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
       dots.forEach((dot) => {
         const htmlDot = dot as HTMLElement;
@@ -80,7 +79,6 @@ export default function Home() {
     if (sectionId === "hero") {
       // User clicked "home": tell Hero to expand portfolio when it mounts (see portfolioCache / usePortfolioAnimation restore branch).
       portfolioCache.expandOnReturnToHero = true;
-      console.log("[hero-nav] CLICK home → set expandOnReturnToHero = true, cache.everCompleted =", portfolioCache.everCompleted);
       // Hero mounts at opacity 0; handleHeroReady runs blur-to-clear. setIsTransitioning(false) in its onComplete.
       tl.to(`.content-section.active`, {
         opacity: 0,

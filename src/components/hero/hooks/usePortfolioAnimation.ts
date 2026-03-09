@@ -318,7 +318,6 @@ export function usePortfolioAnimation(
   useEffect(() => {
     return () => {
       (cache as { expandOnReturnToHero: boolean }).expandOnReturnToHero = true;
-      console.log("[portfolio] Hero UNMOUNT → set expandOnReturnToHero = true");
     };
   }, [cache]);
 
@@ -328,9 +327,6 @@ export function usePortfolioAnimation(
     // before calling setIsComplete(false) — we must not overwrite it here.
     if (!isActive) return;
     wasExpandedRef.current = isComplete;
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[portfolio] tracking effect: isComplete=", isComplete, "isActive=", isActive, "→ wasExpandedRef=", wasExpandedRef.current);
-    }
     if (isComplete && !staticExpand) hasSeenExpandedThisMountRef.current = true;
     if (!staticExpand) (cache as { lastExpandedWhenLeavingHero: boolean }).lastExpandedWhenLeavingHero = isComplete;
   }, [isComplete, isActive, staticExpand, cache]);
@@ -339,9 +335,6 @@ export function usePortfolioAnimation(
   useEffect(() => {
     const saveExpandedStateOnCleanup = () => {
       if (!staticExpand) {
-        if (process.env.NODE_ENV !== "production") {
-          console.log("[portfolio] saveExpandedStateOnCleanup: wasExpandedRef.current=", wasExpandedRef.current);
-        }
         (cache as { lastExpandedWhenLeavingHero: boolean }).lastExpandedWhenLeavingHero = wasExpandedRef.current;
       }
     };
@@ -349,17 +342,12 @@ export function usePortfolioAnimation(
       userExpandedRef.current = expanded;
     };
 
-    if (!headerRef.current) {
-      console.log("[portfolio] main effect: no headerRef.current, skip");
-      return saveExpandedStateOnCleanup;
-    }
+    if (!headerRef.current) return saveExpandedStateOnCleanup;
 
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {
-      console.log("[portfolio] main effect: !isActive, expandOnReturnToHero =", cache.expandOnReturnToHero);
       // Only save "was expanded" when we're actually leaving hero. When we're mounting with isActive false (returning to hero), don't overwrite — we need lastExpandedWhenLeavingHero for the restore branch.
       if (!cache.expandOnReturnToHero) {
-        console.log("[portfolio] !isActive: saving lastExpandedWhenLeavingHero =", wasExpandedRef.current);
         (cache as { lastExpandedWhenLeavingHero: boolean }).lastExpandedWhenLeavingHero = wasExpandedRef.current;
       }
       if (dragCleanupRef.current) {
@@ -384,19 +372,10 @@ export function usePortfolioAnimation(
     // ── Restore when back on hero or after resize ────────────────────────────────────────────────
     // Rule: expand if (page or unmount set expandOnReturnToHero) OR (was expanded when we left).
     const canRestore = !!(cache.cachedData && cache.dataCalculated && cache.everCompleted);
-    if (!canRestore) {
-      console.log("[portfolio] main effect: isActive but no cache for restore", {
-        hasCachedData: !!cache.cachedData,
-        dataCalculated: cache.dataCalculated,
-        everCompleted: cache.everCompleted,
-        expandOnReturnToHero: cache.expandOnReturnToHero,
-      });
-    }
     if (isActive && canRestore) {
       // Don't clear expandOnReturnToHero here — effect can run twice; second run would see false and collapse. Clear only after we apply expand inside rAF.
       const expandOnReturn = cache.expandOnReturnToHero;
       const shouldExpand = expandOnReturn || cache.lastExpandedWhenLeavingHero;
-      console.log("[portfolio] RESTORE BRANCH: expandOnReturn=", expandOnReturn, "lastExpandedWhenLeavingHero=", cache.lastExpandedWhenLeavingHero, "→ shouldExpand=", shouldExpand);
       const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef, cache);
       const applyRestore = () => {
         if (restoreAppliedRef.current || !headerRef.current) return;
