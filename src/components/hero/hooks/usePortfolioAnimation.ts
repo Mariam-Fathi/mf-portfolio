@@ -312,6 +312,7 @@ export function usePortfolioAnimation(
   const mobileResizeCleanupRef = useRef<(() => void) | null>(null);
   const restoreResizeCleanupRef = useRef<(() => void) | null>(null);
   const hasSeenExpandedThisMountRef = useRef(false);
+  const restoreAppliedRef = useRef(false);
 
   // When Hero unmounts (user navigated away), mark "expand portfolio when they come back".
   useEffect(() => {
@@ -397,39 +398,46 @@ export function usePortfolioAnimation(
       const shouldExpand = expandOnReturn || cache.lastExpandedWhenLeavingHero;
       console.log("[portfolio] RESTORE BRANCH: expandOnReturn=", expandOnReturn, "lastExpandedWhenLeavingHero=", cache.lastExpandedWhenLeavingHero, "→ shouldExpand=", shouldExpand);
       const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef, cache);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (expandOnReturn) (cache as { expandOnReturnToHero: boolean }).expandOnReturnToHero = false;
-          if (dragCleanupRef.current) dragCleanupRef.current();
-          dragCleanupRef.current = null;
-          restoreResizeCleanupRef.current?.();
-          restoreResizeCleanupRef.current = null;
+      const applyRestore = () => {
+        if (restoreAppliedRef.current || !headerRef.current) return;
+        restoreAppliedRef.current = true;
+        if (expandOnReturn) (cache as { expandOnReturnToHero: boolean }).expandOnReturnToHero = false;
+        if (dragCleanupRef.current) dragCleanupRef.current();
+        dragCleanupRef.current = null;
+        restoreResizeCleanupRef.current?.();
+        restoreResizeCleanupRef.current = null;
 
-          if (staticExpand) {
-            restoreFinalState(headerRef, cache.cachedData!);
-            if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cache.cachedData!.oFinalX });
-            setIsComplete(true);
-            return;
-          }
-          if (!shouldExpand) {
-            userExpandedRef.current = false;
-            dragCleanupRef.current = restoreCollapsedState(headerRef, cache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart, onUserExpandChange) ?? null;
-            return;
-          }
-          userExpandedRef.current = true;
+        if (staticExpand) {
           restoreFinalState(headerRef, cache.cachedData!);
-          recalculateAndApplyExpandedState(headerRef, oDragWrapperRef, cache);
           if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cache.cachedData!.oFinalX });
           setIsComplete(true);
-          dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cache.cachedData!, setIsComplete, onDragStart, onUserExpandChange);
-          window.addEventListener("resize", handleResize);
-          restoreResizeCleanupRef.current = () => {
-            cancelResize();
-            window.removeEventListener("resize", handleResize);
-          };
+          return;
+        }
+        if (!shouldExpand) {
+          userExpandedRef.current = false;
+          dragCleanupRef.current = restoreCollapsedState(headerRef, cache.cachedData!, oDragWrapperRef, setIsComplete, onDragStart, onUserExpandChange) ?? null;
+          return;
+        }
+        userExpandedRef.current = true;
+        restoreFinalState(headerRef, cache.cachedData!);
+        recalculateAndApplyExpandedState(headerRef, oDragWrapperRef, cache);
+        if (oDragWrapperRef?.current) gsap.set(oDragWrapperRef.current, { x: cache.cachedData!.oFinalX });
+        setIsComplete(true);
+        dragCleanupRef.current = attachODragAfterRestore(headerRef, oDragWrapperRef, cache.cachedData!, setIsComplete, onDragStart, onUserExpandChange);
+        window.addEventListener("resize", handleResize);
+        restoreResizeCleanupRef.current = () => {
+          cancelResize();
+          window.removeEventListener("resize", handleResize);
+        };
+      };
+      // Double rAF then short delay so hero is visible and laid out before we measure and set line/O
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(applyRestore, 50);
         });
       });
       return () => {
+        restoreAppliedRef.current = false;
         saveExpandedStateOnCleanup();
         restoreResizeCleanupRef.current?.();
         restoreResizeCleanupRef.current = null;
