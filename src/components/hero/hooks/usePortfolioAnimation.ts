@@ -392,13 +392,14 @@ export function usePortfolioAnimation(
       });
     }
     if (isActive && canRestore) {
+      // Don't clear expandOnReturnToHero here — effect can run twice; second run would see false and collapse. Clear only after we apply expand inside rAF.
       const expandOnReturn = cache.expandOnReturnToHero;
-      if (expandOnReturn) (cache as { expandOnReturnToHero: boolean }).expandOnReturnToHero = false;
       const shouldExpand = expandOnReturn || cache.lastExpandedWhenLeavingHero;
       console.log("[portfolio] RESTORE BRANCH: expandOnReturn=", expandOnReturn, "lastExpandedWhenLeavingHero=", cache.lastExpandedWhenLeavingHero, "→ shouldExpand=", shouldExpand);
       const { handler: handleResize, cancel: cancelResize } = createResizeHandler(headerRef, oDragWrapperRef, cache);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          if (expandOnReturn) (cache as { expandOnReturnToHero: boolean }).expandOnReturnToHero = false;
           if (dragCleanupRef.current) dragCleanupRef.current();
           dragCleanupRef.current = null;
           restoreResizeCleanupRef.current?.();
