@@ -80,6 +80,8 @@ export default function Home() {
       // Returning to hero — hero mounts at opacity 0, then handleHeroReady
       // fires once the component is ready and runs the blur-to-clear entrance.
       // setIsTransitioning(false) is called inside handleHeroReady's onComplete.
+      // Use same restore logic: ensure portfolio expands on return (restore branch in usePortfolioAnimation).
+      portfolioCache.returnedFromSection = true;
       tl.to(`.content-section.active`, {
         opacity: 0,
         x: 100,
