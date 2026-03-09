@@ -57,9 +57,10 @@ export default function Home() {
   const handleNavigate = useCallback(async (sectionId: SectionId) => {
     if (isTransitioning || activeSection === sectionId) return;
     
-    // When leaving hero: mark so portfolio restores expanded when we come back (set here, not in Hero cleanup — production may unload Hero chunk before cleanup runs)
+    // When leaving hero: mark "expand portfolio when they come back" (page sets it so it works even if Hero chunk unloads on Vercel)
     if (activeSection === "hero" && sectionId !== "hero") {
-      portfolioCache.returnedFromSection = true;
+      portfolioCache.expandOnReturnToHero = true;
+      console.log("[hero-nav] LEAVE hero → set expandOnReturnToHero = true");
       const dots = document.querySelectorAll('.original-i-dot, .final-i-dot, .original-i-dot-svg, .final-i-dot-svg, .original-i-dot-se, .final-i-dot-se');
       dots.forEach((dot) => {
         const htmlDot = dot as HTMLElement;
@@ -77,11 +78,10 @@ export default function Home() {
     const tl = gsap.timeline();
 
     if (sectionId === "hero") {
-      // Returning to hero — hero mounts at opacity 0, then handleHeroReady
-      // fires once the component is ready and runs the blur-to-clear entrance.
-      // setIsTransitioning(false) is called inside handleHeroReady's onComplete.
-      // Use same restore logic: ensure portfolio expands on return (restore branch in usePortfolioAnimation).
-      portfolioCache.returnedFromSection = true;
+      // User clicked "home": tell Hero to expand portfolio when it mounts (see portfolioCache / usePortfolioAnimation restore branch).
+      portfolioCache.expandOnReturnToHero = true;
+      console.log("[hero-nav] CLICK home → set expandOnReturnToHero = true, cache.everCompleted =", portfolioCache.everCompleted);
+      // Hero mounts at opacity 0; handleHeroReady runs blur-to-clear. setIsTransitioning(false) in its onComplete.
       tl.to(`.content-section.active`, {
         opacity: 0,
         x: 100,
@@ -186,6 +186,7 @@ export default function Home() {
             onNavigate={(section: string) => handleNavigate(section as SectionId)}
             onReady={handleHeroReady}
             isActive={activeSection === "hero" && isHeroReady}
+            portfolioCache={portfolioCache}
           />
         </div>
       )}

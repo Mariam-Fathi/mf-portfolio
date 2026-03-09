@@ -25,7 +25,7 @@ import { useHeroNavigation } from "./hooks/useHeroNavigation";
 // ─────────────────────────────────────────────────────────────────────
 // Hero Component
 // ─────────────────────────────────────────────────────────────────────
-const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => {
+const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portfolioCache: portfolioCacheProp }) => {
   // ── Refs ────────────────────────────────────────────────────────
   const portfolioHeaderRef = useRef<HTMLDivElement>(null);
   const numberSevenRef = useRef<SVGSVGElement>(null);
@@ -113,6 +113,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true }) => 
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
     portfolioRevealReady || isDotAnimationComplete,
     isMd, // static expand: final state, no drag
+    portfolioCacheProp,
   );
 
   // On lg: show "Software Engineer" the moment the dot hits the ı (dotLandedOnI), not after the 0.5s settle — synced for realism. On md/sm: show when portfolio is ready (no dot animation).
