@@ -205,7 +205,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                           href={cert.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 w-full border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150"
+                          className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 w-full justify-center"
                           style={{
                             background: "#F9E7C9",
                             borderColor: "#6A0610",
@@ -262,7 +262,10 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       aria-label={`View ${cert.title} certificate`}
     >
       {!imgError ? (
-        <span className="relative block w-full max-w-[420px] max-h-[55vh] min-h-[160px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden" style={{ boxShadow: "3px 3px 0 #1a1a1a" }}>
+        <span
+          className="relative inline-block w-full max-w-[420px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden mx-auto align-top"
+          style={{ boxShadow: "3px 3px 0 #1a1a1a" }}
+        >
           <Image
             src={encodeURI(cert.image)}
             alt={cert.title}
@@ -270,12 +273,12 @@ function CertificateImage({ cert }: { cert: Certificate }) {
             height={560}
             sizes="(max-width: 768px) 80vw, 420px"
             className={cn(
-              "block h-auto w-full max-h-[55vh] object-contain object-center transition-opacity duration-300",
+              "block w-full h-auto object-contain object-center transition-opacity duration-300",
               imgLoaded ? "opacity-100" : "opacity-0",
             )}
             onLoad={() => setImgLoaded(true)}
             onError={() => setImgError(true)}
-            unoptimized
+            loading="lazy"
           />
           {!imgLoaded && (
             <span

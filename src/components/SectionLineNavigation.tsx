@@ -91,18 +91,19 @@ const SectionLineNavigation: React.FC<SectionLineNavigationProps> = ({ onNavigat
         alignItems: "center",
         transform: "translateY(-50%)",
       });
-      gsap.set(navRef.current, { 
-        opacity: 1, 
+      gsap.set(navRef.current, {
+        opacity: 1,
         display: "flex",
         visibility: "visible",
         left: navFinalX,
         top: navY,
         transform: "translate(-100%, -50%)",
+        pointerEvents: "auto",
       });
-      gsap.set(lineRef.current, { 
-        opacity: 0.4, 
+      gsap.set(lineRef.current, {
+        opacity: 0.4,
         width: targetLineWidth,
-        transform: "translateY(-50%)"
+        transform: "translateY(-50%)",
       });
       return;
     }
