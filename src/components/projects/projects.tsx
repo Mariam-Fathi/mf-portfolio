@@ -254,7 +254,7 @@ function ProjectDirItem({
   const folderLabel = `${String(index + 1).padStart(2, "0")}_${project.id}`;
   return (
     <div
-      className={`flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group rounded-sm transition-all duration-100 ${
+      className={`flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group  transition-all duration-100 ${
         isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40"
       }`}
       style={{ paddingLeft: "8px" }}

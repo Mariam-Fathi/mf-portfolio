@@ -13,19 +13,20 @@ type Certificate = {
 };
 
 const certificates: Certificate[] = [
-  {
-    id: "time-series",
-    title: "Time Series",
-    image: "/certificates/Mariam Fathi - Time Series.png",
-    platform: "Kaggle",
-    link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
-  },
+
   {
     id: "data-engineering",
     title: "Data Engineering",
     image: "/certificates/data-engineering.jpeg",
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
+  },
+  {
+    id: "ai-agents",
+    title: "AI Agents Intensive",
+    image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
+    platform: "Kaggle × Google",
+    link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
   },
   {
     id: "computer-vision",
@@ -35,11 +36,11 @@ const certificates: Certificate[] = [
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
   },
   {
-    id: "ai-agents",
-    title: "AI Agents Intensive",
-    image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
-    platform: "Kaggle × Google",
-    link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
+    id: "time-series",
+    title: "Time Series",
+    image: "/certificates/Mariam Fathi - Time Series.png",
+    platform: "Kaggle",
+    link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
   },
   {
     id: "ieee",
@@ -77,7 +78,7 @@ function CertDirItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group rounded-sm transition-all duration-100",
+        "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group  transition-all duration-100",
         isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40",
       )}
       style={{ paddingLeft: "8px" }}
