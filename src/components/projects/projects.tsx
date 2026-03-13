@@ -71,16 +71,6 @@ const projects: Project[] = [
     ],
   },
   {
-    id: "homi",
-    title: "Homi",
-    role: "Full-Stack Engineer",
-    description:
-      "Full-stack mobile property marketplace (React Native / Expo) shipped on the Play Store. Users sign in securely with AppWrite OAuth, search and filter properties, browse rich listing details, and complete payment flows with Stripe; Firebase powers push notifications so they stay updated on new homes, price changes, and status updates. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments, with OTA updates for fast iteration. Delivered a production-ready, cross-platform app focused on making it easy to find and secure the right home from a phone.",
-    links: [
-      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
-    ],
-  },
-  {
     id: "real-estate-data",
     title: "Data Auditing",
     role: "Data Engineer",
@@ -93,6 +83,33 @@ const projects: Project[] = [
         { name: "87.4% Memory Opt + Real Estate Suspicious Patterns", url: "https://www.kaggle.com/code/mariamfathiamin/87-4-memory-opt-real-estate-suspicious-patterns" },
         { name: "87.4% Memory Opt + Real Estate Data Quality Visuals", url: "https://www.kaggle.com/code/mariamfathiamin/real-estate-data-quality-visuals" },
       ]},
+    ],
+  },
+  {
+    id: "operational-portal",
+    title: "Operational Portal",
+    role: "Full-Stack Engineer",
+    description: "Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind.",
+    links: [
+      { name: "Live", url: "https://operational-portal.vercel.app/" },
+    ],
+  },
+  {
+    id: "shibin-ride",
+    title: "Shibin Ride",
+    role: "Full-Stack Engineer",
+    description:
+      "Designed and built a full-stack bus booking platform inspired by Swvl, tailored for local Egyptian routes. Engineered a PostgreSQL schema on Supabase covering trips, seat reservations, waitlists, ratings, and push notifications — with race condition protection using FOR UPDATE locks to guarantee no overbooking. Implemented three pg_cron background jobs for automatic trip completion, 30-minute departure reminders, and waitlist seat notifications. Built two Supabase Edge Functions for push delivery via Expo and atomic trip cancellation with passenger notifications. Architected the full booking lifecycle (confirmed → completed) without per-passenger check-in, matching real driver workflows. Stack: Supabase (PostgreSQL, pg_cron, Edge Functions, RLS), Expo Push Notifications.",
+    links: [],
+  },
+  {
+    id: "homi",
+    title: "Homi",
+    role: "Full-Stack Engineer",
+    description:
+      "Full-stack mobile property marketplace (React Native / Expo) shipped on the Play Store. Users sign in securely with AppWrite OAuth, search and filter properties, browse rich listing details, and complete payment flows with Stripe; Firebase powers push notifications so they stay updated on new homes, price changes, and status updates. Stack: Expo (Router, typed routes, EAS updates), NativeWind for UI, react-native-appwrite and @stripe/stripe-react-native for auth and payments, with OTA updates for fast iteration. Delivered a production-ready, cross-platform app focused on making it easy to find and secure the right home from a phone.",
+    links: [
+      { name: "Play Store", url: "https://play.google.com/store/apps/details?id=com.mariamfathi.homi" },
     ],
   },
   {
@@ -112,15 +129,6 @@ const projects: Project[] = [
     description: "As the mobile engineer on Sanayat, an on-demand handyman platform, I designed and built both client applications from the ground up. The Customer App enables users to discover handymen, create broadcast or direct bookings, track jobs in real time, chat with providers, complete payments, and manage wallet and reviews. The Handyman App gives providers a job feed with bidding and direct/scheduled requests, availability and calendar management, verification onboarding, in-app chat and location sharing, wallet and payouts, and a referral program. Both apps are built with Expo and React Native in a TypeScript monorepo, sharing types and i18n (English and Arabic) with the backend, and use NativeWind, React Query, and Zustand for a consistent, maintainable codebase. The result is a production-ready, two-sided marketplace experience with end-to-end flows for booking, payment, and communication.",
     links: [
       // { name: "GitHub", url: "#" },
-    ],
-  },
-  {
-    id: "iot-portal",
-    title: "Operational Portal",
-    role: "Full-Stack Engineer",
-    description: "Built a real-time React dashboard for monitoring room devices with Appwrite as backend and Appwrite Realtime for live updates. Implemented Dashboard (search, filters by device/status/battery, pagination, summary stats), Manage Devices (full CRUD), and Analytics (Recharts pie/bar charts). Added critical-event detection, in-app notification panel, and optional WhatsApp alerts (Twilio/Green API/Evolution API) for device failures and low battery. Delivered sample-data import script and responsive UI with Tailwind.",
-    links: [
-      { name: "Live", url: "https://operational-portal.vercel.app/" },
     ],
   },
   {
