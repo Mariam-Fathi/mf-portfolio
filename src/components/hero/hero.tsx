@@ -58,10 +58,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   // Flip once on the client so portals are never rendered during SSR
   useEffect(() => setIsMounted(true), []);
 
-  // Md or sm only: show portfolio + engineer final state immediately (no dot animation).
+  // Sm only: show portfolio + engineer final state immediately (no dot animation). Md and lg use dot.
   useEffect(() => {
-    if (isMd || isSm) setPortfolioRevealReady(true);
-  }, [isMd, isSm]);
+    if (isSm) setPortfolioRevealReady(true);
+  }, [isSm]);
 
   // ── Hooks — each owns one animation phase ──────────────────────
   //
@@ -113,7 +113,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     portfolioCacheProp,
   );
 
-  // On lg: show "Software Engineer" the moment the dot hits the ı (dotLandedOnI), not after the 0.5s settle — synced for realism. On md/sm: show when portfolio is ready (no dot animation).
+  // On lg/md: show "Software Engineer" when dot hits the ı (dotLandedOnI) or dot animation completes. On sm (<768px): show when portfolio is ready (no dot animation).
   useEngineerText(
     engineerTextRef,
     numberSevenRef,

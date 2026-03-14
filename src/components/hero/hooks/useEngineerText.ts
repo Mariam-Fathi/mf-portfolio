@@ -58,19 +58,29 @@ export function useEngineerText(
     };
   }, [engineerRef]);
 
+  // ── When reveal is not active (e.g. resize from sm to lg before dot click), hide the text ──
+  useEffect(() => {
+    if (startEngineerReveal) return;
+    const el = engineerRef.current;
+    if (el) {
+      gsap.killTweensOf(el);
+      gsap.set(el, { opacity: 0, filter: "blur(0px)", clipPath: "none" });
+    }
+  }, [startEngineerReveal, engineerRef]);
+
   // ── Write-on reveal (starts when dot lands on "ı") ──────────────
   useEffect(() => {
     if (!startEngineerReveal) return;
     const isMobile = checkIsMobile();
 
-    // ── Mobile: set final state immediately ─────────────────────
+    // ── Mobile/sm: set final state immediately (do not set engineerTextEverShown so that
+    //    if user resizes to lg and clicks the dot, they still get the write-on effect) ──
     if (isMobile) {
       if (engineerRef.current) {
         const el = engineerRef.current;
         if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
         gsap.set(el, { opacity: 1, filter: "blur(0px)", x: 0, y: 0, rotation: 0, clipPath: "none" });
       }
-      engineerTextEverShown = true;
       onEngineerRevealComplete?.();
       return;
     }
