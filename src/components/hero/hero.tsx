@@ -803,7 +803,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           border-bottom: 2px solid ${COLORS.primary};
           border-left: 2px solid ${COLORS.primary};
           box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-          border-radius: 0;
+          border-radius: 18px 18px 0 0;
           display: flex;
           align-items: stretch;
           padding: 0 1.25rem;
@@ -849,7 +849,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           border-bottom: none;
           border-right: 2px solid ${COLORS.primary};
           border-left: none;
-          border-radius: 0;
+          border-radius: 0px;
           padding: 0.5em 0.9em;
           display: flex;
           align-items: center;
@@ -886,7 +886,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           border-right: 2px solid ${COLORS.primary};
           border-bottom: 2px solid ${COLORS.primary};
           border-top: none;
-          border-radius: 0;
+          border-radius: 0 0 14px 14px;
           background: ${COLORS.heroBackground};
           box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
           position: relative;

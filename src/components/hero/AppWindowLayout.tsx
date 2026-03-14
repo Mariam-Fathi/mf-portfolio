@@ -172,7 +172,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           border-bottom: 2px solid ${COLORS.primary};
           border-left: 2px solid ${COLORS.primary};
           box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-          border-radius: 0;
+          border-radius: 14px 14px 0 0;
           display: flex;
           align-items: stretch;
           padding: 0 1.25rem;
@@ -218,7 +218,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           border-bottom: none;
           border-right: 2px solid ${COLORS.primary};
           border-left: none;
-          border-radius: 0;
+          border-radius: 0px;
           padding: 0.5em 0.9em;
           display: flex;
           align-items: center;
@@ -255,7 +255,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           border-right: 2px solid ${COLORS.primary};
           border-bottom: 2px solid ${COLORS.primary};
           border-top: none;
-          border-radius: 0;
+          border-radius: 0 0 14px 14px;
           background: ${COLORS.heroBackground};
           box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
           position: relative;
