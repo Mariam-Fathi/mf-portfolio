@@ -2,12 +2,11 @@ import { useEffect, type RefObject } from "react";
 import { setHeroNavigationY, setHeroLineData } from "@/utils/navigationPosition";
 
 /**
- * After the portfolio animation completes, positions the hero navigation
- * at the end of the line between PORTFOL and O, and stores the positions
- * in the shared `navigationPosition` module for other sections to read.
+ * After the portfolio animation completes, computes line/position data from the
+ * header (PORTFOL / O / line) and stores it in the shared `navigationPosition`
+ * module for other sections (e.g. SectionNavigation, SectionLineNavigation) to read.
  */
 export function useHeroNavigation(
-  navRef: RefObject<HTMLElement | null>,
   portfolioHeaderRef: RefObject<HTMLDivElement | null>,
   isPortfolioAnimationComplete: boolean,
 ) {
@@ -15,9 +14,8 @@ export function useHeroNavigation(
     if (!isPortfolioAnimationComplete) return;
 
     const position = () => {
-      const nav = navRef.current;
       const header = portfolioHeaderRef.current;
-      if (!nav || !header) return;
+      if (!header) return;
 
       const portfolEl = header.querySelector(".hero-cover-title-portfoli") as HTMLElement | null;
       const oEl = header.querySelector(".hero-cover-title-o") as HTMLElement | null;
@@ -47,31 +45,10 @@ export function useHeroNavigation(
         lineWidth: lineRect.width,
         oPositionX,
       });
-
-      const navAbsoluteY = absoluteLineY / 2;
-      const navRelativeY = navAbsoluteY - containerRect.top;
-
-      nav.style.top = `${navRelativeY}px`;
-      nav.style.left = `${lineEndX}px`;
-      nav.style.transform = "translate(-100%, -50%)";
-      nav.style.zIndex = "101";
-      nav.style.marginLeft = "0";
-      nav.style.paddingLeft = "0";
-      nav.style.opacity = "1";
     };
-
-    // Hide initially to prevent flash, then position
-    if (navRef.current) {
-      navRef.current.style.opacity = "0";
-      navRef.current.style.top = "50%";
-      navRef.current.style.left = "100%";
-      navRef.current.style.transform = "translate(-100%, -50%)";
-    }
 
     requestAnimationFrame(() => requestAnimationFrame(position));
 
-    // Debounced — waits for usePortfolioAnimation's resize handler
-    // to finish repositioning O and the line first.
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
@@ -84,5 +61,5 @@ export function useHeroNavigation(
       window.removeEventListener("resize", onResize);
       if (resizeTimer) clearTimeout(resizeTimer);
     };
-  }, [isPortfolioAnimationComplete, navRef, portfolioHeaderRef]);
+  }, [isPortfolioAnimationComplete, portfolioHeaderRef]);
 }

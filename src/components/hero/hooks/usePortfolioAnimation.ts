@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import gsap from "gsap";
-import { COLORS, TIMING } from "../constants";
+import { COLORS, SKIP_PORTFOLIO_ANIMATION, TIMING } from "../constants";
 import { checkIsMobile } from "./useIsMobile";
 import type { PortfolioData, PortfolioCacheRef } from "../types";
 import {
@@ -343,6 +343,12 @@ export function usePortfolioAnimation(
     };
 
     if (!headerRef.current) return saveExpandedStateOnCleanup;
+
+    // ── Whole "PORTFOLIO" only (no O/line): no portfolio animation, mark complete ─
+    if (SKIP_PORTFOLIO_ANIMATION && !getHeaderElements(headerRef)) {
+      setIsComplete(true);
+      return saveExpandedStateOnCleanup;
+    }
 
     // ── Reset when hero becomes inactive ─────────────────────────
     if (!isActive) {

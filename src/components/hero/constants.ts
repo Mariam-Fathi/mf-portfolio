@@ -63,8 +63,14 @@ export const ENGINEER_TEXT = {
    * and the actual rendered top of the descender-adjusted text block.
    * Derived empirically from the Pouities font metrics at all tested sizes.
    */
-  VERTICAL_NUDGE_PX: 17,
+  VERTICAL_NUDGE_PX: 60,
 } as const;
+
+// ── App window frame (title bar, menu bar, section body connect as one programme) ───
+export const APP_WINDOW_INSET_PX = 6;
+
+// ── Skip only portfolio animation (O/line/drag/expand). Dot and engineer text still animate. ───
+export const SKIP_PORTFOLIO_ANIMATION = true;
 
 // ── Breakpoints (px) ───────────────────────────────────────────────
 export const BREAKPOINTS = {

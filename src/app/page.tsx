@@ -4,13 +4,14 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 // Keep portfolio cache in page chunk so it survives Hero unmount (production chunk loading)
 import { portfolioCache } from "@/components/hero/portfolioCache";
 import Hero from "@/components/hero/hero";
+import AppWindowLayout from "@/components/hero/AppWindowLayout";
 import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
 import { Certificates, CERTIFICATE_IMAGE_URLS } from "@/components/Certificates";
 import Contact from "@/components/Contact";
 import SectionNavigation from "@/components/SectionNavigation";
-import SectionLineNavigation from "@/components/SectionLineNavigation";
+import { COLORS } from "@/components/hero/constants";
 
 type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
 
@@ -189,76 +190,75 @@ export default function Home() {
         </div>
       )}
 
-      {/* CONTENT SECTIONS - Only show when not on hero */}
+      {/* CONTENT SECTIONS - Same hero app window (title bar + menu), section content in main area */}
       {activeSection !== "hero" && (
-        <div className="content-container" ref={contentRef}>
-          {/* Section Line Navigation - line from left edge with O morphing into nav */}
-          <SectionLineNavigation 
-            onNavigate={(section: string) => handleNavigate(section as SectionId)}
-            currentSection={activeSection}
-          />
+        <AppWindowLayout activeSection={activeSection} onNavigate={(section: string) => handleNavigate(section as SectionId)}>
+          <div className="content-container app-window-sections" ref={contentRef}>
+            {/* Experience Section */}
+            <section 
+              id="experience-content" 
+              tabIndex={-1}
+              className={`content-section ${activeSection === "experience" ? "active" : ""}`}
+            >
+              <Experience isActive={activeSection === "experience"}/>
+            </section>
 
-          {/* Experience Section */}
-          <section 
-            id="experience-content" 
-            tabIndex={-1}
-            className={`content-section ${activeSection === "experience" ? "active" : ""}`}
-          >
-            <Experience isActive={activeSection === "experience"}/>
-          </section>
+            {/* Work Section */}
+            <section 
+              id="work-content" 
+              tabIndex={-1}
+              className={`content-section ${activeSection === "work" ? "active" : ""}`}
+            >
+              <GalleryShowcase />
+            </section>
 
-          {/* Work Section */}
-          <section 
-            id="work-content" 
-            tabIndex={-1}
-            className={`content-section ${activeSection === "work" ? "active" : ""}`}
-          >
-            <GalleryShowcase />
-          </section>
+            {/* Certificates Section */}
+            <section
+              id="certificates-content"
+              tabIndex={-1}
+              className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
+            >
+              <Certificates isActive={activeSection === "certificates"} />
+            </section>
 
-          {/* Certificates Section */}
-          <section
-            id="certificates-content"
-            tabIndex={-1}
-            className={`content-section ${activeSection === "certificates" ? "active" : ""}`}
-          >
-            <Certificates isActive={activeSection === "certificates"} />
-          </section>
-
-          {/* Contact Section */}
-          <section 
-            id="contact-content" 
-            tabIndex={-1}
-            className={`content-section ${activeSection === "contact" ? "active" : ""}`}
-          >
-            <Contact />
-          </section>
-        </div>
+            {/* Contact Section */}
+            <section 
+              id="contact-content" 
+              tabIndex={-1}
+              className={`content-section ${activeSection === "contact" ? "active" : ""}`}
+            >
+              <Contact />
+            </section>
+          </div>
+        </AppWindowLayout>
       )}
 
 
       <style jsx>{`
         .portfolio-frame {
           height: 100vh;
+          height: 100dvh;
           position: relative;
           overflow: hidden;
-          background: #F5ECE1;
+          background: ${COLORS.heroBackground};
           margin: 0;
           padding: 0;
         }
 
-        /* Content Container */
+        /* Content Container — same program, full viewport */
         .content-container {
           position: absolute;
           inset: 0;
           z-index: 2;
         }
 
-        /* Content Sections */
+        /* Content Sections — match hero so nav feels like opening a new tab in same app */
         .content-section {
-          background-color: #F5ECE1;
+          background-color: ${COLORS.heroBackground};
           position: absolute;
           inset: 0;
+          min-height: 100vh;
+          min-height: 100dvh;
           opacity: 0;
           transform: translateX(100px);
           display: none;
@@ -288,9 +288,29 @@ export default function Home() {
         .content-section.active::-webkit-scrollbar {
           display: none;
         }
-        
-        /* Projects section - full viewport */
-        #work-content {
+
+        /* Inside app window: no scrollbar, only remaining view height, center section content */
+        .app-window-sections .content-section {
+          min-height: 0;
+          height: 100%;
+        }
+        /* Section fills content area so programme body connects to menu bar */
+        .app-window-sections .content-section.active {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          overflow: hidden;
+        }
+        .app-window-sections .content-section.active > * {
+          flex: 1;
+          min-height: 0;
+          max-width: none;
+        }
+
+        /* Certificates, Projects, Contact — full viewport, no extra padding */
+        #certificates-content,
+        #work-content,
+        #contact-content {
           padding: 0 !important;
           margin: 0 !important;
         }

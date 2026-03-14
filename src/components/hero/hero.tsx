@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
-import { COLORS, FONTS, Z_LAYERS } from "./constants";
+import { COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS, APP_WINDOW_INSET_PX } from "./constants";
 
 const pouitiesFont = localFont({
   src: "../../../public/fonts/pouities/Pouities.ttf",
@@ -39,7 +39,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const dotRef = useRef<HTMLDivElement>(null);
   const liquidDropsRef = useRef<HTMLDivElement>(null);
   const engineerTextRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLElement | null>(null);
 
   const [isMounted, setIsMounted] = useState(false);
   const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
@@ -55,13 +54,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
   const isMobile = useIsMobile();
   const { isLg, isMd, isSm } = useHeroBreakpoints();
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // Flip once on the client so portals are never rendered during SSR
   useEffect(() => setIsMounted(true), []);
 
   // Md or sm only: show portfolio + engineer final state immediately (no dot animation).
-  // Use isMd || isSm (not !isLg) so we never run on initial render when isLg is still false before breakpoints hydrate — otherwise lg screens would wrongly get portfolioRevealReady and Software Engineer would appear from the start.
   useEffect(() => {
     if (isMd || isSm) setPortfolioRevealReady(true);
   }, [isMd, isSm]);
@@ -112,7 +109,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     undefined,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
     portfolioRevealReady || isDotAnimationComplete,
-    isMd, // static expand: final state, no drag
+    SKIP_PORTFOLIO_ANIMATION || isMd, // static expand: final state, no drag (only when skipping portfolio animation)
     portfolioCacheProp,
   );
 
@@ -127,7 +124,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
-  useHeroNavigation(navRef, portfolioHeaderRef, isPortfolioAnimationComplete);
+  useHeroNavigation(portfolioHeaderRef, isPortfolioAnimationComplete);
 
   // ── Dot click prompt on "ı" ─────────────────────────────────
   // Calculate "ı" dot position after Mariam SVG is ready.
@@ -284,7 +281,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     };
   }, []);
 
-  // Show dot click prompt (lg only)
+  // Show dot click prompt (lg only).
   useEffect(() => {
     if (isLg && isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
       const timer = setTimeout(() => setShowDotClickPrompt(true), 1200);
@@ -293,7 +290,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     if (!isLg || isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
   }, [isLg, isMariamReady, isDotClicked, isActive, dotClickPos]);
 
-  // Animate dot click SVG: draw once, then sway
+  // Animate dot click SVG: draw once, then sway.
   useEffect(() => {
     if (!showDotClickPrompt || !dotClickSvgRef.current) return;
     const svgEl = dotClickSvgRef.current;
@@ -304,7 +301,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
       opacity: 0,
     });
 
-    // Fade in then sway
     gsap.to(svgEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
 
     const swayTl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
@@ -393,7 +389,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     <section
       id="hero"
       className="hero-section"
-      style={{ backgroundColor: COLORS.heroBackground }}
+      style={{ backgroundColor: "#EDE6D9" }}
     >
       {/* SVG filter for glass effect */}
       <svg width="0" height="0" style={{ position: "absolute" }}>
@@ -406,59 +402,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         </defs>
       </svg>
 
-      {/* ── PORTFOLIO header ───────────────────────────────────── */}
-      <div className="hero-yellow-frame">
-        <div className="hero-frame-marquee hero-frame-marquee-top">
-          <div className="hero-cover-header">
+      {/* ── Retro OS window: title bar + menu bar + content ─────── */}
+      <div className="hero-yellow-frame hero-window">
+        {/* Title bar: hero title (program name position + size) + traffic lights */}
+        <div className="hero-window-title-bar">
+          <div className="hero-cover-header hero-cover-header-in-title-bar">
             <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-              {(isMd || isSm) ? (
+              {SKIP_PORTFOLIO_ANIMATION ? (
                 <>
-                  {/* Md + Sm: PORTFOLIO whole + menu icon; hidden portfoli for layout measurement */}
+                  <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
+                </>
+              ) : (isMd || isSm) ? (
+                <>
                   <span className="hero-cover-title-portfoli hero-cover-title-portfoli-hidden" aria-hidden="true">PORTFOLI</span>
                   <span className="hero-cover-title-full-sm" aria-label="Portfolio">PORTFOLIO</span>
-                  <button
-                    type="button"
-                    className="hero-menu-button"
-                    onClick={() => setMenuOpen((o) => !o)}
-                    aria-label={menuOpen ? "Close menu" : "Open menu"}
-                    aria-expanded={menuOpen}
-                  >
-                    <span className="hero-menu-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <path d="M3 12h18M3 6h18M3 18h18" />
-                      </svg>
-                    </span>
-                  </button>
-                  {menuOpen && (
-                    <nav className="hero-menu-overlay" aria-label="Main navigation">
-                      <button
-                        type="button"
-                        className="hero-menu-close"
-                        onClick={() => setMenuOpen(false)}
-                        aria-label="Close menu"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                          <path d="M18 6L6 18M6 6l12 12" />
-                        </svg>
-                      </button>
-                      <ul className="hero-menu-links">
-                        {NAV_SECTIONS.map((s) => (
-                          <li key={s.id}>
-                            <a
-                              href={`#${s.id}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setMenuOpen(false);
-                                onNavigate(s.id);
-                              }}
-                            >
-                              {s.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </nav>
-                  )}
                 </>
               ) : (
                 <>
@@ -484,31 +441,40 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
                     }}
                     aria-hidden="true"
                   />
-
-                  {/* Navigation links — rendered after portfolio animation (md/lg) */}
-                  {isPortfolioAnimationComplete && (
-                    <nav ref={navRef} className="hero-site-navigation">
-                      <ul className="hero-nav-links">
-                        {NAV_SECTIONS.map((s) => (
-                          <li key={s.id}>
-                            <a
-                              href={`#${s.id}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                onNavigate(s.id);
-                              }}
-                            >
-                              {s.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </nav>
-                  )}
                 </>
               )}
             </div>
           </div>
+          <div className="hero-window-traffic" aria-hidden="true">
+            <span className="hero-window-traffic-dot hero-window-traffic-red" />
+            <span className="hero-window-traffic-dot hero-window-traffic-yellow" />
+            <span className="hero-window-traffic-dot hero-window-traffic-green" />
+          </div>
+        </div>
+        {/* Menu bar: nav links only */}
+        <div className="hero-window-menu-bar">
+          <nav className="hero-window-menu-nav" aria-label="Main navigation">
+            <ul className="hero-window-menu-nav-links">
+              {NAV_SECTIONS.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className={s.id === "hero" ? "active" : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onNavigate(s.id);
+                    }}
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+        {/* Same outer content frame as section view */}
+        <div className="app-window-layout-content">
+          <div className="app-window-content-frame" />
         </div>
       </div>
 
@@ -711,7 +677,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           .hero-section { padding: 0.5rem; }
         }
 
-        /* ── Yellow frame (auto so O is clickable; dot raises z when it needs clicks) ─ */
+        /* ── Retro OS window frame ───────────────────────────────── */
         .hero-yellow-frame {
           position: fixed;
           inset: 0;
@@ -721,6 +687,210 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           overflow-y: hidden;
           margin: 0;
           padding: 0;
+        }
+        /* Outer frame: chunky border + 3D bevel (retro OS vibe, our palette) */
+        .hero-window {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          background: ${COLORS.heroBackground};
+          margin: 0;
+          overflow: hidden;
+        }
+        .hero-window-title-bar {
+          flex-shrink: 0;
+          min-height: clamp(60px, 8vw, 100px);
+          background: ${COLORS.primary};
+          border-top: 6px solid ${COLORS.heroBackground};
+          border-right: 6px solid ${COLORS.heroBackground};
+          border-bottom: 6px solid ${COLORS.heroBackground};
+          border-left: 6px solid ${COLORS.heroBackground};
+          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+          border-radius: 18px;
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1.5rem 0 1rem;
+          font-family: ${FONTS.display};
+          color: ${COLORS.heroBackground};
+          overflow: visible;
+        }
+        /* Override .hero-cover-header (position: absolute) so portfolio stays in title bar */
+        .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
+          position: relative !important;
+          inset: auto !important;
+          flex: 1 1 auto;
+          min-width: 0;
+          width: auto;
+          height: 100%;
+          min-height: clamp(60px, 8vw, 100px);
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          padding: 0;
+        }
+        .hero-window-title-bar .hero-cover-header-line {
+          height: 100%;
+          min-height: clamp(60px, 8vw, 100px);
+          justify-content: flex-start;
+        }
+        /* Whole word "PORTFOLIO" at left (no O/line/drag) */
+        .hero-window-title-bar .hero-cover-title-whole {
+          font-size: clamp(2rem, 8vw, 6rem);
+          letter-spacing: 0.15em;
+          height: clamp(60px, 8vw, 100px);
+          color: ${COLORS.heroBackground};
+          font-family: ${FONTS.display};
+          text-transform: uppercase;
+          display: inline-flex;
+          align-items: center;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-title-whole {
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            height: clamp(50px, 12vw, 80px);
+          }
+        }
+        /* Big size + bg color for text (portfolio on dark bar) */
+        .hero-window-title-bar .hero-cover-title-full,
+        .hero-window-title-bar .hero-cover-title-portfoli,
+        .hero-window-title-bar .hero-cover-title-o {
+          font-size: clamp(2rem, 8vw, 6rem);
+          letter-spacing: 0.15em;
+          height: clamp(60px, 8vw, 100px);
+          color: ${COLORS.heroBackground};
+        }
+        .hero-window-title-bar .hero-cover-title-full-sm {
+          font-size: clamp(1.5rem, 6vw, 3rem);
+          letter-spacing: 0.15em;
+          height: clamp(50px, 12vw, 80px);
+          color: ${COLORS.heroBackground};
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-title-full,
+          .hero-window-title-bar .hero-cover-title-portfoli,
+          .hero-window-title-bar .hero-cover-title-o {
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            height: clamp(50px, 12vw, 80px);
+          }
+        }
+        .hero-window-traffic {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .hero-window-traffic-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          border: 2px solid ${COLORS.heroBackground};
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 1px rgba(0,0,0,0.2);
+        }
+        .hero-window-traffic-red,
+        .hero-window-traffic-yellow,
+        .hero-window-traffic-green { background: ${COLORS.heroBackground}; }
+        .hero-window-menu-bar {
+          flex-shrink: 0;
+          min-height: clamp(36px, 5.5vw, 44px);
+          background: transparent;
+          margin-left: 6px;
+          margin-right: 6px;
+          border-top: 2px solid ${COLORS.primary};
+          border-right: 2px solid ${COLORS.primary};
+          border-bottom: 2px solid ${COLORS.primary};
+          border-left: 2px solid ${COLORS.primary};
+          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+          border-radius: 0;
+          display: flex;
+          align-items: stretch;
+          padding: 0 1.25rem;
+          gap: 0;
+          font-family: ${FONTS.display};
+          font-size: clamp(0.65rem, 1vw, 0.75rem);
+          color: ${COLORS.primary};
+        }
+        .hero-window-menu-nav {
+          flex: 1;
+          display: flex;
+          justify-content: flex-end;
+          align-self: stretch;
+          min-height: 0;
+        }
+        .hero-window-menu-nav-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          align-items: stretch;
+          justify-content: flex-end;
+          gap: 0;
+          height: 100%;
+          min-height: 100%;
+          width: 100%;
+        }
+        .hero-window-menu-nav-links li {
+          display: flex;
+          align-items: stretch;
+          flex: 1;
+          min-width: 0;
+        }
+        .hero-window-menu-nav-links a {
+          color: ${COLORS.primary};
+          text-decoration: none;
+          font-size: clamp(0.6rem, 1.1vw, 0.75rem);
+          text-transform: lowercase;
+          letter-spacing: 0.04em;
+          line-height: 1;
+          opacity: 0.9;
+          border-top: none;
+          border-bottom: none;
+          border-right: 2px solid ${COLORS.primary};
+          border-left: none;
+          border-radius: 0;
+          padding: 0.5em 0.9em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          width: 100%;
+          box-sizing: border-box;
+          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+        }
+        .hero-window-menu-nav-links li:first-child a {
+          border-left: none;
+        }
+        .hero-window-menu-nav-links li:last-child a {
+          border-right: none;
+        }
+        .hero-window-menu-nav-links a:hover,
+        .hero-window-menu-nav-links a.active {
+          opacity: 1;
+          font-weight: 700;
+        }
+        .app-window-layout-content {
+          flex: 1;
+          min-height: 0;
+          position: relative;
+          display: flex;
+          overflow: hidden;
+          background: ${COLORS.heroBackground};
+        }
+        .app-window-content-frame {
+          flex: 1;
+          min-height: 0;
+          margin: -2px ${APP_WINDOW_INSET_PX}px ${APP_WINDOW_INSET_PX}px ${APP_WINDOW_INSET_PX}px;
+          border-left: 2px solid ${COLORS.primary};
+          border-right: 2px solid ${COLORS.primary};
+          border-bottom: 2px solid ${COLORS.primary};
+          border-top: none;
+          border-radius: 0;
+          background: ${COLORS.heroBackground};
+          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+          position: relative;
+          overflow: hidden;
         }
 
         /* ── Frame marquee (top bar) ───────────────────────────── */
@@ -862,81 +1032,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           flex: 1;
           min-width: 0;
         }
-        .hero-menu-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          padding: 0;
-          border: none;
-          background: transparent;
-          color: ${COLORS.primary};
-          cursor: pointer;
-          margin-left: auto;
-          flex-shrink: 0;
-        }
-        .hero-menu-icon {
-          display: block;
-          width: 24px;
-          height: 24px;
-        }
-        .hero-menu-icon svg {
-          width: 100%;
-          height: 100%;
-        }
-        .hero-menu-overlay {
-          position: fixed;
-          inset: 0;
-          z-index: ${Z_LAYERS.frame + 100};
-          background: ${COLORS.heroBackground};
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 2rem;
-        }
-        .hero-menu-close {
-          position: absolute;
-          top: clamp(1rem, 3vw, 1.5rem);
-          right: clamp(1rem, 3vw, 1.5rem);
-          width: 48px;
-          height: 48px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          border: none;
-          background: transparent;
-          color: ${COLORS.primary};
-          cursor: pointer;
-          border-radius: 4px;
-        }
-        .hero-menu-close:hover { opacity: 0.85; }
-        .hero-menu-close svg {
-          width: 28px;
-          height: 28px;
-        }
-        .hero-menu-links {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          align-items: center;
-          font-family: ${FONTS.display};
-        }
-        .hero-menu-links a {
-          font-size: clamp(1rem, 4vw, 1.5rem);
-          text-transform: lowercase;
-          letter-spacing: 0.05em;
-          color: ${COLORS.primary};
-          text-decoration: none;
-          opacity: 0.9;
-        }
-        .hero-menu-links a:hover { opacity: 1; }
-
         /* ── O click trigger ──────────────────────────────────── */
         .hero-o-trigger {
           position: relative;
@@ -960,44 +1055,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           .hero-click-svg {
             width: clamp(40px, 10vw, 60px);
           }
-        }
-
-        /* ── Navigation ────────────────────────────────────────── */
-        .hero-site-navigation {
-          position: absolute;
-          display: flex;
-          align-items: center;
-          font-family: ${FONTS.display};
-          opacity: 0;
-          z-index: 30;
-          white-space: nowrap;
-          pointer-events: auto;
-          transition: opacity 0.3s ease;
-        }
-        .hero-nav-links {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: row;
-          gap: 1.5rem;
-          align-items: center;
-        }
-        .hero-nav-links li { margin: 0; padding: 0; }
-        .hero-nav-links a {
-          font-size: clamp(0.6rem, 0.8vw, 0.75rem);
-          font-weight: 400;
-          text-transform: lowercase;
-          letter-spacing: 0.05em;
-          color: ${COLORS.primary};
-          text-decoration: none;
-          opacity: 0.8;
-          transition: opacity 0.2s ease;
-        }
-        .hero-nav-links a:hover { opacity: 1; }
-        @media (max-width: 768px) {
-          .hero-nav-links { gap: 0.75rem; }
-          .hero-nav-links a { font-size: clamp(0.4rem, 0.6vw, 0.55rem); }
         }
 
         /* ── Engineer text (Pouities via next/font localFont) ─────── */

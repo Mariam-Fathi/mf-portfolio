@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { ExternalLink } from "lucide-react";
+import { COLORS } from "@/components/hero/constants";
 
 type ProjectLink = {
   name: string;
@@ -270,12 +271,12 @@ function ProjectDirItem({
   );
 }
 
-// Single palette for Project Explorer so all projects are visible (no light-on-light).
+// Match hero — same program, same palette.
 const explorerPalette = {
-  headline: "#280B0B",
-  body: "#280B0B",
-  link: "#6A0610",
-  accent: "#6A0610",
+  headline: COLORS.primary,
+  body: COLORS.primary,
+  link: COLORS.accent,
+  accent: COLORS.accent,
 };
 
 export default function GalleryShowcase(_props: ProjectsProps) {
@@ -287,41 +288,19 @@ export default function GalleryShowcase(_props: ProjectsProps) {
   return (
     <section
       id="projects"
-      className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
-      style={{ background: "#F9E7C9" }}
+      className="relative w-full h-full flex flex-col md:flex-row p-0 font-sans min-h-0"
+      style={{ background: COLORS.heroBackground }}
     >
-      {/* Main Window — Project Explorer vibe */}
-      <div
-        className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
-        style={{
-          background: "#F9E7C9",
-          boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
-        }}
-      >
-        {/* Title Bar */}
-        <div
-          className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
-          style={{ background: "#F9E7C9" }}
-        >
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-          </div>
-          <span className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase" style={{ color: "#280B0B" }}>
-            Project Explorer
-          </span>
-        </div>
-
-        <div className="flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+      {/* Sidebar + main (frame is in AppWindowLayout) */}
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full" style={{ minHeight: "320px" }}>
           {/* Sidebar — project tree */}
           <div
             className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: "#F9E7C9" }}
+            style={{ background: COLORS.heroBackground }}
           >
             <div className="flex-1 overflow-y-auto py-2 scrollbar-hide no-visible-scrollbar">
               <div className="px-2 pb-1">
-                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#6A0610" }}>
+                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: COLORS.accent }}>
                   Projects
                 </span>
               </div>
@@ -344,7 +323,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                 {/* Channel-style header */}
                 <div
                   className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
-                  style={{ background: "#F9E7C9" }}
+                  style={{ background: COLORS.heroBackground }}
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] leading-relaxed" style={{ color: colors.headline }}>
@@ -355,17 +334,12 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                 </div>
 
                 {/* Messages-style: role + description */}
-                <div className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-5 no-visible-scrollbar" style={{ background: "#F9E7C9" }}>
+                <div className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-5 no-visible-scrollbar" style={{ background: COLORS.heroBackground }}>
                   <div className="flex gap-3">
-                    <div
-                      className="w-8 h-8 rounded-sm flex items-center justify-center text-[10px] font-bold flex-shrink-0 border border-[#1a1a1a]"
-                      style={{ background: "#280B0B", color: "#F9E7C9" }}
-                    >
-                      {selectedIndex + 1}
-                    </div>
+              
                     <div className="flex-1">
                       <div className="mb-1">
-                        <span className="text-[12px] font-bold" style={{ color: "#280B0B" }}>Brief</span>
+                        <span className="text-[12px] font-bold" style={{ color: COLORS.primary }}>Brief</span>
                       </div>
                       <p className="text-[11px] leading-relaxed mb-2" style={{ color: colors.body }}>
                         {project.description}
@@ -375,7 +349,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
 
                   {/* Project Files — links as file pills; show section for every project */}
                   <div className="pt-2">
-                    <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: "#6A0610" }}>
+                    <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: COLORS.accent }}>
                       Project Files
                     </div>
                     {project.links.length > 0 ? (
@@ -390,7 +364,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
                                 style={{
-                                  background: "#F9E7C9",
+                                  background: COLORS.heroBackground,
                                   borderColor: colors.accent,
                                   boxShadow: "2px 2px 0 " + colors.accent,
                                 }}
@@ -413,7 +387,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
                               style={{
-                                background: "#F9E7C9",
+                                background: COLORS.heroBackground,
                                 borderColor: colors.accent,
                                 boxShadow: "2px 2px 0 " + colors.accent,
                               }}
@@ -440,7 +414,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                 {/* Footer bar — explorer vibe */}
                 <div
                   className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: "#F9E7C9" }}
+                  style={{ background: COLORS.heroBackground }}
                 >
                   <span className="text-[10px] font-sans" style={{ color: "#8a7a5a" }}>
                   </span>
@@ -452,7 +426,6 @@ export default function GalleryShowcase(_props: ProjectsProps) {
             )}
           </div>
         </div>
-      </div>
     </section>
   );
 }

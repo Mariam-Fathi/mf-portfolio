@@ -6,6 +6,7 @@ import {
   IconBrandLinkedin,
   IconLetterK,
 } from "@tabler/icons-react";
+import { COLORS } from "@/components/hero/constants";
 const EMAIL = "mariam.f.siam@gmail.com";
 
 type ContactChannel = {
@@ -81,44 +82,20 @@ const Contact: React.FC = () => {
   return (
     <section
       id="contact"
-      className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
-      style={{ background: "#F9E7C9" }}
+      className="relative w-full h-full flex flex-col md:flex-row p-0 font-sans min-h-0"
+      style={{ background: COLORS.heroBackground }}
     >
-      <div
-        className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
-        style={{
-          background: "#F9E7C9",
-          boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
-        }}
-      >
-        {/* Title Bar */}
-        <div
-          className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
-          style={{ background: "#F9E7C9" }}
-        >
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-          </div>
-          <span
-            className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase"
-            style={{ color: "#280B0B" }}
-          >
-            We Must Discuss
-          </span>
-        </div>
-
-        <div className="flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+      {/* Sidebar + main (frame is in AppWindowLayout) */}
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full" style={{ minHeight: "320px" }}>
           {/* Sidebar — contact buttons */}
           <div
             className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: "#F9E7C9" }}
+            style={{ background: COLORS.heroBackground }}
           >
             <div className="flex-1 overflow-y-auto py-3 px-3 no-visible-scrollbar flex flex-col gap-2">
               <span
                 className="text-[10px] font-bold tracking-widest uppercase pb-1"
-                style={{ color: "#6A0610" }}
+                style={{ color: COLORS.accent }}
               >
                 Contacts
               </span>
@@ -133,9 +110,9 @@ const Contact: React.FC = () => {
                     {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                     className="inline-flex items-center gap-2 px-2.5 py-2 rounded-sm border-2 border-[#2a2a2a] transition-colors hover:opacity-90 w-full"
                     style={{
-                      background: "#F9E7C9",
+                      background: COLORS.heroBackground,
                       boxShadow: "2px 2px 0 #1a1a1a",
-                      color: "#280B0B",
+                      color: COLORS.primary,
                     }}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" stroke={2} />
@@ -150,58 +127,60 @@ const Contact: React.FC = () => {
           <div className="flex-1 flex flex-col min-h-[400px]">
             <div
               className="flex-1 overflow-y-auto px-4 md:px-5 py-4 no-visible-scrollbar"
-              style={{ background: "#F9E7C9" }}
+              style={{ background: COLORS.heroBackground }}
             >
               <form onSubmit={handleSubmit} className="space-y-3 w-full">
-                <div>
-                  <label
-                    htmlFor="contact-name"
-                    className="block text-[10px] font-bold tracking-widest uppercase mb-1"
-                    style={{ color: "#6A0610" }}
-                  >
-                    Name
-                  </label>
-                  <input
-                    id="contact-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
-                    className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
-                    style={{
-                      background: "#F9E7C9",
-                      color: "#280B0B",
-                      boxShadow: "2px 2px 0 #1a1a1a",
-                    }}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="contact-email"
-                    className="block text-[10px] font-bold tracking-widest uppercase mb-1"
-                    style={{ color: "#6A0610" }}
-                  >
-                    Your email
-                  </label>
-                  <input
-                    id="contact-email"
-                    type="email"
-                    value={replyTo}
-                    onChange={(e) => setReplyTo(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
-                    style={{
-                      background: "#F9E7C9",
-                      color: "#280B0B",
-                      boxShadow: "2px 2px 0 #1a1a1a",
-                    }}
-                  />
+                <div className="flex flex-row gap-4">
+                  <div className="flex-1 min-w-0">
+                    <label
+                      htmlFor="contact-name"
+                      className="block text-[10px] font-bold tracking-widest uppercase mb-1"
+                      style={{ color: COLORS.accent }}
+                    >
+                      Name
+                    </label>
+                    <input
+                      id="contact-name"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name"
+                      className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
+                      style={{
+                        background: COLORS.heroBackground,
+                        color: COLORS.primary,
+                        boxShadow: "2px 2px 0 #1a1a1a",
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <label
+                      htmlFor="contact-email"
+                      className="block text-[10px] font-bold tracking-widest uppercase mb-1"
+                      style={{ color: COLORS.accent }}
+                    >
+                      Your email
+                    </label>
+                    <input
+                      id="contact-email"
+                      type="email"
+                      value={replyTo}
+                      onChange={(e) => setReplyTo(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0"
+                      style={{
+                        background: COLORS.heroBackground,
+                        color: COLORS.primary,
+                        boxShadow: "2px 2px 0 #1a1a1a",
+                      }}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label
                     htmlFor="contact-message"
                     className="block text-[10px] font-bold tracking-widest uppercase mb-1"
-                    style={{ color: "#6A0610" }}
+                    style={{ color: COLORS.accent }}
                   >
                     Message
                   </label>
@@ -213,8 +192,8 @@ const Contact: React.FC = () => {
                     rows={5}
                     className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0 resize-y min-h-[100px]"
                     style={{
-                      background: "#F9E7C9",
-                      color: "#280B0B",
+                      background: COLORS.heroBackground,
+                      color: COLORS.primary,
                       boxShadow: "2px 2px 0 #1a1a1a",
                     }}
                   />
@@ -223,8 +202,8 @@ const Contact: React.FC = () => {
                   type="submit"
                   className="px-4 py-2 text-[11px] font-bold font-sans rounded-sm border-2 border-[#1a1a1a] transition-colors hover:opacity-90"
                   style={{
-                    background: "#280B0B",
-                    color: "#F9E7C9",
+                    background: COLORS.primary,
+                    color: COLORS.heroBackground,
                     boxShadow: "2px 2px 0 #1a1a1a",
                   }}
                 >
@@ -236,7 +215,7 @@ const Contact: React.FC = () => {
             {/* Footer — current date & time */}
             <div
               className="border-t-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 min-h-[40px] flex items-center justify-end"
-              style={{ background: "#F9E7C9" }}
+              style={{ background: COLORS.heroBackground }}
             >
               <span className="text-[10px] font-sans tabular-nums" style={{ color: "#8a7a5a" }}>
                 {dateTimeFormatter.format(now)}
@@ -244,7 +223,6 @@ const Contact: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </section>
   );
 };

@@ -65,6 +65,7 @@ export type SectionId =
   | "contact";
 
 export const NAV_SECTIONS: { id: SectionId; label: string }[] = [
+  { id: "hero", label: "home" },
   { id: "experience", label: "experience" },
   { id: "work", label: "projects" },
   { id: "certificates", label: "certificates" },

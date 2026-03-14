@@ -3,6 +3,7 @@
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { COLORS } from "@/components/hero/constants";
 
 type Certificate = {
   id: string;
@@ -108,46 +109,21 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen flex items-center justify-center p-6 md:p-8 font-sans"
-      style={{ background: "#F9E7C9" }}
+      className="relative w-full h-full flex flex-col md:flex-row p-0 font-sans min-h-0"
+      style={{ background: COLORS.heroBackground }}
     >
-      {/* Main Window — same vibe as Project Explorer */}
-      <div
-        className="w-full max-w-[900px] rounded-xl overflow-hidden border-2 border-[#2a2a2a]"
-        style={{
-          background: "#F9E7C9",
-          boxShadow: "6px 6px 0px #1a1a1a, 0 20px 60px rgba(0,0,0,0.15)",
-        }}
-      >
-        {/* Title Bar */}
-        <div
-          className="border-b-2 border-[#2a2a2a] px-4 py-2.5 flex items-center gap-3"
-          style={{ background: "#F9E7C9" }}
-        >
-          <div className="flex gap-1.5">
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-            <div className="w-3 h-3 rounded-full bg-[#2a2a2a] border border-[#1a1a1a]" />
-          </div>
-          <span
-            className="flex-1 text-center text-[12px] font-bold tracking-widest uppercase"
-            style={{ color: "#280B0B" }}
-          >
-            Certificate Explorer
-          </span>
-        </div>
-
-        <div className="flex flex-col md:flex-row" style={{ minHeight: "520px" }}>
+      {/* Sidebar + main (frame is in AppWindowLayout) */}
+      <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full" style={{ minHeight: "320px" }}>
           {/* Sidebar — certificate list */}
           <div
             className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: "#F9E7C9" }}
+            style={{ background: COLORS.heroBackground }}
           >
             <div className="flex-1 overflow-y-auto py-2 no-visible-scrollbar">
               <div className="px-2 pb-1">
                 <span
                   className="text-[10px] font-bold tracking-widest uppercase"
-                  style={{ color: "#6A0610" }}
+                  style={{ color: COLORS.accent }}
                 >
                   Certificates
                 </span>
@@ -171,18 +147,18 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Channel-style header */}
                 <div
                   className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
-                  style={{ background: "#F9E7C9" }}
+                  style={{ background: COLORS.heroBackground }}
                 >
                   <div className="flex items-center gap-2">
                     <span
                         className="text-[11px] leading-relaxed"
-                        style={{ color: "#280B0B" }}
+                        style={{ color: COLORS.primary }}
                     >
                       # {cert.title} - {cert.platform}
                     </span>
             
                   </div>
-                  <span className="text-[11px]" style={{ color: "#6A0610" }}>
+                  <span className="text-[11px]" style={{ color: COLORS.accent }}>
                     
                   </span>
                 </div>
@@ -190,15 +166,10 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Content: image */}
                 <div
                   className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-4 no-visible-scrollbar"
-                  style={{ background: "#F9E7C9" }}
+                  style={{ background: COLORS.heroBackground }}
                 >
                   <div className="flex gap-3">
-                    <div
-                      className="w-8 h-8 rounded-sm flex items-center justify-center text-[10px] font-bold flex-shrink-0 border border-[#1a1a1a]"
-                      style={{ background: "#280B0B", color: "#F9E7C9" }}
-                    >
-                      {selectedIndex + 1}
-                    </div>
+              
                     <div className="flex-1">
                       <div className="w-full max-w-[420px] space-y-2">
                         <CertificateImage cert={cert} />
@@ -208,15 +179,15 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 w-full justify-center"
                           style={{
-                            background: "#F9E7C9",
-                            borderColor: "#6A0610",
-                            boxShadow: "2px 2px 0 #6A0610",
+                            background: COLORS.heroBackground,
+                            borderColor: COLORS.accent,
+                            boxShadow: `2px 2px 0 ${COLORS.accent}`,
                           }}
                         >
-                          <span className="text-[10px] font-sans" style={{ color: "#280B0B" }}>
+                          <span className="text-[10px] font-sans" style={{ color: COLORS.primary }}>
                             View credential
                           </span>
-                          <span className="text-[10px]" style={{ color: "#6A0610" }}>↗</span>
+                          <span className="text-[10px]" style={{ color: COLORS.accent }}>↗</span>
                         </a>
                       </div>
                     </div>
@@ -226,7 +197,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                 {/* Footer bar */}
                 <div
                   className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: "#F9E7C9" }}
+                  style={{ background: COLORS.heroBackground }}
                 >
                   <span
                     className="text-[10px] font-sans"
@@ -245,7 +216,6 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
             )}
           </div>
         </div>
-      </div>
     </section>
   );
 };
@@ -259,7 +229,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       href={cert.link}
       target="_blank"
       rel="noopener noreferrer"
-      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#6A0610]"
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#91010F]"
       aria-label={`View ${cert.title} certificate`}
     >
       {!imgError ? (
@@ -284,7 +254,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
           {!imgLoaded && (
             <span
               className="absolute inset-0 animate-pulse opacity-60"
-              style={{ backgroundColor: "#F9E7C9" }}
+              style={{ backgroundColor: COLORS.heroBackground }}
               aria-hidden
             />
           )}
@@ -292,7 +262,7 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       ) : (
         <span
           className="block py-6 text-center text-[11px] font-sans font-medium rounded-sm border border-[#2a2a2a]"
-          style={{ color: "#280B0B", background: "#F9E7C9" }}
+          style={{ color: COLORS.primary, background: COLORS.heroBackground }}
         >
           {cert.title}
         </span>

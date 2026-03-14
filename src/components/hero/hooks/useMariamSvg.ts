@@ -1,7 +1,10 @@
 import { useEffect, useState, type RefObject } from "react";
-import { FONTS } from "../constants";
+import { FONTS, APP_WINDOW_INSET_PX } from "../constants";
 import { checkIsMobile } from "./useIsMobile";
 import type { MariamSvgData } from "../types";
+
+// Bottom of content frame = inset + 2px border (match hero app-window-content-frame)
+const FRAME_BOTTOM_OFFSET_PX = APP_WINDOW_INSET_PX + 2;
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
 // IMPORTANT – React 18 Strict Mode double-invokes effects in development.
@@ -80,19 +83,21 @@ function layoutMariam(
   isMobile: boolean,
   onDone?: () => void,
 ) {
-  const portfolEl = portfolioHeaderRef.current?.querySelector(
-    ".hero-cover-title-portfoli",
-  ) as HTMLElement | null;
+  // When SKIP_PORTFOLIO_ANIMATION we have .hero-cover-title-whole; otherwise .hero-cover-title-portfoli
+  const portfolEl =
+    (portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
+    (portfolioHeaderRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
   if (!portfolEl) { onDone?.(); return; }
 
   const screenHeight = getViewportHeight();
   const screenWidth = window.innerWidth;
   const portfolRect = portfolEl.getBoundingClientRect();
   const mobileBottomPadding = isMobile ? 40 : 0;
+  const bottomOffset = isMobile ? mobileBottomPadding : FRAME_BOTTOM_OFFSET_PX;
 
   const availableHeight = isMobile
     ? Math.min(screenHeight * 0.3, 200)
-    : screenHeight - portfolRect.bottom - mobileBottomPadding;
+    : screenHeight - portfolRect.bottom - FRAME_BOTTOM_OFFSET_PX;
 
   const widthPerFontSize = getWidthPerFontSize();
   let fontSize = (screenWidth - 2) / widthPerFontSize;
@@ -108,7 +113,7 @@ function layoutMariam(
     position: "fixed",
     left: "0px",
     top: "auto",
-    bottom: `${mobileBottomPadding}px`,
+    bottom: `${bottomOffset}px`,
     margin: "0",
     padding: "0",
     height: `${mariamHeight}px`,
@@ -173,7 +178,7 @@ function layoutMariam(
 function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: boolean) {
   const { fontSize, mariamWidth, mariamHeight } = data;
   const padding = 10;
-  const bottomOffset = isMobile ? 40 : 0;
+  const bottomOffset = isMobile ? 40 : FRAME_BOTTOM_OFFSET_PX;
 
   svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
   svg.setAttribute("width", `${mariamWidth}px`);

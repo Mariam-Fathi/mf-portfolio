@@ -14,9 +14,10 @@ export function usePortfolWidth(
     if (!headerRef.current) return;
 
     const measure = () => {
-      const el = headerRef.current?.querySelector(
-        ".hero-cover-title-portfoli",
-      ) as HTMLElement | null;
+      // When SKIP_PORTFOLIO_ANIMATION we have .hero-cover-title-whole; otherwise .hero-cover-title-portfoli
+      const el =
+        (headerRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
+        (headerRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
       if (!el) return;
       const orig = el.style.display;
       el.style.display = "inline";
