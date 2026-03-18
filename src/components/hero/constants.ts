@@ -29,6 +29,8 @@ export const Z_LAYERS = {
   mariamSvg: 300,
   navigation: 101,
   engineerText: 9999,
+  /** Mobile sidebar overlay — above Mariam and engineer text when open */
+  mobileMenuOverlay: 10000,
 } as const;
 
 // ── Animation durations (seconds) ───────────────────────────────────

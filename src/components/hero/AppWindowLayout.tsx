@@ -59,7 +59,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
 
   return (
     <>
-      <div className="hero-yellow-frame hero-window app-window-layout">
+      <div className={`hero-yellow-frame hero-window app-window-layout${isMobile && isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
         {/* Title bar: same as hero — PORTFOLIO (clickable = back to hero) + nav links on right; mobile: menu icon */}
         <div className="hero-window-title-bar">
           <div className="hero-cover-header hero-cover-header-in-title-bar">
@@ -153,6 +153,9 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           margin: 0;
           padding: 0;
         }
+        .hero-yellow-frame.hero-window-mobile-menu-open {
+          z-index: ${Z_LAYERS.mobileMenuOverlay};
+        }
         .hero-window {
           display: flex;
           flex-direction: column;
@@ -203,6 +206,11 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           justify-content: center;
           padding: 0;
         }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
+            justify-content: flex-start;
+          }
+        }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
           min-height: var(--titlebar-square-height);
@@ -210,6 +218,11 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           display: flex;
           align-items: center;
           width: 100%;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-header-line {
+            justify-content: flex-start;
+          }
         }
         .hero-window-title-bar .hero-cover-title-whole {
           font-size: clamp(24px, calc(var(--titlebar-square-height) * 0.39), 58px);
@@ -300,7 +313,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .hero-window-mobile-menu-overlay {
           position: fixed;
           inset: 0;
-          z-index: ${Z_LAYERS.frame + 10};
+          z-index: ${Z_LAYERS.mobileMenuOverlay};
           background: rgba(0,0,0,0.4);
           display: flex;
           align-items: flex-start;

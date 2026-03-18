@@ -155,20 +155,22 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     portfolioCacheProp,
   );
 
-  // On lg/md: show "Software Engineer" when dot hits the ı (dotLandedOnI) or dot animation completes. On sm (<768px): show when portfolio is ready (no dot animation).
+  // When true, "Software Engineer" is revealed (and React must not reset its opacity to 0).
+  const engineerRevealActive =
+    isMounted &&
+    (isLg
+      ? dotLandedOnI || isDotAnimationComplete
+      : isSm
+        ? isDotAnimationComplete
+        : portfolioRevealReady || isDotAnimationComplete);
+
   useEngineerText(
     engineerTextRef,
     numberSevenRef,
     svgIRef,
     svgA2Ref,
     svgM2Ref,
-    isMounted &&
-      (isLg
-        ? dotLandedOnI || isDotAnimationComplete
-        : // Mobile: wait for the dot "complete" so ıam gets its final color first.
-          isSm
-          ? isDotAnimationComplete
-          : portfolioRevealReady || isDotAnimationComplete),
+    engineerRevealActive,
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
@@ -451,7 +453,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
       </svg>
 
       {/* ── Retro OS window: title bar + menu bar + content ─────── */}
-      <div className="hero-yellow-frame hero-window">
+      <div className={`hero-yellow-frame hero-window${isSidebarMobile && isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
         {/* Title bar: hero title (program name position + size) */}
         <div className="hero-window-title-bar">
           <div className="hero-cover-header hero-cover-header-in-title-bar">
@@ -644,9 +646,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
             className={`hero-engineer-text ${pouitiesFont.className}`}
             style={{
               position: "fixed",
-              // top/left/right/bottom are intentionally omitted here.
-              // useEngineerText owns all positional styles and sets them directly,
-              // so there is no specificity conflict and no !important needed.
+              // top/left/right/bottom are intentionally omitted — useEngineerText sets them.
               color: COLORS.primary,
               fontFamily: pouitiesFont.style.fontFamily,
               fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
@@ -654,7 +654,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               pointerEvents: "none",
               whiteSpace: "nowrap",
               overflow: "visible",
-              opacity: 0,
+              // Must match reveal state so React doesn't overwrite GSAP back to 0 on re-render.
+              opacity: engineerRevealActive ? 1 : 0,
               filter: "blur(0px)",
             }}
           >
@@ -772,6 +773,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           margin: 0;
           padding: 0;
         }
+        .hero-yellow-frame.hero-window-mobile-menu-open {
+          z-index: ${Z_LAYERS.mobileMenuOverlay};
+        }
         /* Outer frame: chunky border + 3D bevel (retro OS vibe, our palette) */
         .hero-window {
           display: flex;
@@ -823,10 +827,20 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           justify-content: center;
           padding: 0;
         }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
+            justify-content: flex-start;
+          }
+        }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
           min-height: var(--titlebar-square-height);
           justify-content: center;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar .hero-cover-header-line {
+            justify-content: flex-start;
+          }
         }
         /* Whole word "PORTFOLIO" at left (no O/line/drag) — same font as Software Engineer */
         .hero-window-title-bar .hero-cover-title-whole {
@@ -944,7 +958,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         .hero-window-mobile-menu-overlay {
           position: fixed;
           inset: 0;
-          z-index: ${Z_LAYERS.frame + 10};
+          z-index: ${Z_LAYERS.mobileMenuOverlay};
           background: rgba(0,0,0,0.4);
           display: flex;
           align-items: flex-start;
