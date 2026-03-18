@@ -12,7 +12,6 @@ const SectionNavigation: React.FC<SectionNavigationProps> = ({ onNavigate, curre
   const navRef = useRef<HTMLElement>(null);
   const sections = [
     { id: "hero", label: "home" },
-    { id: "experience", label: "experience" },
     { id: "work", label: "projects" },
     { id: "certificates", label: "certificates" },
     { id: "contact", label: "contact" },

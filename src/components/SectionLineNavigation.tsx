@@ -13,7 +13,6 @@ interface SectionLineNavigationProps {
 
 const sections = [
   { id: "hero", label: "home" },
-  { id: "experience", label: "experience" },
   { id: "work", label: "projects" },
   { id: "certificates", label: "certificates" },
   { id: "contact", label: "contact" },
