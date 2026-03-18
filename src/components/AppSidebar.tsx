@@ -86,7 +86,7 @@ export default function AppSidebar({
       style={{ background: COLORS.heroBackground }}
     >
       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 no-visible-scrollbar flex flex-col gap-2 justify-between">
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 ">
           <span
             className="text-[10px] font-bold tracking-widest uppercase pb-1"
             style={{ color: COLORS.accent }}
@@ -118,7 +118,7 @@ export default function AppSidebar({
  
 
         {/* Separator between sections and contacts */}
-        <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
+        <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2" />
         <div className="flex flex-col gap-2">
         <span
             className="text-[10px] font-bold tracking-widest uppercase pb-1"
@@ -202,11 +202,11 @@ export default function AppSidebar({
             );
           })}
         </div>    
-        <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
+        <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2" />
 
         <div className="flex flex-col gap-2">
           <span
-            className="text-[10px] font-bold tracking-widest uppercase pb-1 mt-1"
+            className="text-[10px] font-bold tracking-widest uppercase pb-1"
             style={{ color: COLORS.accent }}
           >
             Contacts
