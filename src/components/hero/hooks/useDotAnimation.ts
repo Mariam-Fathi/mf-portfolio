@@ -390,7 +390,6 @@ function buildDotTimeline(
     ease: "power3.in",
   });
   tl.call(runLetterTouch);
-  tl.call(() => onDotLandedOnI?.()); // exact moment dot touches ı — trigger engineer text & portfolio
   tl.to(dot, {
     keyframes: [
       {
@@ -408,6 +407,7 @@ function buildDotTimeline(
         backgroundColor: dotBase,
         duration: TIMING.dotTouchSettle,
         ease: "back.out(1.06)",
+        onComplete: () => onDotLandedOnI?.(),
       },
     ],
   });
