@@ -91,13 +91,21 @@ function layoutMariam(
   const portfolRect = portfolEl.getBoundingClientRect();
   const bottomOffset = 0;
 
+  // Shift the SVG to the right so it doesn't overlap the left sidebar (desktop only).
+  // On mobile we keep `left: 0` to avoid horizontal overflow.
+  const sidebarEl = !isMobile
+    ? (document.querySelector('[data-app-sidebar="left"]') as HTMLElement | null)
+    : null;
+  const sidebarOffsetPx = isMobile ? 0 : (sidebarEl?.getBoundingClientRect().width ?? 240);
+  const availableSvgWidth = Math.max(1, screenWidth - sidebarOffsetPx);
+
   const availableHeight = isMobile
     ? Math.min(screenHeight * 0.3, 200)
     : screenHeight - portfolRect.bottom;
 
   const widthPerFontSize = getWidthPerFontSize();
-  let fontSize = (screenWidth - 2) / widthPerFontSize;
-  const mariamWidth = screenWidth;
+  let fontSize = (availableSvgWidth - 2) / widthPerFontSize;
+  const mariamWidth = availableSvgWidth;
   const mariamHeight = availableHeight;
   const padding = 10;
 
@@ -107,7 +115,7 @@ function layoutMariam(
   svg.setAttribute("height", `${mariamHeight}px`);
   Object.assign(svg.style, {
     position: "fixed",
-    left: "0px",
+    left: `${sidebarOffsetPx}px`,
     top: "auto",
     bottom: `${bottomOffset}px`,
     margin: "0",
@@ -138,7 +146,7 @@ function layoutMariam(
     requestAnimationFrame(() => {
       try {
         const bbox = textEl.getBBox();
-        const widthScale = (screenWidth - 2) / bbox.width;
+        const widthScale = (availableSvgWidth - 2) / bbox.width;
         const heightScale = mariamHeight / bbox.height;
         const scale = Math.min(widthScale, heightScale);
 
@@ -151,6 +159,7 @@ function layoutMariam(
           fontSize,
           mariamWidth,
           mariamHeight,
+          sidebarOffsetPx,
           portfolBottom: portfolRect.bottom,
           portfolLeft: portfolRect.left,
           portfolFontSize: parseFloat(window.getComputedStyle(portfolEl).fontSize),
@@ -175,13 +184,14 @@ function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: bo
   const { fontSize, mariamWidth, mariamHeight } = data;
   const padding = 10;
   const bottomOffset = 0;
+  const sidebarOffsetPx = isMobile ? 0 : data.sidebarOffsetPx;
 
   svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
   svg.setAttribute("width", `${mariamWidth}px`);
   svg.setAttribute("height", `${mariamHeight}px`);
   Object.assign(svg.style, {
     position: "fixed",
-    left: "0px",
+    left: `${sidebarOffsetPx}px`,
     top: "auto",
     bottom: `${bottomOffset}px`,
     margin: "0",

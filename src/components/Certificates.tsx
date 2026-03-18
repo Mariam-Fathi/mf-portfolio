@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { COLORS } from "@/components/hero/constants";
@@ -11,6 +11,8 @@ type Certificate = {
   image: string;
   platform: string;
   link: string;
+  skills: string[];
+  brief: string;
 };
 
 const certificates: Certificate[] = [
@@ -21,6 +23,9 @@ const certificates: Certificate[] = [
     image: "/certificates/data-engineering.jpeg",
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
+    skills: ["Data Modeling", "ETL", "SQL", "Data Pipelines", "Warehousing"],
+    brief:
+      "A foundation in building reliable data pipelines: from modeling and transforming raw data to designing maintainable ingestion and warehousing workflows.",
   },
   {
     id: "ai-agents",
@@ -28,6 +33,9 @@ const certificates: Certificate[] = [
     image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
+    skills: ["Agent Workflows", "Prompting", "Tool Use", "Evaluation", "Safety"],
+    brief:
+      "Hands-on training for building agent-like systems: planning steps, integrating tools, and validating outputs with practical evaluation and safety considerations.",
   },
   {
     id: "computer-vision",
@@ -35,6 +43,9 @@ const certificates: Certificate[] = [
     image: "/certificates/Mariam Fathi - Computer Vision.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
+    skills: ["Image Processing", "CNNs", "Vision Pipelines", "Model Evaluation"],
+    brief:
+      "Applied computer vision fundamentals: processing images, training convolutional models, and evaluating performance for real-world vision tasks.",
   },
   {
     id: "time-series",
@@ -42,6 +53,9 @@ const certificates: Certificate[] = [
     image: "/certificates/Mariam Fathi - Time Series.png",
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
+    skills: ["Forecasting", "Time Series Features", "Anomaly Detection", "Validation"],
+    brief:
+      "Developed practical time-series modeling skills: feature preparation, forecasting strategies, and robust model validation for temporal data.",
   },
   {
     id: "ieee",
@@ -49,6 +63,9 @@ const certificates: Certificate[] = [
     image: "/certificates/IEEE Certificate.jpeg",
     platform: "IEEE",
     link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
+    skills: ["Professional Development", "Engineering Concepts", "Technical Communication"],
+    brief:
+      "An IEEE-backed credential focused on strengthening engineering knowledge and professional practice through structured learning.",
   },
 ];
 
@@ -56,7 +73,7 @@ const certificates: Certificate[] = [
 export const CERTIFICATE_IMAGE_URLS = certificates.map((c) => c.image);
 
 const FolderIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+  <svg width="40" height="40" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
     <path
       d="M1 3.5a.5.5 0 01.5-.5H5l1.5 2H12.5a.5.5 0 01.5.5V11a.5.5 0 01-.5.5h-11A.5.5 0 011 11V3.5z"
       fill="currentColor"
@@ -64,158 +81,197 @@ const FolderIcon = () => (
   </svg>
 );
 
-function CertDirItem({
-  cert,
-  index,
-  isSelected,
-  onSelect,
-}: {
-  cert: Certificate;
-  index: number;
-  isSelected: boolean;
-  onSelect: () => void;
-}) {
-  const folderLabel = `${String(index + 1).padStart(2, "0")}_${cert.id}`;
-  return (
-    <div
-      className={cn(
-        "flex items-center gap-1.5 px-2 py-0.5 cursor-pointer group  transition-all duration-100",
-        isSelected ? "bg-[#1a1a1a] text-[#e8e0cc]" : "hover:bg-[#1a1a1a]/40",
-      )}
-      style={{ paddingLeft: "8px" }}
-      onClick={onSelect}
-    >
-      <span className={isSelected ? "text-[#c8b97a]" : "text-[#8a7a5a]"}>
-        <FolderIcon />
-      </span>
-      <span
-        className={cn(
-          "text-[11px] leading-relaxed font-sans",
-          isSelected ? "text-[#e8e0cc]" : "text-[#2a2a2a]",
-        )}
-      >
-        {folderLabel}
-      </span>
-    </div>
-  );
-}
-
 const Certificates: React.FC<{ isActive?: boolean }> = () => {
-  const sectionRef = useRef<HTMLElement>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const cert = certificates[selectedIndex];
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isModalOpen]);
+
+  const openModal = (index: number) => {
+    setSelectedIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <section
-      ref={sectionRef}
-      className="relative w-full h-full flex flex-col md:flex-row p-0 font-sans min-h-0"
+      id="certificates"
+      className="relative w-full h-full flex flex-col p-0 font-sans min-h-0"
       style={{ background: COLORS.heroBackground }}
     >
-      {/* Sidebar + main (frame is in AppWindowLayout) */}
-      <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full" style={{ minHeight: "320px" }}>
-          {/* Sidebar — certificate list */}
-          <div
-            className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: COLORS.heroBackground }}
-          >
-            <div className="flex-1 overflow-y-auto py-2 no-visible-scrollbar">
-              <div className="px-2 pb-1">
-                <span
-                  className="text-[10px] font-bold tracking-widest uppercase"
-                  style={{ color: COLORS.accent }}
-                >
-                  Certificates
-                </span>
-              </div>
-              {certificates.map((c, i) => (
-                <CertDirItem
-                  key={c.id}
-                  cert={c}
-                  index={i}
-                  isSelected={selectedIndex === i}
-                  onSelect={() => setSelectedIndex(i)}
-                />
-              ))}
-            </div>
+      {/* Icon grid */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-2 no-visible-scrollbar">
+        <div className="mb-4">
+          <span className="text-[10px] pl-4 font-bold tracking-widest uppercase pb-1" style={{ color: "#280B0B" }}>
+            portfolio / certificates
+          </span>
+          <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
           </div>
 
-          {/* Main Content — selected certificate */}
-          <div className="flex-1 flex flex-col min-h-[400px]">
-            {cert && (
-              <>
-                {/* Channel-style header */}
-                <div
-                  className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
-                  style={{ background: COLORS.heroBackground }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                        className="text-[11px] leading-relaxed"
-                        style={{ color: COLORS.primary }}
-                    >
-                      # {cert.title} - {cert.platform}
-                    </span>
-            
-                  </div>
-                  <span className="text-[11px]" style={{ color: COLORS.accent }}>
-                    
+        <div className="px-4 md:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center">
+            {certificates.map((c, i) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => openModal(i)}
+                className="group cursor-pointer select-none"
+                style={{ background: "transparent" }}
+                aria-label={`Open certificate: ${c.title}`}
+              >
+                <div className="flex flex-col items-center">
+                  <span
+                    className="text-[#e8e0cc]"
+                    style={{
+                      color: i === selectedIndex && isModalOpen ? COLORS.primary : "#8a7a5a",
+                    }}
+                  >
+                    <FolderIcon />
+                  </span>
+                  <span
+                    className="mt-1 text-[11px] font-sans leading-relaxed bg-transparent"
+                    style={{
+                      color: "#8a7a5a",
+                      textAlign: "center",
+                      maxWidth: 140,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                    title={`portfolio / certificates / ${c.title}`}
+                  >
+                    {c.title}
                   </span>
                 </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-                {/* Content: image */}
-                <div
-                  className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-4 no-visible-scrollbar"
-                  style={{ background: COLORS.heroBackground }}
-                >
-                  <div className="flex gap-3">
-              
-                    <div className="flex-1">
-                      <div className="w-full max-w-[420px] space-y-2">
-                        <CertificateImage cert={cert} />
-                        <a
-                          href={cert.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 w-full justify-center"
+      {/* Modal */}
+      {isModalOpen && cert && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[99999] flex items-center justify-center"
+        >
+          <div className="absolute inset-0 bg-black/60" onClick={closeModal} aria-hidden="true" />
+
+          <div
+            className="relative w-[92vw] max-w-[860px] max-h-[86vh] overflow-y-auto border-2 border-[#2a2a2a]"
+            style={{ background: COLORS.heroBackground, boxShadow: "2px 2px 0 #1a1a1a" }}
+          >
+            <div
+              className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between gap-3"
+              style={{ background: COLORS.heroBackground }}
+            >
+              <span className="text-[11px] leading-relaxed" style={{ color: COLORS.primary, whiteSpace: "nowrap" }}>
+                # {cert.title} - {cert.platform}
+              </span>
+
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Close certificate modal"
+                className="flex items-center justify-center rounded-sm border-2 border-[#2a2a2a] px-2 py-1 transition hover:opacity-90"
+                style={{ background: COLORS.heroBackground, color: COLORS.primary, boxShadow: "2px 2px 0 #1a1a1a" }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="px-4 md:px-5 py-4">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Left: certificate image */}
+                <div className="w-full md:max-w-[420px] space-y-2">
+                  <CertificateImage cert={cert} />
+
+                  <a
+                    href={cert.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 w-full justify-center"
+                    style={{
+                      background: COLORS.heroBackground,
+                      borderColor: COLORS.accent,
+                      boxShadow: `2px 2px 0 ${COLORS.accent}`,
+                    }}
+                  >
+                    <span className="text-[10px] font-sans" style={{ color: COLORS.primary }}>
+                      View credential
+                    </span>
+                    <span className="text-[10px]" style={{ color: COLORS.accent }}>
+                      ↗
+                    </span>
+                  </a>
+                </div>
+
+                {/* Right: skills + brief */}
+                <div className="flex-1 min-w-0 space-y-4">
+                  <div>
+                    <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: COLORS.accent }}>
+                      Skills
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {cert.skills.map((skill) => (
+                        <span
+                          key={skill}
+                          className="inline-flex items-center border rounded-sm px-2.5 py-1.5"
                           style={{
                             background: COLORS.heroBackground,
                             borderColor: COLORS.accent,
                             boxShadow: `2px 2px 0 ${COLORS.accent}`,
+                            color: COLORS.primary,
                           }}
                         >
-                          <span className="text-[10px] font-sans" style={{ color: COLORS.primary }}>
-                            View credential
-                          </span>
-                          <span className="text-[10px]" style={{ color: COLORS.accent }}>↗</span>
-                        </a>
-                      </div>
+                          <span className="text-[10px] font-sans font-bold">{skill}</span>
+                        </span>
+                      ))}
                     </div>
                   </div>
-                </div>
 
-                {/* Footer bar */}
-                <div
-                  className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: COLORS.heroBackground }}
-                >
-                  <span
-                    className="text-[10px] font-sans"
-                    style={{ color: "#8a7a5a" }}
-                  >
-                  </span>
-                  <span
-                    className="text-[9px] font-sans"
-                    style={{ color: "#8a7a5a" }}
-                  >
-                    {String(selectedIndex + 1).padStart(2, "0")} /{" "}
-                    {String(certificates.length).padStart(2, "0")}
-                  </span>
+                  <div>
+                    <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: COLORS.accent }}>
+                      Brief
+                    </div>
+                    <p className="text-[11px] leading-relaxed" style={{ color: COLORS.primary }}>
+                      {cert.brief}
+                    </p>
+                  </div>
                 </div>
-              </>
-            )}
+              </div>
+            </div>
+
+            <div
+              className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-end"
+              style={{ background: COLORS.heroBackground }}
+            >
+              <span className="text-[9px] font-sans" style={{ color: "#8a7a5a" }}>
+                {String(selectedIndex + 1).padStart(2, "0")} / {String(certificates.length).padStart(2, "0")}
+              </span>
+            </div>
           </div>
         </div>
+      )}
     </section>
   );
 };

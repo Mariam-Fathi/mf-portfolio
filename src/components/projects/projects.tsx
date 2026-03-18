@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { COLORS } from "@/components/hero/constants";
 
@@ -29,7 +29,7 @@ const extColors: Record<string, string> = {
 };
 
 const FolderIcon = ({ open }: { open: boolean }) => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+  <svg width="40" height="40" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
     <path
       d={open ? "M1 4h12v7.5a.5.5 0 01-.5.5H1.5a.5.5 0 01-.5-.5V4zm0 0V2.5a.5.5 0 01.5-.5H5l1.5 2H1z" : "M1 3.5a.5.5 0 01.5-.5H5l1.5 2H12.5a.5.5 0 01.5.5V11a.5.5 0 01-.5.5h-11A.5.5 0 011 11V3.5z"}
       fill="currentColor"
@@ -145,7 +145,7 @@ const projects: Project[] = [
   },
   {
     id: "wheelchair-dashboard",
-    title: "Wheelchair EL-Haram Dashboard",
+    title: "Wheelchair",
     role: "Frontend Engineer",
     description: "Developed a secure, multilingual (EN/AR/UR) React/TypeScript admin dashboard for wheelchair service operations. Delivered full CRUD for contracted partners, assets, services, and pricing; real-time dashboard with KPIs and maps; trip tracking and detail views; JWT auth, RBAC-ready flows, and CSV/PDF export. Integrated REST APIs, TanStack Query, Tailwind CSS, and Google Maps in a responsive, RTL-capable SPA.",
     links: [
@@ -281,151 +281,223 @@ const explorerPalette = {
 
 export default function GalleryShowcase(_props: ProjectsProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const project = projects[selectedIndex];
   const colors = explorerPalette;
 
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isModalOpen]);
+
+  const openModal = (index: number) => {
+    setSelectedIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <section
       id="projects"
-      className="relative w-full h-full flex flex-col md:flex-row p-0 font-sans min-h-0"
+      className="relative w-full h-full flex flex-col p-0 font-sans min-h-0"
       style={{ background: COLORS.heroBackground }}
     >
-      {/* Sidebar + main (frame is in AppWindowLayout) */}
-      <div className="flex flex-col md:flex-row flex-1 min-h-0 w-full" style={{ minHeight: "320px" }}>
-          {/* Sidebar — project tree */}
-          <div
-            className="w-full md:w-[240px] border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col"
-            style={{ background: COLORS.heroBackground }}
-          >
-            <div className="flex-1 overflow-y-auto py-2 scrollbar-hide no-visible-scrollbar">
-              <div className="px-2 pb-1">
-                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: COLORS.accent }}>
-                  Projects
-                </span>
-              </div>
-              {projects.map((p, i) => (
-                <ProjectDirItem
-                  key={p.id}
-                  project={p}
-                  index={i}
-                  isSelected={selectedIndex === i}
-                  onSelect={() => setSelectedIndex(i)}
-                />
-              ))}
-            </div>
+      {/* Icon grid (Explorer-style) */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-2 no-visible-scrollbar">
+        <div className="mb-4">
+          <span className="text-[10px] pl-4 font-bold tracking-widest uppercase pb-1" style={{ color: "#280B0B" }}>
+            portfolio / projects
+          </span>
+          {/* Separator line under breadcrumb heading */}
+          <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
           </div>
 
-          {/* Main Content — selected project */}
-          <div className="flex-1 flex flex-col min-h-[400px]">
-            {project && (
-              <>
-                {/* Channel-style header */}
-                <div
-                  className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between flex-wrap gap-2"
-                  style={{ background: COLORS.heroBackground }}
+        <div className="px-4 md:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center">
+            {projects.map((p, i) => {
+              const folderLabel = `${String(i + 1).padStart(2, "0")}_${p.id}`;
+              const breadcrumbLabel = `portfolio / projects / ${p.title}`;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => openModal(i)}
+                  className="group cursor-pointer select-none"
+                  style={{ background: "transparent" }}
+                  aria-label={`Open project: ${p.title}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] leading-relaxed" style={{ color: colors.headline }}>
-                      # {project.title} — {project.role}
+                  <div className="flex flex-col items-center">
+                    <span
+                      className="text-[#e8e0cc]"
+                      style={{
+                        color: i === selectedIndex && isModalOpen ? colors.headline : "#8a7a5a",
+                      }}
+                    >
+                      <FolderIcon open={false} />
+                    </span>
+                    <span
+                      className="mt-1 text-[11px] font-sans leading-relaxed text-[#2a2a2a] bg-transparent"
+                      style={{
+                        color: "#8a7a5a",
+                        textAlign: "center",
+                        maxWidth: 140,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      title={breadcrumbLabel}
+                    >
+                      {p.title}
                     </span>
                   </div>
-                
-                </div>
-
-                {/* Messages-style: role + description */}
-                <div className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-5 no-visible-scrollbar" style={{ background: COLORS.heroBackground }}>
-                  <div className="flex gap-3">
-              
-                    <div className="flex-1">
-                      <div className="mb-1">
-                        <span className="text-[12px] font-bold" style={{ color: COLORS.primary }}>Brief</span>
-                      </div>
-                      <p className="text-[11px] leading-relaxed mb-2" style={{ color: colors.body }}>
-                        {project.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Project Files — links as file pills; show section for every project */}
-                  <div className="pt-2">
-                    <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: COLORS.accent }}>
-                      Project Files
-                    </div>
-                    {project.links.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {project.links.map((link) => {
-                          if (link.isGrouped && link.groupedLinks) {
-                            return link.groupedLinks.map((gl, idx) => (
-                              <a
-                                key={`${idx}-${gl.url}`}
-                                href={gl.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
-                                style={{
-                                  background: COLORS.heroBackground,
-                                  borderColor: colors.accent,
-                                  boxShadow: "2px 2px 0 " + colors.accent,
-                                }}
-                              >
-                                <span style={{ color: extColors.link }}>
-                                  <FileIcon ext="link" />
-                                </span>
-                                <span className="text-[10px] font-sans" style={{ color: colors.headline }}>
-                                  [{idx + 1}] {gl.name.length > 24 ? gl.name.slice(0, 24) + "…" : gl.name}
-                                </span>
-                                <ExternalLink className="w-3 h-3" style={{ color: colors.headline }} />
-                              </a>
-                            ));
-                          }
-                          return (
-                            <a
-                              key={link.url}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
-                              style={{
-                                background: COLORS.heroBackground,
-                                borderColor: colors.accent,
-                                boxShadow: "2px 2px 0 " + colors.accent,
-                              }}
-                            >
-                              <span style={{ color: extColors.link }}>
-                                <FileIcon ext="link" />
-                              </span>
-                              <span className="text-[10px] font-sans" style={{ color: colors.headline }}>
-                                {link.name}
-                              </span>
-                              <ExternalLink className="w-3 h-3" style={{ color: colors.headline }} />
-                            </a>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-[11px] font-sans" style={{ color: "#8a7a5a" }}>
-                        No public links for this project.
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Footer bar — explorer vibe */}
-                <div
-                  className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-between"
-                  style={{ background: COLORS.heroBackground }}
-                >
-                  <span className="text-[10px] font-sans" style={{ color: "#8a7a5a" }}>
-                  </span>
-                  <span className="text-[9px] font-sans" style={{ color: "#8a7a5a" }}>
-                    {String(selectedIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
-                  </span>
-                </div>
-              </>
-            )}
+                </button>
+              );
+            })}
           </div>
         </div>
+      </div>
+
+      {/* Modal */}
+      {isModalOpen && project && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[99999] flex items-center justify-center"
+        >
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={closeModal}
+            aria-hidden="true"
+          />
+
+          <div
+            className="relative w-[92vw] max-w-[860px] max-h-[86vh] overflow-y-auto border-2 border-[#2a2a2a]"
+            style={{ background: COLORS.heroBackground, boxShadow: "2px 2px 0 #1a1a1a" }}
+          >
+            {/* Header */}
+            <div
+              className="border-b-2 border-[#2a2a2a] px-4 md:px-5 py-2.5 flex items-center justify-between gap-3"
+              style={{ background: COLORS.heroBackground }}
+            >
+              <span className="text-[11px] leading-relaxed" style={{ color: colors.headline, whiteSpace: "nowrap" }}>
+                # {project.title} — {project.role}
+              </span>
+
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Close project modal"
+                className="flex items-center justify-center rounded-sm border-2 border-[#2a2a2a] px-2 py-1 transition hover:opacity-90"
+                style={{ background: COLORS.heroBackground, color: colors.headline, boxShadow: "2px 2px 0 #1a1a1a" }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-4 md:px-5 py-4 space-y-5 no-visible-scrollbar">
+              <div>
+                <div className="mb-1">
+                  <span className="text-[12px] font-bold" style={{ color: COLORS.primary }}>
+                    Brief
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed" style={{ color: colors.body }}>
+                  {project.description}
+                </p>
+              </div>
+
+              <div>
+                <div className="text-[10px] font-bold tracking-widest uppercase mb-2" style={{ color: COLORS.accent }}>
+                  Project Files
+                </div>
+
+                {project.links.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {project.links.map((link) => {
+                      if (link.isGrouped && link.groupedLinks) {
+                        return link.groupedLinks.map((gl, idx) => (
+                          <a
+                            key={`${idx}-${gl.url}`}
+                            href={gl.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
+                            style={{
+                              background: COLORS.heroBackground,
+                              borderColor: colors.accent,
+                              boxShadow: "2px 2px 0 " + colors.accent,
+                            }}
+                          >
+                            <span style={{ color: extColors.link }}>
+                              <FileIcon ext="link" />
+                            </span>
+                            <span className="text-[10px] font-sans" style={{ color: colors.headline }}>
+                              [{idx + 1}] {gl.name.length > 24 ? gl.name.slice(0, 24) + "…" : gl.name}
+                            </span>
+                            <ExternalLink className="w-3 h-3" style={{ color: colors.headline }} />
+                          </a>
+                        ));
+                      }
+
+                      return (
+                        <a
+                          key={link.url}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 border rounded-sm px-2.5 py-1.5 cursor-pointer hover:opacity-90 transition-all duration-150 group inline-flex"
+                          style={{
+                            background: COLORS.heroBackground,
+                            borderColor: colors.accent,
+                            boxShadow: "2px 2px 0 " + colors.accent,
+                          }}
+                        >
+                          <span style={{ color: extColors.link }}>
+                            <FileIcon ext="link" />
+                          </span>
+                          <span className="text-[10px] font-sans" style={{ color: colors.headline }}>
+                            {link.name}
+                          </span>
+                          <ExternalLink className="w-3 h-3" style={{ color: colors.headline }} />
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-[11px] font-sans" style={{ color: "#8a7a5a" }}>
+                    No public links for this project.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div
+              className="border-t-2 border-[#2a2a2a] px-4 py-2.5 flex items-center justify-end"
+              style={{ background: COLORS.heroBackground }}
+            >
+              <span className="text-[9px] font-sans" style={{ color: "#8a7a5a" }}>
+                {String(selectedIndex + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

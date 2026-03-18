@@ -49,6 +49,7 @@ export interface MariamSvgData {
   fontSize: number;
   mariamWidth: number;
   mariamHeight: number;
+  sidebarOffsetPx: number;
   portfolBottom: number;
   portfolLeft: number;
   portfolFontSize: number;
@@ -61,11 +62,11 @@ export type SectionId =
   | "hero"
   | "work"
   | "certificates"
-  | "contact";
+  | "experience";
 
 export const NAV_SECTIONS: { id: SectionId; label: string }[] = [
   { id: "hero", label: "home" },
   { id: "work", label: "projects" },
   { id: "certificates", label: "certificates" },
-  { id: "contact", label: "contact" },
+  { id: "experience", label: "experience" },
 ];

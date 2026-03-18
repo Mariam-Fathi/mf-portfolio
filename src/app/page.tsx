@@ -9,11 +9,8 @@ import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
 import { Certificates, CERTIFICATE_IMAGE_URLS } from "@/components/Certificates";
-import Contact from "@/components/Contact";
-import SectionNavigation from "@/components/SectionNavigation";
 import { COLORS } from "@/components/hero/constants";
-
-type SectionId = "hero" | "work" | "certificates" | "experience" | "contact";
+import type { SectionId } from "@/components/hero/types";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<SectionId>("hero");
@@ -220,15 +217,6 @@ export default function Home() {
             >
               <Certificates isActive={activeSection === "certificates"} />
             </section>
-
-            {/* Contact Section */}
-            <section 
-              id="contact-content" 
-              tabIndex={-1}
-              className={`content-section ${activeSection === "contact" ? "active" : ""}`}
-            >
-              <Contact />
-            </section>
           </div>
         </AppWindowLayout>
       )}
@@ -307,10 +295,9 @@ export default function Home() {
           max-width: none;
         }
 
-        /* Certificates, Projects, Contact — full viewport, no extra padding */
+        /* Certificates & projects — full viewport, no extra padding */
         #certificates-content,
-        #work-content,
-        #contact-content {
+        #work-content {
           padding: 0 !important;
           margin: 0 !important;
         }

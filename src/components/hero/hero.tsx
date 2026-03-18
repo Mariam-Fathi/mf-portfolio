@@ -14,7 +14,6 @@ const pouitiesFont = localFont({
   src: "../../../public/fonts/pouities/Pouities.ttf",
   display: "swap",
 });
-import { NAV_SECTIONS } from "./types";
 import type { HeroProps } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
@@ -25,6 +24,7 @@ import { usePortfolioAnimation, hasPortfolioEverCompleted } from "./hooks/usePor
 import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
 import { useHeroNavigation } from "./hooks/useHeroNavigation";
+import AppSidebar from "@/components/AppSidebar";
 
 // ─────────────────────────────────────────────────────────────────────
 // Hero Component
@@ -51,7 +51,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
   const [isDotClicked, setIsDotClicked] = useState(false);
   const isDotClickedRef = useRef(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dotPreShownRef = useRef(false);
   const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
   const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
@@ -412,7 +411,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         {/* Title bar: hero title (program name position + size) */}
         <div className="hero-window-title-bar">
           <div className="hero-cover-header hero-cover-header-in-title-bar">
-            <div className={`hero-cover-header-line ${goAroundFont.className}`} ref={portfolioHeaderRef}>
+            <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
               {SKIP_PORTFOLIO_ANIMATION ? (
                 <>
                   <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
@@ -450,82 +449,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               )}
             </div>
           </div>
-          {/* Desktop: nav links. Mobile: menu icon (overlay with links) */}
-          <nav className="hero-window-title-nav" aria-label="Main navigation">
-            <ul className="hero-window-title-nav-links">
-              {NAV_SECTIONS.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    className={s.id === "hero" ? "active" : undefined}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onNavigate(s.id);
-                    }}
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <button
-            type="button"
-            className="hero-window-menu-btn"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileMenuOpen}
-            onClick={() => setMobileMenuOpen((o) => !o)}
-          >
-            <span className="hero-window-menu-btn-icon" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <line x1="3" y1="12" x2="21" y2="12" />
-                <line x1="3" y1="18" x2="21" y2="18" />
-              </svg>
-            </span>
-          </button>
         </div>
-      {/* Mobile menu overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="hero-window-mobile-menu-overlay"
-          role="dialog"
-          aria-label="Navigation menu"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <nav className="hero-window-mobile-menu" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="hero-window-mobile-menu-close"
-              aria-label="Close menu"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-            <ul className="hero-window-mobile-menu-links">
-              {NAV_SECTIONS.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={`#${s.id}`}
-                    className={s.id === "hero" ? "active" : undefined}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onNavigate(s.id);
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-      )}
         {/* Same outer content frame as section view */}
         <div className="app-window-layout-content">
+          <AppSidebar currentSection="hero" onNavigate={(s) => onNavigate(s)} />
           <div className="app-window-content-frame" />
         </div>
       </div>
@@ -748,7 +675,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           min-width: 0;
           width: auto;
           height: 100%;
-          min-height: clamp(40px, 5vw, 56px);
+          min-height: clamp(48px, 6vw, 64px);
           display: flex;
           align-items: center;
           justify-content: flex-start;
@@ -756,24 +683,24 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
-          min-height: clamp(40px, 5vw, 56px);
+          min-height: clamp(48px, 6vw, 64px);
           justify-content: flex-start;
         }
         /* Whole word "PORTFOLIO" at left (no O/line/drag) — same font as Software Engineer */
         .hero-window-title-bar .hero-cover-title-whole {
-          font-size: clamp(1rem, 1.6vw, 1.55rem);
+          font-size: clamp(1.3rem, 2.4vw, 2.25rem);
           letter-spacing: 0.14em;
-          height: clamp(40px, 5vw, 56px);
+          height: clamp(48px, 6vw, 64px);
           color: ${COLORS.heroBackground};
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-whole {
-            font-size: clamp(1.25rem, 5vw, 2.25rem);
-            height: clamp(36px, 10vw, 52px);
+            font-size: clamp(1.65rem, 6.2vw, 3rem);
+            height: clamp(42px, 11vw, 60px);
           }
         }
         /* Big size + bg color for text (portfolio on dark bar) — same font as Software Engineer */
@@ -784,14 +711,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           letter-spacing: 0.12em;
           height: clamp(40px, 5vw, 56px);
           color: ${COLORS.heroBackground};
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
         }
         .hero-window-title-bar .hero-cover-title-full-sm {
           font-size: clamp(1.25rem, 5vw, 2.5rem);
           letter-spacing: 0.15em;
           height: clamp(36px, 10vw, 52px);
           color: ${COLORS.heroBackground};
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-full,
@@ -809,7 +736,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           align-items: center;
           justify-content: flex-end;
           height: 100%;
-          min-height: clamp(40px, 5vw, 56px);
+          min-height: clamp(48px, 6vw, 64px);
           padding-left: 0.75rem;
         }
         .hero-window-title-nav-links {
@@ -1110,7 +1037,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: ${COLORS.primary};
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           line-height: 1;
           display: inline-flex;
           align-items: center;
@@ -1157,7 +1084,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: ${COLORS.primary};
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           line-height: 1;
           display: inline-flex;
           align-items: center;
