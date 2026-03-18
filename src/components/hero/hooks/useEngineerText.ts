@@ -68,6 +68,26 @@ export function useEngineerText(
     }
   }, [startEngineerReveal, engineerRef]);
 
+  // ── Ensure "Software Engineer" is visible at end when reveal is active ──
+  // Force opacity/visibility so the text is never left hidden; delayed clipPath clear
+  // so desktop write-on can finish first.
+  useEffect(() => {
+    if (!startEngineerReveal) return;
+    const el = engineerRef.current;
+    if (!el) return;
+    // Immediate: ensure opacity 1 so nothing leaves it at 0
+    requestAnimationFrame(() => {
+      if (engineerRef.current) gsap.set(engineerRef.current, { opacity: 1, visibility: "visible" });
+    });
+    // Delayed: ensure clipPath none so text is fully visible after write-on (2s) or on mobile
+    const isMobile = checkIsMobile();
+    const delayMs = isMobile ? 50 : 2500;
+    const t = setTimeout(() => {
+      if (engineerRef.current) gsap.set(engineerRef.current, { clipPath: "none" });
+    }, delayMs);
+    return () => clearTimeout(t);
+  }, [startEngineerReveal]);
+
   // ── Write-on reveal (starts when dot lands on "ı") ──────────────
   useEffect(() => {
     if (!startEngineerReveal) return;
@@ -153,11 +173,7 @@ export function useEngineerText(
     if (!el.textContent?.trim()) el.textContent = "Software  Engineer";
 
     const position = () => {
-      // Don't reposition while the write-on is mid-reveal on first visit.
-      // revealStartedRef is instance-level (resets on remount);
-      // engineerTextEverShown is module-level (survives remount).
-      // Together they cover both cases: in-progress first visit, and returning visit.
-      if (revealStartedRef.current && !engineerTextEverShown) return;
+      const isMobile = checkIsMobile();
       const iEl = svgIRef.current;
       if (!iEl || !a2 || !m2 || !el) return;
 
@@ -181,8 +197,7 @@ export function useEngineerText(
       const engLeft = iamCenterX - engRect.width / 2;
 
       // ENGINEER_TEXT.VERTICAL_NUDGE_PX compensates for the gap between the SVG
-      // baseline and the rendered top of the descender-adjusted text block.
-      // Value is Pouities-font-specific; derived empirically across all tested sizes.
+      // baseline and the actual rendered top of the descender-adjusted text block.
       const top = dotY - engRect.height + descenderOffset + ENGINEER_TEXT.VERTICAL_NUDGE_PX;
 
       el.style.top = `${top}px`;
@@ -190,8 +205,10 @@ export function useEngineerText(
       el.style.left = `${engLeft}px`;
       el.style.right = "auto";
 
-      // Keep hidden until reveal starts (clip-path covers the text from the right)
-      if (!engineerTextEverShown) {
+      // Keep hidden until reveal starts (clip-path covers the text from the right).
+      // Do not overwrite clipPath while desktop write-on is in progress.
+      const writeOnInProgress = revealStartedRef.current && !engineerTextEverShown;
+      if (!engineerTextEverShown && !isMobile && !writeOnInProgress) {
         gsap.set(el, { opacity: 1, clipPath: "inset(-20% 100% -20% 0)" });
       }
     };
@@ -228,5 +245,5 @@ export function useEngineerText(
       }
       window.removeEventListener("resize", onResize);
     };
-  }, [isMariamReady, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);
+  }, [isMariamReady, startEngineerReveal, engineerRef, svgIRef, svgA2Ref, svgM2Ref]);
 }

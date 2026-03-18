@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
-import { COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS } from "./constants";
+import { BREAKPOINTS, COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS } from "./constants";
 
 const goAroundFont = localFont({
   src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
@@ -22,7 +22,7 @@ import type { HeroProps } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
 import { useMariamSvg } from "./hooks/useMariamSvg";
-import { useDotAnimation } from "./hooks/useDotAnimation";
+import { resetDotCache, useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
 import { usePortfolioAnimation, hasPortfolioEverCompleted } from "./hooks/usePortfolioAnimation";
 import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
@@ -61,10 +61,42 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const dotClickSvgRef = useRef<SVGSVGElement>(null);
   const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
   const isMobile = useIsMobile();
+  const isSidebarMobile = useIsMobile(BREAKPOINTS.md);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isLg, isMd, isSm } = useHeroBreakpoints();
+  const prevIsLgRef = useRef<boolean>(false);
 
   // Flip once on the client so portals are never rendered during SSR
   useEffect(() => setIsMounted(true), []);
+
+  // If we resize from mobile to desktop without clicking the dot,
+  // reset dot cache so the dot returns to the "unclicked" state.
+  useEffect(() => {
+    const prevIsLg = prevIsLgRef.current;
+    prevIsLgRef.current = isLg;
+
+    if (!prevIsLg && isLg && !isDotClicked) {
+      resetDotCache();
+      // Restore default desktop "unclicked" visuals.
+      if (svgIRef.current) gsap.set(svgIRef.current, { fill: COLORS.primary });
+      if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: COLORS.primary });
+      if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: COLORS.primary });
+
+      // Ensure dot/engineer states are fully reset.
+      setDotLandedOnI(false);
+      setEngineerRevealComplete(false);
+      if (dotRef.current) {
+        Object.assign(dotRef.current.style, { display: "none", opacity: "0", visibility: "hidden" });
+      }
+      dotPreShownRef.current = false;
+      isDotClickedRef.current = false;
+      setShowDotClickPrompt(false);
+    }
+  }, [isLg, isDotClicked]);
+
+  useEffect(() => {
+    if (!isSidebarMobile) setIsMobileMenuOpen(false);
+  }, [isSidebarMobile]);
 
   // Sm only: show portfolio + engineer final state immediately (no dot animation). Md and lg use dot.
   useEffect(() => {
@@ -104,7 +136,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     isActive,
     isMariamReady,
     isMobile,
-    isDotClicked,
+    // On mobile we don't rely on the dot click; we just need "final state" after the
+    // portfolio reveal becomes ready.
+    isMounted && (isSm ? portfolioRevealReady : isDotClicked),
     portfolioHeaderRef,
     onDotLandedOnI,
   );
@@ -128,7 +162,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     svgIRef,
     svgA2Ref,
     svgM2Ref,
-    isLg ? (dotLandedOnI || isDotAnimationComplete) : (portfolioRevealReady || isDotAnimationComplete),
+    isMounted &&
+      (isLg
+        ? dotLandedOnI || isDotAnimationComplete
+        : // Mobile: wait for the dot "complete" so ıam gets its final color first.
+          isSm
+          ? isDotAnimationComplete
+          : portfolioRevealReady || isDotAnimationComplete),
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
@@ -453,12 +493,96 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               )}
             </div>
           </div>
+
+          {/* Mobile-only: open sidebar drawer */}
+          <button
+            type="button"
+            className="hero-window-menu-btn"
+            aria-label="Open sidebar menu"
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => {
+              if (!isSidebarMobile) return;
+              setIsMobileMenuOpen((v) => !v);
+            }}
+          >
+            <span className="hero-window-menu-btn-icon" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 7h16" />
+                <path d="M4 12h16" />
+                <path d="M4 17h16" />
+              </svg>
+            </span>
+          </button>
         </div>
         {/* Same outer content frame as section view */}
         <div className="app-window-layout-content">
-          <AppSidebar currentSection="hero" onNavigate={(s) => onNavigate(s)} />
+          {!isSidebarMobile && (
+            <AppSidebar
+              currentSection="hero"
+              onNavigate={(s) => {
+                setIsMobileMenuOpen(false);
+                onNavigate(s);
+              }}
+            />
+          )}
           <div className="app-window-content-frame" />
         </div>
+
+        {/* Mobile-only: sidebar in a drawer overlay */}
+        {isSidebarMobile && isMobileMenuOpen && (
+          <div
+            className="hero-window-mobile-menu-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Sidebar menu"
+            onMouseDown={() => setIsMobileMenuOpen(false)}
+          >
+            <div
+              className="hero-window-mobile-menu"
+              onMouseDown={(e) => {
+                // Prevent closing when interacting with the drawer itself.
+                e.stopPropagation();
+              }}
+            >
+              <button
+                type="button"
+                className="hero-window-mobile-menu-close"
+                aria-label="Close sidebar menu"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="hero-window-mobile-menu-content">
+                <AppSidebar
+                  currentSection="hero"
+                  onNavigate={(s) => {
+                    setIsMobileMenuOpen(false);
+                    onNavigate(s);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Mariam SVG ─────────────────────────────────────────── */}
@@ -837,6 +961,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           display: flex;
           flex-direction: column;
           gap: 0.5rem;
+          overflow: hidden;
         }
         .hero-window-mobile-menu-close {
           align-self: flex-end;
@@ -852,6 +977,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           justify-content: center;
         }
         .hero-window-mobile-menu-close:hover { opacity: 0.9; }
+
+        .hero-window-mobile-menu-content {
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        }
         .hero-window-mobile-menu-links {
           list-style: none;
           margin: 0;

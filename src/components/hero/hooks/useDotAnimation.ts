@@ -38,7 +38,9 @@ function calculatePositions(
   const isMobile = checkIsMobile();
   // Use height (proportional to font size) rather than width (narrow for "ı")
   const baseDotSize = iRect.height * 0.135;
-  const dotSize = isMobile ? baseDotSize * 0.6 : baseDotSize;
+  // Mobile dot was too small on the "ı" target in smaller viewports.
+  // Keep desktop sizing unchanged.
+  const dotSize = isMobile ? baseDotSize * 0.75 : baseDotSize;
 
   return {
     iScreenX: iRect.left + iRect.width / 2,
@@ -534,12 +536,38 @@ export function useDotAnimation(
     if (isMobile) {
       const tid = setTimeout(() => {
         colorLetters(svgI, svgA2, svgM2);
+
+        // Mimic the desktop "ı letter touch" squash/spring so the SVG layout
+        // (and thus engineer positioning) matches what happens after the dot lands.
+        gsap.to(svgI, { fill: COLORS.accent, duration: 0.28, ease: "sine.out" });
+        const textEl = svgI.parentElement as SVGTextElement | null;
+        if (textEl) {
+          const textR = textEl.getBoundingClientRect();
+          const iR = svgI.getBoundingClientRect();
+          const originX = iR.left - textR.left + iR.width / 2;
+          const originY = iR.bottom - textR.top;
+          gsap.set(textEl, { transformOrigin: `${originX}px ${originY}px` });
+          gsap.to(textEl, {
+            scaleY: 0.88,
+            duration: TIMING.letterTouchSquash,
+            ease: "sine.in",
+            force3D: false,
+          });
+          gsap.to(textEl, {
+            scaleY: 1,
+            duration: TIMING.letterTouchSpring,
+            ease: "back.out(1.08)",
+            delay: TIMING.letterTouchSquash,
+            force3D: false,
+          });
+        }
+
         Object.assign(dot.style, { display: "none", opacity: "0", visibility: "hidden" });
         setIsDotComplete(true);
         setIsDotFallenFromM(true);
         setIsDotStarted(true);
         animationEverCompleted = true;
-      }, 200);
+      }, 0);
       return () => clearTimeout(tid);
     }
 

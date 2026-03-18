@@ -82,7 +82,7 @@ export default function AppSidebar({
   return (
     <aside
       data-app-sidebar="left"
-      className="w-full md:w-[240px] flex-shrink-0 border-b md:border-b-0 md:border-r-2 border-[#280B0B] flex flex-col min-h-0 text-left"
+      className="w-full md:w-[240px] h-full flex-shrink-0 border-b md:border-b-0 md:border-r-2 border-[#280B0B] flex flex-col min-h-0 text-left"
       style={{ background: COLORS.heroBackground }}
     >
       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 no-visible-scrollbar flex flex-col gap-2 justify-between">
