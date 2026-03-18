@@ -657,6 +657,17 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           margin: 0;
           overflow: hidden;
           box-shadow: 2px 2px 0 #1a1a1a;
+          /* Title bar is half the desktop sidebar width (md:w-[240px] => 120px). */
+          --titlebar-square-height: clamp(48px, 6vw, 64px);
+        }
+        @media (min-width: 768px) {
+          .hero-window {
+            --titlebar-square-height: 120px;
+          }
+          .hero-window-title-bar {
+            /* With a fixed bar height, remove vertical padding to prevent overflow. */
+            padding: 0 10px;
+          }
         }
         .hero-window-title-bar {
           flex-shrink: 0;
@@ -666,6 +677,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           flex-wrap: nowrap;
           align-items: center;
           justify-content: space-between;
+          box-sizing: border-box;
+          height: var(--titlebar-square-height);
+          min-height: var(--titlebar-square-height);
           padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
           font-family: ${kawaiiStitchFont.style.fontFamily};
           color: ${COLORS.heroBackground};
@@ -679,27 +693,29 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           min-width: 0;
           width: auto;
           height: 100%;
-          min-height: clamp(48px, 6vw, 64px);
+          min-height: var(--titlebar-square-height);
           display: flex;
           align-items: center;
-          justify-content: flex-start;
+          justify-content: center;
           padding: 0;
         }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
-          min-height: clamp(48px, 6vw, 64px);
-          justify-content: flex-start;
+          min-height: var(--titlebar-square-height);
+          justify-content: center;
         }
         /* Whole word "PORTFOLIO" at left (no O/line/drag) — same font as Software Engineer */
         .hero-window-title-bar .hero-cover-title-whole {
-          font-size: clamp(1.3rem, 2.4vw, 2.25rem);
-          letter-spacing: 0.14em;
-          height: clamp(48px, 6vw, 64px);
+          font-size: clamp(24px, calc(var(--titlebar-square-height) * 0.39), 58px);
+          letter-spacing: 0.12em;
+          height: var(--titlebar-square-height);
           color: ${COLORS.heroBackground};
           font-family: ${kawaiiStitchFont.style.fontFamily};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
+          line-height: 1;
+          white-space: nowrap;
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-whole {
@@ -740,7 +756,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           align-items: center;
           justify-content: flex-end;
           height: 100%;
-          min-height: clamp(48px, 6vw, 64px);
+          min-height: var(--titlebar-square-height);
           padding-left: 0.75rem;
         }
         .hero-window-title-nav-links {

@@ -64,7 +64,7 @@ export default function AppSidebar({
     {
       title: "Software Engineer",
       company: "Tarqia",
-      type: "Full-time",
+      type: "",
       fromDate: "Jan 2024",
       toDate: "Present",
       color: "#280B0B",
@@ -72,17 +72,17 @@ export default function AppSidebar({
     {
       title: "Mobile Engineer",
       company: "Dracode",
-      type: "Contract",
+      type: "",
       fromDate: "Sep 2025",
       toDate: "Jan 2026",
-      color: COLORS.accent,
+      color: "#280B0B",
     },
   ];
 
   return (
     <aside
       data-app-sidebar="left"
-      className="w-full md:w-[240px] flex-shrink-0 border-b md:border-b-0 md:border-r-2 border-[#2a2a2a] flex flex-col min-h-0 text-left"
+      className="w-full md:w-[240px] flex-shrink-0 border-b md:border-b-0 md:border-r-2 border-[#280B0B] flex flex-col min-h-0 text-left"
       style={{ background: COLORS.heroBackground }}
     >
       <div className="flex-1 min-h-0 overflow-y-auto py-3 px-3 no-visible-scrollbar flex flex-col gap-2 justify-between">
