@@ -1,8 +1,14 @@
 "use client";
 
 import React from "react";
-import { COLORS, FONTS, Z_LAYERS, APP_WINDOW_INSET_PX } from "./constants";
+import localFont from "next/font/local";
+import { COLORS, FONTS, Z_LAYERS } from "./constants";
 import { NAV_SECTIONS } from "./types";
+
+const goAroundFont = localFont({
+  src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
+  display: "swap",
+});
 
 export interface AppWindowLayoutProps {
   onNavigate: (section: string) => void;
@@ -11,14 +17,14 @@ export interface AppWindowLayoutProps {
 }
 
 /**
- * Same app window chrome as hero (title bar + menu bar). Use when showing
+ * Same app window chrome as hero (title bar + nav in bar, no borders). Use when showing
  * a section so the frame stays and only the content area is replaced.
  */
 export default function AppWindowLayout({ onNavigate, activeSection, children }: AppWindowLayoutProps) {
   return (
     <>
       <div className="hero-yellow-frame hero-window app-window-layout">
-        {/* Title bar: same as hero — PORTFOLIO (clickable = back to hero) + traffic lights */}
+        {/* Title bar: same as hero — PORTFOLIO (clickable = back to hero) + nav links on right */}
         <div className="hero-window-title-bar">
           <div className="hero-cover-header hero-cover-header-in-title-bar">
             <div
@@ -30,20 +36,11 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
               onKeyDown={(e) => e.key === "Enter" && onNavigate("hero")}
               style={{ cursor: "pointer" }}
             >
-              <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
+              <span className={`hero-cover-title-whole ${goAroundFont.className}`} aria-label="Portfolio">PORTFOLIO</span>
             </div>
           </div>
-          <div className="hero-window-traffic" aria-hidden="true">
-            <span className="hero-window-traffic-dot hero-window-traffic-red" />
-            <span className="hero-window-traffic-dot hero-window-traffic-yellow" />
-            <span className="hero-window-traffic-dot hero-window-traffic-green" />
-          </div>
-        </div>
-
-        {/* Menu bar: nav links */}
-        <div className="hero-window-menu-bar">
-          <nav className="hero-window-menu-nav" aria-label="Main navigation">
-            <ul className="hero-window-menu-nav-links">
+          <nav className="hero-window-title-nav" aria-label="Main navigation">
+            <ul className="hero-window-title-nav-links">
               {NAV_SECTIONS.map((s) => (
                 <li key={s.id}>
                   <a
@@ -62,7 +59,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           </nav>
         </div>
 
-        {/* Fixed frame for all sections — same inset + border; only content inside changes */}
+        {/* Content frame — no margin/borders, same as hero */}
         <div className="app-window-layout-content">
           <div className="app-window-content-frame">
             {children}
@@ -88,23 +85,17 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           margin: 0;
           overflow: hidden;
           height: 100%;
+          box-shadow: 2px 2px 0 #1a1a1a;
         }
         .hero-window-title-bar {
           flex-shrink: 0;
-          min-height: clamp(60px, 8vw, 100px);
           background: ${COLORS.primary};
-          border-top: 6px solid ${COLORS.heroBackground};
-          border-right: 6px solid ${COLORS.heroBackground};
-          border-bottom: 6px solid ${COLORS.heroBackground};
-          border-left: 6px solid ${COLORS.heroBackground};
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-          border-radius: 18px;
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
           align-items: center;
           justify-content: space-between;
-          padding: 0 1.5rem 0 1rem;
+          padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
           font-family: ${FONTS.display};
           color: ${COLORS.heroBackground};
           overflow: visible;
@@ -116,7 +107,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           min-width: 0;
           width: auto;
           height: 100%;
-          min-height: clamp(60px, 8vw, 100px);
+          min-height: clamp(40px, 5vw, 56px);
           display: flex;
           align-items: center;
           justify-content: flex-start;
@@ -124,120 +115,68 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
-          min-height: clamp(60px, 8vw, 100px);
+          min-height: clamp(40px, 5vw, 56px);
           justify-content: flex-start;
         }
         .hero-window-title-bar .hero-cover-title-whole {
-          font-size: clamp(2rem, 8vw, 6rem);
-          letter-spacing: 0.15em;
-          height: clamp(60px, 8vw, 100px);
+          font-size: clamp(1rem, 1.6vw, 1.55rem);
+          letter-spacing: 0.14em;
+          height: clamp(40px, 5vw, 56px);
           color: ${COLORS.heroBackground};
-          font-family: ${FONTS.display};
+          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-whole {
-            font-size: clamp(1.5rem, 6vw, 3rem);
-            height: clamp(50px, 12vw, 80px);
+            font-size: clamp(1.25rem, 5vw, 2.25rem);
+            height: clamp(36px, 10vw, 52px);
           }
         }
-        .hero-window-traffic {
-          flex-shrink: 0;
+        .hero-window-title-nav {
+          flex: 0 0 auto;
           display: flex;
           align-items: center;
-          gap: 6px;
-        }
-        .hero-window-traffic-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          border: 2px solid ${COLORS.heroBackground};
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 1px rgba(0,0,0,0.2);
-        }
-        .hero-window-traffic-red,
-        .hero-window-traffic-yellow,
-        .hero-window-traffic-green {
-          background: ${COLORS.heroBackground};
-        }
-        .hero-window-menu-bar {
-          flex-shrink: 0;
-          min-height: clamp(36px, 5.5vw, 44px);
-          background: transparent;
-          margin-left: 6px;
-          margin-right: 6px;
-          border-top: 2px solid ${COLORS.primary};
-          border-right: 2px solid ${COLORS.primary};
-          border-bottom: 2px solid ${COLORS.primary};
-          border-left: 2px solid ${COLORS.primary};
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-          border-radius: 14px 14px 0 0;
-          display: flex;
-          align-items: stretch;
-          padding: 0 1.25rem;
-          gap: 0;
-          font-family: ${FONTS.display};
-          font-size: clamp(0.65rem, 1vw, 0.75rem);
-          color: ${COLORS.primary};
-        }
-        .hero-window-menu-nav {
-          flex: 1;
-          display: flex;
           justify-content: flex-end;
-          align-self: stretch;
-          min-height: 0;
+          height: 100%;
+          min-height: clamp(40px, 5vw, 56px);
+          padding-left: 0.75rem;
         }
-        .hero-window-menu-nav-links {
+        .hero-window-title-nav-links {
           list-style: none;
           margin: 0;
           padding: 0;
           display: flex;
-          align-items: stretch;
-          justify-content: flex-end;
-          gap: 0;
-          height: 100%;
-          min-height: 100%;
-          width: 100%;
-        }
-        .hero-window-menu-nav-links li {
-          display: flex;
-          align-items: stretch;
-          flex: 1;
-          min-width: 0;
-        }
-        .hero-window-menu-nav-links a {
-          color: ${COLORS.primary};
-          text-decoration: none;
-          font-size: clamp(0.6rem, 1.1vw, 0.75rem);
-          text-transform: lowercase;
-          letter-spacing: 0.04em;
-          line-height: 1;
-          opacity: 0.9;
-          border-top: none;
-          border-bottom: none;
-          border-right: 2px solid ${COLORS.primary};
-          border-left: none;
-          border-radius: 0px;
-          padding: 0.5em 0.9em;
-          display: flex;
           align-items: center;
-          justify-content: center;
-          height: 100%;
-          width: 100%;
-          box-sizing: border-box;
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+          justify-content: flex-end;
+          gap: clamp(0.65rem, 1.5vw, 1.1rem);
+          white-space: nowrap;
         }
-        .hero-window-menu-nav-links li:first-child a {
-          border-left: none;
+        .hero-window-title-nav-links a {
+          color: ${COLORS.heroBackground};
+          text-decoration: none;
+          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-size: clamp(0.72rem, 1.05vw, 0.92rem);
+          text-transform: lowercase;
+          letter-spacing: 0.06em;
+          line-height: 1;
+          opacity: 0.92;
+          padding: 0.35rem 0.25rem;
         }
-        .hero-window-menu-nav-links li:last-child a {
-          border-right: none;
-        }
-        .hero-window-menu-nav-links a:hover,
-        .hero-window-menu-nav-links a.active {
+        .hero-window-title-nav-links a:hover,
+        .hero-window-title-nav-links a.active {
           opacity: 1;
           font-weight: 700;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-nav-links {
+            gap: clamp(0.6rem, 2.4vw, 0.9rem);
+          }
+          .hero-window-title-nav-links a {
+            font-size: clamp(0.66rem, 2.2vw, 0.85rem);
+            letter-spacing: 0.055em;
+          }
         }
         .app-window-layout-content {
           flex: 1;
@@ -250,14 +189,8 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .app-window-content-frame {
           flex: 1;
           min-height: 0;
-          margin: -2px ${APP_WINDOW_INSET_PX}px ${APP_WINDOW_INSET_PX}px ${APP_WINDOW_INSET_PX}px;
-          border-left: 2px solid ${COLORS.primary};
-          border-right: 2px solid ${COLORS.primary};
-          border-bottom: 2px solid ${COLORS.primary};
-          border-top: none;
-          border-radius: 0 0 14px 14px;
+          margin: 0;
           background: ${COLORS.heroBackground};
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
           position: relative;
           overflow: hidden;
         }

@@ -1,10 +1,7 @@
 import { useEffect, useState, type RefObject } from "react";
-import { FONTS, APP_WINDOW_INSET_PX } from "../constants";
+import { FONTS } from "../constants";
 import { checkIsMobile } from "./useIsMobile";
 import type { MariamSvgData } from "../types";
-
-// Bottom of content frame = inset + 2px border (match hero app-window-content-frame)
-const FRAME_BOTTOM_OFFSET_PX = APP_WINDOW_INSET_PX + 2;
 
 // ── Module-level cache (survives unmount / remount) ─────────────────
 // IMPORTANT – React 18 Strict Mode double-invokes effects in development.
@@ -92,12 +89,11 @@ function layoutMariam(
   const screenHeight = getViewportHeight();
   const screenWidth = window.innerWidth;
   const portfolRect = portfolEl.getBoundingClientRect();
-  const mobileBottomPadding = isMobile ? 40 : 0;
-  const bottomOffset = isMobile ? mobileBottomPadding : FRAME_BOTTOM_OFFSET_PX;
+  const bottomOffset = 0;
 
   const availableHeight = isMobile
     ? Math.min(screenHeight * 0.3, 200)
-    : screenHeight - portfolRect.bottom - FRAME_BOTTOM_OFFSET_PX;
+    : screenHeight - portfolRect.bottom;
 
   const widthPerFontSize = getWidthPerFontSize();
   let fontSize = (screenWidth - 2) / widthPerFontSize;
@@ -178,7 +174,7 @@ function layoutMariam(
 function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: boolean) {
   const { fontSize, mariamWidth, mariamHeight } = data;
   const padding = 10;
-  const bottomOffset = isMobile ? 40 : FRAME_BOTTOM_OFFSET_PX;
+  const bottomOffset = 0;
 
   svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
   svg.setAttribute("width", `${mariamWidth}px`);

@@ -190,7 +190,7 @@ const Contact: React.FC = () => {
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Your message..."
                     rows={5}
-                    className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0 resize-y min-h-[100px]"
+                    className="w-full px-3 py-2 text-[12px] font-sans rounded-sm border-2 border-[#2a2a2a] outline-none focus:ring-0 resize-y min-h-[200px]"
                     style={{
                       background: COLORS.heroBackground,
                       color: COLORS.primary,
