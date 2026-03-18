@@ -29,7 +29,7 @@ const extColors: Record<string, string> = {
 };
 
 const FolderIcon = ({ open }: { open: boolean }) => (
-  <svg width="40" height="40" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
+  <svg width="80" height="80" viewBox="0 0 14 14" fill="none" className="flex-shrink-0">
     <path
       d={open ? "M1 4h12v7.5a.5.5 0 01-.5.5H1.5a.5.5 0 01-.5-.5V4zm0 0V2.5a.5.5 0 01.5-.5H5l1.5 2H1z" : "M1 3.5a.5.5 0 01.5-.5H5l1.5 2H12.5a.5.5 0 01.5.5V11a.5.5 0 01-.5.5h-11A.5.5 0 011 11V3.5z"}
       fill="currentColor"

@@ -2,12 +2,17 @@
 
 import React from "react";
 import localFont from "next/font/local";
-import { COLORS, FONTS, Z_LAYERS } from "./constants";
+import { COLORS, Z_LAYERS } from "./constants";
 import type { SectionId } from "./types";
 import AppSidebar from "@/components/AppSidebar";
 
 const goAroundFont = localFont({
   src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
+  display: "swap",
+});
+
+const kawaiiStitchFont = localFont({
+  src: "../../../public/fonts/kawaii_stitch/Kawaii Stitch.ttf",
   display: "swap",
 });
 
@@ -80,7 +85,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           align-items: center;
           justify-content: space-between;
           padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           color: ${COLORS.heroBackground};
           overflow: visible;
         }
@@ -107,7 +112,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           letter-spacing: 0.14em;
           height: clamp(48px, 6vw, 64px);
           color: ${COLORS.heroBackground};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;

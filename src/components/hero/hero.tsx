@@ -14,6 +14,10 @@ const pouitiesFont = localFont({
   src: "../../../public/fonts/pouities/Pouities.ttf",
   display: "swap",
 });
+const kawaiiStitchFont = localFont({
+  src: "../../../public/fonts/kawaii_stitch/Kawaii Stitch.ttf",
+  display: "swap",
+});
 import type { HeroProps } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
@@ -663,7 +667,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           align-items: center;
           justify-content: space-between;
           padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           color: ${COLORS.heroBackground};
           overflow: visible;
         }
@@ -692,7 +696,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           letter-spacing: 0.14em;
           height: clamp(48px, 6vw, 64px);
           color: ${COLORS.heroBackground};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
@@ -711,14 +715,14 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           letter-spacing: 0.12em;
           height: clamp(40px, 5vw, 56px);
           color: ${COLORS.heroBackground};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
         }
         .hero-window-title-bar .hero-cover-title-full-sm {
           font-size: clamp(1.25rem, 5vw, 2.5rem);
           letter-spacing: 0.15em;
           height: clamp(36px, 10vw, 52px);
           color: ${COLORS.heroBackground};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-full,
@@ -1037,7 +1041,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: ${COLORS.primary};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           line-height: 1;
           display: inline-flex;
           align-items: center;
@@ -1084,7 +1088,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: ${COLORS.primary};
-          font-family: ${FONTS.display};
+          font-family: ${kawaiiStitchFont.style.fontFamily};
           line-height: 1;
           display: inline-flex;
           align-items: center;
