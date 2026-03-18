@@ -51,6 +51,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
   const [isDotClicked, setIsDotClicked] = useState(false);
   const isDotClickedRef = useRef(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dotPreShownRef = useRef(false);
   const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
   const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
@@ -449,7 +450,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               )}
             </div>
           </div>
-          {/* Title bar right-side navigation (replaces old 3-dot area) */}
+          {/* Desktop: nav links. Mobile: menu icon (overlay with links) */}
           <nav className="hero-window-title-nav" aria-label="Main navigation">
             <ul className="hero-window-title-nav-links">
               {NAV_SECTIONS.map((s) => (
@@ -468,7 +469,61 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               ))}
             </ul>
           </nav>
+          <button
+            type="button"
+            className="hero-window-menu-btn"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((o) => !o)}
+          >
+            <span className="hero-window-menu-btn-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </span>
+          </button>
         </div>
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="hero-window-mobile-menu-overlay"
+          role="dialog"
+          aria-label="Navigation menu"
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <nav className="hero-window-mobile-menu" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="hero-window-mobile-menu-close"
+              aria-label="Close menu"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <ul className="hero-window-mobile-menu-links">
+              {NAV_SECTIONS.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className={s.id === "hero" ? "active" : undefined}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onNavigate(s.id);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+      )}
         {/* Same outer content frame as section view */}
         <div className="app-window-layout-content">
           <div className="app-window-content-frame" />
@@ -792,6 +847,85 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
             letter-spacing: 0.055em;
           }
         }
+        @media (max-width: 768px) {
+          .hero-window-title-nav { display: none !important; }
+        }
+        .hero-window-menu-btn {
+          display: none;
+          flex-shrink: 0;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${COLORS.heroBackground};
+          cursor: pointer;
+          border-radius: 6px;
+        }
+        .hero-window-menu-btn:hover { opacity: 0.9; }
+        .hero-window-menu-btn-icon { display: flex; align-items: center; justify-content: center; }
+        .hero-window-menu-btn-icon svg { width: 24px; height: 24px; }
+        @media (max-width: 768px) {
+          .hero-window-menu-btn { display: flex; }
+        }
+        .hero-window-mobile-menu-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: ${Z_LAYERS.frame + 10};
+          background: rgba(0,0,0,0.4);
+          display: flex;
+          align-items: flex-start;
+          justify-content: flex-end;
+          padding: 0;
+        }
+        .hero-window-mobile-menu {
+          width: min(280px, 85vw);
+          height: 100%;
+          background: ${COLORS.primary};
+          color: ${COLORS.heroBackground};
+          padding: 1.25rem 1rem;
+          box-shadow: -2px 0 12px rgba(0,0,0,0.2);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .hero-window-mobile-menu-close {
+          align-self: flex-end;
+          width: 44px;
+          height: 44px;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${COLORS.heroBackground};
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .hero-window-mobile-menu-close:hover { opacity: 0.9; }
+        .hero-window-mobile-menu-links {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+        }
+        .hero-window-mobile-menu-links a {
+          color: ${COLORS.heroBackground};
+          text-decoration: none;
+          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-size: 1rem;
+          text-transform: lowercase;
+          letter-spacing: 0.06em;
+          padding: 0.6rem 0.5rem;
+          display: block;
+          opacity: 0.92;
+        }
+        .hero-window-mobile-menu-links a:hover,
+        .hero-window-mobile-menu-links a.active { opacity: 1; font-weight: 700; }
 
         .hero-window-menu-bar {
           flex-shrink: 0;
