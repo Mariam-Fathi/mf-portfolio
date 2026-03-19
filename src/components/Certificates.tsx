@@ -9,6 +9,10 @@ type Certificate = {
   id: string;
   title: string;
   image: string;
+  /** Intrinsic width of the image (for exact container fit, no layout shift). */
+  imageWidth?: number;
+  /** Intrinsic height of the image (for exact container fit, no layout shift). */
+  imageHeight?: number;
   platform: string;
   link: string;
   skills: string[];
@@ -21,6 +25,8 @@ const certificates: Certificate[] = [
     id: "data-engineering",
     title: "Data Engineering",
     image: "/certificates/data-engineering.jpeg",
+    imageWidth: 1200,
+    imageHeight: 800,
     platform: "DeepLearning.AI",
     link: "https://www.coursera.org/account/accomplishments/specialization/K9DJQ1VGKWTR",
     skills: ["Data Modeling", "ETL", "SQL", "Data Pipelines", "Warehousing"],
@@ -31,6 +37,8 @@ const certificates: Certificate[] = [
     id: "ai-agents",
     title: "AI Agents Intensive",
     image: "/certificates/5-Day AI Agents Intensive Course with Google.png",
+    imageWidth: 1200,
+    imageHeight: 800,
     platform: "Kaggle × Google",
     link: "https://www.kaggle.com/certification/badges/mariamfathiamin/105",
     skills: ["Agent Workflows", "Prompting", "Tool Use", "Evaluation", "Safety"],
@@ -41,6 +49,8 @@ const certificates: Certificate[] = [
     id: "computer-vision",
     title: "Computer Vision",
     image: "/certificates/Mariam Fathi - Computer Vision.png",
+    imageWidth: 1200,
+    imageHeight: 800,
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/computer-vision",
     skills: ["Image Processing", "CNNs", "Vision Pipelines", "Model Evaluation"],
@@ -51,6 +61,8 @@ const certificates: Certificate[] = [
     id: "time-series",
     title: "Time Series",
     image: "/certificates/Mariam Fathi - Time Series.png",
+    imageWidth: 1200,
+    imageHeight: 800,
     platform: "Kaggle",
     link: "https://www.kaggle.com/learn/certification/mariamfathiamin/time-series",
     skills: ["Forecasting", "Time Series Features", "Anomaly Detection", "Validation"],
@@ -61,6 +73,8 @@ const certificates: Certificate[] = [
     id: "ieee",
     title: "IEEE Certificate",
     image: "/certificates/IEEE Certificate.jpeg",
+    imageWidth: 1200,
+    imageHeight: 800,
     platform: "IEEE",
     link: "https://drive.google.com/file/d/1sMv03TTz0IQSeAaCdvyyKYXt9Jtoi5OS/view",
     skills: ["Professional Development", "Engineering Concepts", "Technical Communication"],
@@ -276,9 +290,37 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
   );
 };
 
+/** Measured dimensions cache so reopening the same cert uses exact ratio immediately. */
+const measuredByCertId: Record<string, { width: number; height: number }> = {};
+
 function CertificateImage({ cert }: { cert: Certificate }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [measured, setMeasured] = useState<{ width: number; height: number } | null>(
+    () => measuredByCertId[cert.id] ?? null,
+  );
+
+  const dimensions = cert.imageWidth != null && cert.imageHeight != null
+    ? { width: cert.imageWidth, height: cert.imageHeight }
+    : measured;
+
+  const aspectRatio = dimensions
+    ? `${dimensions.width}/${dimensions.height}`
+    : "3/2";
+
+  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    if (w && h) {
+      measuredByCertId[cert.id] = { width: w, height: h };
+      setMeasured({ width: w, height: h });
+    }
+    setImgLoaded(true);
+  };
+
+  const imgWidth = dimensions?.width ?? 420;
+  const imgHeight = dimensions?.height ?? 280;
 
   return (
     <a
@@ -291,19 +333,19 @@ function CertificateImage({ cert }: { cert: Certificate }) {
       {!imgError ? (
         <span
           className="relative inline-block w-full max-w-[420px] rounded-sm border-2 border-[#2a2a2a] overflow-hidden mx-auto align-top"
-          style={{ boxShadow: "3px 3px 0 #1a1a1a" }}
+          style={{ boxShadow: "3px 3px 0 #1a1a1a", aspectRatio }}
         >
           <Image
             src={encodeURI(cert.image)}
             alt={cert.title}
-            width={420}
-            height={560}
+            width={imgWidth}
+            height={imgHeight}
             sizes="(max-width: 768px) 80vw, 420px"
             className={cn(
-              "block w-full h-auto object-contain object-center transition-opacity duration-300",
+              "block w-full h-full object-contain object-center transition-opacity duration-300",
               imgLoaded ? "opacity-100" : "opacity-0",
             )}
-            onLoad={() => setImgLoaded(true)}
+            onLoad={handleLoad}
             onError={() => setImgError(true)}
             loading="lazy"
           />
