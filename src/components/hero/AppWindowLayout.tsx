@@ -155,6 +155,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         }
         .hero-yellow-frame.hero-window-mobile-menu-open {
           z-index: ${Z_LAYERS.mobileMenuOverlay};
+          overflow: visible;
         }
         .hero-window {
           display: flex;
@@ -323,6 +324,8 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .hero-window-mobile-menu {
           width: min(280px, 85vw);
           height: 100%;
+          max-height: 100vh;
+          max-height: 100dvh;
           background: ${COLORS.primary};
           color: ${COLORS.heroBackground};
           padding: 1.25rem 1rem;
@@ -349,7 +352,9 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .hero-window-mobile-menu-content {
           flex: 1;
           min-height: 0;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
         }
         .hero-window-mobile-menu-links {
           list-style: none;

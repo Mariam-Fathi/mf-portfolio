@@ -407,7 +407,11 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     }
   }, [isMariamReady, onReady]);
 
-  // ── Lock scroll on mobile ──────────────────────────────────────
+  // Ref so scroll-lock listener sees current menu state (allow scroll inside drawer when open)
+  const isMobileMenuOpenRef = useRef(false);
+  isMobileMenuOpenRef.current = isMobileMenuOpen;
+
+  // ── Lock scroll on mobile (allow scroll inside open sidebar drawer) ──────────────────────────────────────
   useEffect(() => {
     if (!isMobile) return;
     const saved = {
@@ -430,7 +434,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
       height: "100vh",
     });
 
-    const prevent = (e: Event) => e.preventDefault();
+    const prevent = (e: Event) => {
+      if (isMobileMenuOpenRef.current && (e.target as Element)?.closest?.(".hero-window-mobile-menu")) return;
+      e.preventDefault();
+    };
     document.addEventListener("touchmove", prevent, { passive: false });
     document.addEventListener("wheel", prevent, { passive: false });
 
@@ -647,6 +654,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               top: 0,
               left: 0,
               display: "none",
+              visibility: isSidebarMobile && isMobileMenuOpen ? "hidden" : undefined,
               zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : (!isDotClicked && showDotClickPrompt ? Z_LAYERS.frame + 50 : Z_LAYERS.dot),
               pointerEvents: "none",
             }}
@@ -791,6 +799,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         }
         .hero-yellow-frame.hero-window-mobile-menu-open {
           z-index: ${Z_LAYERS.mobileMenuOverlay};
+          overflow-x: visible;
+          overflow-y: visible;
         }
         /* Outer frame: chunky border + 3D bevel (retro OS vibe, our palette) */
         .hero-window {
@@ -984,6 +994,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         .hero-window-mobile-menu {
           width: min(280px, 85vw);
           height: 100%;
+          max-height: 100vh;
+          max-height: 100dvh;
           background: ${COLORS.primary};
           color: ${COLORS.heroBackground};
           padding: 1.25rem 1rem;
@@ -1011,7 +1023,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         .hero-window-mobile-menu-content {
           flex: 1;
           min-height: 0;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
         }
         .hero-window-mobile-menu-links {
           list-style: none;
