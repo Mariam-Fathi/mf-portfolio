@@ -65,17 +65,33 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isLg, isMd, isSm } = useHeroBreakpoints();
   const prevIsLgRef = useRef<boolean>(false);
+  const prevIsLgInitializedRef = useRef<boolean>(false);
 
   // Flip once on the client so portals are never rendered during SSR
   useEffect(() => setIsMounted(true), []);
 
+  // On large screens: when returning to hero from another section, restore "dot completed" state
+  // so the dot and "Software Engineer" stay in their last state (useDotAnimation restores from cache).
+  useEffect(() => {
+    if (!isMounted || !isLg) return;
+    if (hasDotAnimationEverCompleted()) {
+      setIsDotClicked(true);
+      setDotLandedOnI(true);
+      setEngineerRevealComplete(true);
+      isDotClickedRef.current = true;
+    }
+  }, [isMounted, isLg]);
+
   // If we resize from mobile to desktop without clicking the dot,
   // reset dot cache so the dot returns to the "unclicked" state.
+  // Only when prevIsLg was actually set by a prior render (not initial mount on lg, not return from section).
   useEffect(() => {
     const prevIsLg = prevIsLgRef.current;
     prevIsLgRef.current = isLg;
+    const wasInitialized = prevIsLgInitializedRef.current;
+    prevIsLgInitializedRef.current = true;
 
-    if (!prevIsLg && isLg && !isDotClicked) {
+    if (wasInitialized && !prevIsLg && isLg && !isDotClicked) {
       resetDotCache();
       // Restore default desktop "unclicked" visuals.
       if (svgIRef.current) gsap.set(svgIRef.current, { fill: COLORS.primary });
@@ -631,7 +647,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               top: 0,
               left: 0,
               display: "none",
-              zIndex: !isDotClicked && showDotClickPrompt ? Z_LAYERS.frame + 50 : Z_LAYERS.dot,
+              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : (!isDotClicked && showDotClickPrompt ? Z_LAYERS.frame + 50 : Z_LAYERS.dot),
               pointerEvents: "none",
             }}
           />,
@@ -650,7 +666,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               color: COLORS.primary,
               fontFamily: pouitiesFont.style.fontFamily,
               fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
-              zIndex: Z_LAYERS.engineerText,
+              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : Z_LAYERS.engineerText,
               pointerEvents: "none",
               whiteSpace: "nowrap",
               overflow: "visible",
@@ -673,7 +689,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
               left: `${dotClickPos.x}px`,
               top: `${dotClickPos.y - 4}px`,
               transform: "translateX(-50%) translateY(-100%)",
-              zIndex: Z_LAYERS.dot + 10,
+              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : Z_LAYERS.dot + 10,
               pointerEvents: "none",
             }}
           >
