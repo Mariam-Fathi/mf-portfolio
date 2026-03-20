@@ -184,8 +184,8 @@ export default function HeroContactStrip({
           })}
         </div>
       ) : (
-        /* Row layout — unchanged */
-        <div className="mx-auto flex w-full max-w-[1400px] flex-row gap-2 md:gap-3">
+        /* Row layout (desktop) / Column layout (mobile) */
+        <div className="mx-auto flex w-full max-w-[1400px] flex-col gap-2 md:flex-row md:gap-3">
           {blocks.map((b) => {
             const Icon = b.icon;
             const external = b.id !== "email";
@@ -194,18 +194,18 @@ export default function HeroContactStrip({
                 key={b.id}
                 href={b.href}
                 {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className={`hero-contact-card group flex flex-1 min-h-[100px] min-w-0 flex-col rounded-[22px] p-3 shadow-[2px_2px_0_#1a1a1a] transition-opacity hover:opacity-95 md:p-3.5 ${b.className}`}
+                className={`hero-contact-card group flex w-full min-w-0 flex-row items-center gap-3 p-3 shadow-[2px_2px_0_#1a1a1a] transition-opacity hover:opacity-95 md:flex-col md:flex-1 md:min-h-[100px] md:items-start md:p-3.5 ${b.className}`}
               >
                 <div className="flex shrink-0 justify-start">
                   <Icon className="h-5 w-5 md:h-6 md:w-6" stroke={1.75} />
                 </div>
-                <div className="min-h-[6px] flex-1 md:min-h-2" />
-                <div className="flex w-full items-center gap-1.5" aria-hidden="true">
+                <div className="hidden min-h-[6px] flex-1 md:block md:min-h-2" />
+                <div className="hidden w-full items-center gap-1.5 md:flex" aria-hidden="true">
                   <span className={`hidden h-1.5 w-1.5 shrink-0 rounded-full md:inline-flex ${b.lineClass}`} />
                   <span className={`h-px min-w-0 flex-1 rounded-full ${b.lineClass} opacity-90`} />
                   <span className={`hidden h-1.5 w-1.5 shrink-0 rounded-full md:inline-flex ${b.lineClass}`} />
                 </div>
-                <p className="mt-2 hidden line-clamp-2 text-right font-sans text-[12px] font-medium leading-tight tracking-tight opacity-95 md:block md:text-[12px]">
+                <p className="flex-1 truncate text-left text-[12px] font-medium leading-tight tracking-tight opacity-95 md:mt-2 md:flex-none md:text-right md:text-[12px]">
                   {b.caption}
                 </p>
               </a>
