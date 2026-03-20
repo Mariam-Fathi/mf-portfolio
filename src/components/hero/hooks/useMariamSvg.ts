@@ -362,12 +362,24 @@ export function useMariamSvg(
     }, 100);
 
     // ── Resize handler ───────────────────────────────────────────
+    // IMPORTANT: always read svgRef.current inside the callback, NOT the
+    // `svg` variable captured at effect-setup time. When the user resizes
+    // mobile → desktop (or back), React swaps which SVG is rendered
+    // (hidden 1×1 mobile stub ↔ visible mariam-slot SVG), so svgRef.current
+    // changes after this effect registered. Using the stale `svg` closure
+    // means layoutMariam works on the wrong element (e.g. the invisible
+    // 1×1 stub) and Mariam comes out tiny or invisible.
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
+        const currentSvg = svgRef.current;
+        if (!currentSvg) return;
+
+        const mobile = checkIsMobile();
+
         // Skip tiny viewport shifts on mobile (virtual keyboard, URL bar, etc.).
-        if (checkIsMobile() && cachedSvgData) {
+        if (mobile && cachedSvgData) {
           const w = window.innerWidth;
           const h = getViewportHeight();
           if (
@@ -380,7 +392,7 @@ export function useMariamSvg(
 
         svgDataCalculated = false;
         cachedSvgData = null;
-        layoutMariam(svg, portfolioHeaderRef, checkIsMobile());
+        layoutMariam(currentSvg, portfolioHeaderRef, mobile);
       }, 150);
     };
 
