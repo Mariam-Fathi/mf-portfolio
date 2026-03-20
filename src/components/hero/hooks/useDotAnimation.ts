@@ -500,8 +500,26 @@ export function useDotAnimation(
     if (!svg || !svgI || !svgA2 || !svgM2 || !dot) return;
 
     // ── Restore from cache (dot at rest on ı) ────────────────────
-    if (cachedPositions && positionsCalculated) {
-      setDotAtFinal(dot, cachedPositions);
+    // animationEverCompleted means the dot animation ran in a previous mount.
+    // We MUST recalculate positions from the live DOM here — cachedPositions
+    // holds screen coordinates from the *previous* mount and Mariam may have
+    // been re-laid out at different dimensions/position since then (e.g. after
+    // navigating away and back). Using stale coords puts the dot in the wrong
+    // spot. We update the cache so the resize handler has fresh data too.
+    if (animationEverCompleted) {
+      const freshPos = calculatePositions(svgI, svgA2, svgM2);
+      const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
+      if (oData) {
+        freshPos.oPortfolioScreenX = oData.x;
+        freshPos.oPortfolioCenterY = oData.centerY;
+        freshPos.oPortfolioTop = oData.top;
+        freshPos.oPortfolioWidth = oData.width;
+        freshPos.oPortfolioHeight = oData.height;
+      }
+      cachedPositions = freshPos;
+      positionsCalculated = true;
+
+      setDotAtFinal(dot, freshPos);
       gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
       gsap.to(dot, {
         opacity: 1,
