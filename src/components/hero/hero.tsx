@@ -331,9 +331,9 @@ const Hero: React.FC<HeroProps> = ({
     if (isMariamReady && onReady) requestAnimationFrame(() => requestAnimationFrame(onReady));
   }, [isMariamReady, onReady]);
 
-  // Lock scroll on mobile
+  // Lock background scroll only while mobile menu is open
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || !isMobileMenuOpen) return;
     const saved = { bodyOverflow: document.body.style.overflow, bodyHeight: document.body.style.height, htmlOverflow: document.documentElement.style.overflow };
     Object.assign(document.body.style, { overflow: "hidden", overflowY: "hidden", height: "100vh", position: "fixed", width: "100%", top: "0", left: "0" });
     Object.assign(document.documentElement.style, { overflow: "hidden", overflowY: "hidden", height: "100vh" });
@@ -346,7 +346,7 @@ const Hero: React.FC<HeroProps> = ({
       document.removeEventListener("touchmove", prevent);
       document.removeEventListener("wheel", prevent);
     };
-  }, [isMobile]);
+  }, [isMobile, isMobileMenuOpen]);
 
   // ── Render ────────────────────────────────────────────────────────
   return (
@@ -364,7 +364,7 @@ const Hero: React.FC<HeroProps> = ({
 
       {/* ── Window frame ─────────────────────────────────────────── */}
       <div className="hero-outer-frame">
-        <div className="hero-yellow-frame hero-window">
+        <div className={`hero-yellow-frame hero-window${isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
 
           {/* Title bar */}
           <div className="hero-window-title-bar">
@@ -502,6 +502,51 @@ const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Mobile menu overlay (visible only on small screens) */}
+          {isMobileMenuOpen && (
+            <div
+              className="hero-window-mobile-menu-overlay"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              <div className="hero-window-mobile-menu" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="hero-window-mobile-menu-close"
+                  aria-label="Close menu"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  ×
+                </button>
+
+                <div className="hero-window-mobile-menu-content">
+                  <ul className="hero-window-mobile-menu-links">
+                    {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                      const isCurrent = s.id === "hero";
+                      return (
+                        <li key={s.id}>
+                          <a
+                            href="#"
+                            className={isCurrent ? "active" : undefined}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setIsMobileMenuOpen(false);
+                              onNavigate(s.id as SectionId);
+                            }}
+                          >
+                            {s.label}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -631,6 +676,7 @@ const Hero: React.FC<HeroProps> = ({
           margin: 0;
           padding: 0;
         }
+        .hero-yellow-frame.hero-window-mobile-menu-open { overflow: visible; }
 
         .hero-window {
           display: flex;
@@ -651,7 +697,7 @@ const Hero: React.FC<HeroProps> = ({
 
         .hero-window-title-bar {
           flex-shrink: 0;
-          background: ${COLORS.heroBackground};
+          background:  #FCB34F;
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
@@ -677,6 +723,10 @@ const Hero: React.FC<HeroProps> = ({
           justify-content: space-between;
           box-sizing: border-box;
           padding: 0;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar { padding: 0 clamp(10px, 3vw, 14px); }
+          .hero-window-title-inner { gap: 0.5rem; }
         }
 
         .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
@@ -1004,6 +1054,7 @@ const Hero: React.FC<HeroProps> = ({
             height: auto;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            padding: 10px;
           }
           .hero-inner-grid {
             display: flex;
@@ -1011,27 +1062,29 @@ const Hero: React.FC<HeroProps> = ({
             gap: clamp(8px, 2vw, 14px);
             overflow-y: auto;
             overflow-x: hidden;
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 0;
           }
           .hero-contact-col {
             align-self: stretch;
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: visible;
             transform: none;
           }
           .hero-contact-col > * {
-            flex: 1;
+            flex: 0 0 auto;
             min-height: 0;
-            overflow: hidden;
+            overflow: visible;
           }
           .hero-experience-panel-wrap {
             margin-top: 0;
             flex-shrink: 0;
             width: 100%;
             justify-self: stretch;
+            margin-right: 0;
+            overflow: visible;
           }
           .hero-mariam-slot { display: none; }
         }

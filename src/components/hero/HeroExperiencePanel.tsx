@@ -37,8 +37,8 @@ export default function HeroExperiencePanel() {
       style={{ maxWidth: "100%", boxSizing: "border-box" }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between bg-[#EDE6D9] border-b-2 border-[#280B0B] px-3 py-2">
-        <div className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#280B0B" }}>
+      <div className="flex items-center justify-between bg-[#1F6590] border-b-2 border-[#280B0B] px-3 py-2">
+        <div className="text-[10px] font-meduim tracking-widest uppercase" style={{ color: "#EDE6D9" }}>
           EXPERIENCES
         </div>
       </div>
@@ -50,7 +50,7 @@ export default function HeroExperiencePanel() {
             isMobile && item.title === "Software Engineer" ? null : (
               <div key={item.title} className="min-w-0 w-full">
                 <div className="text-[12px] font-medium leading-tight">{item.title}</div>
-                <div className="text-[10px] leading-tight mt-0.5" style={{ color: "#6A0610" }}>
+                <div className="text-[10px] leading-tight mt-0.5" style={{ color: "#E62A34" }}>
                   {item.company}{" "}
                   <span style={{ opacity: 0.8 }}>|</span>{" "}
                   {item.fromDate} - {item.toDate}

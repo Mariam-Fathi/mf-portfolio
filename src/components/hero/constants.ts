@@ -4,15 +4,15 @@
 export const COLORS = {
   primary: "#280B0B",
   /** Carmine — "iam" letters, dot, O hover/focus, all accent UI */
-  accent: "#91010F",
+  accent: "#E62A34",
   heroBackground: "#F9E7C9",
   line: "#280B0B",
   /** Dot animation variants (derived from accent so one change updates all) */
-  dotMotion: "#B8221E",   // slightly lighter during arcs
-  dotLand: "#6B0109",     // darker on impact
-  dotGhost: "#F5D4D2",    // very light when falling off
-  dotFallLight: "#E8B4B2", // light when dropping from above
-  dotFallMid: "#C94A46",  // mid during bounce
+  dotMotion: "#EF4A52",   // slightly lighter during arcs
+  dotLand: "#B81826",     // darker on impact
+  dotGhost: "#F9D6D8",    // very light when falling off
+  dotFallLight: "#F29AA0", // light when dropping from above
+  dotFallMid: "#DE3F4A",  // mid during bounce
 } as const;
 
 // ── Font families ───────────────────────────────────────────────────
@@ -65,7 +65,7 @@ export const ENGINEER_TEXT = {
    * and the actual rendered top of the descender-adjusted text block.
    * Derived empirically from the Pouities font metrics at all tested sizes.
    */
-  VERTICAL_NUDGE_PX: 60,
+  VERTICAL_NUDGE_PX: 50,
 } as const;
 
 // ── App window frame (title bar, menu bar, section body connect as one programme) ───

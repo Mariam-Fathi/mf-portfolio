@@ -203,7 +203,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         }
         .hero-window-title-bar {
           flex-shrink: 0;
-          background: ${COLORS.heroBackground};
+          background: #FCB34F;
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
@@ -216,8 +216,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           color: ${COLORS.primary};
           overflow: visible;
           border: 2px solid ${COLORS.primary};
-          /* Match other UI "step" styling, but emphasize the bottom edge. */
-          box-shadow: 0 2px 0 #1a1a1a;
+          box-shadow: 2px 2px 0 #1a1a1a;
         }
         .hero-window-title-inner {
           width: 100%;
@@ -228,6 +227,14 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           justify-content: space-between;
           box-sizing: border-box;
           padding: 0;
+        }
+        @media (max-width: 768px) {
+          .hero-window-title-bar {
+            padding: 0 clamp(10px, 3vw, 14px);
+          }
+          .hero-window-title-inner {
+            gap: 0.5rem;
+          }
         }
         .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
           position: relative !important;
@@ -272,6 +279,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           align-items: center;
           line-height: 1;
           white-space: nowrap;
+          transform: translateX(-2px);
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-whole {
@@ -300,18 +308,20 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         }
         .hero-window-title-nav-links button {
           color: ${COLORS.primary};
-          text-decoration: none;
           font-family: ${FONTS.display};
           font-size: clamp(0.72rem, 1.05vw, 0.92rem);
           text-transform: lowercase;
           letter-spacing: 0.06em;
           line-height: 1;
-          opacity: 0.92;
           padding: 0.35rem 0.45rem;
           background: ${COLORS.heroBackground};
           border: 2px solid ${COLORS.primary};
           box-shadow: 2px 2px 0 #1a1a1a;
           cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          appearance: none;
         }
         .hero-window-title-nav-links button:hover,
         .hero-window-title-nav-links button.active {
@@ -352,7 +362,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           padding: 0;
           border: none;
           background: transparent;
-          color: ${COLORS.heroBackground};
+          color: ${COLORS.primary};
           cursor: pointer;
           border-radius: 6px;
         }
@@ -418,7 +428,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .hero-window-mobile-menu-links a {
           color: ${COLORS.heroBackground};
           text-decoration: none;
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           font-size: 1rem;
           text-transform: lowercase;
           letter-spacing: 0.06em;
@@ -434,7 +444,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           min-height: 0;
           position: relative;
           display: flex;
-          overflow: visible;
+          overflow: hidden;
           background: ${COLORS.heroBackground};
         }
         .app-window-content-frame {
@@ -443,7 +453,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           margin: 0;
           background: ${COLORS.heroBackground};
           position: relative;
-          overflow: visible;
+          overflow: hidden;
           padding: clamp(10px, 2vw, 18px);
           padding-bottom: 0;
           display: flex;

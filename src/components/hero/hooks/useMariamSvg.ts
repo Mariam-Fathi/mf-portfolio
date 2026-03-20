@@ -10,7 +10,10 @@ import type { MariamSvgData } from "../types";
 // data. This is expected in development only; production builds are unaffected.
 let cachedSvgData: MariamSvgData | null = null;
 let svgDataCalculated = false;
-const MARIAM_LAYOUT_VERSION = 11;
+
+// Bump this whenever the layout algorithm changes so stale caches are
+// automatically discarded on the first load after a deploy.
+const MARIAM_LAYOUT_VERSION = 12;
 
 export function resetMariamCache() {
   cachedSvgData = null;
@@ -66,7 +69,6 @@ function alignTextToBottom(
     const yAdjustment = target - (bbox.y + bbox.height);
     textEl.setAttribute("y", yAdjustment.toString());
   } catch (err) {
-    // getBBox can throw if the element is not yet rendered (e.g. display:none parent).
     if (process.env.NODE_ENV !== "production") {
       console.warn("[useMariamSvg] alignTextToBottom: getBBox failed — text may render at y=0. Cause:", err);
     }
@@ -76,6 +78,13 @@ function alignTextToBottom(
 // ── Core layout calculation ─────────────────────────────────────────
 // Extracted so it can be called from both the initial effect and the
 // resize handler without duplicating logic.
+//
+// Key design decisions:
+//   • Width ALWAYS fills the mariam slot column — font size is derived from width.
+//   • Height is the actual rendered slot height so Mariam fills (not overflows) the cell.
+//   • The SVG uses overflow:hidden so nothing bleeds past the frame.
+//   • On return-to-hero the slot may not have its final size yet (grid re-paint);
+//     we retry up to 12 rAF frames until the slot is large enough to trust.
 function layoutMariam(
   svg: SVGSVGElement,
   portfolioHeaderRef: RefObject<HTMLDivElement | null>,
@@ -83,44 +92,64 @@ function layoutMariam(
   onDone?: () => void,
   attempt = 0,
 ) {
-  // When SKIP_PORTFOLIO_ANIMATION we have .hero-cover-title-whole; otherwise .hero-cover-title-portfoli
+  // Locate the PORTFOL(I) / PORTFOLIO element used as the top anchor.
   const portfolEl =
     (portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
     (portfolioHeaderRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
-  if (!portfolEl) { onDone?.(); return; }
+
+  // Not painted yet — retry (can happen on return-to-hero mid paint cycle).
+  if (!portfolEl) {
+    if (attempt < 12) {
+      requestAnimationFrame(() => layoutMariam(svg, portfolioHeaderRef, isMobile, onDone, attempt + 1));
+    } else {
+      onDone?.();
+    }
+    return;
+  }
+
+  const portfolRect = portfolEl.getBoundingClientRect();
+
+  // Guard: element present but not yet laid out.
+  if (portfolRect.width === 0 || portfolRect.height === 0) {
+    if (attempt < 12) {
+      requestAnimationFrame(() => layoutMariam(svg, portfolioHeaderRef, isMobile, onDone, attempt + 1));
+    } else {
+      onDone?.();
+    }
+    return;
+  }
 
   const screenHeight = getViewportHeight();
   const screenWidth = window.innerWidth;
-  const portfolRect = portfolEl.getBoundingClientRect();
+
   const stripEl = document.querySelector("[data-hero-contact-strip]") as HTMLElement | null;
-  const reserveBottom =
-    stripEl?.dataset.noBottomReserve !== "true";
+  const reserveBottom = stripEl?.dataset.noBottomReserve !== "true";
   const bottomReservePx =
     stripEl && reserveBottom ? Math.ceil(stripEl.getBoundingClientRect().height) : 0;
 
-  // The Mariam SVG lives inside the hero grid (right column).
-  // Measure the actual container so width/height never "overfit" the viewport.
   const contactsNoBottomReserve = stripEl?.dataset.noBottomReserve === "true";
   const mariamSlotEl = svg.closest(".hero-mariam-slot") as HTMLElement | null;
   const mariamSlotRect = mariamSlotEl?.getBoundingClientRect();
   const mariamSlotWidth = mariamSlotRect?.width ?? 0;
   const mariamSlotHeight = mariamSlotRect?.height ?? 0;
 
-  // On section -> hero return, the grid can mount one frame before final sizing.
-  // Wait for a stable slot box so we don't lock in a wrong oversized layout.
+  // ── Wait for the slot to have a real size before locking in layout ──
+  // On first mount and on return-to-hero the grid may still be distributing
+  // space. Retry up to 12 rAF frames (~200ms at 60fps) until the slot has a
+  // width of at least 120px and height of at least 80px.
   if (!isMobile && (mariamSlotWidth < 120 || mariamSlotHeight < 80)) {
-    if (attempt < 10) {
-      requestAnimationFrame(() => {
-        layoutMariam(svg, portfolioHeaderRef, isMobile, onDone, attempt + 1);
-      });
+    if (attempt < 12) {
+      requestAnimationFrame(() => layoutMariam(svg, portfolioHeaderRef, isMobile, onDone, attempt + 1));
       return;
     }
+    // Gave up waiting — fall through with whatever values we have.
   }
 
-  // If the slot hasn't stretched yet, measure the parent grid's 3fr column directly.
+  // ── Width ────────────────────────────────────────────────────────
+  // Prefer the measured slot width; fall back to 75% of the grid width
+  // (3fr out of a 1fr + 3fr grid) when the slot hasn't stretched yet.
   const gridEl = mariamSlotEl?.closest(".hero-inner-grid") as HTMLElement | null;
   const gridRect = gridEl?.getBoundingClientRect();
-  // 3fr out of 4fr total = 75% of grid width (minus column gap).
   const columnGap = gridEl ? parseFloat(getComputedStyle(gridEl).columnGap) || 0 : 0;
   const fallbackSlotWidth = gridRect
     ? Math.max(240, (gridRect.width - columnGap) * 0.75)
@@ -132,17 +161,16 @@ function layoutMariam(
       ? Math.ceil(parseFloat(getComputedStyle(mariamSlotEl).paddingRight || "0")) || 0
       : 0;
 
-  const availableSvgWidth = Math.max(1, resolvedSlotWidth - rightPaddingPx);
-  const mariamWidth = availableSvgWidth; // always fill the full column
+  const mariamWidth = Math.max(1, resolvedSlotWidth - rightPaddingPx);
   const sidebarOffsetPx = 0;
 
+  // ── Height ───────────────────────────────────────────────────────
+  // Use the slot's actual rendered height so Mariam fills exactly its
+  // grid cell without bleeding past the frame bottom.
   const rawMobileH = Math.min(screenHeight * 0.3, 200);
   const availableHeight = isMobile
     ? Math.max(40, rawMobileH - bottomReservePx)
     : Math.max(40, screenHeight - portfolRect.bottom - bottomReservePx);
-
-  const widthPerFontSize = getWidthPerFontSize();
-  let fontSize = (mariamWidth - 2) / widthPerFontSize;
 
   const contactsHeight = stripEl ? stripEl.getBoundingClientRect().height : 0;
   const contactsHeightForCap =
@@ -150,9 +178,10 @@ function layoutMariam(
       ? Math.max(40, contactsHeight - 24)
       : contactsHeight;
 
+  // Use full slot height — no arbitrary pixel cuts.
   const slotBasedHeight =
     mariamSlotHeight > 0
-      ? Math.max(40, mariamSlotHeight - 6)
+      ? Math.max(40, mariamSlotHeight)
       : availableHeight;
 
   const cappedAvailableHeight =
@@ -160,16 +189,14 @@ function layoutMariam(
       ? Math.max(40, Math.min(slotBasedHeight, contactsHeightForCap))
       : slotBasedHeight;
 
-  // Use full available height — width drives the size, not height cap
   const mariamHeight = Math.max(40, cappedAvailableHeight);
   const padding = 10;
 
-  // Apply SVG container dimensions
+  // ── Apply SVG container dimensions ───────────────────────────────
   svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
   svg.setAttribute("width", `${mariamWidth}px`);
   svg.setAttribute("height", `${mariamHeight}px`);
   Object.assign(svg.style, {
-    // Rendered inside a grid row, so we let layout flow place it.
     position: "relative",
     left: `${sidebarOffsetPx}px`,
     bottom: "0px",
@@ -177,13 +204,17 @@ function layoutMariam(
     padding: "0",
     height: `${mariamHeight}px`,
     width: `${mariamWidth}px`,
-    overflow: "visible",
+    // overflow:hidden so Mariam never bleeds past the frame boundary.
+    overflow: "hidden",
   });
 
   const textEl = svg.querySelector(".hero-mariam-text") as SVGTextElement | null;
   if (!textEl) { onDone?.(); return; }
 
-  // Apply text attributes
+  // Font size is derived from width — Mariam fills the column horizontally.
+  const widthPerFontSize = getWidthPerFontSize();
+  let fontSize = (mariamWidth - 2) / widthPerFontSize;
+
   textEl.setAttribute("x", "0");
   textEl.setAttribute("y", `${mariamHeight}px`);
   textEl.setAttribute("dominant-baseline", "baseline");
@@ -194,23 +225,25 @@ function layoutMariam(
   textEl.setAttribute("font-weight", "700");
   textEl.setAttribute("letter-spacing", "0");
 
-  // Measure → scale → align → cache → done (3 rAF frames)
+  // ── Measure → fine-tune scale → align → cache → done ─────────────
+  // Three rAF passes ensure the browser has rendered the text at the
+  // initial font size before we measure bbox and correct any drift.
   requestAnimationFrame(() => {
     alignTextToBottom(textEl, mariamHeight, isMobile);
 
     requestAnimationFrame(() => {
       try {
         const bbox = textEl.getBBox();
-        // Scale to fill the full available width — height will overflow
-        // below the frame which is fine (Mariam is a decorative bleed element).
-        const widthScale = (mariamWidth - 2) / bbox.width;
-        const scale = widthScale; // width-only — don't cap by height
 
-        if (scale > 1.01 || scale < 0.99) {
-          fontSize *= scale;
+        // Fine-tune width scale only — height is already controlled by slot height.
+        const widthScale = bbox.width > 0 ? (mariamWidth - 2) / bbox.width : 1;
+
+        if (widthScale > 1.01 || widthScale < 0.99) {
+          fontSize *= widthScale;
           textEl.setAttribute("font-size", `${fontSize}px`);
         }
 
+        // Persist for same-session navigations and resize restores.
         cachedSvgData = {
           fontSize,
           mariamWidth,
@@ -229,7 +262,7 @@ function layoutMariam(
         requestAnimationFrame(() => {
           alignTextToBottom(textEl, mariamHeight, isMobile);
           // Extra rAF so isMariamReady fires after the browser has painted
-          // the final SVG position — prevents dot landing in wrong spot on first load.
+          // the final SVG position — prevents dot landing in wrong spot.
           requestAnimationFrame(() => onDone?.());
         });
       } catch {
@@ -240,23 +273,17 @@ function layoutMariam(
 }
 
 // ── Apply cached data for instant restore ───────────────────────────
+// Used when the screen size hasn't changed and we want to skip the
+// full measurement cycle (e.g. same-session navigation back to hero).
 function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: boolean) {
   const { fontSize, mariamWidth, mariamHeight } = data;
   const padding = 10;
-  const stripEl = document.querySelector("[data-hero-contact-strip]") as HTMLElement | null;
-  const shouldReserveBottom =
-    stripEl?.dataset.noBottomReserve !== "true";
-  const measuredBottom =
-    stripEl && shouldReserveBottom ? Math.ceil(stripEl.getBoundingClientRect().height) : 0;
-  const fallbackBottom = shouldReserveBottom ? (data.bottomReservePx ?? 0) : 0;
-  const bottomReservePx = measuredBottom > 0 ? measuredBottom : fallbackBottom;
   const sidebarOffsetPx = isMobile ? 0 : data.sidebarOffsetPx;
 
   svg.setAttribute("viewBox", `-${padding} 0 ${mariamWidth + padding * 2} ${mariamHeight}`);
   svg.setAttribute("width", `${mariamWidth}px`);
   svg.setAttribute("height", `${mariamHeight}px`);
   Object.assign(svg.style, {
-    // Rendered inside a grid row, so we let layout flow place it.
     position: "relative",
     left: `${sidebarOffsetPx}px`,
     bottom: "0px",
@@ -264,7 +291,7 @@ function applyCachedLayout(svg: SVGSVGElement, data: MariamSvgData, isMobile: bo
     padding: "0",
     height: `${mariamHeight}px`,
     width: `${mariamWidth}px`,
-    overflow: "visible",
+    overflow: "hidden",
   });
 
   const textEl = svg.querySelector(".hero-mariam-text");
@@ -295,70 +322,83 @@ export function useMariamSvg(
     const svg = svgRef.current;
     if (!svg || portfolWidth === 0 || !portfolioHeaderRef.current) return;
 
+    // Always reset ready so the caller knows a fresh layout is underway.
+    setIsMariamReady(false);
+
     const isMobile = checkIsMobile();
 
-    // ── Quick restore from cache (same screen size) ─────────────
-    if (cachedSvgData && svgDataCalculated) {
+    // ── Always wait 2 rAF frames before measuring ─────────────────
+    // On first mount this costs ~32ms but is a no-op in terms of result.
+    // On return-to-hero after navigating away, the hero grid needs at
+    // least one full paint cycle to re-establish its row heights and slot
+    // dimensions. Measuring before that paint results in wrong (too-large
+    // or mispositioned) Mariam. The double rAF is the simplest reliable fix.
+    const run = () => {
+      if (!cachedSvgData || !svgDataCalculated) {
+        // ── Fresh calculation ──────────────────────────────────────
+        layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
+          setIsMariamReady(true);
+        });
+        return;
+      }
+
+      // ── Validate cache against current DOM ────────────────────────
+      // If screen dimensions, portfol position, or slot size have changed
+      // beyond tolerance, discard the cache and recalculate.
       const screenH = getViewportHeight();
       const screenW = window.innerWidth;
+
       const stripEl = document.querySelector("[data-hero-contact-strip]") as HTMLElement | null;
       const curBottomReserve = stripEl ? Math.ceil(stripEl.getBoundingClientRect().height) : 0;
+      const cacheBottom = cachedSvgData.bottomReservePx ?? 0;
+
       const currentPortfolEl =
         (portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
         (portfolioHeaderRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
       const currentPortfolRect = currentPortfolEl?.getBoundingClientRect();
-      const currentSlotRect = (svg.closest(".hero-mariam-slot") as HTMLElement | null)?.getBoundingClientRect();
-      const sidebarEl = !isMobile
-        ? (document.querySelector('[data-app-sidebar="left"]') as HTMLElement | null)
-        : null;
-      const curSidebarOffset = !isMobile && sidebarEl ? sidebarEl.getBoundingClientRect().width : 0;
-      const cacheBottom = cachedSvgData.bottomReservePx ?? 0;
-      const cacheSidebar = cachedSvgData.sidebarOffsetPx ?? 0;
-      const cachePortfolBottom = cachedSvgData.portfolBottom ?? 0;
-      const cachePortfolLeft = cachedSvgData.portfolLeft ?? 0;
       const curPortfolBottom = currentPortfolRect?.bottom ?? 0;
       const curPortfolLeft = currentPortfolRect?.left ?? 0;
+      const cachePortfolBottom = cachedSvgData.portfolBottom ?? 0;
+      const cachePortfolLeft = cachedSvgData.portfolLeft ?? 0;
+
+      const currentSlotRect = (svg.closest(".hero-mariam-slot") as HTMLElement | null)?.getBoundingClientRect();
       const curSlotHeight = currentSlotRect?.height ?? 0;
       const curSlotWidth = currentSlotRect?.width ?? 0;
-      if (
+
+      const cacheValid =
         cachedSvgData.layoutVersion === MARIAM_LAYOUT_VERSION &&
         Math.abs(screenH - cachedSvgData.screenHeight) <= 50 &&
         Math.abs(screenW - cachedSvgData.screenWidth) <= 50 &&
         Math.abs(curBottomReserve - cacheBottom) <= 4 &&
-        Math.abs(curSidebarOffset - cacheSidebar) <= 2 &&
         Math.abs(curPortfolBottom - cachePortfolBottom) <= 8 &&
         Math.abs(curPortfolLeft - cachePortfolLeft) <= 8 &&
+        // Verify slot size matches cache (if slot has been rendered).
         (curSlotHeight <= 0 || Math.abs(curSlotHeight - cachedSvgData.mariamHeight) <= 16) &&
-        (curSlotWidth <= 0 || Math.abs(curSlotWidth - cachedSvgData.mariamWidth) <= 16)
-      ) {
+        (curSlotWidth <= 0 || Math.abs(curSlotWidth - cachedSvgData.mariamWidth) <= 16);
+
+      if (cacheValid) {
         applyCachedLayout(svg, cachedSvgData, isMobile);
         setIsMariamReady(true);
-        // Still attach resize handler below
       } else {
-        // Screen changed — recalculate
+        // Cache is stale — discard and recalculate.
         svgDataCalculated = false;
         cachedSvgData = null;
         layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
           setIsMariamReady(true);
         });
       }
-    } else {
-      // ── Fresh calculation ──────────────────────────────────────
-      layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
-        setIsMariamReady(true);
-      });
-    }
+    };
 
-    // ── Resize handler — actually recalculates ──────────────────
+    // Double rAF ensures the hero grid has finished its layout pass
+    // before we measure any element rects.
+    requestAnimationFrame(() => requestAnimationFrame(run));
+
+    // ── Resize handler ───────────────────────────────────────────
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        // Skip tiny changes on mobile (virtual keyboard, URL bar resize, etc.).
-        // Uses a 100px delta threshold — coarse but sufficient for most devices.
-        // NOTE: On some tablets a portrait↔landscape flip changes width by exactly
-        // ~100px, which could cause this guard to skip a needed recalculation.
-        // A more robust solution would check `screen.orientation` instead.
+        // Skip tiny viewport shifts on mobile (virtual keyboard, URL bar, etc.).
         if (checkIsMobile() && cachedSvgData) {
           const w = window.innerWidth;
           const h = getViewportHeight();
