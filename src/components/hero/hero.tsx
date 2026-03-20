@@ -294,7 +294,7 @@ const Hero: React.FC<HeroProps> = ({
   // Show click prompt (lg only)
   useEffect(() => {
     if (isLg && isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
-      const t = setTimeout(() => setShowDotClickPrompt(true), 0);
+      const t = setTimeout(() => setShowDotClickPrompt(true), 100);
       return () => clearTimeout(t);
     }
     if (!isLg || isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
