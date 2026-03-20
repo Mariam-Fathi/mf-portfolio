@@ -291,18 +291,33 @@ export function useMariamSvg(
       const screenW = window.innerWidth;
       const stripEl = document.querySelector("[data-hero-contact-strip]") as HTMLElement | null;
       const curBottomReserve = stripEl ? Math.ceil(stripEl.getBoundingClientRect().height) : 0;
+      const currentPortfolEl =
+        (portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
+        (portfolioHeaderRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
+      const currentPortfolRect = currentPortfolEl?.getBoundingClientRect();
+      const currentSlotRect = (svg.closest(".hero-mariam-slot") as HTMLElement | null)?.getBoundingClientRect();
       const sidebarEl = !isMobile
         ? (document.querySelector('[data-app-sidebar="left"]') as HTMLElement | null)
         : null;
       const curSidebarOffset = !isMobile && sidebarEl ? sidebarEl.getBoundingClientRect().width : 0;
       const cacheBottom = cachedSvgData.bottomReservePx ?? 0;
       const cacheSidebar = cachedSvgData.sidebarOffsetPx ?? 0;
+      const cachePortfolBottom = cachedSvgData.portfolBottom ?? 0;
+      const cachePortfolLeft = cachedSvgData.portfolLeft ?? 0;
+      const curPortfolBottom = currentPortfolRect?.bottom ?? 0;
+      const curPortfolLeft = currentPortfolRect?.left ?? 0;
+      const curSlotHeight = currentSlotRect?.height ?? 0;
+      const curSlotWidth = currentSlotRect?.width ?? 0;
       if (
         cachedSvgData.layoutVersion === MARIAM_LAYOUT_VERSION &&
         Math.abs(screenH - cachedSvgData.screenHeight) <= 50 &&
         Math.abs(screenW - cachedSvgData.screenWidth) <= 50 &&
         Math.abs(curBottomReserve - cacheBottom) <= 4 &&
-        Math.abs(curSidebarOffset - cacheSidebar) <= 2
+        Math.abs(curSidebarOffset - cacheSidebar) <= 2 &&
+        Math.abs(curPortfolBottom - cachePortfolBottom) <= 8 &&
+        Math.abs(curPortfolLeft - cachePortfolLeft) <= 8 &&
+        (curSlotHeight <= 0 || Math.abs(curSlotHeight - cachedSvgData.mariamHeight) <= 16) &&
+        (curSlotWidth <= 0 || Math.abs(curSlotWidth - cachedSvgData.mariamWidth) <= 16)
       ) {
         applyCachedLayout(svg, cachedSvgData, isMobile);
         setIsMariamReady(true);

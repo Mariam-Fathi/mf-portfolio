@@ -10,8 +10,10 @@ const experienceItems = [
     fromDate: "Jan 2024",
     toDate: "Present",
     bullets: [
-      "Responsible for managing all key product deliverables.",
-      "Edits and updates client-facing visuals and assets.",
+      "Owned end-to-end delivery for the Wheelchair Admin Portal and Operational Portal.",
+      "Drove Smart Key mobile delivery at Tarqia, from feature planning to production rollout.",
+      "Built and shipped production features across dashboards, AI-assisted flows, and third-party integrations.",
+      "Led implementation from planning through deployment and release handoff.",
     ],
   },
   {
@@ -20,8 +22,8 @@ const experienceItems = [
     fromDate: "Sep 2025",
     toDate: "Jan 2026",
     bullets: [
-      "Tasked to create and improve layouts for new screens.",
-      "Edited visual assets for clients, campaigns, and social media posts.",
+      "Delivered mobile product work for Sanayat with a focus on reliability and UX quality.",
+      "Implemented core flows including booking, onboarding, notifications, and payments, plus responsive screen layouts.",
     ],
   },
 ] as const;
