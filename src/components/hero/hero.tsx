@@ -553,7 +553,7 @@ const Hero: React.FC<HeroProps> = ({
       {/* ── Portals ───────────────────────────────────────────────── */}
 
       {/* Dot overlay */}
-      {isMounted && createPortal(
+      {isMounted && isLg && createPortal(
         <div
           ref={dotRef}
           className="hero-dot-overlay"
