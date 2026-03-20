@@ -81,6 +81,7 @@ function layoutMariam(
   portfolioHeaderRef: RefObject<HTMLDivElement | null>,
   isMobile: boolean,
   onDone?: () => void,
+  attempt = 0,
 ) {
   // When SKIP_PORTFOLIO_ANIMATION we have .hero-cover-title-whole; otherwise .hero-cover-title-portfoli
   const portfolEl =
@@ -104,6 +105,17 @@ function layoutMariam(
   const mariamSlotRect = mariamSlotEl?.getBoundingClientRect();
   const mariamSlotWidth = mariamSlotRect?.width ?? 0;
   const mariamSlotHeight = mariamSlotRect?.height ?? 0;
+
+  // On section -> hero return, the grid can mount one frame before final sizing.
+  // Wait for a stable slot box so we don't lock in a wrong oversized layout.
+  if (!isMobile && (mariamSlotWidth < 120 || mariamSlotHeight < 80)) {
+    if (attempt < 10) {
+      requestAnimationFrame(() => {
+        layoutMariam(svg, portfolioHeaderRef, isMobile, onDone, attempt + 1);
+      });
+      return;
+    }
+  }
 
   // If the slot hasn't stretched yet, measure the parent grid's 3fr column directly.
   const gridEl = mariamSlotEl?.closest(".hero-inner-grid") as HTMLElement | null;
