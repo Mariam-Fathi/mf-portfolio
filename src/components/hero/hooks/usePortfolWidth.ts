@@ -1,33 +1,45 @@
 import { useEffect, useState, type RefObject } from "react";
 
 /**
- * Measures the width of the PORTFOL element on mount.
- * This is separated from the animation hook to break the circular dependency:
+ * Measures the width of the PORTFOL(I/O) element.
+ * Returns a non-zero fallback immediately so downstream hooks
+ * (useMariamSvg, etc.) never stall waiting for a measurement.
+ *
+ * Separated from animation hooks to break the circular dependency:
  *   portfolWidth → useMariamSvg → useDotAnimation → usePortfolioAnimation
  */
 export function usePortfolWidth(
   headerRef: RefObject<HTMLDivElement | null>,
 ): number {
-  const [portfolWidth, setPortfolWidth] = useState(0);
+  // Start with a non-zero fallback so the Mariam SVG renders immediately.
+  // useMariamSvg will re-layout once the real measurement arrives.
+  const [portfolWidth, setPortfolWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") return window.innerWidth * 0.75;
+    return 800;
+  });
 
   useEffect(() => {
     if (!headerRef.current) return;
 
     const measure = () => {
-      // When SKIP_PORTFOLIO_ANIMATION we have .hero-cover-title-whole; otherwise .hero-cover-title-portfoli
       const el =
         (headerRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
         (headerRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
       if (!el) return;
+
+      // Temporarily force display so getBoundingClientRect is accurate
+      // even when the element is visually hidden (e.g. opacity 0, clip-path).
       const orig = el.style.display;
       el.style.display = "inline";
       const w = el.getBoundingClientRect().width;
       el.style.display = orig;
+
       if (w > 0) setPortfolWidth(w);
     };
 
     measure();
-    const t = setTimeout(measure, 100);
+    // Second pass after fonts/layout settle
+    const t = setTimeout(measure, 120);
     return () => clearTimeout(t);
   }, [headerRef]);
 

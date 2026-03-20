@@ -50,6 +50,8 @@ export interface MariamSvgData {
   mariamWidth: number;
   mariamHeight: number;
   sidebarOffsetPx: number;
+  bottomReservePx: number;
+  layoutVersion: number;
   portfolBottom: number;
   portfolLeft: number;
   portfolFontSize: number;

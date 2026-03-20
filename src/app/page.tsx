@@ -228,7 +228,8 @@ export default function Home() {
           height: 100dvh;
           position: relative;
           overflow: hidden;
-          background: ${COLORS.heroBackground};
+          /* Page background behind the app window chrome */
+          background: #EDE6D9;
           margin: 0;
           padding: 0;
         }

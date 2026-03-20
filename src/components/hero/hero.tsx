@@ -4,37 +4,34 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import localFont from "next/font/local";
 import gsap from "gsap";
-import { BREAKPOINTS, COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS } from "./constants";
+import { COLORS, FONTS, SKIP_PORTFOLIO_ANIMATION, Z_LAYERS } from "./constants";
 
-const goAroundFont = localFont({
-  src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
-  display: "swap",
-});
 const pouitiesFont = localFont({
   src: "../../../public/fonts/pouities/Pouities.ttf",
   display: "swap",
 });
-const kawaiiStitchFont = localFont({
-  src: "../../../public/fonts/kawaii_stitch/Kawaii Stitch.ttf",
-  display: "swap",
-});
-import type { HeroProps } from "./types";
+
+import { NAV_SECTIONS, type HeroProps, type SectionId } from "./types";
 import { useIsMobile, checkIsMobile } from "./hooks/useIsMobile";
 import { useHeroBreakpoints } from "./hooks/useHeroBreakpoints";
 import { useMariamSvg } from "./hooks/useMariamSvg";
 import { resetDotCache, useDotAnimation } from "./hooks/useDotAnimation";
 import { usePortfolWidth } from "./hooks/usePortfolWidth";
-import { usePortfolioAnimation, hasPortfolioEverCompleted } from "./hooks/usePortfolioAnimation";
+import { usePortfolioAnimation } from "./hooks/usePortfolioAnimation";
 import { hasDotAnimationEverCompleted } from "./hooks/useDotAnimation";
 import { useEngineerText } from "./hooks/useEngineerText";
 import { useHeroNavigation } from "./hooks/useHeroNavigation";
-import AppSidebar from "@/components/AppSidebar";
+import HeroContactStrip from "./HeroContactStrip";
+import HeroContactsPanel from "./HeroContactsPanel";
+import HeroExperiencePanel from "./HeroExperiencePanel";
 
-// ─────────────────────────────────────────────────────────────────────
-// Hero Component
-// ─────────────────────────────────────────────────────────────────────
-const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portfolioCache: portfolioCacheProp }) => {
-  // ── Refs ────────────────────────────────────────────────────────
+const Hero: React.FC<HeroProps> = ({
+  onNavigate,
+  onReady,
+  isActive = true,
+  portfolioCache: portfolioCacheProp,
+}) => {
+  // ── Refs ──────────────────────────────────────────────────────────
   const portfolioHeaderRef = useRef<HTMLDivElement>(null);
   const numberSevenRef = useRef<SVGSVGElement>(null);
   const svgMariamTextRef = useRef<SVGTextElement>(null);
@@ -47,31 +44,44 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
   const dotRef = useRef<HTMLDivElement>(null);
   const liquidDropsRef = useRef<HTMLDivElement>(null);
   const engineerTextRef = useRef<HTMLDivElement>(null);
-
-  const [isMounted, setIsMounted] = useState(false);
-  const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
-  const [dotLandedOnI, setDotLandedOnI] = useState(false); // true the moment dot touches "ı" — used to sync engineer text
-  const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
   const oDragWrapperRef = useRef<HTMLSpanElement>(null);
-  const [isDotClicked, setIsDotClicked] = useState(false);
-  const isDotClickedRef = useRef(false);
-  const dotPreShownRef = useRef(false);
-  const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
-  const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
   const dotClickSvgRef = useRef<SVGSVGElement>(null);
   const dotClickTlRef = useRef<gsap.core.Timeline | null>(null);
-  const isMobile = useIsMobile();
-  const isSidebarMobile = useIsMobile(BREAKPOINTS.md);
+
+  // ── State ─────────────────────────────────────────────────────────
+  const [isMounted, setIsMounted] = useState(false);
+  const [portfolioRevealReady, setPortfolioRevealReady] = useState(false);
+  const [dotLandedOnI, setDotLandedOnI] = useState(false);
+  const [engineerRevealComplete, setEngineerRevealComplete] = useState(false);
+  const [isDotClicked, setIsDotClicked] = useState(false);
+  const [showDotClickPrompt, setShowDotClickPrompt] = useState(false);
+  const [dotClickPos, setDotClickPos] = useState<{ x: number; y: number; size: number } | null>(null);
+
+  const isDotClickedRef = useRef(false);
+  const dotPreShownRef = useRef(false);
+
+  const PAGE_BACKGROUND = "#EDE6D9";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isLg, isMd, isSm } = useHeroBreakpoints();
   const prevIsLgRef = useRef<boolean>(false);
   const prevIsLgInitializedRef = useRef<boolean>(false);
 
-  // Flip once on the client so portals are never rendered during SSR
+  const isMobile = useIsMobile();
+  const { isLg, isMd, isSm } = useHeroBreakpoints();
+
+  // ── Mount ─────────────────────────────────────────────────────────
   useEffect(() => setIsMounted(true), []);
 
-  // On large screens: when returning to hero from another section, restore "dot completed" state
-  // so the dot and "Software Engineer" stay in their last state (useDotAnimation restores from cache).
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMobileMenuOpen]);
+
+  // Restore dot/engineer state when returning to hero (lg only)
   useEffect(() => {
     if (!isMounted || !isLg) return;
     if (hasDotAnimationEverCompleted()) {
@@ -82,9 +92,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     }
   }, [isMounted, isLg]);
 
-  // If we resize from mobile to desktop without clicking the dot,
-  // reset dot cache so the dot returns to the "unclicked" state.
-  // Only when prevIsLg was actually set by a prior render (not initial mount on lg, not return from section).
+  // Reset dot cache when resizing from mobile → desktop before clicking dot
   useEffect(() => {
     const prevIsLg = prevIsLgRef.current;
     prevIsLgRef.current = isLg;
@@ -93,12 +101,9 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
 
     if (wasInitialized && !prevIsLg && isLg && !isDotClicked) {
       resetDotCache();
-      // Restore default desktop "unclicked" visuals.
       if (svgIRef.current) gsap.set(svgIRef.current, { fill: COLORS.primary });
       if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: COLORS.primary });
       if (svgM2Ref.current) gsap.set(svgM2Ref.current, { fill: COLORS.primary });
-
-      // Ensure dot/engineer states are fully reset.
       setDotLandedOnI(false);
       setEngineerRevealComplete(false);
       if (dotRef.current) {
@@ -110,25 +115,12 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     }
   }, [isLg, isDotClicked]);
 
-  useEffect(() => {
-    if (!isSidebarMobile) setIsMobileMenuOpen(false);
-  }, [isSidebarMobile]);
-
-  // Sm only: show portfolio + engineer final state immediately (no dot animation). Md and lg use dot.
+  // sm: skip dot animation, show engineer text immediately
   useEffect(() => {
     if (isSm) setPortfolioRevealReady(true);
   }, [isSm]);
 
-  // ── Hooks — each owns one animation phase ──────────────────────
-  //
-  // Dependency chain (no circular deps):
-  //   usePortfolWidth → portfolWidth
-  //   useMariamSvg(portfolWidth) → isMariamReady
-  //   useDotAnimation(isMariamReady) → isDotAnimationStarted / isDotAnimationComplete
-  //   usePortfolioAnimation(portfolioRevealReady) → isPortfolioAnimationComplete (user drags O to right)
-  //   useEngineerText(isDotAnimationComplete)
-  //   useHeroNavigation(isPortfolioAnimationComplete)
-
+  // ── Core hooks ────────────────────────────────────────────────────
   const portfolWidth = usePortfolWidth(portfolioHeaderRef);
 
   const { isMariamReady } = useMariamSvg(
@@ -140,9 +132,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
 
   const onDotLandedOnI = useCallback(() => {
     setPortfolioRevealReady(true);
-    setDotLandedOnI(true); // sync "Software Engineer" reveal with dot hitting the ı
+    setDotLandedOnI(true);
   }, []);
-  const { isDotAnimationStarted, isDotAnimationComplete, isDotFallenFromM } = useDotAnimation(
+
+  const { isDotAnimationComplete } = useDotAnimation(
     numberSevenRef,
     svgIRef,
     svgA2Ref,
@@ -152,8 +145,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     isActive,
     isMariamReady,
     isMobile,
-    // On mobile we don't rely on the dot click; we just need "final state" after the
-    // portfolio reveal becomes ready.
     isMounted && (isSm ? portfolioRevealReady : isDotClicked),
     portfolioHeaderRef,
     onDotLandedOnI,
@@ -167,11 +158,10 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     undefined,
     oDragWrapperRef as React.RefObject<HTMLDivElement | null>,
     portfolioRevealReady || isDotAnimationComplete,
-    SKIP_PORTFOLIO_ANIMATION || isMd, // static expand: final state, no drag (only when skipping portfolio animation)
+    SKIP_PORTFOLIO_ANIMATION || isMd,
     portfolioCacheProp,
   );
 
-  // When true, "Software Engineer" is revealed (and React must not reset its opacity to 0).
   const engineerRevealActive =
     isMounted &&
     (isLg
@@ -190,54 +180,50 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     isMariamReady,
     useCallback(() => setEngineerRevealComplete(true), []),
   );
+
   useHeroNavigation(portfolioHeaderRef, isPortfolioAnimationComplete);
 
-  // ── Dot click prompt on "ı" ─────────────────────────────────
-  // Calculate "ı" dot position after Mariam SVG is ready.
-  // Debounced on resize to avoid layout thrash on every pixel.
+  // ── Dot click position ────────────────────────────────────────────
   useEffect(() => {
     if (!isMariamReady || !svgIRef.current) return;
     const updatePos = () => {
       const iRect = svgIRef.current?.getBoundingClientRect();
-      if (!iRect) return;
+      if (!iRect || iRect.width === 0 || iRect.height === 0) return;
       const mobile = checkIsMobile();
       const baseDotSize = iRect.height * 0.135;
-      const dotSize = mobile ? baseDotSize * 0.6 : baseDotSize;
       setDotClickPos({
         x: iRect.left + iRect.width / 2,
         y: iRect.top + iRect.height * 0.19,
-        size: dotSize,
+        size: mobile ? baseDotSize * 0.6 : baseDotSize,
       });
     };
-    updatePos();
 
-    // Debounce > Mariam's 150ms + 3-frame rAF chain so "ı" position
-    // is fresh after the SVG re-layouts.
-    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
-    const debouncedUpdate = () => {
-      if (resizeTimer) clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        requestAnimationFrame(() => requestAnimationFrame(updatePos));
-      }, 250);
+    const t1 = setTimeout(() => requestAnimationFrame(updatePos), 50);
+    const t2 = setTimeout(updatePos, 300);
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const onResize = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(updatePos)), 250);
     };
-    window.addEventListener("resize", debouncedUpdate);
+    window.addEventListener("resize", onResize);
     return () => {
-      window.removeEventListener("resize", debouncedUpdate);
-      if (resizeTimer) clearTimeout(resizeTimer);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", onResize);
+      if (timer) clearTimeout(timer);
     };
   }, [isMariamReady]);
 
-  // Pre-show the actual dot at "ı" position before click (lg only).
+  // ── Pre-show dot on "ı" before click (lg only) ────────────────────
   useEffect(() => {
     if (!isLg || !isMariamReady || isDotClicked || !dotRef.current || !dotClickPos) return;
     if (hasDotAnimationEverCompleted()) return;
 
     const dot = dotRef.current;
-    const size = dotClickPos.size;
-    const baseY = dotClickPos.y;
-    const baseX = dotClickPos.x - size / 2;
+    const { size, x, y: baseY } = dotClickPos;
+    const baseX = x - size / 2;
 
-    // Always keep size/position up-to-date (covers resize)
     Object.assign(dot.style, {
       display: "block",
       visibility: "visible",
@@ -254,16 +240,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
     });
 
     if (!dotPreShownRef.current) {
-      // First time: blur-in to match the hero container's entrance
-      // (page.tsx: 0.8s duration, 0.2s delay on first load).
-      gsap.set(dot, {
-        x: baseX,
-        y: baseY,
-        opacity: 0,
-        filter: "blur(15px)",
-        rotation: 0,
-        scale: 1,
-      });
+      gsap.set(dot, { x: baseX, y: baseY, opacity: 0, filter: "blur(15px)", rotation: 0, scale: 1 });
       gsap.to(dot, {
         opacity: 1,
         filter: "blur(0px)",
@@ -273,198 +250,108 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         onComplete: () => { dotPreShownRef.current = true; },
       });
     } else {
-      // Resize: snap to new position/size without re-animating
-      gsap.set(dot, {
-        x: baseX,
-        y: baseY,
-        rotation: 0,
-        scale: 1,
-      });
+      gsap.set(dot, { x: baseX, y: baseY, rotation: 0, scale: 1 });
     }
 
-    // Hover on dot: expand down (sag toward ı) + dot and "ı" match accent (touching).
-    const hoverDrop = 8;
     const svgI = svgIRef.current;
     let hoverTl: gsap.core.Timeline | null = null;
-    const onMouseEnter = () => {
+    const hoverDrop = 8;
+
+    const onEnter = () => {
       if (hoverTl) hoverTl.kill();
       dot.style.transformOrigin = "50% 0%";
       if (svgI) gsap.to(svgI, { fill: COLORS.accent, duration: 0.22, ease: "sine.out" });
       hoverTl = gsap.timeline();
-      hoverTl.to(dot, {
-        y: baseY + hoverDrop,
-        scaleX: 0.96,
-        scaleY: 1.08,
-        backgroundColor: COLORS.accent,
-        duration: 0.22,
-        ease: "sine.out",
-      });
+      hoverTl.to(dot, { y: baseY + hoverDrop, scaleX: 0.96, scaleY: 1.08, backgroundColor: COLORS.accent, duration: 0.22, ease: "sine.out" });
     };
-    const onMouseLeave = () => {
+    const onLeave = () => {
       if (hoverTl) hoverTl.kill();
       dot.style.transformOrigin = "center center";
       if (svgI) gsap.to(svgI, { fill: COLORS.primary, duration: 0.24, ease: "sine.out" });
-      gsap.to(dot, {
-        y: baseY,
-        scaleX: 1,
-        scaleY: 1,
-        backgroundColor: COLORS.primary,
-        duration: 0.24,
-        ease: "sine.out",
-      });
+      gsap.to(dot, { y: baseY, scaleX: 1, scaleY: 1, backgroundColor: COLORS.primary, duration: 0.24, ease: "sine.out" });
     };
 
-    dot.addEventListener("mouseenter", onMouseEnter);
-    dot.addEventListener("mouseleave", onMouseLeave);
+    dot.addEventListener("mouseenter", onEnter);
+    dot.addEventListener("mouseleave", onLeave);
 
     return () => {
-      dot.removeEventListener("mouseenter", onMouseEnter);
-      dot.removeEventListener("mouseleave", onMouseLeave);
+      dot.removeEventListener("mouseenter", onEnter);
+      dot.removeEventListener("mouseleave", onLeave);
       if (hoverTl) hoverTl.kill();
-      // Kill any standalone svgI tweens that were fired outside hoverTl
       if (svgI) gsap.killTweensOf(svgI);
-      // Don't hide on resize re-runs (dotPreShownRef stays true).
-      // Don't hide when isDotClicked transitions (animation takes over).
-      // Only hide if the dot was never fully shown (e.g. early unmount).
       if (!isDotClickedRef.current && !hasDotAnimationEverCompleted() && !dotPreShownRef.current) {
-        Object.assign(dot.style, {
-          display: "none",
-          opacity: "0",
-          visibility: "hidden",
-          pointerEvents: "none",
-          cursor: "default",
-        });
+        Object.assign(dot.style, { display: "none", opacity: "0", visibility: "hidden", pointerEvents: "none", cursor: "default" });
       }
     };
   }, [isLg, isMariamReady, isDotClicked, dotClickPos]);
 
-  // Reset isDotClickedRef on unmount so a future remount starts fresh
-  // (avoids stale ref suppressing the pre-show dot cleanup on remount).
-  useEffect(() => {
-    return () => {
-      isDotClickedRef.current = false;
-      dotPreShownRef.current = false;
-    };
+  // Reset refs on unmount
+  useEffect(() => () => {
+    isDotClickedRef.current = false;
+    dotPreShownRef.current = false;
   }, []);
 
-  // Show dot click prompt (lg only).
+  // Show click prompt (lg only)
   useEffect(() => {
     if (isLg && isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
-      const timer = setTimeout(() => setShowDotClickPrompt(true), 1200);
-      return () => clearTimeout(timer);
+      const t = setTimeout(() => setShowDotClickPrompt(true), 1200);
+      return () => clearTimeout(t);
     }
     if (!isLg || isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
   }, [isLg, isMariamReady, isDotClicked, isActive, dotClickPos]);
 
-  // Animate dot click SVG: draw once, then sway.
+  // Animate "click!" SVG sway
   useEffect(() => {
     if (!showDotClickPrompt || !dotClickSvgRef.current) return;
-    const svgEl = dotClickSvgRef.current;
-
-    gsap.set(svgEl, {
-      rotation: 0,
-      transformOrigin: "50% 100%",
-      opacity: 0,
-    });
-
-    gsap.to(svgEl, { opacity: 1, duration: 0.4, ease: "power2.out" });
-
-    const swayTl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
-    dotClickTlRef.current = swayTl;
-    swayTl.fromTo(svgEl, { rotation: -4 }, { rotation: 4, duration: 1, ease: "sine.inOut" });
-
+    const el = dotClickSvgRef.current;
+    gsap.set(el, { rotation: 0, transformOrigin: "50% 100%", opacity: 0 });
+    gsap.to(el, { opacity: 1, duration: 0.4, ease: "power2.out" });
+    const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
+    dotClickTlRef.current = tl;
+    tl.fromTo(el, { rotation: -4 }, { rotation: 4, duration: 1, ease: "sine.inOut" });
     return () => {
-      if (dotClickTlRef.current) dotClickTlRef.current.kill();
-      gsap.killTweensOf(svgEl);
+      dotClickTlRef.current?.kill();
+      gsap.killTweensOf(el);
     };
   }, [showDotClickPrompt]);
 
   // Handle dot click
   const handleDotClick = useCallback(() => {
     if (isDotClicked) return;
-    // Set ref synchronously BEFORE state — prevents the pre-show
-    // cleanup from hiding the dot during the React commit phase
     isDotClickedRef.current = true;
-    if (dotClickTlRef.current) dotClickTlRef.current.kill();
-    if (dotClickSvgRef.current) {
-      gsap.to(dotClickSvgRef.current, { opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.in" });
-    }
-    // Remove click interactivity from the dot
-    if (dotRef.current) {
-      Object.assign(dotRef.current.style, {
-        pointerEvents: "none",
-        cursor: "default",
-      });
-    }
+    dotClickTlRef.current?.kill();
+    if (dotClickSvgRef.current) gsap.to(dotClickSvgRef.current, { opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.in" });
+    if (dotRef.current) Object.assign(dotRef.current.style, { pointerEvents: "none", cursor: "default" });
     setIsDotClicked(true);
     setShowDotClickPrompt(false);
   }, [isDotClicked]);
 
-  // ── Call onReady when Mariam is positioned ─────────────────────
+  // onReady callback
   useEffect(() => {
-    if (isMariamReady && onReady) {
-      requestAnimationFrame(() => requestAnimationFrame(onReady));
-    }
+    if (isMariamReady && onReady) requestAnimationFrame(() => requestAnimationFrame(onReady));
   }, [isMariamReady, onReady]);
 
-  // Ref so scroll-lock listener sees current menu state (allow scroll inside drawer when open)
-  const isMobileMenuOpenRef = useRef(false);
-  isMobileMenuOpenRef.current = isMobileMenuOpen;
-
-  // ── Lock scroll on mobile (allow scroll inside open sidebar drawer) ──────────────────────────────────────
+  // Lock scroll on mobile
   useEffect(() => {
     if (!isMobile) return;
-    const saved = {
-      bodyOverflow: document.body.style.overflow,
-      bodyHeight: document.body.style.height,
-      htmlOverflow: document.documentElement.style.overflow,
-    };
-    Object.assign(document.body.style, {
-      overflow: "hidden",
-      overflowY: "hidden",
-      height: "100vh",
-      position: "fixed",
-      width: "100%",
-      top: "0",
-      left: "0",
-    });
-    Object.assign(document.documentElement.style, {
-      overflow: "hidden",
-      overflowY: "hidden",
-      height: "100vh",
-    });
-
-    const prevent = (e: Event) => {
-      if (isMobileMenuOpenRef.current && (e.target as Element)?.closest?.(".hero-window-mobile-menu")) return;
-      e.preventDefault();
-    };
+    const saved = { bodyOverflow: document.body.style.overflow, bodyHeight: document.body.style.height, htmlOverflow: document.documentElement.style.overflow };
+    Object.assign(document.body.style, { overflow: "hidden", overflowY: "hidden", height: "100vh", position: "fixed", width: "100%", top: "0", left: "0" });
+    Object.assign(document.documentElement.style, { overflow: "hidden", overflowY: "hidden", height: "100vh" });
+    const prevent = (e: Event) => e.preventDefault();
     document.addEventListener("touchmove", prevent, { passive: false });
     document.addEventListener("wheel", prevent, { passive: false });
-
     return () => {
-      Object.assign(document.body.style, {
-        overflow: saved.bodyOverflow,
-        height: saved.bodyHeight,
-        position: "",
-        width: "",
-        top: "",
-        left: "",
-      });
+      Object.assign(document.body.style, { overflow: saved.bodyOverflow, height: saved.bodyHeight, position: "", width: "", top: "", left: "" });
       document.documentElement.style.overflow = saved.htmlOverflow;
       document.removeEventListener("touchmove", prevent);
       document.removeEventListener("wheel", prevent);
     };
   }, [isMobile]);
 
-
-  // ── Render ─────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────
   return (
-    <section
-      id="hero"
-      className="hero-section"
-      style={{ backgroundColor: "#EDE6D9" }}
-    >
-      {/* SVG filter for glass effect */}
+    <section id="hero" className="hero-section" style={{ backgroundColor: PAGE_BACKGROUND }}>
+      {/* SVG filter */}
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
           <filter id="glass-distortion" x="0%" y="0%" width="100%" height="100%">
@@ -475,298 +362,240 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         </defs>
       </svg>
 
-      {/* ── Retro OS window: title bar + menu bar + content ─────── */}
-      <div className={`hero-yellow-frame hero-window${isSidebarMobile && isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
-        {/* Title bar: hero title (program name position + size) */}
-        <div className="hero-window-title-bar">
-          <div className="hero-cover-header hero-cover-header-in-title-bar">
-            <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
-              {SKIP_PORTFOLIO_ANIMATION ? (
-                <>
-                  <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
-                </>
-              ) : (isMd || isSm) ? (
-                <>
-                  <span className="hero-cover-title-portfoli hero-cover-title-portfoli-hidden" aria-hidden="true">PORTFOLI</span>
-                  <span className="hero-cover-title-full-sm" aria-label="Portfolio">PORTFOLIO</span>
-                </>
-              ) : (
-                <>
-                  <span className="hero-cover-title-full" aria-label="Portfolio">{"PORTFOLI"}
-                    <span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
-                  </span>
-                  <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
-                  <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-                    <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">
-                      O
-                    </span>
-                  </span>
-                  <div
-                    className="hero-cover-title-line"
-                    style={{
-                      display: "none",
-                      height: "1px",
-                      backgroundColor: COLORS.line,
-                      opacity: 0.4,
-                      position: "absolute",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                    }}
-                    aria-hidden="true"
-                  />
-                </>
-              )}
+      {/* ── Window frame ─────────────────────────────────────────── */}
+      <div className="hero-outer-frame">
+        <div className="hero-yellow-frame hero-window">
+
+          {/* Title bar */}
+          <div className="hero-window-title-bar">
+            <div className="hero-window-title-inner">
+              <div className="hero-cover-header hero-cover-header-in-title-bar">
+                <div className="hero-cover-header-line" ref={portfolioHeaderRef}>
+                  {SKIP_PORTFOLIO_ANIMATION ? (
+                    <span className="hero-cover-title-whole" aria-label="Portfolio">PORTFOLIO</span>
+                  ) : (isMd || isSm) ? (
+                    <>
+                      <span className="hero-cover-title-portfoli hero-cover-title-portfoli-hidden" aria-hidden="true">PORTFOLI</span>
+                      <span className="hero-cover-title-full-sm" aria-label="Portfolio">PORTFOLIO</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="hero-cover-title-full" aria-label="Portfolio">
+                        {"PORTFOLI"}<span className="hero-o-trigger" aria-hidden="true">{"O"}</span>
+                      </span>
+                      <span className="hero-cover-title-portfoli" style={{ display: "none" }} aria-hidden="true">PORTFOLI</span>
+                      <span ref={oDragWrapperRef} className="hero-o-drag-wrapper" style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+                        <span className="hero-cover-title-o" style={{ display: "none", opacity: 1, position: "relative" }} aria-label="Drag to expand navigation">O</span>
+                      </span>
+                      <div
+                        className="hero-cover-title-line"
+                        style={{ display: "none", height: "1px", backgroundColor: COLORS.line, opacity: 0.4, position: "absolute", top: "50%", transform: "translateY(-50%)" }}
+                        aria-hidden="true"
+                      />
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <nav className="hero-window-title-nav" aria-label="Site sections">
+                <ul className="hero-window-title-nav-links">
+                  {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                    const isCurrent = s.id === "hero";
+                    return (
+                      <li key={s.id}>
+                        <button
+                          type="button"
+                          className={isCurrent ? "active" : undefined}
+                          aria-current={isCurrent ? "page" : undefined}
+                          onClick={() => onNavigate(s.id as SectionId)}
+                        >
+                          {s.label}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </nav>
+
+              <button
+                type="button"
+                className="hero-window-menu-btn"
+                aria-label="Open menu"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <span className="hero-window-menu-btn-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 7H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    <path d="M4 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </button>
             </div>
           </div>
 
-          {/* Mobile-only: open sidebar drawer */}
-          <button
-            type="button"
-            className="hero-window-menu-btn"
-            aria-label="Open sidebar menu"
-            aria-expanded={isMobileMenuOpen}
-            onClick={() => {
-              if (!isSidebarMobile) return;
-              setIsMobileMenuOpen((v) => !v);
-            }}
-          >
-            <span className="hero-window-menu-btn-icon" aria-hidden="true">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 7h16" />
-                <path d="M4 12h16" />
-                <path d="M4 17h16" />
-              </svg>
-            </span>
-          </button>
-        </div>
-        {/* Same outer content frame as section view */}
-        <div className="app-window-layout-content">
-          {!isSidebarMobile && (
-            <AppSidebar
-              currentSection="hero"
-              onNavigate={(s) => {
-                setIsMobileMenuOpen(false);
-                onNavigate(s);
-              }}
-            />
-          )}
-          <div className="app-window-content-frame" />
-        </div>
+          {/* Content area */}
+          <div className="app-window-layout-content">
+            <div className="app-window-content-frame">
+              <div className="hero-inner-grid">
 
-        {/* Mobile-only: sidebar in a drawer overlay */}
-        {isSidebarMobile && isMobileMenuOpen && (
-          <div
-            className="hero-window-mobile-menu-overlay"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Sidebar menu"
-            onMouseDown={() => setIsMobileMenuOpen(false)}
-          >
-            <div
-              className="hero-window-mobile-menu"
-              onMouseDown={(e) => {
-                // Prevent closing when interacting with the drawer itself.
-                e.stopPropagation();
-              }}
-            >
-              <button
-                type="button"
-                className="hero-window-mobile-menu-close"
-                aria-label="Close sidebar menu"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
-              </button>
+                {/* Top-right: Experience */}
+                <div className="hero-experience-panel-wrap">
+                  <HeroExperiencePanel />
+                </div>
 
-              <div className="hero-window-mobile-menu-content">
-                <AppSidebar
-                  currentSection="hero"
-                  onNavigate={(s) => {
-                    setIsMobileMenuOpen(false);
-                    onNavigate(s);
-                  }}
-                />
+                {/* Bottom-left: Contacts */}
+                <div className="hero-contact-col">
+                  <HeroContactsPanel noBottomReserve />
+                </div>
+
+                {/* Bottom-right: Mariam — hidden on mobile */}
+                {!isMobile && (
+                  <div className="hero-mariam-slot">
+                    <div className="hero-mariam-svg-wrap">
+                      <svg
+                        ref={numberSevenRef}
+                        className="hero-number-seven"
+                        style={{ zIndex: Z_LAYERS.mariamSvg, pointerEvents: "none", margin: 0, padding: 0 }}
+                      >
+                        <text
+                          ref={svgMariamTextRef}
+                          className="hero-mariam-text"
+                          x="0"
+                          y="0"
+                          fill={COLORS.primary}
+                          fontFamily={FONTS.display}
+                          textAnchor="start"
+                          dominantBaseline="hanging"
+                          style={{ letterSpacing: "0" }}
+                        >
+                          <tspan ref={svgMRef}>M</tspan>
+                          <tspan ref={svgA1Ref}>a</tspan>
+                          <tspan ref={svgRRef}>r</tspan>
+                          <tspan ref={svgIRef}>ı</tspan>
+                          <tspan ref={svgA2Ref}>a</tspan>
+                          <tspan ref={svgM2Ref}>m</tspan>
+                        </text>
+                      </svg>
+                    </div>
+                  </div>
+                )}
+
+                {/* On mobile, render a hidden SVG still needed for dot refs */}
+                {isMobile && (
+                  <svg
+                    ref={numberSevenRef}
+                    style={{ position: "absolute", opacity: 0, pointerEvents: "none", width: 1, height: 1, overflow: "hidden" }}
+                    aria-hidden="true"
+                  >
+                    <text ref={svgMariamTextRef} className="hero-mariam-text">
+                      <tspan ref={svgMRef}>M</tspan>
+                      <tspan ref={svgA1Ref}>a</tspan>
+                      <tspan ref={svgRRef}>r</tspan>
+                      <tspan ref={svgIRef}>ı</tspan>
+                      <tspan ref={svgA2Ref}>a</tspan>
+                      <tspan ref={svgM2Ref}>m</tspan>
+                    </text>
+                  </svg>
+                )}
+
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* ── Mariam SVG ─────────────────────────────────────────── */}
-      {portfolWidth > 0 && (
-        <svg
-          ref={numberSevenRef}
-          className="hero-number-seven"
-          style={{ position: "fixed", zIndex: Z_LAYERS.mariamSvg, pointerEvents: "none", margin: 0, padding: 0 }}
-        >
-          <text
-            ref={svgMariamTextRef}
-            className="hero-mariam-text"
-            x="0"
-            y="0"
-            fill={COLORS.primary}
-            fontFamily={FONTS.display}
-            textAnchor="start"
-            dominantBaseline="hanging"
-            style={{ letterSpacing: "0" }}
-          >
-            <tspan ref={svgMRef}>M</tspan>
-            <tspan ref={svgA1Ref}>a</tspan>
-            <tspan ref={svgRRef}>r</tspan>
-            <tspan ref={svgIRef}>ı</tspan>
-            <tspan ref={svgA2Ref}>a</tspan>
-            <tspan ref={svgM2Ref}>m</tspan>
-          </text>
+      {/* ── Portals ───────────────────────────────────────────────── */}
 
-        </svg>
+      {/* Dot overlay */}
+      {isMounted && createPortal(
+        <div
+          ref={dotRef}
+          className="hero-dot-overlay"
+          onClick={!isDotClicked && showDotClickPrompt ? handleDotClick : undefined}
+          role={!isDotClicked && showDotClickPrompt ? "button" : undefined}
+          tabIndex={!isDotClicked && showDotClickPrompt ? 0 : undefined}
+          onKeyDown={!isDotClicked && showDotClickPrompt ? (e: React.KeyboardEvent) => { if (e.key === "Enter") handleDotClick(); } : undefined}
+          style={{
+            position: "fixed", top: 0, left: 0, display: "none",
+            zIndex: !isDotClicked && showDotClickPrompt ? Z_LAYERS.frame + 50 : Z_LAYERS.dot,
+            pointerEvents: "none",
+          }}
+        />,
+        document.body,
       )}
 
-      {/* ── Dot overlay (React Portal — proper lifecycle & z-index) */}
-      {isMounted &&
-        createPortal(
-          <div
-            ref={dotRef}
-            className="hero-dot-overlay"
-            onClick={!isDotClicked && showDotClickPrompt ? handleDotClick : undefined}
-            role={!isDotClicked && showDotClickPrompt ? "button" : undefined}
-            tabIndex={!isDotClicked && showDotClickPrompt ? 0 : undefined}
-            onKeyDown={!isDotClicked && showDotClickPrompt ? (e: React.KeyboardEvent) => { if (e.key === "Enter") handleDotClick(); } : undefined}
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              display: "none",
-              visibility: isSidebarMobile && isMobileMenuOpen ? "hidden" : undefined,
-              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : (!isDotClicked && showDotClickPrompt ? Z_LAYERS.frame + 50 : Z_LAYERS.dot),
-              pointerEvents: "none",
-            }}
-          />,
-          document.body,
-        )}
+      {/* Engineer text */}
+      {!isMobile && isMounted && createPortal(
+        <div
+          ref={engineerTextRef}
+          className={`hero-engineer-text ${pouitiesFont.className}`}
+          style={{
+            position: "fixed",
+            color: COLORS.primary,
+            fontFamily: pouitiesFont.style.fontFamily,
+            fontSize: "clamp(2rem, 6vw, 6rem)",
+            zIndex: Z_LAYERS.engineerText,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+            overflow: "visible",
+            opacity: engineerRevealActive ? 1 : 0,
+            filter: "blur(0px)",
+          }}
+        >
+          Software  Engineer
+        </div>,
+        document.body,
+      )}
 
-      {/* ── Engineer text (React Portal) ──────────────────────── */}
-      {isMounted &&
-        createPortal(
-          <div
-            ref={engineerTextRef}
-            className={`hero-engineer-text ${pouitiesFont.className}`}
-            style={{
-              position: "fixed",
-              // top/left/right/bottom are intentionally omitted — useEngineerText sets them.
-              color: COLORS.primary,
-              fontFamily: pouitiesFont.style.fontFamily,
-              fontSize: "clamp(2rem, 6vw, 6rem)", // initial — overridden by useEngineerText
-              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : Z_LAYERS.engineerText,
-              pointerEvents: "none",
-              whiteSpace: "nowrap",
-              overflow: "visible",
-              // Must match reveal state so React doesn't overwrite GSAP back to 0 on re-render.
-              opacity: engineerRevealActive ? 1 : 0,
-              filter: "blur(0px)",
-            }}
+      {/* "Click!" SVG prompt */}
+      {isMounted && isLg && showDotClickPrompt && dotClickPos && !isDotClicked && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            left: `${dotClickPos.x}px`,
+            top: `${dotClickPos.y - 4}px`,
+            transform: "translateX(-50%) translateY(-100%)",
+            zIndex: Z_LAYERS.dot + 10,
+            pointerEvents: "none",
+          }}
+        >
+          <svg
+            ref={dotClickSvgRef}
+            viewBox="0 0 100 70"
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden="true"
+            style={{ width: "clamp(55px, 7vw, 90px)", height: "auto", display: "block", color: COLORS.primary, opacity: 0, overflow: "visible" }}
           >
-            Software  Engineer
-          </div>,
-          document.body,
-        )}
-
-      {/* ── Dot click SVG (React Portal) ───────────────────────── */}
-      {isMounted && isLg && showDotClickPrompt && dotClickPos && !isDotClicked &&
-        createPortal(
-          <div
-            style={{
-              position: "fixed",
-              left: `${dotClickPos.x}px`,
-              top: `${dotClickPos.y - 4}px`,
-              transform: "translateX(-50%) translateY(-100%)",
-              zIndex: isSidebarMobile && isMobileMenuOpen ? -1 : Z_LAYERS.dot + 10,
-              pointerEvents: "none",
-            }}
-          >
-            <svg
-              ref={dotClickSvgRef}
-              viewBox="0 0 100 70"
-              preserveAspectRatio="xMidYMid meet"
-              aria-hidden="true"
-              style={{
-                width: "clamp(55px, 7vw, 90px)",
-                height: "auto",
-                display: "block",
-                color: COLORS.primary,
-                opacity: 0,
-                overflow: "visible",
-              }}
-            >
-              <g>
-                {/* Arrow — at bottom, head points down toward dot */}
-                <g transform="matrix(1.554,0.136,-0.136,1.554,9.843,38)">
-                  <g transform="translate(4.016,8)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M2.016,-6C1.235,-5.932,0.736,-5.403,0.158,-4.91C-0.567,-4.288,-1.054,-3.599,-1.346,-2.694C-1.559,-2.053,-1.76,-1.413,-1.888,-0.748C-2.016,-0.083,-1.986,0.545,-1.973,1.185C-1.949,2.454,-1.486,3.968,-0.409,4.732C-0.153,4.91,0.145,5.021,0.413,5.175C0.657,5.317,0.865,5.514,1.12,5.625C1.284,5.692,1.327,5.723,1.454,5.822C1.582,5.92,1.655,5.982,1.839,6" />
-                  </g>
-                  <g transform="translate(4.74,13.192)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M-2.506,2.443C-2.506,2.443,-2.57,2.451,-2.57,2.451C-1.515,2.31,-0.466,2.249,0.589,2.108L1.696,1.959C1.878,1.935,2.265,1.958,2.396,1.828C2.57,1.656,2.357,0.978,2.328,0.764C2.294,0.508,2.226,0.241,2.24,-0.016C2.255,-0.252,2.281,-0.494,2.276,-0.733C2.268,-1.067,2.274,-1.381,2.229,-1.715C2.196,-1.96,2.164,-2.206,2.13,-2.451" />
-                  </g>
+            <g>
+              <g transform="matrix(1.554,0.136,-0.136,1.554,9.843,38)">
+                <g transform="translate(4.016,8)">
+                  <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M2.016,-6C1.235,-5.932,0.736,-5.403,0.158,-4.91C-0.567,-4.288,-1.054,-3.599,-1.346,-2.694C-1.559,-2.053,-1.76,-1.413,-1.888,-0.748C-2.016,-0.083,-1.986,0.545,-1.973,1.185C-1.949,2.454,-1.486,3.968,-0.409,4.732C-0.153,4.91,0.145,5.021,0.413,5.175C0.657,5.317,0.865,5.514,1.12,5.625C1.284,5.692,1.327,5.723,1.454,5.822C1.582,5.92,1.655,5.982,1.839,6" />
                 </g>
-                {/* Click text — at top, near the arrow tail */}
-                <g transform="matrix(1.272,-0.27,0.27,1.272,18,27)">
-                  <g transform="translate(51.831,5.275)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.35,-2.47C0.028,-1.519,-0.195,-0.803,-0.175,0.175C-0.167,0.561,-0.183,0.939,-0.175,1.317C-0.167,1.69,-0.35,2.104,-0.211,2.47" />
-                  </g>
-                  <g transform="translate(51.162,12.575)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.193,0.304C0.109,0.081,-0.034,-0.13,-0.193,-0.304C-0.157,-0.169,-0.125,-0.029,-0.098,0.11" />
-                  </g>
-                  <g transform="translate(5.635,7.245)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.218,-3.88C1.904,-3.8,1.737,-4.134,1.453,-4.226C1.013,-4.373,0.674,-4.214,0.253,-4.146C-0.253,-4.063,-0.709,-4.15,-1.159,-3.84C-1.497,-3.605,-1.784,-3.196,-2.075,-2.905C-2.273,-2.71,-2.471,-2.524,-2.635,-2.301C-2.813,-2.058,-2.964,-1.796,-3.016,-1.497C-3.135,-0.833,-2.651,-0.376,-2.779,0.248C-2.901,0.857,-3.089,1.35,-2.826,1.963C-2.508,2.706,-2.026,2.933,-1.422,3.414C-1.112,3.661,-0.781,3.884,-0.416,4.039C-0.188,4.134,0.169,4.373,0.407,4.341C0.781,4.289,1.151,3.983,1.513,3.864C1.974,3.709,2.679,3.486,3.135,3.438" />
-                  </g>
-                  <g transform="translate(41.164,7.61)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-0.428,5.047C-0.448,4.12,-0.463,3.19,-0.487,2.263C-0.503,1.655,-0.515,1.106,-0.392,0.505C-0.3,0.056,-0.181,-0.326,-0.181,-0.783C-0.181,-1.487,-0.121,-2.092,0.002,-2.788C0.073,-3.186,0.141,-3.599,0.244,-3.993C0.34,-4.351,0.515,-4.661,0.455,-5.047" />
-                  </g>
-                  <g transform="translate(43.777,6.097)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-2.153,1.74C-2.027,0.944,-0.944,0.475,-0.371,0.022C-0.017,-0.261,0.403,-0.42,0.741,-0.71C1.191,-1.096,1.616,-1.442,2.153,-1.74C2.137,-1.609,2.066,-1.509,1.931,-1.446" />
-                  </g>
-                  <g transform="translate(43.497,9.02)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.606,-2.253C-1.535,-1.807,-1.293,-1.211,-1.09,-0.801C-0.704,-0.034,-0.004,0.253,0.656,0.666C1.142,0.969,1.363,1.772,1.606,2.253" />
-                  </g>
-                  <g transform="translate(24.172,2.806)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.062,0.115L0.062,0.012C0.062,0.095,0.013,0.259,0.141,0.239C0.268,0.219,0.26,-0.004,0.193,-0.072C-0.054,-0.306,-0.268,0.306,0.053,0.167C0.086,0.032,-0.13,0.016,-0.125,0.175" />
-                  </g>
-                  <g transform="translate(24.518,9.215)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.093,2.746C0.149,2.535,0.193,2.242,0.157,2.018C0.113,1.745,-0.014,1.565,-0.026,1.283C-0.038,1.036,0.018,0.798,-0.026,0.551C-0.074,0.268,-0.169,0.065,-0.181,-0.224C-0.193,-0.514,-0.161,-0.81,-0.157,-1.099C-0.157,-1.664,0.038,-2.158,0.061,-2.746" />
-                  </g>
-                  <g transform="translate(16.343,7.284)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.579,-4.2C-1.948,-3.929,-1.758,-3.141,-1.833,-2.744C-1.953,-2.119,-2.188,-1.598,-2.195,-0.954C-2.203,-0.318,-2.227,0.322,-2.232,0.959C-2.235,1.468,-2.351,1.846,-2.414,2.343C-2.477,2.839,-2.282,3.373,-2.112,3.85C-1.977,3.695,-1.571,4.161,-1.396,4.149C-0.713,4.109,-0.044,4.097,0.645,4.113C0.982,4.12,1.32,4.124,1.654,4.137C1.921,4.145,2.216,4.2,2.477,4.128" />
-                  </g>
-                  <g transform="translate(32.644,7.785)">
-                    <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.663,-3.592C2.642,-3.815,2.105,-3.798,1.954,-3.794C1.791,-3.794,1.628,-3.783,1.465,-3.794C1.27,-3.811,1.091,-3.882,0.9,-3.918C0.168,-4.044,-0.233,-3.656,-0.746,-3.281C-1.295,-2.884,-1.617,-2.431,-1.852,-1.822C-2.051,-1.309,-2.11,-0.76,-2.357,-0.263C-2.428,-0.116,-2.516,0.023,-2.56,0.178C-2.587,0.279,-2.6,0.382,-2.604,0.486C-2.62,0.755,-2.623,1.03,-2.635,1.301C-2.639,1.384,-2.663,1.491,-2.635,1.574C-2.604,1.671,-2.508,1.762,-2.456,1.845C-2.297,2.091,-2.138,2.335,-1.987,2.585C-1.876,2.768,-1.78,2.966,-1.637,3.125C-1.51,3.266,-1.359,3.388,-1.224,3.52C-1.128,3.615,-1.037,3.698,-0.913,3.754C-0.834,3.79,-0.75,3.814,-0.671,3.833C-0.516,3.874,-0.361,3.889,-0.201,3.901C0.141,3.93,0.475,4.044,0.822,4.04C1.107,4.04,1.37,4.029,1.652,3.982" />
-                  </g>
+                <g transform="translate(4.74,13.192)">
+                  <path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2" d="M-2.506,2.443C-2.506,2.443,-2.57,2.451,-2.57,2.451C-1.515,2.31,-0.466,2.249,0.589,2.108L1.696,1.959C1.878,1.935,2.265,1.958,2.396,1.828C2.57,1.656,2.357,0.978,2.328,0.764C2.294,0.508,2.226,0.241,2.24,-0.016C2.255,-0.252,2.281,-0.494,2.276,-0.733C2.268,-1.067,2.274,-1.381,2.229,-1.715C2.196,-1.96,2.164,-2.206,2.13,-2.451" />
                 </g>
               </g>
-            </svg>
-          </div>,
-          document.body,
-        )}
+              <g transform="matrix(1.272,-0.27,0.27,1.272,18,27)">
+                <g transform="translate(51.831,5.275)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.35,-2.47C0.028,-1.519,-0.195,-0.803,-0.175,0.175C-0.167,0.561,-0.183,0.939,-0.175,1.317C-0.167,1.69,-0.35,2.104,-0.211,2.47" /></g>
+                <g transform="translate(51.162,12.575)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.193,0.304C0.109,0.081,-0.034,-0.13,-0.193,-0.304C-0.157,-0.169,-0.125,-0.029,-0.098,0.11" /></g>
+                <g transform="translate(5.635,7.245)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.218,-3.88C1.904,-3.8,1.737,-4.134,1.453,-4.226C1.013,-4.373,0.674,-4.214,0.253,-4.146C-0.253,-4.063,-0.709,-4.15,-1.159,-3.84C-1.497,-3.605,-1.784,-3.196,-2.075,-2.905C-2.273,-2.71,-2.471,-2.524,-2.635,-2.301C-2.813,-2.058,-2.964,-1.796,-3.016,-1.497C-3.135,-0.833,-2.651,-0.376,-2.779,0.248C-2.901,0.857,-3.089,1.35,-2.826,1.963C-2.508,2.706,-2.026,2.933,-1.422,3.414C-1.112,3.661,-0.781,3.884,-0.416,4.039C-0.188,4.134,0.169,4.373,0.407,4.341C0.781,4.289,1.151,3.983,1.513,3.864C1.974,3.709,2.679,3.486,3.135,3.438" /></g>
+                <g transform="translate(41.164,7.61)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-0.428,5.047C-0.448,4.12,-0.463,3.19,-0.487,2.263C-0.503,1.655,-0.515,1.106,-0.392,0.505C-0.3,0.056,-0.181,-0.326,-0.181,-0.783C-0.181,-1.487,-0.121,-2.092,0.002,-2.788C0.073,-3.186,0.141,-3.599,0.244,-3.993C0.34,-4.351,0.515,-4.661,0.455,-5.047" /></g>
+                <g transform="translate(43.777,6.097)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-2.153,1.74C-2.027,0.944,-0.944,0.475,-0.371,0.022C-0.017,-0.261,0.403,-0.42,0.741,-0.71C1.191,-1.096,1.616,-1.442,2.153,-1.74C2.137,-1.609,2.066,-1.509,1.931,-1.446" /></g>
+                <g transform="translate(43.497,9.02)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.606,-2.253C-1.535,-1.807,-1.293,-1.211,-1.09,-0.801C-0.704,-0.034,-0.004,0.253,0.656,0.666C1.142,0.969,1.363,1.772,1.606,2.253" /></g>
+                <g transform="translate(24.172,2.806)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.062,0.115L0.062,0.012C0.062,0.095,0.013,0.259,0.141,0.239C0.268,0.219,0.26,-0.004,0.193,-0.072C-0.054,-0.306,-0.268,0.306,0.053,0.167C0.086,0.032,-0.13,0.016,-0.125,0.175" /></g>
+                <g transform="translate(24.518,9.215)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M0.093,2.746C0.149,2.535,0.193,2.242,0.157,2.018C0.113,1.745,-0.014,1.565,-0.026,1.283C-0.038,1.036,0.018,0.798,-0.026,0.551C-0.074,0.268,-0.169,0.065,-0.181,-0.224C-0.193,-0.514,-0.161,-0.81,-0.157,-1.099C-0.157,-1.664,0.038,-2.158,0.061,-2.746" /></g>
+                <g transform="translate(16.343,7.284)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M-1.579,-4.2C-1.948,-3.929,-1.758,-3.141,-1.833,-2.744C-1.953,-2.119,-2.188,-1.598,-2.195,-0.954C-2.203,-0.318,-2.227,0.322,-2.232,0.959C-2.235,1.468,-2.351,1.846,-2.414,2.343C-2.477,2.839,-2.282,3.373,-2.112,3.85C-1.977,3.695,-1.571,4.161,-1.396,4.149C-0.713,4.109,-0.044,4.097,0.645,4.113C0.982,4.12,1.32,4.124,1.654,4.137C1.921,4.145,2.216,4.2,2.477,4.128" /></g>
+                <g transform="translate(32.644,7.785)"><path strokeLinecap="round" strokeLinejoin="round" fill="none" stroke="currentColor" strokeWidth="2.5" d="M2.663,-3.592C2.642,-3.815,2.105,-3.798,1.954,-3.794C1.791,-3.794,1.628,-3.783,1.465,-3.794C1.27,-3.811,1.091,-3.882,0.9,-3.918C0.168,-4.044,-0.233,-3.656,-0.746,-3.281C-1.295,-2.884,-1.617,-2.431,-1.852,-1.822C-2.051,-1.309,-2.11,-0.76,-2.357,-0.263C-2.428,-0.116,-2.516,0.023,-2.56,0.178C-2.587,0.279,-2.6,0.382,-2.604,0.486C-2.62,0.755,-2.623,1.03,-2.635,1.301C-2.639,1.384,-2.663,1.491,-2.635,1.574C-2.604,1.671,-2.508,1.762,-2.456,1.845C-2.297,2.091,-2.138,2.335,-1.987,2.585C-1.876,2.768,-1.78,2.966,-1.637,3.125C-1.51,3.266,-1.359,3.388,-1.224,3.52C-1.128,3.615,-1.037,3.698,-0.913,3.754C-0.834,3.79,-0.75,3.814,-0.671,3.833C-0.516,3.874,-0.361,3.889,-0.201,3.901C0.141,3.93,0.475,4.044,0.822,4.04C1.107,4.04,1.37,4.029,1.652,3.982" /></g>
+              </g>
+            </g>
+          </svg>
+        </div>,
+        document.body,
+      )}
 
-      {/* ── Styles ─────────────────────────────────────────────── */}
+      {/* ── Styles ────────────────────────────────────────────────── */}
       <style jsx>{`
-        /* ── Section ────────────────────────────────────────────── */
         .hero-section {
           display: flex;
           width: 100%;
@@ -775,57 +604,54 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          text-align: center;
           color: ${COLORS.primary};
           position: relative;
           overflow: hidden;
           margin: 0;
           padding: 0;
         }
-        @media (max-width: 768px) {
-          .hero-section { padding: 0.5rem; }
+
+        .hero-outer-frame {
+          position: fixed;
+          inset: clamp(8px, 2vw, 18px);
+          z-index: ${Z_LAYERS.frame};
+          pointer-events: auto;
+          border: 2px solid ${COLORS.primary};
+          box-shadow: 2px 2px 0 #1a1a1a;
+          overflow: hidden;
+          background: ${COLORS.heroBackground};
         }
 
-        /* ── Retro OS window frame ───────────────────────────────── */
         .hero-yellow-frame {
-          position: fixed;
+          position: absolute;
           inset: 0;
           pointer-events: auto;
           z-index: ${Z_LAYERS.frame};
-          overflow-x: visible;
-          overflow-y: hidden;
+          overflow: hidden;
           margin: 0;
           padding: 0;
         }
-        .hero-yellow-frame.hero-window-mobile-menu-open {
-          z-index: ${Z_LAYERS.mobileMenuOverlay};
-          overflow-x: visible;
-          overflow-y: visible;
-        }
-        /* Outer frame: chunky border + 3D bevel (retro OS vibe, our palette) */
+
         .hero-window {
           display: flex;
           flex-direction: column;
           align-items: stretch;
           background: ${COLORS.heroBackground};
+          position: relative;
           margin: 0;
+          width: 100%;
+          height: 100%;
           overflow: hidden;
-          box-shadow: 2px 2px 0 #1a1a1a;
-          /* Title bar is half the desktop sidebar width (md:w-[240px] => 120px). */
           --titlebar-square-height: clamp(48px, 6vw, 64px);
         }
         @media (min-width: 768px) {
-          .hero-window {
-            --titlebar-square-height: 120px;
-          }
-          .hero-window-title-bar {
-            /* With a fixed bar height, remove vertical padding to prevent overflow. */
-            padding: 0 10px;
-          }
+          .hero-window { --titlebar-square-height: 120px; }
+          .hero-window-title-bar { padding: 0; }
         }
+
         .hero-window-title-bar {
           flex-shrink: 0;
-          background: ${COLORS.primary};
+          background: ${COLORS.heroBackground};
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
@@ -834,52 +660,62 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           box-sizing: border-box;
           height: var(--titlebar-square-height);
           min-height: var(--titlebar-square-height);
-          padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
-          font-family: ${kawaiiStitchFont.style.fontFamily};
-          color: ${COLORS.heroBackground};
+          padding: 0;
+          color: ${COLORS.primary};
+          border: 2px solid ${COLORS.primary};
+          box-shadow: 2px 2px 0 #1a1a1a;
           overflow: visible;
+          margin: 0;
         }
-        /* Override .hero-cover-header (position: absolute) so portfolio stays in title bar */
+
+        .hero-window-title-inner {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+          padding: 0;
+        }
+
         .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
           position: relative !important;
           inset: auto !important;
-          flex: 1 1 auto;
+          flex: 0 0 auto;
           min-width: 0;
           width: auto;
           height: 100%;
           min-height: var(--titlebar-square-height);
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           padding: 0;
-        }
-        @media (max-width: 768px) {
-          .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
-            justify-content: flex-start;
-          }
         }
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
           min-height: var(--titlebar-square-height);
-          justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          width: auto;
+          margin: 0;
+          padding: 0;
+          position: relative;
+          overflow: visible;
         }
-        @media (max-width: 768px) {
-          .hero-window-title-bar .hero-cover-header-line {
-            justify-content: flex-start;
-          }
-        }
-        /* Whole word "PORTFOLIO" at left (no O/line/drag) — same font as Software Engineer */
         .hero-window-title-bar .hero-cover-title-whole {
           font-size: clamp(24px, calc(var(--titlebar-square-height) * 0.39), 58px);
           letter-spacing: 0.12em;
           height: var(--titlebar-square-height);
-          color: ${COLORS.heroBackground};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
           line-height: 1;
           white-space: nowrap;
+          transform: translateX(-2px);
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-whole {
@@ -887,22 +723,21 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
             height: clamp(42px, 11vw, 60px);
           }
         }
-        /* Big size + bg color for text (portfolio on dark bar) — same font as Software Engineer */
         .hero-window-title-bar .hero-cover-title-full,
         .hero-window-title-bar .hero-cover-title-portfoli,
         .hero-window-title-bar .hero-cover-title-o {
           font-size: clamp(1.5rem, 4.5vw, 3.25rem);
           letter-spacing: 0.12em;
           height: clamp(40px, 5vw, 56px);
-          color: ${COLORS.heroBackground};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
         }
         .hero-window-title-bar .hero-cover-title-full-sm {
           font-size: clamp(1.25rem, 5vw, 2.5rem);
           letter-spacing: 0.15em;
           height: clamp(36px, 10vw, 52px);
-          color: ${COLORS.heroBackground};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-title-full,
@@ -913,7 +748,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           }
         }
 
-        /* Title bar nav (top-right) */
+        /* Nav */
         .hero-window-title-nav {
           flex: 0 0 auto;
           display: flex;
@@ -921,7 +756,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           justify-content: flex-end;
           height: 100%;
           min-height: var(--titlebar-square-height);
-          padding-left: 0.75rem;
         }
         .hero-window-title-nav-links {
           list-style: none;
@@ -929,38 +763,49 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           padding: 0;
           display: flex;
           align-items: center;
-          justify-content: flex-end;
           gap: clamp(0.65rem, 1.5vw, 1.1rem);
           white-space: nowrap;
         }
-        .hero-window-title-nav-links a {
-          color: ${COLORS.heroBackground};
-          text-decoration: none;
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+        .hero-window-title-nav-links button {
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
           font-size: clamp(0.72rem, 1.05vw, 0.92rem);
           text-transform: lowercase;
           letter-spacing: 0.06em;
           line-height: 1;
-          opacity: 0.92;
-          padding: 0.35rem 0.25rem;
+          padding: 0.35rem 0.45rem;
+          background: ${COLORS.heroBackground};
+          border: 2px solid ${COLORS.primary};
+          box-shadow: 2px 2px 0 #1a1a1a;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          appearance: none;
         }
-        .hero-window-title-nav-links a:hover,
-        .hero-window-title-nav-links a.active {
-          opacity: 1;
+        .hero-window-title-nav-links button:hover,
+        .hero-window-title-nav-links button.active {
+          opacity: 0.95;
           font-weight: 700;
         }
         @media (max-width: 768px) {
-          .hero-window-title-nav-links {
-            gap: clamp(0.6rem, 2.4vw, 0.9rem);
+          .hero-window-title-nav {
+            flex: 0 1 auto;
+            max-width: min(52vw, 220px);
+            min-width: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
           }
-          .hero-window-title-nav-links a {
-            font-size: clamp(0.66rem, 2.2vw, 0.85rem);
-            letter-spacing: 0.055em;
+          .hero-window-title-nav::-webkit-scrollbar { display: none; }
+          .hero-window-title-nav-links { display: none; }
+          .hero-window-title-nav-links button {
+            font-size: clamp(0.62rem, 2vw, 0.78rem);
+            padding: 0.3rem 0.15rem;
+            white-space: nowrap;
           }
         }
-        @media (max-width: 768px) {
-          .hero-window-title-nav { display: none !important; }
-        }
+
+        /* Mobile hamburger menu (replaces the 3 title tabs) */
         .hero-window-menu-btn {
           display: none;
           flex-shrink: 0;
@@ -971,7 +816,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           padding: 0;
           border: none;
           background: transparent;
-          color: ${COLORS.heroBackground};
+          color: ${COLORS.primary};
           cursor: pointer;
           border-radius: 6px;
         }
@@ -981,6 +826,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         @media (max-width: 768px) {
           .hero-window-menu-btn { display: flex; }
         }
+
         .hero-window-mobile-menu-overlay {
           position: fixed;
           inset: 0;
@@ -1019,7 +865,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           justify-content: center;
         }
         .hero-window-mobile-menu-close:hover { opacity: 0.9; }
-
         .hero-window-mobile-menu-content {
           flex: 1;
           min-height: 0;
@@ -1038,7 +883,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         .hero-window-mobile-menu-links a {
           color: ${COLORS.heroBackground};
           text-decoration: none;
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           font-size: 1rem;
           text-transform: lowercase;
           letter-spacing: 0.06em;
@@ -1049,155 +894,149 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
         .hero-window-mobile-menu-links a:hover,
         .hero-window-mobile-menu-links a.active { opacity: 1; font-weight: 700; }
 
-        .hero-window-menu-bar {
-          flex-shrink: 0;
-          min-height: clamp(36px, 5.5vw, 44px);
-          background: transparent;
-          margin-left: 6px;
-          margin-right: 6px;
-          border-top: 2px solid ${COLORS.primary};
-          border-right: 2px solid ${COLORS.primary};
-          border-bottom: 2px solid ${COLORS.primary};
-          border-left: 2px solid ${COLORS.primary};
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-          border-radius: 18px 18px 0 0;
-          display: flex;
-          align-items: stretch;
-          padding: 0 1.25rem;
-          gap: 0;
-          font-family: ${FONTS.display};
-          font-size: clamp(0.65rem, 1vw, 0.75rem);
-          color: ${COLORS.primary};
-        }
-        .hero-window-menu-nav {
-          flex: 1;
-          display: flex;
-          justify-content: flex-end;
-          align-self: stretch;
-          min-height: 0;
-        }
-        .hero-window-menu-nav-links {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-          display: flex;
-          align-items: stretch;
-          justify-content: flex-end;
-          gap: 0;
-          height: 100%;
-          min-height: 100%;
-          width: 100%;
-        }
-        .hero-window-menu-nav-links li {
-          display: flex;
-          align-items: stretch;
-          flex: 1;
-          min-width: 0;
-        }
-        .hero-window-menu-nav-links a {
-          color: ${COLORS.primary};
-          text-decoration: none;
-          font-size: clamp(0.6rem, 1.1vw, 0.75rem);
-          text-transform: lowercase;
-          letter-spacing: 0.04em;
-          line-height: 1;
-          opacity: 0.9;
-          border-top: none;
-          border-bottom: none;
-          border-right: 2px solid ${COLORS.primary};
-          border-left: none;
-          border-radius: 0px;
-          padding: 0.5em 0.9em;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          width: 100%;
-          box-sizing: border-box;
-          box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
-        }
-        .hero-window-menu-nav-links li:first-child a {
-          border-left: none;
-        }
-        .hero-window-menu-nav-links li:last-child a {
-          border-right: none;
-        }
-        .hero-window-menu-nav-links a:hover,
-        .hero-window-menu-nav-links a.active {
-          opacity: 1;
-          font-weight: 700;
-        }
-        /* Menu bar is no longer used (nav moved into title bar) */
-        .hero-window-menu-bar {
-          display: none;
-        }
+        /* Content frame */
         .app-window-layout-content {
           flex: 1;
           min-height: 0;
           position: relative;
           display: flex;
+          flex-direction: column;
           overflow: hidden;
           background: ${COLORS.heroBackground};
         }
         .app-window-content-frame {
           flex: 1;
           min-height: 0;
-          margin: 0;
           background: ${COLORS.heroBackground};
           position: relative;
           overflow: hidden;
+          padding: clamp(10px, 2vw, 18px);
+          padding-bottom: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          height: 0;
         }
 
-        /* ── Frame marquee (top bar) ───────────────────────────── */
-        .hero-frame-marquee {
-          position: absolute;
-          background-color: transparent;
-          overflow-x: visible;
-          overflow-y: hidden;
+        /* ── Inner grid ──────────────────────────────────────────── */
+        .hero-inner-grid {
+          width: 100%;
+          flex: 1;
+          min-height: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+          grid-template-rows: auto 1fr;
+          grid-template-areas:
+            "empty    experience"
+            "contacts mariam";
+          column-gap: clamp(10px, 2vw, 18px);
+          row-gap: 0;
+          overflow: hidden;
+          align-items: stretch;
+          align-content: stretch;
+        }
+
+        .hero-experience-panel-wrap {
+          grid-area: experience;
+          justify-self: end;
+          align-self: start;
+          width: auto;
+          max-width: 100%;
+          overflow: visible;
+          pointer-events: auto;
+          position: relative;
+          margin-top: clamp(3rem, 1.5vh, 16px);
+          margin-right: clamp(0px, 2vw, 18px);
+          /* Keep the Experience panel behind Mariam */
+          z-index: ${Z_LAYERS.mariamSvg - 1};
+        }
+
+        .hero-contact-col {
+          grid-area: contacts;
+          align-self: stretch;
+          justify-self: start;
+          overflow: hidden;
+          position: relative;
+          /* Keep Contacts behind Mariam */
+          z-index: ${Z_LAYERS.mariamSvg - 1};
+          width: 100%;
           display: flex;
-          align-items: center;
+          flex-direction: column;
+          padding: 0;
+          box-sizing: border-box;
+          min-height: 0;
+          transform: translateY(-40%);
+        }
+
+        .hero-contact-col > * {
+          flex: 1;
+          min-height: 0;
+          width: 100%;
+          overflow: hidden;
+        }
+
+        .hero-mariam-slot {
+          grid-area: mariam;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          justify-content: flex-end;
+          align-self: stretch;
+          overflow: visible;
+          position: relative;
+          z-index: ${Z_LAYERS.mariamSvg + 10};
+          min-height: 0;
+        }
+
+        .hero-mariam-svg-wrap {
+          width: 100%;
+          overflow: visible;
+          display: flex;
+          justify-content: flex-end;
+          align-items: flex-end;
           margin: 0;
           padding: 0;
-          isolation: isolate;
-          box-shadow: 0px 6px 21px -8px rgba(109, 109, 109, 0.2);
-        }
-        .hero-frame-marquee::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: 0;
-          box-shadow: inset 0 0 8px -2px rgba(109, 109, 109, 0.3);
-          pointer-events: none;
-        }
-        .hero-frame-marquee::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          z-index: -1;
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-          filter: url(#glass-distortion);
-          -webkit-filter: url(#glass-distortion);
-          isolation: isolate;
-          pointer-events: none;
-        }
-        .hero-frame-marquee-top {
-          top: 0;
-          left: 0;
-          right: 0;
-          height: clamp(60px, 8vw, 100px);
-          position: relative;
-          overflow: visible;
-          box-shadow: none;
-          padding-right: clamp(1rem, 2vw, 2rem);
-          min-width: 0;
-        }
-        .hero-frame-marquee-top::before,
-        .hero-frame-marquee-top::after {
-          display: none;
         }
 
-        /* ── Header ────────────────────────────────────────────── */
+        /* Mobile: single column, no mariam */
+        @media (max-width: 768px) {
+          .app-window-content-frame {
+            height: auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+          }
+          .hero-inner-grid {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 2vw, 14px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            min-height: 0;
+          }
+          .hero-contact-col {
+            align-self: stretch;
+            flex: 1;
+            min-height: 0;
+            padding: 0;
+            overflow: hidden;
+            transform: none;
+          }
+          .hero-contact-col > * {
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+          }
+          .hero-experience-panel-wrap {
+            margin-top: 0;
+            flex-shrink: 0;
+            width: 100%;
+            justify-self: stretch;
+          }
+          .hero-mariam-slot { display: none; }
+        }
+
+        /* ── Portfolio title elements ─────────────────────────── */
         .hero-cover-header {
           position: absolute;
           inset: 0;
@@ -1205,7 +1044,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           flex-direction: column;
           align-items: flex-start;
           justify-content: center;
-          gap: 0.5rem;
           font-family: ${FONTS.display};
           width: 100%;
           padding: 0 1rem;
@@ -1223,8 +1061,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           position: relative;
           overflow: visible;
         }
-
-        /* ── PORTFOLIO title elements (same font as Software Engineer) ──────────────────────────── */
         .hero-cover-title-full,
         .hero-cover-title-portfoli,
         .hero-cover-title-o {
@@ -1232,7 +1068,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.12em;
           color: ${COLORS.primary};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          font-family: ${pouitiesFont.style.fontFamily};
           line-height: 1;
           display: inline-flex;
           align-items: center;
@@ -1247,12 +1083,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
             height: clamp(50px, 12vw, 80px);
           }
         }
-        .hero-cover-title-o {
-          will-change: transform;
-        }
-        .hero-o-drag-wrapper {
-          touch-action: none; /* first touch starts drag, not scroll */
-        }
+        .hero-cover-title-o { will-change: transform; }
+        .hero-o-drag-wrapper { touch-action: none; }
         .hero-cover-title-line {
           will-change: width, transform;
           transform-origin: left center;
@@ -1264,8 +1096,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           transform: translateY(-50%);
           left: 0;
         }
-
-        /* ── Small: full PORTFOLIO + menu (no line/O) ───────────── */
         .hero-cover-title-portfoli-hidden {
           position: absolute;
           left: -9999px;
@@ -1279,7 +1109,7 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           text-transform: uppercase;
           letter-spacing: 0.15em;
           color: ${COLORS.primary};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          font-family: ${pouitiesFont.style.fontFamily};
           line-height: 1;
           display: inline-flex;
           align-items: center;
@@ -1287,7 +1117,6 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           flex: 1;
           min-width: 0;
         }
-        /* ── O click trigger ──────────────────────────────────── */
         .hero-o-trigger {
           position: relative;
           cursor: pointer;
@@ -1295,24 +1124,8 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           pointer-events: auto;
           outline: none;
         }
-        .hero-click-svg {
-          position: absolute;
-          top: 70%;
-          left: 50%;
-          width: clamp(55px, 7vw, 90px);
-          height: auto;
-          pointer-events: none;
-          color: ${COLORS.primary};
-          opacity: 0;
-          z-index: 20;
-        }
-        @media (max-width: 768px) {
-          .hero-click-svg {
-            width: clamp(40px, 10vw, 60px);
-          }
-        }
 
-        /* ── Engineer text (Pouities via next/font localFont) ─────── */
+        /* ── Engineer text ────────────────────────────────────── */
         :global(.hero-engineer-text) {
           color: ${COLORS.primary};
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -1322,18 +1135,13 @@ const Hero: React.FC<HeroProps> = ({ onNavigate, onReady, isActive = true, portf
           overflow: visible;
         }
         @media (max-width: 768px) {
-          :global(.hero-engineer-text) {
-            bottom: auto;
-            font-size: clamp(1.5rem, 5vw, 3.5rem);
-          }
+          :global(.hero-engineer-text) { font-size: clamp(1.5rem, 5vw, 3.5rem); }
         }
         @media (max-width: 480px) {
-          :global(.hero-engineer-text) {
-            font-size: clamp(1.2rem, 4.5vw, 2.8rem);
-          }
+          :global(.hero-engineer-text) { font-size: clamp(1.2rem, 4.5vw, 2.8rem); }
         }
 
-        /* ── Dot overlay ───────────────────────────────────────── */
+        /* ── Dot overlay ─────────────────────────────────────── */
         :global(.hero-dot-overlay) {
           z-index: ${Z_LAYERS.dot} !important;
           position: fixed !important;

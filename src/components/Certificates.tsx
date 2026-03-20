@@ -71,7 +71,7 @@ const certificates: Certificate[] = [
   },
   {
     id: "ieee",
-    title: "IEEE Certificate",
+    title: "IEEE ",
     image: "/certificates/IEEE Certificate.jpeg",
     imageWidth: 1200,
     imageHeight: 800,
@@ -132,16 +132,11 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
       style={{ background: COLORS.heroBackground }}
     >
       {/* Icon grid */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-2 no-visible-scrollbar">
-        <div className="mb-4">
-          <span className="text-[10px] pl-4 font-bold tracking-widest uppercase pb-1" style={{ color: "#280B0B" }}>
-            portfolio / certificates
-          </span>
-          <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
-          </div>
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-0 no-visible-scrollbar">
+      
 
-        <div className="px-4 md:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center">
+        <div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center mt-10">
             {certificates.map((c, i) => (
               <button
                 key={c.id}

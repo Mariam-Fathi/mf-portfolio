@@ -115,7 +115,7 @@ const projects: Project[] = [
   },
   {
     id: "personality-ai",
-    title: "Multimodal Personality Analysis",
+    title: "Personality Analysis",
     role: "AI Researcher / Machine Learning Engineer",
     description: "Bachelor project (Computer Systems Engineering). Engineered an end-to-end system predicting Big Five traits from short videos using computer vision (facial action units), audio (PyAudioAnalysis), and NLP (BERT) on First Impressions V2 (10K videos), with LSTNet and XGBoost late fusion (MAE 0.0489). Built a full-stack Node.js/Express/MongoDB app with secure auth, upload pipeline, admin dashboard, and radar-chart visualization.",
     links: [
@@ -317,17 +317,11 @@ export default function GalleryShowcase(_props: ProjectsProps) {
       style={{ background: COLORS.heroBackground }}
     >
       {/* Icon grid (Explorer-style) */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-2 no-visible-scrollbar">
-        <div className="mb-4">
-          <span className="text-[10px] pl-4 font-bold tracking-widest uppercase pb-1" style={{ color: "#280B0B" }}>
-            portfolio / projects
-          </span>
-          {/* Separator line under breadcrumb heading */}
-          <div className="w-full h-px bg-[#2a2a2a] opacity-70 my-2.5" />
-          </div>
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-visible py-0 no-visible-scrollbar">
+   
 
-        <div className="px-4 md:px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center">
+        <div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6 gap-x-4 justify-items-center mt-10">
             {projects.map((p, i) => {
               const folderLabel = `${String(i + 1).padStart(2, "0")}_${p.id}`;
               const breadcrumbLabel = `portfolio / projects / ${p.title}`;

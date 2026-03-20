@@ -2,10 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import localFont from "next/font/local";
-import { BREAKPOINTS, COLORS, Z_LAYERS } from "./constants";
+import { COLORS, FONTS, Z_LAYERS } from "./constants";
 import type { SectionId } from "./types";
-import { useIsMobile } from "./hooks/useIsMobile";
-import AppSidebar from "@/components/AppSidebar";
+import { NAV_SECTIONS } from "./types";
 
 const goAroundFont = localFont({
   src: "../../../public/fonts/go_around_the_books/Go around the books 2022.ttf",
@@ -24,28 +23,15 @@ export interface AppWindowLayoutProps {
 }
 
 /**
- * Same app window chrome as hero (title bar + nav in bar, no borders). Use when showing
- * a section so the frame stays and only the content area is replaced.
+ * Same app window chrome as hero (outer window + title bar + nav in bar). Use when
+ * showing a section so the chrome stays and only the content area is replaced.
  */
 export default function AppWindowLayout({ onNavigate, activeSection, children }: AppWindowLayoutProps) {
-  // Keep mobile logic aligned with CSS media queries (hamburger shows at <=768px).
-  const isMobile = useIsMobile(BREAKPOINTS.md);
-  const [hasMounted, setHasMounted] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const handleNavigate = (section: SectionId | "hero") => {
-    setIsMobileMenuOpen(false);
     onNavigate(section);
   };
 
-  useEffect(() => {
-    // If we cross back to desktop, ensure drawer is closed.
-    if (!isMobile) setIsMobileMenuOpen(false);
-  }, [isMobile]);
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -53,15 +39,21 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsMobileMenuOpen(false);
     };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isMobileMenuOpen, isMobile]);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isMobileMenuOpen]);
 
   return (
     <>
-      <div className={`hero-yellow-frame hero-window app-window-layout${isMobile && isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""}`}>
-        {/* Title bar: same as hero — PORTFOLIO (clickable = back to hero) + nav links on right; mobile: menu icon */}
+      <div className="hero-outer-frame">
+        <div
+          className={`hero-yellow-frame hero-window app-window-layout${
+            isMobileMenuOpen ? " hero-window-mobile-menu-open" : ""
+          }`}
+        >
+        {/* Title bar: PORTFOLIO (clickable = back to hero) + nav links */}
         <div className="hero-window-title-bar">
+          <div className="hero-window-title-inner">
           <div className="hero-cover-header hero-cover-header-in-title-bar">
             <div
               className="hero-cover-header-line"
@@ -76,85 +68,117 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
             </div>
           </div>
 
-          {/* Mobile-only: open sidebar drawer */}
+          <nav className="hero-window-title-nav" aria-label="Site sections">
+            <ul className="hero-window-title-nav-links">
+              {/* Home + projects + certificates only (hide experience). */}
+              {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                const isCurrent = s.id === activeSection;
+                return (
+                  <li key={s.id}>
+                    <button
+                      type="button"
+                      className={isCurrent ? "active" : undefined}
+                      aria-current={isCurrent ? "page" : undefined}
+                      onClick={() => handleNavigate(s.id)}
+                    >
+                      {s.label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
           <button
             type="button"
             className="hero-window-menu-btn"
-            aria-label="Open sidebar menu"
-            aria-expanded={isMobileMenuOpen}
-            onClick={() => {
-              if (!isMobile) return;
-              setIsMobileMenuOpen((v) => !v);
-            }}
+            aria-label="Open menu"
+            onClick={() => setIsMobileMenuOpen(true)}
           >
             <span className="hero-window-menu-btn-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 7h16" />
-                <path d="M4 12h16" />
-                <path d="M4 17h16" />
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4 7H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M4 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </span>
           </button>
+          </div>
         </div>
 
         {/* Content frame — no margin/borders, same as hero */}
         <div className="app-window-layout-content">
-          {/* Desktop/tablet: sidebar always visible */}
-          {activeSection && hasMounted && !isMobile && (
-            <AppSidebar currentSection={activeSection} onNavigate={(s) => handleNavigate(s)} />
-          )}
-
           <div className="app-window-content-frame">{children}</div>
         </div>
 
-        {/* Mobile-only: sidebar in a drawer overlay */}
-        {activeSection && isMobile && hasMounted && isMobileMenuOpen && (
+        {/* Mobile menu overlay (visible only on small screens) */}
+        {isMobileMenuOpen && (
           <div
             className="hero-window-mobile-menu-overlay"
             role="dialog"
             aria-modal="true"
-            aria-label="Sidebar menu"
-            onMouseDown={() => setIsMobileMenuOpen(false)}
+            aria-label="Navigation menu"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
-            <div
-              className="hero-window-mobile-menu"
-              onMouseDown={(e) => {
-                // Prevent closing when interacting with the drawer itself.
-                e.stopPropagation();
-              }}
-            >
+            <div className="hero-window-mobile-menu" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
                 className="hero-window-mobile-menu-close"
-                aria-label="Close sidebar menu"
+                aria-label="Close menu"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M18 6 6 18" />
-                  <path d="M6 6l12 12" />
-                </svg>
+                ×
               </button>
 
               <div className="hero-window-mobile-menu-content">
-                <AppSidebar currentSection={activeSection} onNavigate={(s) => handleNavigate(s)} />
+                <ul className="hero-window-mobile-menu-links">
+                  {NAV_SECTIONS.filter((s) => s.id !== "experience").map((s) => {
+                    const isCurrent = s.id === activeSection;
+                    return (
+                      <li key={s.id}>
+                        <a
+                          href="#"
+                          className={isCurrent ? "active" : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setIsMobileMenuOpen(false);
+                            handleNavigate(s.id);
+                          }}
+                        >
+                          {s.label}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
             </div>
           </div>
         )}
+        </div>
       </div>
 
       <style jsx>{`
-        .hero-yellow-frame {
+        .hero-outer-frame {
           position: fixed;
+          inset: clamp(8px, 2vw, 18px);
+          z-index: ${Z_LAYERS.frame};
+          pointer-events: auto;
+          border: 2px solid ${COLORS.primary};
+          box-shadow: 2px 2px 0 #1a1a1a;
+          overflow: hidden;
+          background: ${COLORS.heroBackground};
+        }
+
+        .hero-yellow-frame {
+          position: absolute;
           inset: 0;
           pointer-events: auto;
-          z-index: ${Z_LAYERS.frame};
           overflow: hidden;
           margin: 0;
           padding: 0;
         }
         .hero-yellow-frame.hero-window-mobile-menu-open {
-          z-index: ${Z_LAYERS.mobileMenuOverlay};
           overflow: visible;
         }
         .hero-window {
@@ -165,7 +189,6 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           margin: 0;
           overflow: hidden;
           height: 100%;
-          box-shadow: 2px 2px 0 #1a1a1a;
           /* Title bar is half the desktop sidebar width (md:w-[240px] => 120px). */
           --titlebar-square-height: clamp(48px, 6vw, 64px);
         }
@@ -175,12 +198,12 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           }
           .hero-window-title-bar {
             /* With a fixed bar height, remove vertical padding to prevent overflow. */
-            padding: 0 10px;
+            padding: 0;
           }
         }
         .hero-window-title-bar {
           flex-shrink: 0;
-          background: ${COLORS.primary};
+          background: ${COLORS.heroBackground};
           display: flex;
           flex-direction: row;
           flex-wrap: nowrap;
@@ -189,22 +212,34 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           box-sizing: border-box;
           height: var(--titlebar-square-height);
           min-height: var(--titlebar-square-height);
-          padding: clamp(0.5rem, 1.5vw, 0.75rem) 10px;
-          font-family: ${kawaiiStitchFont.style.fontFamily};
-          color: ${COLORS.heroBackground};
+          padding: 0;
+          color: ${COLORS.primary};
           overflow: visible;
+          border: 2px solid ${COLORS.primary};
+          /* Match other UI "step" styling, but emphasize the bottom edge. */
+          box-shadow: 0 2px 0 #1a1a1a;
+        }
+        .hero-window-title-inner {
+          width: 100%;
+          max-width: 1400px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          box-sizing: border-box;
+          padding: 0;
         }
         .hero-window-title-bar .hero-cover-header.hero-cover-header-in-title-bar {
           position: relative !important;
           inset: auto !important;
-          flex: 1 1 auto;
+          flex: 0 0 auto;
           min-width: 0;
           width: auto;
           height: 100%;
           min-height: var(--titlebar-square-height);
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
           padding: 0;
         }
         @media (max-width: 768px) {
@@ -215,10 +250,11 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
         .hero-window-title-bar .hero-cover-header-line {
           height: 100%;
           min-height: var(--titlebar-square-height);
-          justify-content: center;
+          justify-content: flex-start;
           display: flex;
           align-items: center;
-          width: 100%;
+          width: auto;
+          min-width: 0;
         }
         @media (max-width: 768px) {
           .hero-window-title-bar .hero-cover-header-line {
@@ -229,8 +265,8 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           font-size: clamp(24px, calc(var(--titlebar-square-height) * 0.39), 58px);
           letter-spacing: 0.12em;
           height: var(--titlebar-square-height);
-          color: ${COLORS.heroBackground};
-          font-family: ${kawaiiStitchFont.style.fontFamily};
+          color: ${COLORS.primary};
+          font-family: ${FONTS.display};
           text-transform: uppercase;
           display: inline-flex;
           align-items: center;
@@ -251,7 +287,6 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           justify-content: flex-end;
           height: 100%;
           min-height: var(--titlebar-square-height);
-          padding-left: 0.75rem;
         }
         .hero-window-title-nav-links {
           list-style: none;
@@ -263,33 +298,49 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           gap: clamp(0.65rem, 1.5vw, 1.1rem);
           white-space: nowrap;
         }
-        .hero-window-title-nav-links a {
-          color: ${COLORS.heroBackground};
+        .hero-window-title-nav-links button {
+          color: ${COLORS.primary};
           text-decoration: none;
-          font-family: ${goAroundFont.style.fontFamily}, sans-serif;
+          font-family: ${FONTS.display};
           font-size: clamp(0.72rem, 1.05vw, 0.92rem);
           text-transform: lowercase;
           letter-spacing: 0.06em;
           line-height: 1;
           opacity: 0.92;
-          padding: 0.35rem 0.25rem;
+          padding: 0.35rem 0.45rem;
+          background: ${COLORS.heroBackground};
+          border: 2px solid ${COLORS.primary};
+          box-shadow: 2px 2px 0 #1a1a1a;
+          cursor: pointer;
         }
-        .hero-window-title-nav-links a:hover,
-        .hero-window-title-nav-links a.active {
-          opacity: 1;
+        .hero-window-title-nav-links button:hover,
+        .hero-window-title-nav-links button.active {
+          opacity: 0.95;
           font-weight: 700;
         }
         @media (max-width: 768px) {
           .hero-window-title-nav-links {
-            gap: clamp(0.6rem, 2.4vw, 0.9rem);
+            display: none;
           }
-          .hero-window-title-nav-links a {
+          .hero-window-title-nav-links button {
             font-size: clamp(0.66rem, 2.2vw, 0.85rem);
             letter-spacing: 0.055em;
           }
         }
         @media (max-width: 768px) {
-          .hero-window-title-nav { display: none !important; }
+          .hero-window-title-nav {
+            flex: 0 1 auto;
+            max-width: min(52vw, 220px);
+            min-width: 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-left: 0.5rem;
+          }
+          .hero-window-title-nav::-webkit-scrollbar {
+            display: none;
+          }
         }
         .hero-window-menu-btn {
           display: none;
@@ -383,7 +434,7 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           min-height: 0;
           position: relative;
           display: flex;
-          overflow: hidden;
+          overflow: visible;
           background: ${COLORS.heroBackground};
         }
         .app-window-content-frame {
@@ -392,7 +443,12 @@ export default function AppWindowLayout({ onNavigate, activeSection, children }:
           margin: 0;
           background: ${COLORS.heroBackground};
           position: relative;
-          overflow: hidden;
+          overflow: visible;
+          padding: clamp(10px, 2vw, 18px);
+          padding-bottom: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
         }
       `}</style>
     </>
