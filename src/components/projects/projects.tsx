@@ -338,7 +338,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                     <span
                       className="text-[#e8e0cc]"
                       style={{
-                        color: i === selectedIndex && isModalOpen ? colors.headline : "#8a7a5a",
+                        color: COLORS.accent,
                       }}
                     >
                       <FolderIcon open={false} />
@@ -346,7 +346,7 @@ export default function GalleryShowcase(_props: ProjectsProps) {
                     <span
                       className="mt-1 text-[11px] font-sans leading-relaxed text-[#2a2a2a] bg-transparent"
                       style={{
-                        color: "#8a7a5a",
+                        color: "#280B0B",
                         textAlign: "center",
                         maxWidth: 140,
                         whiteSpace: "nowrap",

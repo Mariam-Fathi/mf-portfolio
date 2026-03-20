@@ -150,7 +150,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                   <span
                     className="text-[#e8e0cc]"
                     style={{
-                      color: i === selectedIndex && isModalOpen ? COLORS.primary : "#8a7a5a",
+                      color: COLORS.accent,
                     }}
                   >
                     <FolderIcon />
@@ -158,7 +158,7 @@ const Certificates: React.FC<{ isActive?: boolean }> = () => {
                   <span
                     className="mt-1 text-[11px] font-sans leading-relaxed bg-transparent"
                     style={{
-                      color: "#8a7a5a",
+                      color: "#280B0B",
                       textAlign: "center",
                       maxWidth: 140,
                       whiteSpace: "nowrap",
