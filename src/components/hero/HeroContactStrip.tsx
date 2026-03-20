@@ -37,7 +37,7 @@ const blocks: Block[] = [
   },
   {
     id: "linkedin",
-    caption: "linkedin.com/in/mariamfathi-siam",
+    caption: "linkedin.com/in/mariam-fathi-siam",
     href: "https://www.linkedin.com/in/mariam-fathi-siam",
     icon: IconBrandLinkedin,
     className: "bg-[#EDE6D9] text-[#280B0B] border-2 border-[#280B0B]",
