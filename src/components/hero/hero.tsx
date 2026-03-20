@@ -892,8 +892,8 @@ const Hero: React.FC<HeroProps> = ({
           height: 100%;
           max-height: 100vh;
           max-height: 100dvh;
-          background: ${COLORS.primary};
-          color: ${COLORS.heroBackground};
+          background: ${COLORS.heroBackground};
+          color: ${COLORS.primary};
           padding: 1.25rem 1rem;
           box-shadow: -2px 0 12px rgba(0,0,0,0.2);
           display: flex;
@@ -908,7 +908,7 @@ const Hero: React.FC<HeroProps> = ({
           padding: 0;
           border: none;
           background: transparent;
-          color: ${COLORS.heroBackground};
+          color: ${COLORS.primary};
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -931,7 +931,7 @@ const Hero: React.FC<HeroProps> = ({
           gap: 0.25rem;
         }
         .hero-window-mobile-menu-links a {
-          color: ${COLORS.heroBackground};
+          color: ${COLORS.primary};
           text-decoration: none;
           font-family: ${FONTS.display};
           font-size: 1rem;

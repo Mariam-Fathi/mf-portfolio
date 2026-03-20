@@ -201,11 +201,11 @@ export default function HeroContactStrip({
                 </div>
                 <div className="min-h-[6px] flex-1 md:min-h-2" />
                 <div className="flex w-full items-center gap-1.5" aria-hidden="true">
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${b.lineClass}`} />
+                  <span className={`hidden h-1.5 w-1.5 shrink-0 rounded-full md:inline-flex ${b.lineClass}`} />
                   <span className={`h-px min-w-0 flex-1 rounded-full ${b.lineClass} opacity-90`} />
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${b.lineClass}`} />
+                  <span className={`hidden h-1.5 w-1.5 shrink-0 rounded-full md:inline-flex ${b.lineClass}`} />
                 </div>
-                <p className="mt-2 line-clamp-2 text-right font-sans text-[12px] font-medium leading-tight tracking-tight opacity-95 md:text-[12px]">
+                <p className="mt-2 hidden line-clamp-2 text-right font-sans text-[12px] font-medium leading-tight tracking-tight opacity-95 md:block md:text-[12px]">
                   {b.caption}
                 </p>
               </a>
