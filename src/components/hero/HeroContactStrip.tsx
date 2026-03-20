@@ -32,15 +32,15 @@ const blocks: Block[] = [
     caption: EMAIL,
     href: mailtoHref,
     icon: IconMail,
-    className: "bg-[#F9E7C9] text-[#280B0B] border-2 border-[#280B0B]",
+    className: "bg-[#EDE6D9] text-[#280B0B] border-2 border-[#280B0B]",
     lineClass: "bg-[#280B0B]",
   },
   {
     id: "linkedin",
     caption: "linkedin.com/in/mariamfathi-siam",
-    href: "https://www.linkedin.com/in/mariamfathi-siam",
+    href: "https://www.linkedin.com/in/mariam-fathi-siam",
     icon: IconBrandLinkedin,
-    className: "bg-[#F9E7C9] text-[#280B0B] border-2 border-[#280B0B]",
+    className: "bg-[#EDE6D9] text-[#280B0B] border-2 border-[#280B0B]",
     lineClass: "bg-[#280B0B]",
   },
   {
@@ -48,7 +48,7 @@ const blocks: Block[] = [
     caption: "github.com/Mariam-Fathi",
     href: "https://github.com/Mariam-Fathi",
     icon: IconBrandGithub,
-    className: "bg-[#F9E7C9] text-[#280B0B] border-2 border-[#280B0B]",
+    className: "bg-[#EDE6D9] text-[#280B0B] border-2 border-[#280B0B]",
     lineClass: "bg-[#280B0B]",
   },
   {
@@ -56,7 +56,7 @@ const blocks: Block[] = [
     caption: "kaggle.com/mariamfathiamin",
     href: "https://www.kaggle.com/mariamfathiamin",
     icon: IconLetterK,
-    className: "bg-[#F9E7C9] text-[#280B0B] border-2 border-[#280B0B]",
+    className: "bg-[#EDE6D9] text-[#280B0B] border-2 border-[#280B0B]",
     lineClass: "bg-[#280B0B]",
   },
 ];

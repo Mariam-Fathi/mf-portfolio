@@ -658,14 +658,30 @@ export function useDotAnimation(
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
-      // Wait for Mariam's 150ms debounce + 3-frame rAF chain to finish
+      // Wait for Mariam's full layout cycle:
+      //   - useMariamSvg debounces at 150ms
+      //   - layoutMariam retries up to 12 rAF frames (~200ms at 60fps)
+      //   - plus one more paint cycle for tspan rects to stabilise
+      // 600ms is conservative but reliable across all device speeds.
       resizeTimer = setTimeout(() => {
         positionsCalculated = false;
         cachedPositions = null;
 
-        if (animationEverCompleted && svgIRef.current && svgA2Ref.current && svgM2Ref.current && dotRef.current) {
+        if (animationEverCompleted) {
+          const svgIEl = svgIRef.current;
+          const svgA2El = svgA2Ref.current;
+          const svgM2El = svgM2Ref.current;
+          const dotEl = dotRef.current;
+          if (!svgIEl || !svgA2El || !svgM2El || !dotEl) return;
+
           requestAnimationFrame(() => requestAnimationFrame(() => {
-            const pos = calculatePositions(svgIRef.current!, svgA2Ref.current!, svgM2Ref.current!);
+            const svgIEl2 = svgIRef.current;
+            const svgA2El2 = svgA2Ref.current;
+            const svgM2El2 = svgM2Ref.current;
+            const dotEl2 = dotRef.current;
+            if (!svgIEl2 || !svgA2El2 || !svgM2El2 || !dotEl2) return;
+
+            const pos = calculatePositions(svgIEl2, svgA2El2, svgM2El2);
             const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
             if (oData) {
               pos.oPortfolioScreenX = oData.x;
@@ -676,10 +692,12 @@ export function useDotAnimation(
             }
             cachedPositions = pos;
             positionsCalculated = true;
-            setDotAtFinal(dotRef.current!, pos);
+            setDotAtFinal(dotEl2, pos);
+            // Restore "iam" accent colors in case they were cleared on mobile
+            colorLetters(svgIEl2, svgA2El2, svgM2El2);
           }));
         }
-      }, 250);
+      }, 600);
     };
 
     window.addEventListener("resize", handleResize);

@@ -58,9 +58,14 @@ export function useEngineerText(
     };
   }, [engineerRef]);
 
-  // ── When reveal is not active (e.g. resize from sm to lg before dot click), hide the text ──
+  // ── When reveal is not active, hide the text — but only if the text
+  // was never fully shown yet. Once engineerTextEverShown is true we must
+  // NOT hide it: on mobile→desktop resize, startEngineerReveal briefly
+  // becomes false while isMariamReady resets during Mariam's re-layout,
+  // which would wipe out the visible "Software Engineer" text. ──
   useEffect(() => {
     if (startEngineerReveal) return;
+    if (engineerTextEverShown) return; // already revealed — keep it visible
     const el = engineerRef.current;
     if (el) {
       gsap.killTweensOf(el);
@@ -68,14 +73,16 @@ export function useEngineerText(
     }
   }, [startEngineerReveal, engineerRef]);
 
-  // ── Ensure "Software Engineer" is visible at end when reveal is active ──
-  // Force opacity/visibility so the text is never left hidden; delayed clipPath clear
-  // so desktop write-on can finish first.
+  // ── Ensure "Software Engineer" is visible whenever reveal is active ──
+  // This re-runs on every isMariamReady cycle (not just when startEngineerReveal
+  // first becomes true) so the text is guaranteed visible after any Mariam
+  // re-layout (resize, return-to-hero, etc.). Without this, the element can
+  // be left at opacity:0 after the position effect's cleanup/re-run cycle.
   useEffect(() => {
     if (!startEngineerReveal) return;
     const el = engineerRef.current;
     if (!el) return;
-    // Immediate: ensure opacity 1 so nothing leaves it at 0
+    // Immediate: ensure opacity 1
     requestAnimationFrame(() => {
       if (engineerRef.current) gsap.set(engineerRef.current, { opacity: 1, visibility: "visible" });
     });
@@ -86,7 +93,7 @@ export function useEngineerText(
       if (engineerRef.current) gsap.set(engineerRef.current, { clipPath: "none" });
     }, delayMs);
     return () => clearTimeout(t);
-  }, [startEngineerReveal]);
+  }, [startEngineerReveal, isMariamReady, engineerRef]);
 
   // ── Write-on reveal (starts when dot lands on "ı") ──────────────
   useEffect(() => {
@@ -225,14 +232,14 @@ export function useEngineerText(
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
-      // 250ms > useMariamSvg's 150ms debounce + 3-frame rAF chain so SVG
-      // rects are stable before we re-measure.
-      // TODO: replace once a shared mariamLayoutReady signal exists.
+      // 600ms matches useDotAnimation's resize debounce — gives Mariam's full
+      // layoutMariam retry cycle (150ms debounce + up to 12 rAF frames ~200ms)
+      // time to finish before we re-measure the "ıam" tspan rects.
       resizeTimer = setTimeout(() => {
         resizeTimer = null;
         cachedWidthRatio = null; // invalidate — fontSize changes on resize
         requestAnimationFrame(() => requestAnimationFrame(position));
-      }, 250);
+      }, 600);
     };
     window.addEventListener("resize", onResize);
 

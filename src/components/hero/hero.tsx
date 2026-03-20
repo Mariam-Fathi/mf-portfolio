@@ -92,14 +92,17 @@ const Hero: React.FC<HeroProps> = ({
     }
   }, [isMounted, isLg]);
 
-  // Reset dot cache when resizing from mobile → desktop before clicking dot
+  // Reset dot cache when resizing from mobile → desktop
   useEffect(() => {
     const prevIsLg = prevIsLgRef.current;
     prevIsLgRef.current = isLg;
     const wasInitialized = prevIsLgInitializedRef.current;
     prevIsLgInitializedRef.current = true;
 
-    if (wasInitialized && !prevIsLg && isLg && !isDotClicked) {
+    if (!wasInitialized || !(!prevIsLg && isLg)) return;
+
+    if (!isDotClicked) {
+      // ── Dot never clicked: full reset so the user gets the click prompt again ──
       resetDotCache();
       if (svgIRef.current) gsap.set(svgIRef.current, { fill: COLORS.primary });
       if (svgA2Ref.current) gsap.set(svgA2Ref.current, { fill: COLORS.primary });
@@ -112,6 +115,16 @@ const Hero: React.FC<HeroProps> = ({
       dotPreShownRef.current = false;
       isDotClickedRef.current = false;
       setShowDotClickPrompt(false);
+    } else {
+      // ── Dot was already clicked: restore post-animation state ──
+      // useDotAnimation's main effect re-runs when isMariamReady fires
+      // (animationEverCompleted=true path) and repositions the dot at the
+      // correct "ı" location after the fresh layout. We just keep React
+      // state flags consistent so engineerRevealActive stays true.
+      setIsDotClicked(true);
+      setDotLandedOnI(true);
+      setEngineerRevealComplete(true);
+      isDotClickedRef.current = true;
     }
   }, [isLg, isDotClicked]);
 
