@@ -294,7 +294,7 @@ const Hero: React.FC<HeroProps> = ({
   // Show click prompt (lg only)
   useEffect(() => {
     if (isLg && isMariamReady && !isDotClicked && isActive && !hasDotAnimationEverCompleted() && dotClickPos) {
-      const t = setTimeout(() => setShowDotClickPrompt(true), 1200);
+      const t = setTimeout(() => setShowDotClickPrompt(true), 0);
       return () => clearTimeout(t);
     }
     if (!isLg || isDotClicked || hasDotAnimationEverCompleted()) setShowDotClickPrompt(false);
@@ -304,8 +304,8 @@ const Hero: React.FC<HeroProps> = ({
   useEffect(() => {
     if (!showDotClickPrompt || !dotClickSvgRef.current) return;
     const el = dotClickSvgRef.current;
-    gsap.set(el, { rotation: 0, transformOrigin: "50% 100%", opacity: 0 });
-    gsap.to(el, { opacity: 1, duration: 0.4, ease: "power2.out" });
+    gsap.set(el, { rotation: 0, transformOrigin: "50% 100%", opacity: 0, filter: "blur(15px)" });
+    gsap.to(el, { opacity: 1, filter: "blur(0px)", duration: 0.8, ease: "power2.out" });
     const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: 0.4 });
     dotClickTlRef.current = tl;
     tl.fromTo(el, { rotation: -4 }, { rotation: 4, duration: 1, ease: "sine.inOut" });
