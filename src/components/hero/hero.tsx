@@ -599,7 +599,7 @@ const Hero: React.FC<HeroProps> = ({
           style={{
             position: "fixed",
             left: `${dotClickPos.x}px`,
-            top: `${dotClickPos.y - 4}px`,
+            top: `${dotClickPos.y + 8}px`,
             transform: "translateX(-50%) translateY(-100%)",
             zIndex: Z_LAYERS.dot + 10,
             pointerEvents: "none",
