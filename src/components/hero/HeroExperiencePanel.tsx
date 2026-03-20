@@ -49,8 +49,8 @@ export default function HeroExperiencePanel() {
           {experienceItems.map((item) =>
             isMobile && item.title === "Software Engineer" ? null : (
               <div key={item.title} className="min-w-0 w-full">
-                <div className="text-[12px] font-bold leading-tight">{item.title}</div>
-                <div className="text-[10px] leading-tight mt-0.5" style={{ color: "#8A9EA7" }}>
+                <div className="text-[12px] font-medium leading-tight">{item.title}</div>
+                <div className="text-[10px] leading-tight mt-0.5" style={{ color: "#6A0610" }}>
                   {item.company}{" "}
                   <span style={{ opacity: 0.8 }}>|</span>{" "}
                   {item.fromDate} - {item.toDate}

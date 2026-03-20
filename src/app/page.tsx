@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { portfolioCache } from "@/components/hero/portfolioCache";
 import Hero from "@/components/hero/hero";
 import AppWindowLayout from "@/components/hero/AppWindowLayout";
+import { resetMariamCache } from "@/components/hero/hooks/useMariamSvg";
 import { gsap } from "gsap";
 import { Experience } from "@/components/Experience";
 import GalleryShowcase from "@/components/projects/projects";
@@ -77,6 +78,9 @@ export default function Home() {
     if (sectionId === "hero") {
       // User clicked "home": tell Hero to expand portfolio when it mounts (see portfolioCache / usePortfolioAnimation restore branch).
       portfolioCache.expandOnReturnToHero = true;
+      // Always force a fresh Mariam measurement on return to home.
+      // Production remount timing can make cached SVG geometry stale.
+      resetMariamCache();
       // Hero mounts at opacity 0; handleHeroReady runs blur-to-clear. setIsTransitioning(false) in its onComplete.
       tl.to(`.content-section.active`, {
         opacity: 0,
