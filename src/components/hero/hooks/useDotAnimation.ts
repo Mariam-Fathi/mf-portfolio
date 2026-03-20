@@ -503,35 +503,50 @@ export function useDotAnimation(
     // animationEverCompleted means the dot animation ran in a previous mount.
     // We MUST recalculate positions from the live DOM here — cachedPositions
     // holds screen coordinates from the *previous* mount and Mariam may have
-    // been re-laid out at different dimensions/position since then (e.g. after
-    // navigating away and back). Using stale coords puts the dot in the wrong
-    // spot. We update the cache so the resize handler has fresh data too.
+    // been re-laid out at different dimensions/position since then.
+    //
+    // We also wait an extra rAF after isMariamReady fires: useMariamSvg calls
+    // setIsMariamReady(true) inside a rAF chain, but the SVG tspan rects are
+    // only stable after the browser has painted the new SVG dimensions. Without
+    // the extra rAF, calculatePositions() reads the tspan rects before the
+    // browser has committed the new SVG layout to the screen.
     if (animationEverCompleted) {
-      const freshPos = calculatePositions(svgI, svgA2, svgM2);
-      const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
-      if (oData) {
-        freshPos.oPortfolioScreenX = oData.x;
-        freshPos.oPortfolioCenterY = oData.centerY;
-        freshPos.oPortfolioTop = oData.top;
-        freshPos.oPortfolioWidth = oData.width;
-        freshPos.oPortfolioHeight = oData.height;
-      }
-      cachedPositions = freshPos;
-      positionsCalculated = true;
+      let rafId: number;
+      rafId = requestAnimationFrame(() => {
+        rafId = requestAnimationFrame(() => {
+          const svgIEl = svgIRef.current;
+          const svgA2El = svgA2Ref.current;
+          const svgM2El = svgM2Ref.current;
+          const dotEl = dotRef.current;
+          if (!svgIEl || !svgA2El || !svgM2El || !dotEl) return;
 
-      setDotAtFinal(dot, freshPos);
-      gsap.set(dot, { opacity: 0, filter: "blur(15px)" });
-      gsap.to(dot, {
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.6,
-        ease: "power2.out",
+          const freshPos = calculatePositions(svgIEl, svgA2El, svgM2El);
+          const oData = portfolioHeaderRef ? getPortfolioOData(portfolioHeaderRef) : null;
+          if (oData) {
+            freshPos.oPortfolioScreenX = oData.x;
+            freshPos.oPortfolioCenterY = oData.centerY;
+            freshPos.oPortfolioTop = oData.top;
+            freshPos.oPortfolioWidth = oData.width;
+            freshPos.oPortfolioHeight = oData.height;
+          }
+          cachedPositions = freshPos;
+          positionsCalculated = true;
+
+          setDotAtFinal(dotEl, freshPos);
+          gsap.set(dotEl, { opacity: 0, filter: "blur(15px)" });
+          gsap.to(dotEl, {
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.6,
+            ease: "power2.out",
+          });
+          colorLetters(svgIEl, svgA2El, svgM2El);
+          setIsDotComplete(true);
+          setIsDotFallenFromM(true);
+          setIsDotStarted(true);
+        });
       });
-      colorLetters(svgI, svgA2, svgM2);
-      setIsDotComplete(true);
-      setIsDotFallenFromM(true);
-      setIsDotStarted(true);
-      return;
+      return () => cancelAnimationFrame(rafId);
     }
 
     // ── Wait for user click ─────────────────────────────────────

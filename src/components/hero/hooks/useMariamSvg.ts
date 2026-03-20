@@ -327,71 +327,39 @@ export function useMariamSvg(
 
     const isMobile = checkIsMobile();
 
-    // ── Always wait 2 rAF frames before measuring ─────────────────
-    // On first mount this costs ~32ms but is a no-op in terms of result.
-    // On return-to-hero after navigating away, the hero grid needs at
-    // least one full paint cycle to re-establish its row heights and slot
-    // dimensions. Measuring before that paint results in wrong (too-large
-    // or mispositioned) Mariam. The double rAF is the simplest reliable fix.
+    // ── Always do a fresh layout calculation on (re)mount ─────────
+    // We previously tried to restore from a module-level cache using
+    // getBoundingClientRect() comparisons. The problem: on return-to-hero
+    // the hero grid CSS (height:0 → flex:1) needs several paint cycles to
+    // settle. During that window the slot rects are wrong (0 height or
+    // mismatched), so the cache check either:
+    //   (a) passes the slot-size guard (curSlotHeight <= 0 → "valid") and
+    //       calls applyCachedLayout with stale screen coords → Mariam wrong
+    //       size/position, or
+    //   (b) fails the check, discards the cache, calls layoutMariam too early
+    //       → slot still not settled → wrong layout again.
+    //
+    // Fix: always discard any stale screen-coord cache on (re)mount and run
+    // a fresh layoutMariam. layoutMariam itself retries up to 12 rAF frames
+    // until the slot has a real size, so it handles "grid not settled yet"
+    // correctly. The module-level cache is updated by layoutMariam and is
+    // still used by the resize handler (no change there).
+    svgDataCalculated = false;
+    cachedSvgData = null;
+
     const run = () => {
-      if (!cachedSvgData || !svgDataCalculated) {
-        // ── Fresh calculation ──────────────────────────────────────
-        layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
-          setIsMariamReady(true);
-        });
-        return;
-      }
-
-      // ── Validate cache against current DOM ────────────────────────
-      // If screen dimensions, portfol position, or slot size have changed
-      // beyond tolerance, discard the cache and recalculate.
-      const screenH = getViewportHeight();
-      const screenW = window.innerWidth;
-
-      const stripEl = document.querySelector("[data-hero-contact-strip]") as HTMLElement | null;
-      const curBottomReserve = stripEl ? Math.ceil(stripEl.getBoundingClientRect().height) : 0;
-      const cacheBottom = cachedSvgData.bottomReservePx ?? 0;
-
-      const currentPortfolEl =
-        (portfolioHeaderRef.current?.querySelector(".hero-cover-title-portfoli") as HTMLElement | null) ??
-        (portfolioHeaderRef.current?.querySelector(".hero-cover-title-whole") as HTMLElement | null);
-      const currentPortfolRect = currentPortfolEl?.getBoundingClientRect();
-      const curPortfolBottom = currentPortfolRect?.bottom ?? 0;
-      const curPortfolLeft = currentPortfolRect?.left ?? 0;
-      const cachePortfolBottom = cachedSvgData.portfolBottom ?? 0;
-      const cachePortfolLeft = cachedSvgData.portfolLeft ?? 0;
-
-      const currentSlotRect = (svg.closest(".hero-mariam-slot") as HTMLElement | null)?.getBoundingClientRect();
-      const curSlotHeight = currentSlotRect?.height ?? 0;
-      const curSlotWidth = currentSlotRect?.width ?? 0;
-
-      const cacheValid =
-        cachedSvgData.layoutVersion === MARIAM_LAYOUT_VERSION &&
-        Math.abs(screenH - cachedSvgData.screenHeight) <= 50 &&
-        Math.abs(screenW - cachedSvgData.screenWidth) <= 50 &&
-        Math.abs(curBottomReserve - cacheBottom) <= 4 &&
-        Math.abs(curPortfolBottom - cachePortfolBottom) <= 8 &&
-        Math.abs(curPortfolLeft - cachePortfolLeft) <= 8 &&
-        // Verify slot size matches cache (if slot has been rendered).
-        (curSlotHeight <= 0 || Math.abs(curSlotHeight - cachedSvgData.mariamHeight) <= 16) &&
-        (curSlotWidth <= 0 || Math.abs(curSlotWidth - cachedSvgData.mariamWidth) <= 16);
-
-      if (cacheValid) {
-        applyCachedLayout(svg, cachedSvgData, isMobile);
+      layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
         setIsMariamReady(true);
-      } else {
-        // Cache is stale — discard and recalculate.
-        svgDataCalculated = false;
-        cachedSvgData = null;
-        layoutMariam(svg, portfolioHeaderRef, isMobile, () => {
-          setIsMariamReady(true);
-        });
-      }
+      });
     };
 
-    // Double rAF ensures the hero grid has finished its layout pass
-    // before we measure any element rects.
-    requestAnimationFrame(() => requestAnimationFrame(run));
+    // 100 ms gives the browser two full paint cycles (~32 ms for double-rAF)
+    // plus extra budget for CSS transitions on the hero grid content frame
+    // (it animates from height:0 → flex:1 when the hero becomes active).
+    // Without this, the slot rect reads as 0 on return-to-hero.
+    const mountTimer = setTimeout(() => {
+      requestAnimationFrame(() => requestAnimationFrame(run));
+    }, 100);
 
     // ── Resize handler ───────────────────────────────────────────
     let resizeTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -418,6 +386,7 @@ export function useMariamSvg(
 
     window.addEventListener("resize", handleResize);
     return () => {
+      clearTimeout(mountTimer);
       window.removeEventListener("resize", handleResize);
       if (resizeTimeout) clearTimeout(resizeTimeout);
     };
